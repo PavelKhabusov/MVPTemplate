@@ -1,0 +1,58 @@
+import { useState } from 'react'
+import { YStack } from 'tamagui'
+import { useTranslation } from '@mvp/i18n'
+import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
+import { authApi } from './auth.service'
+
+export function SignInForm() {
+  const { t } = useTranslation()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      await authApi.login({ email, password })
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? t('common.error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <YStack gap="$3" width="100%" maxWidth={400}>
+      <FadeIn>
+        <AppInput
+          label={t('auth.email')}
+          placeholder="email@example.com"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          error={error ? ' ' : undefined}
+        />
+      </FadeIn>
+
+      <SlideIn from="bottom" delay={100}>
+        <AppInput
+          label={t('auth.password')}
+          placeholder="********"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          error={error || undefined}
+        />
+      </SlideIn>
+
+      <SlideIn from="bottom" delay={200}>
+        <AppButton loading={loading} onPress={handleSubmit} marginTop="$2">
+          {t('auth.signIn')}
+        </AppButton>
+      </SlideIn>
+    </YStack>
+  )
+}

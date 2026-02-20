@@ -1,0 +1,71 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "search": "Search",
+    "noResults": "No results found",
+    "empty": "Nothing here yet"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "createAccount": "Create Account"
+  },
+  "tabs": {
+    "home": "Home",
+    "explore": "Explore",
+    "profile": "Profile"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "language": "Language",
+    "notifications": "Notifications",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "about": "About",
+    "version": "Version",
+    "signOut": "Sign Out"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "avatar": "Avatar",
+    "name": "Name",
+    "email": "Email"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all as read"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "getStarted": "Get Started",
+    "slide1Title": "Welcome",
+    "slide1Description": "Welcome to the app",
+    "slide2Title": "Explore",
+    "slide2Description": "Discover amazing features",
+    "slide3Title": "Get Started",
+    "slide3Description": "Create your account and start"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Что-то пошло не так",
+    "retry": "Повторить",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "confirm": "Подтвердить",
+    "back": "Назад",
+    "next": "Далее",
+    "done": "Готово",
+    "search": "Поиск",
+    "noResults": "Ничего не найдено",
+    "empty": "Пока здесь пусто"
+  },
+  "auth": {
+    "signIn": "Войти",
+    "signUp": "Регистрация",
+    "signOut": "Выйти",
+    "email": "Email",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "name": "Имя",
+    "forgotPassword": "Забыли пароль?",
+    "noAccount": "Нет аккаунта?",
+    "hasAccount": "Уже есть аккаунт?",
+    "createAccount": "Создать аккаунт"
+  },
+  "tabs": {
+    "home": "Главная",
+    "explore": "Обзор",
+    "profile": "Профиль"
+  },
+  "settings": {
+    "title": "Настройки",
+    "theme": "Тема",
+    "themeSystem": "Системная",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "language": "Язык",
+    "notifications": "Уведомления",
+    "privacy": "Политика конфиденциальности",
+    "terms": "Условия использования",
+    "about": "О приложении",
+    "version": "Версия",
+    "signOut": "Выйти"
+  },
+  "profile": {
+    "title": "Профиль",
+    "editProfile": "Редактировать профиль",
+    "avatar": "Аватар",
+    "name": "Имя",
+    "email": "Email"
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "empty": "Пока нет уведомлений",
+    "markAllRead": "Отметить все как прочитанные"
+  },
+  "onboarding": {
+    "skip": "Пропустить",
+    "getStarted": "Начать",
+    "slide1Title": "Добро пожаловать",
+    "slide1Description": "Добро пожаловать в приложение",
+    "slide2Title": "Исследуйте",
+    "slide2Description": "Откройте для себя удивительные возможности",
+    "slide3Title": "Начните",
+    "slide3Description": "Создайте аккаунт и приступайте"
+  }
+}
