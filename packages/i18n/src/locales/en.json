@@ -12,7 +12,8 @@
     "done": "Done",
     "search": "Search",
     "noResults": "No results found",
-    "empty": "Nothing here yet"
+    "empty": "Nothing here yet",
+    "viewAll": "View All"
   },
   "auth": {
     "signIn": "Sign In",
@@ -25,7 +26,13 @@
     "forgotPassword": "Forgot Password?",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
-    "createAccount": "Create Account"
+    "createAccount": "Create Account",
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "passwordMin": "Password must be at least 8 characters",
+      "passwordsMismatch": "Passwords do not match"
+    }
   },
   "tabs": {
     "home": "Home",
@@ -51,7 +58,11 @@
     "editProfile": "Edit Profile",
     "avatar": "Avatar",
     "name": "Name",
-    "email": "Email"
+    "email": "Email",
+    "signInPrompt": "Sign in to view your profile and access all features",
+    "projects": "Projects",
+    "tasksCompleted": "Completed",
+    "streak": "Day Streak"
   },
   "notifications": {
     "title": "Notifications",
@@ -67,5 +78,51 @@
     "slide2Description": "Discover amazing features",
     "slide3Title": "Get Started",
     "slide3Description": "Create your account and start"
+  },
+  "home": {
+    "welcome": "Welcome back",
+    "welcomeGuest": "Welcome",
+    "subtitle": "Here's what's happening today",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "newProject": "New Project",
+    "viewTasks": "View Tasks",
+    "analytics": "Analytics",
+    "activity1": "Project \"Alpha\" was updated",
+    "activity2": "New team member joined",
+    "activity3": "Task #42 completed",
+    "activity4": "Deploy successful",
+    "activeProjects": "Active Projects",
+    "completedTasks": "Completed",
+    "teamMembers": "Team"
+  },
+  "explore": {
+    "title": "Explore",
+    "subtitle": "Discover templates & resources",
+    "featured": "Featured",
+    "categories": "Categories",
+    "trending": "Trending",
+    "catDesign": "Design",
+    "catDev": "Development",
+    "catMarketing": "Marketing",
+    "catAnalytics": "Analytics",
+    "item1Title": "Landing Page Kit",
+    "item1Desc": "Beautiful, responsive landing page components",
+    "item2Title": "Dashboard Pro",
+    "item2Desc": "Complete analytics dashboard with charts",
+    "item3Title": "Auth Starter",
+    "item3Desc": "Full authentication flow with social login",
+    "item4Title": "API Toolkit",
+    "item4Desc": "REST & GraphQL API utilities and helpers"
+  },
+  "interactive": {
+    "notes": "Notes",
+    "addNote": "Add Note",
+    "notePlaceholder": "Write something...",
+    "noteEmpty": "No notes yet. Tap + to add one.",
+    "bookmarks": "Bookmarks",
+    "bookmarkEmpty": "No bookmarks saved yet",
+    "bookmark": "Bookmark",
+    "unbookmark": "Remove"
   }
 }

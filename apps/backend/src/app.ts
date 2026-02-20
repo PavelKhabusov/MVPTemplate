@@ -3,18 +3,18 @@ import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
-import { env } from './config/env.js'
-import { logger } from './config/logger.js'
-import { errorHandler } from './common/middleware/error-handler.js'
-import { authRoutes } from './modules/auth/auth.routes.js'
-import { usersRoutes } from './modules/users/users.routes.js'
-import { pushRoutes } from './modules/push/push.routes.js'
-import { notificationsRoutes } from './modules/notifications/notifications.routes.js'
-import { searchRoutes } from './modules/search/search.routes.js'
-import { sseRoutes } from './realtime/sse.js'
+import { env } from './config/env'
+import { loggerConfig } from './config/logger'
+import { errorHandler } from './common/middleware/error-handler'
+import { authRoutes } from './modules/auth/auth.routes'
+import { usersRoutes } from './modules/users/users.routes'
+import { pushRoutes } from './modules/push/push.routes'
+import { notificationsRoutes } from './modules/notifications/notifications.routes'
+import { searchRoutes } from './modules/search/search.routes'
+import { sseRoutes } from './realtime/sse'
 
 export async function buildApp() {
-  const app = Fastify({ logger })
+  const app = Fastify({ logger: loggerConfig })
 
   // Security
   await app.register(helmet, { global: true })

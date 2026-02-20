@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { authenticate } from '../common/middleware/authenticate.js'
+import { authenticate } from '../common/middleware/authenticate'
 
 const connections = new Map<string, FastifyReply[]>()
 

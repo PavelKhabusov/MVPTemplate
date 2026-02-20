@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { ScrollView } from 'react-native'
-import { YStack, Text, H2 } from 'tamagui'
+import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { router } from 'expo-router'
-import { useTranslation } from '@mvp/i18n'
-import { useThemeStore, useAuthStore } from '@mvp/store'
+import { useTranslation, SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from '@mvp/i18n'
+import type { SupportedLanguage } from '@mvp/i18n'
+import { useThemeStore, useAuthStore, useLanguageStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
-import { FadeIn, AnimatedListItem } from '@mvp/ui'
+import { AnimatedListItem, ScalePress, AppCard } from '@mvp/ui'
+import { Ionicons } from '@expo/vector-icons'
 import { SettingRow } from './SettingRow'
 import { authApi } from '../auth/auth.service'
 
@@ -19,7 +22,9 @@ const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark']
 export function SettingsContent() {
   const { t, i18n } = useTranslation()
   const { mode, setMode } = useThemeStore()
-  const user = useAuthStore((s) => s.user)
+  const setLanguage = useLanguageStore((s) => s.setLanguage)
+  const [showLangPicker, setShowLangPicker] = useState(false)
+  const theme = useTheme()
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -27,18 +32,22 @@ export function SettingsContent() {
     setMode(next)
   }
 
+  const selectLanguage = (lang: SupportedLanguage) => {
+    i18n.changeLanguage(lang)
+    setLanguage(lang)
+    setShowLangPicker(false)
+  }
+
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
   const handleSignOut = async () => {
     await authApi.logout()
-    router.replace('/sign-in')
+    router.replace('/')
   }
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
       <YStack padding="$4" gap="$3">
-        <FadeIn>
-          <H2>{t('settings.title')}</H2>
-        </FadeIn>
-
         <AnimatedListItem index={0}>
           <SettingRow
             icon="color-palette-outline"
@@ -52,13 +61,41 @@ export function SettingsContent() {
           <SettingRow
             icon="language-outline"
             label={t('settings.language')}
-            value={i18n.language.toUpperCase()}
-            onPress={() => {
-              const next = i18n.language === 'en' ? 'ru' : 'en'
-              i18n.changeLanguage(next)
-            }}
+            value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
+            onPress={() => setShowLangPicker(!showLangPicker)}
           />
         </AnimatedListItem>
+
+        {showLangPicker && (
+          <AppCard padding="$2" gap="$1">
+            {SUPPORTED_LANGUAGES.map((lang) => {
+              const isActive = i18n.language === lang
+              return (
+                <ScalePress key={lang} onPress={() => selectLanguage(lang)}>
+                  <XStack
+                    paddingVertical="$2.5"
+                    paddingHorizontal="$3"
+                    borderRadius="$3"
+                    backgroundColor={isActive ? '$subtleBackground' : 'transparent'}
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Text
+                      color={isActive ? '$color' : '$mutedText'}
+                      fontWeight={isActive ? '600' : '400'}
+                      fontSize="$3"
+                    >
+                      {LANGUAGE_LABELS[lang]}
+                    </Text>
+                    {isActive && (
+                      <Ionicons name="checkmark" size={18} color={theme.accent.val} />
+                    )}
+                  </XStack>
+                </ScalePress>
+              )
+            })}
+          </AppCard>
+        )}
 
         <AnimatedListItem index={2}>
           <SettingRow
@@ -72,7 +109,7 @@ export function SettingsContent() {
           <SettingRow
             icon="shield-outline"
             label={t('settings.privacy')}
-            onPress={() => router.push('/(auth)/privacy')}
+            onPress={() => router.push('/privacy')}
           />
         </AnimatedListItem>
 
@@ -84,14 +121,16 @@ export function SettingsContent() {
           />
         </AnimatedListItem>
 
-        <AnimatedListItem index={5}>
-          <SettingRow
-            icon="log-out-outline"
-            label={t('settings.signOut')}
-            onPress={handleSignOut}
-            danger
-          />
-        </AnimatedListItem>
+        {isAuthenticated && (
+          <AnimatedListItem index={5}>
+            <SettingRow
+              icon="log-out-outline"
+              label={t('settings.signOut')}
+              onPress={handleSignOut}
+              danger
+            />
+          </AnimatedListItem>
+        )}
       </YStack>
     </ScrollView>
   )

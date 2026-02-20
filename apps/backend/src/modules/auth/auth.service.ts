@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { randomBytes } from 'crypto'
-import { env } from '../../config/env.js'
-import { AppError } from '../../common/errors/app-error.js'
-import { hashToken } from '../../common/utils/crypto.js'
-import { authRepository } from './auth.repository.js'
-import type { RegisterInput, LoginInput } from './auth.schema.js'
+import { env } from '../../config/env'
+import { AppError } from '../../common/errors/app-error'
+import { hashToken } from '../../common/utils/crypto'
+import { authRepository } from './auth.repository'
+import type { RegisterInput, LoginInput } from './auth.schema'
 
 const SALT_ROUNDS = 12
 

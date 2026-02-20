@@ -8,7 +8,7 @@ export default function SignUpScreen() {
   const { t } = useTranslation()
 
   return (
-    <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$6">
+    <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$6" backgroundColor="$background">
       <FadeIn>
         <H1>{t('auth.signUp')}</H1>
       </FadeIn>

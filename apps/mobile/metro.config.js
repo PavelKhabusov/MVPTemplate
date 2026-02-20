@@ -15,9 +15,6 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ]
 
-// Support .md files for markdown content
-config.resolver.sourceExts.push('md')
-
 // Fix tslib ESM/CJS interop issue for web (Tamagui v2 RC + framer-motion)
 // Metro follows "import" → "node" path in tslib exports, which breaks on web.
 // Redirect tslib to its proper ESM build for web platform.
@@ -35,5 +32,11 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   }
   return context.resolveRequest(context, moduleName, platform)
 }
+
+// Replace import.meta.env in ALL files (including node_modules) for web.
+// Babel plugins only apply to project code, so we need a transformer-level fix.
+config.transformer.babelTransformerPath = require.resolve(
+  './web-import-meta-transformer.js'
+)
 
 module.exports = config

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
-import { db } from '../../config/database.js'
-import { users, refreshTokens } from '../../database/schema/index.js'
-import type { NewUser } from '../../database/schema/index.js'
+import { db } from '../../config/database'
+import { users, refreshTokens } from '../../database/schema/index'
+import type { NewUser } from '../../database/schema/index'
 
 export const authRepository = {
   async findUserByEmail(email: string) {

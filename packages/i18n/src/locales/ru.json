@@ -12,7 +12,8 @@
     "done": "Готово",
     "search": "Поиск",
     "noResults": "Ничего не найдено",
-    "empty": "Пока здесь пусто"
+    "empty": "Пока здесь пусто",
+    "viewAll": "Смотреть все"
   },
   "auth": {
     "signIn": "Войти",
@@ -25,7 +26,13 @@
     "forgotPassword": "Забыли пароль?",
     "noAccount": "Нет аккаунта?",
     "hasAccount": "Уже есть аккаунт?",
-    "createAccount": "Создать аккаунт"
+    "createAccount": "Создать аккаунт",
+    "validation": {
+      "nameRequired": "Введите имя",
+      "emailRequired": "Введите email",
+      "passwordMin": "Пароль минимум 8 символов",
+      "passwordsMismatch": "Пароли не совпадают"
+    }
   },
   "tabs": {
     "home": "Главная",
@@ -51,7 +58,11 @@
     "editProfile": "Редактировать профиль",
     "avatar": "Аватар",
     "name": "Имя",
-    "email": "Email"
+    "email": "Email",
+    "signInPrompt": "Войдите, чтобы увидеть профиль и получить доступ ко всем функциям",
+    "projects": "Проекты",
+    "tasksCompleted": "Завершено",
+    "streak": "Дней подряд"
   },
   "notifications": {
     "title": "Уведомления",
@@ -67,5 +78,51 @@
     "slide2Description": "Откройте для себя удивительные возможности",
     "slide3Title": "Начните",
     "slide3Description": "Создайте аккаунт и приступайте"
+  },
+  "home": {
+    "welcome": "С возвращением",
+    "welcomeGuest": "Добро пожаловать",
+    "subtitle": "Вот что происходит сегодня",
+    "quickActions": "Быстрые действия",
+    "recentActivity": "Недавняя активность",
+    "newProject": "Новый проект",
+    "viewTasks": "Задачи",
+    "analytics": "Аналитика",
+    "activity1": "Проект «Альфа» обновлён",
+    "activity2": "Новый участник в команде",
+    "activity3": "Задача #42 завершена",
+    "activity4": "Деплой успешен",
+    "activeProjects": "Активные проекты",
+    "completedTasks": "Завершено",
+    "teamMembers": "Команда"
+  },
+  "explore": {
+    "title": "Обзор",
+    "subtitle": "Откройте для себя шаблоны и ресурсы",
+    "featured": "Рекомендуемые",
+    "categories": "Категории",
+    "trending": "В тренде",
+    "catDesign": "Дизайн",
+    "catDev": "Разработка",
+    "catMarketing": "Маркетинг",
+    "catAnalytics": "Аналитика",
+    "item1Title": "Набор лендингов",
+    "item1Desc": "Красивые адаптивные компоненты лендинга",
+    "item2Title": "Dashboard Pro",
+    "item2Desc": "Полная панель аналитики с графиками",
+    "item3Title": "Auth Starter",
+    "item3Desc": "Полный поток аутентификации с соц. входом",
+    "item4Title": "API Toolkit",
+    "item4Desc": "Утилиты для REST и GraphQL API"
+  },
+  "interactive": {
+    "notes": "Заметки",
+    "addNote": "Добавить заметку",
+    "notePlaceholder": "Напишите что-нибудь...",
+    "noteEmpty": "Пока нет заметок. Нажмите +, чтобы добавить.",
+    "bookmarks": "Закладки",
+    "bookmarkEmpty": "Закладок пока нет",
+    "bookmark": "В закладки",
+    "unbookmark": "Убрать"
   }
 }

@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
-import { authService } from '../../modules/auth/auth.service.js'
-import { AppError } from '../errors/app-error.js'
+import { authService } from '../../modules/auth/auth.service'
+import { AppError } from '../errors/app-error'
 
 declare module 'fastify' {
   interface FastifyRequest {

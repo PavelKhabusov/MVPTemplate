@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify'
 import rateLimit from '@fastify/rate-limit'
-import { authService } from './auth.service.js'
-import { registerSchema, loginSchema, refreshSchema } from './auth.schema.js'
-import { authenticate } from '../../common/middleware/authenticate.js'
-import { sendSuccess } from '../../common/utils/response.js'
-import { redis } from '../../config/redis.js'
+import { authService } from './auth.service'
+import { registerSchema, loginSchema, refreshSchema } from './auth.schema'
+import { authenticate } from '../../common/middleware/authenticate'
+import { sendSuccess } from '../../common/utils/response'
+import { redis } from '../../config/redis'
 
 export async function authRoutes(app: FastifyInstance) {
   // Rate limit auth endpoints

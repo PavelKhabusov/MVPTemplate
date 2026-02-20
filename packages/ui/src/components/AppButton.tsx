@@ -1,61 +1,52 @@
-import { styled, Button, Spinner, GetProps } from 'tamagui'
+import { Button, Spinner, type ButtonProps } from 'tamagui'
 import { ScalePress } from '../animations'
 
-const StyledButton = styled(Button, {
-  borderRadius: '$4',
-  fontWeight: 'bold',
-
-  variants: {
-    variant: {
-      primary: {
-        backgroundColor: '$primary',
-        color: 'white',
-        hoverStyle: { opacity: 0.9 },
-        pressStyle: { opacity: 0.8 },
-      },
-      secondary: {
-        backgroundColor: '$secondary',
-        color: 'white',
-        hoverStyle: { opacity: 0.9 },
-        pressStyle: { opacity: 0.8 },
-      },
-      outline: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: '$primary',
-        color: '$primary',
-        hoverStyle: { backgroundColor: '$subtleBackground' },
-      },
-      ghost: {
-        backgroundColor: 'transparent',
-        color: '$primary',
-        hoverStyle: { backgroundColor: '$subtleBackground' },
-      },
-      danger: {
-        backgroundColor: '$error',
-        color: 'white',
-        hoverStyle: { opacity: 0.9 },
-        pressStyle: { opacity: 0.8 },
-      },
-    },
-    size: {
-      sm: { height: 36, paddingHorizontal: '$3', fontSize: '$2' },
-      md: { height: 44, paddingHorizontal: '$4', fontSize: '$3' },
-      lg: { height: 52, paddingHorizontal: '$5', fontSize: '$4' },
-    },
-  } as const,
-
-  defaultVariants: {
-    variant: 'primary',
-    size: 'md',
+const variantStyles = {
+  primary: {
+    backgroundColor: '$primary' as const,
+    color: '$background' as const,
   },
-})
+  secondary: {
+    backgroundColor: '$secondary' as const,
+    color: 'white' as const,
+  },
+  outline: {
+    backgroundColor: 'transparent' as const,
+    borderWidth: 1,
+    borderColor: '$borderColor' as const,
+    color: '$color' as const,
+  },
+  ghost: {
+    backgroundColor: 'transparent' as const,
+    color: '$color' as const,
+  },
+  danger: {
+    backgroundColor: '$error' as const,
+    color: 'white' as const,
+  },
+  accent: {
+    backgroundColor: '$accent' as const,
+    color: '$background' as const,
+  },
+} as const
 
-type StyledButtonProps = GetProps<typeof StyledButton>
+// Map our named sizes to Tamagui size tokens so Button's internal font sizing works
+const sizeToToken = { sm: '$3', md: '$4', lg: '$5' } as const
 
-interface AppButtonProps extends StyledButtonProps {
+const sizeStyles = {
+  sm: { height: 36, paddingHorizontal: '$3' as const },
+  md: { height: 44, paddingHorizontal: '$4' as const },
+  lg: { height: 52, paddingHorizontal: '$5' as const },
+} as const
+
+type Variant = keyof typeof variantStyles
+type Size = keyof typeof sizeStyles
+
+interface AppButtonProps extends Omit<ButtonProps, 'variant' | 'size'> {
   loading?: boolean
   animated?: boolean
+  variant?: Variant
+  size?: Size
 }
 
 export function AppButton({
@@ -63,17 +54,26 @@ export function AppButton({
   disabled,
   children,
   animated = true,
+  variant = 'primary',
+  size = 'md',
   ...props
 }: AppButtonProps) {
-  const button = (
-    <StyledButton disabled={disabled || loading} opacity={disabled ? 0.5 : 1} {...props}>
-      {loading ? <Spinner color="$color" /> : children}
-    </StyledButton>
+  const isDisabled = disabled || loading
+
+  return (
+    <ScalePress disabled={isDisabled} scale={animated ? undefined : 1}>
+      <Button
+        size={sizeToToken[size]}
+        borderRadius="$3"
+        fontWeight="600"
+        disabled={isDisabled}
+        opacity={isDisabled ? 0.5 : 1}
+        {...variantStyles[variant]}
+        {...sizeStyles[size]}
+        {...props}
+      >
+        {loading ? <Spinner color="$color" /> : children}
+      </Button>
+    </ScalePress>
   )
-
-  if (animated) {
-    return <ScalePress disabled={disabled || loading}>{button}</ScalePress>
-  }
-
-  return button
 }

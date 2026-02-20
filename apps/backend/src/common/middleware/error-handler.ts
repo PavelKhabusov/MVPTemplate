@@ -1,8 +1,18 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
-import { AppError } from '../errors/app-error.js'
+import { ZodError } from 'zod'
+import { AppError } from '../errors/app-error'
+
+function formatZodError(error: ZodError): string {
+  return error.errors
+    .map((e) => {
+      const field = e.path.join('.')
+      return field ? `${field}: ${e.message}` : e.message
+    })
+    .join(', ')
+}
 
 export function errorHandler(
-  error: FastifyError,
+  error: FastifyError | ZodError | Error,
   request: FastifyRequest,
   reply: FastifyReply
 ) {
@@ -15,12 +25,19 @@ export function errorHandler(
     })
   }
 
+  // Zod validation errors (from schema.parse() in routes)
+  if (error instanceof ZodError) {
+    return reply.status(400).send({
+      error: 'VALIDATION_ERROR',
+      message: formatZodError(error),
+    })
+  }
+
   // Fastify validation errors
-  if (error.validation) {
+  if ('validation' in error && (error as FastifyError).validation) {
     return reply.status(400).send({
       error: 'VALIDATION_ERROR',
       message: 'Invalid request',
-      details: error.validation,
     })
   }
 

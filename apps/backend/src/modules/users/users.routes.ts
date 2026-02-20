@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify'
-import { authenticate } from '../../common/middleware/authenticate.js'
-import { usersRepository } from './users.repository.js'
-import { updateProfileSchema, updateSettingsSchema } from './users.schema.js'
-import { sendSuccess } from '../../common/utils/response.js'
-import { AppError } from '../../common/errors/app-error.js'
+import { authenticate } from '../../common/middleware/authenticate'
+import { usersRepository } from './users.repository'
+import { updateProfileSchema, updateSettingsSchema } from './users.schema'
+import { sendSuccess } from '../../common/utils/response'
+import { AppError } from '../../common/errors/app-error'
 
 export async function usersRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate)

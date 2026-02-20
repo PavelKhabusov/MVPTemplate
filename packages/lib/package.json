@@ -13,6 +13,7 @@
     "react": "*",
     "react-native": "*",
     "react-native-mmkv": "*",
+    "expo-constants": "*",
     "expo-secure-store": "*"
   }
 }

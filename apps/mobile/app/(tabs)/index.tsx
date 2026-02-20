@@ -1,0 +1,241 @@
+import { useState } from 'react'
+import { ScrollView, Platform } from 'react-native'
+import { YStack, XStack, Text, H2, Input, useTheme } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTranslation } from '@mvp/i18n'
+import { useAuthStore, useNotesStore } from '@mvp/store'
+import { router } from 'expo-router'
+import { FadeIn, SlideIn, AnimatedListItem, AppCard, AppButton, ScalePress } from '@mvp/ui'
+import { Ionicons } from '@expo/vector-icons'
+
+function StatCard({ value, label, icon, color }: { value: string; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }) {
+  const theme = useTheme()
+  return (
+    <AppCard flex={1} padding="$3" gap="$2" alignItems="center">
+      <Ionicons name={icon} size={24} color={color} />
+      <Text fontSize="$6" fontWeight="bold" color="$color">{value}</Text>
+      <Text fontSize="$1" color="$mutedText" textAlign="center">{label}</Text>
+    </AppCard>
+  )
+}
+
+function ActivityItem({ text, time, icon }: { text: string; time: string; icon: keyof typeof Ionicons.glyphMap }) {
+  const theme = useTheme()
+  return (
+    <XStack gap="$3" alignItems="center" paddingVertical="$2">
+      <YStack
+        width={36}
+        height={36}
+        borderRadius={18}
+        backgroundColor="$subtleBackground"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Ionicons name={icon} size={16} color={theme.mutedText.val} />
+      </YStack>
+      <YStack flex={1}>
+        <Text fontSize="$2" color="$color">{text}</Text>
+        <Text fontSize="$1" color="$mutedText">{time}</Text>
+      </YStack>
+    </XStack>
+  )
+}
+
+export default function HomeScreen() {
+  const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
+  const user = useAuthStore((s) => s.user)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const theme = useTheme()
+
+  const greeting = isAuthenticated
+    ? `${t('home.welcome')}, ${user?.name?.split(' ')[0] ?? ''}`
+    : t('home.welcomeGuest')
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: theme.background.val }}
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
+      <YStack
+        flex={1}
+        padding="$4"
+        paddingTop={Platform.OS === 'web' ? '$4' : insets.top + 16}
+        gap="$5"
+        backgroundColor="$background"
+      >
+        {/* Header */}
+        <FadeIn>
+          <YStack gap="$1">
+            <H2 color="$color">{greeting}</H2>
+            <Text color="$mutedText" fontSize="$3">{t('home.subtitle')}</Text>
+          </YStack>
+        </FadeIn>
+
+        {/* Stats */}
+        <SlideIn from="bottom" delay={100}>
+          <XStack gap="$3">
+            <StatCard value="12" label={t('home.activeProjects')} icon="folder-outline" color={theme.accent.val} />
+            <StatCard value="48" label={t('home.completedTasks')} icon="checkmark-circle-outline" color={theme.success.val} />
+            <StatCard value="8" label={t('home.teamMembers')} icon="people-outline" color={theme.secondary.val} />
+          </XStack>
+        </SlideIn>
+
+        {/* Quick Actions */}
+        <SlideIn from="bottom" delay={200}>
+          <YStack gap="$3">
+            <Text fontWeight="600" fontSize="$4" color="$color">{t('home.quickActions')}</Text>
+            <XStack gap="$3" flexWrap="wrap">
+              <AppButton variant="accent" size="sm" onPress={() => {}}>
+                <XStack gap="$2" alignItems="center">
+                  <Ionicons name="add" size={16} color={theme.background.val} />
+                  <Text color="$background" fontWeight="600" fontSize="$2">{t('home.newProject')}</Text>
+                </XStack>
+              </AppButton>
+              <AppButton variant="outline" size="sm" onPress={() => {}}>
+                <XStack gap="$2" alignItems="center">
+                  <Ionicons name="list-outline" size={16} color={theme.color.val} />
+                  <Text color="$color" fontSize="$2">{t('home.viewTasks')}</Text>
+                </XStack>
+              </AppButton>
+              <AppButton variant="outline" size="sm" onPress={() => {}}>
+                <XStack gap="$2" alignItems="center">
+                  <Ionicons name="bar-chart-outline" size={16} color={theme.color.val} />
+                  <Text color="$color" fontSize="$2">{t('home.analytics')}</Text>
+                </XStack>
+              </AppButton>
+            </XStack>
+          </YStack>
+        </SlideIn>
+
+        {/* Recent Activity */}
+        <SlideIn from="bottom" delay={300}>
+          <AppCard>
+            <Text fontWeight="600" fontSize="$4" color="$color" marginBottom="$3">{t('home.recentActivity')}</Text>
+            <AnimatedListItem index={0}>
+              <ActivityItem text={t('home.activity1')} time="2m ago" icon="folder-outline" />
+            </AnimatedListItem>
+            <AnimatedListItem index={1}>
+              <ActivityItem text={t('home.activity2')} time="1h ago" icon="person-add-outline" />
+            </AnimatedListItem>
+            <AnimatedListItem index={2}>
+              <ActivityItem text={t('home.activity3')} time="3h ago" icon="checkmark-done-outline" />
+            </AnimatedListItem>
+            <AnimatedListItem index={3}>
+              <ActivityItem text={t('home.activity4')} time="5h ago" icon="rocket-outline" />
+            </AnimatedListItem>
+          </AppCard>
+        </SlideIn>
+
+        {/* Notes — authenticated users */}
+        {isAuthenticated && <NotesSection />}
+
+        {/* Sign in CTA for guests */}
+        {!isAuthenticated && (
+          <SlideIn from="bottom" delay={400}>
+            <AppCard borderColor="$accent" borderWidth={1}>
+              <YStack gap="$3" alignItems="center">
+                <Text fontWeight="600" fontSize="$3" color="$color" textAlign="center">
+                  {t('profile.signInPrompt')}
+                </Text>
+                <XStack gap="$3">
+                  <AppButton size="sm" onPress={() => router.push('/sign-in')}>
+                    {t('auth.signIn')}
+                  </AppButton>
+                  <AppButton size="sm" variant="outline" onPress={() => router.push('/sign-up')}>
+                    {t('auth.createAccount')}
+                  </AppButton>
+                </XStack>
+              </YStack>
+            </AppCard>
+          </SlideIn>
+        )}
+      </YStack>
+    </ScrollView>
+  )
+}
+
+function NotesSection() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const { notes, addNote, deleteNote } = useNotesStore()
+  const [newNote, setNewNote] = useState('')
+
+  const handleAdd = () => {
+    const trimmed = newNote.trim()
+    if (!trimmed) return
+    addNote(trimmed)
+    setNewNote('')
+  }
+
+  return (
+    <SlideIn from="bottom" delay={400}>
+      <AppCard>
+        <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
+          <XStack gap="$2" alignItems="center">
+            <Ionicons name="document-text-outline" size={18} color={theme.accent.val} />
+            <Text fontWeight="600" fontSize="$4" color="$color">{t('interactive.notes')}</Text>
+          </XStack>
+          <Text fontSize="$1" color="$mutedText">{notes.length}</Text>
+        </XStack>
+
+        <XStack gap="$2" marginBottom="$3">
+          <Input
+            flex={1}
+            placeholder={t('interactive.notePlaceholder')}
+            value={newNote}
+            onChangeText={setNewNote}
+            onSubmitEditing={handleAdd}
+            backgroundColor="$subtleBackground"
+            borderWidth={1}
+            borderColor="$borderColor"
+            borderRadius="$3"
+            paddingHorizontal="$3"
+            height={40}
+            fontSize="$2"
+            color="$color"
+            placeholderTextColor="$placeholderColor"
+          />
+          <ScalePress onPress={handleAdd}>
+            <YStack
+              width={40}
+              height={40}
+              borderRadius="$3"
+              backgroundColor="$accent"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Ionicons name="add" size={20} color="white" />
+            </YStack>
+          </ScalePress>
+        </XStack>
+
+        {notes.length === 0 ? (
+          <Text color="$mutedText" fontSize="$2" textAlign="center" paddingVertical="$3">
+            {t('interactive.noteEmpty')}
+          </Text>
+        ) : (
+          <YStack gap="$2">
+            {notes.slice(0, 5).map((note, idx) => (
+              <AnimatedListItem key={note.id} index={idx}>
+                <XStack
+                  gap="$3"
+                  alignItems="center"
+                  paddingVertical="$2"
+                  paddingHorizontal="$3"
+                  backgroundColor="$subtleBackground"
+                  borderRadius="$2"
+                >
+                  <Text flex={1} fontSize="$2" color="$color" numberOfLines={2}>{note.text}</Text>
+                  <ScalePress onPress={() => deleteNote(note.id)}>
+                    <Ionicons name="close-circle-outline" size={18} color={theme.mutedText.val} />
+                  </ScalePress>
+                </XStack>
+              </AnimatedListItem>
+            ))}
+          </YStack>
+        )}
+      </AppCard>
+    </SlideIn>
+  )
+}

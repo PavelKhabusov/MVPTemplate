@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { YStack } from 'tamagui'
+import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
 import { authApi } from './auth.service'
@@ -10,22 +11,32 @@ export function SignUpForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async () => {
-    setError('')
+  const validate = () => {
+    const errs: Record<string, string> = {}
+    if (!name.trim()) errs.name = t('auth.validation.nameRequired')
+    if (!email.trim()) errs.email = t('auth.validation.emailRequired')
+    if (password.length < 8) errs.password = t('auth.validation.passwordMin')
+    if (password !== confirmPassword) errs.confirmPassword = t('auth.validation.passwordsMismatch')
+    return errs
+  }
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
+  const handleSubmit = async () => {
+    const errs = validate()
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
       return
     }
 
+    setErrors({})
     setLoading(true)
     try {
       await authApi.register({ email, password, name })
+      router.replace('/')
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? t('common.error'))
+      setErrors({ form: err?.response?.data?.message ?? t('common.error') })
     } finally {
       setLoading(false)
     }
@@ -38,7 +49,8 @@ export function SignUpForm() {
           label={t('auth.name')}
           placeholder="John Doe"
           value={name}
-          onChangeText={setName}
+          onChangeText={(v) => { setName(v); setErrors((e) => { const { name: _, ...rest } = e; return rest }) }}
+          error={errors.name}
         />
       </FadeIn>
 
@@ -47,9 +59,10 @@ export function SignUpForm() {
           label={t('auth.email')}
           placeholder="email@example.com"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(v) => { setEmail(v); setErrors((e) => { const { email: _, ...rest } = e; return rest }) }}
           keyboardType="email-address"
           autoCapitalize="none"
+          error={errors.email}
         />
       </SlideIn>
 
@@ -58,8 +71,9 @@ export function SignUpForm() {
           label={t('auth.password')}
           placeholder="********"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(v) => { setPassword(v); setErrors((e) => { const { password: _, ...rest } = e; return rest }) }}
           secureTextEntry
+          error={errors.password}
         />
       </SlideIn>
 
@@ -68,9 +82,9 @@ export function SignUpForm() {
           label={t('auth.confirmPassword')}
           placeholder="********"
           value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          onChangeText={(v) => { setConfirmPassword(v); setErrors((e) => { const { confirmPassword: _, ...rest } = e; return rest }) }}
           secureTextEntry
-          error={error || undefined}
+          error={errors.confirmPassword || errors.form}
         />
       </SlideIn>
 

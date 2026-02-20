@@ -1,0 +1,29 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/backend/**'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -f apps/backend/docker/Dockerfile -t mvp-backend:latest apps/backend
+
+      # Add your container registry push steps here
+      # Example for GitHub Container Registry:
+      # - name: Login to GHCR
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Push to GHCR
+      #   run: |
+      #     docker tag mvp-backend:latest ghcr.io/${{ github.repository }}/backend:latest
+      #     docker push ghcr.io/${{ github.repository }}/backend:latest

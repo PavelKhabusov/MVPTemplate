@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx expo export:*)",
       "Bash(npx expo install:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(ls:*)"
     ]
   }
 }

@@ -19,6 +19,10 @@ export function AppCard({
       padding="$4"
       borderWidth={1}
       borderColor="$borderColor"
+      shadowColor="rgba(0,0,0,0.06)"
+      shadowOffset={{ width: 0, height: 2 }}
+      shadowOpacity={1}
+      shadowRadius={8}
       {...props}
     >
       {children}

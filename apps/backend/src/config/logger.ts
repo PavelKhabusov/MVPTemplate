@@ -1,10 +1,9 @@
-import pino from 'pino'
-import { env } from './env.js'
+import { env } from './env'
 
-export const logger = pino({
+export const loggerConfig = {
   level: env.NODE_ENV === 'production' ? 'info' : 'debug',
   transport:
     env.NODE_ENV !== 'production'
       ? { target: 'pino-pretty', options: { colorize: true } }
       : undefined,
-})
+}

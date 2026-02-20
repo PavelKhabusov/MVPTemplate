@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import { sql } from 'drizzle-orm'
-import { authenticate } from '../../common/middleware/authenticate.js'
-import { sendSuccess } from '../../common/utils/response.js'
-import { db } from '../../config/database.js'
+import { authenticate } from '../../common/middleware/authenticate'
+import { sendSuccess } from '../../common/utils/response'
+import { db } from '../../config/database'
 
 export async function searchRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate)

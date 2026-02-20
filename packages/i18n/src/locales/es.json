@@ -1,0 +1,128 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Hecho",
+    "search": "Buscar",
+    "noResults": "No se encontraron resultados",
+    "empty": "Nada aquí todavía",
+    "viewAll": "Ver todo"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "name": "Nombre",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "createAccount": "Crear cuenta",
+    "validation": {
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El correo es obligatorio",
+      "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+      "passwordsMismatch": "Las contraseñas no coinciden"
+    }
+  },
+  "tabs": {
+    "home": "Inicio",
+    "explore": "Explorar",
+    "profile": "Perfil"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "language": "Idioma",
+    "notifications": "Notificaciones",
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "about": "Acerca de",
+    "version": "Versión",
+    "signOut": "Cerrar sesión"
+  },
+  "profile": {
+    "title": "Perfil",
+    "editProfile": "Editar perfil",
+    "avatar": "Avatar",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "signInPrompt": "Inicia sesión para ver tu perfil y acceder a todas las funciones",
+    "projects": "Proyectos",
+    "tasksCompleted": "Completadas",
+    "streak": "Racha de días"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Aún no hay notificaciones",
+    "markAllRead": "Marcar todo como leído"
+  },
+  "onboarding": {
+    "skip": "Omitir",
+    "getStarted": "Comenzar",
+    "slide1Title": "Bienvenido",
+    "slide1Description": "Bienvenido a la aplicación",
+    "slide2Title": "Explorar",
+    "slide2Description": "Descubre funciones increíbles",
+    "slide3Title": "Empezar",
+    "slide3Description": "Crea tu cuenta y comienza"
+  },
+  "home": {
+    "welcome": "Bienvenido de nuevo",
+    "welcomeGuest": "Bienvenido",
+    "subtitle": "Esto es lo que pasa hoy",
+    "quickActions": "Acciones rápidas",
+    "recentActivity": "Actividad reciente",
+    "newProject": "Nuevo proyecto",
+    "viewTasks": "Ver tareas",
+    "analytics": "Analíticas",
+    "activity1": "Proyecto \"Alpha\" actualizado",
+    "activity2": "Nuevo miembro del equipo",
+    "activity3": "Tarea #42 completada",
+    "activity4": "Despliegue exitoso",
+    "activeProjects": "Proyectos activos",
+    "completedTasks": "Completadas",
+    "teamMembers": "Equipo"
+  },
+  "explore": {
+    "title": "Explorar",
+    "subtitle": "Descubre plantillas y recursos",
+    "featured": "Destacados",
+    "categories": "Categorías",
+    "trending": "Tendencias",
+    "catDesign": "Diseño",
+    "catDev": "Desarrollo",
+    "catMarketing": "Marketing",
+    "catAnalytics": "Analíticas",
+    "item1Title": "Kit de Landing Page",
+    "item1Desc": "Componentes de página hermosos y responsivos",
+    "item2Title": "Dashboard Pro",
+    "item2Desc": "Panel de analíticas completo con gráficos",
+    "item3Title": "Auth Starter",
+    "item3Desc": "Flujo completo de autenticación con login social",
+    "item4Title": "API Toolkit",
+    "item4Desc": "Utilidades para API REST y GraphQL"
+  },
+  "interactive": {
+    "notes": "Notas",
+    "addNote": "Añadir nota",
+    "notePlaceholder": "Escribe algo...",
+    "noteEmpty": "Aún no hay notas. Toca + para añadir una.",
+    "bookmarks": "Marcadores",
+    "bookmarkEmpty": "Aún no hay marcadores",
+    "bookmark": "Guardar",
+    "unbookmark": "Eliminar"
+  }
+}

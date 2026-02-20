@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
-import { db } from '../../config/database.js'
-import { users, userSettings } from '../../database/schema/index.js'
-import type { UserSettingsData } from '../../database/schema/index.js'
+import { db } from '../../config/database'
+import { users, userSettings } from '../../database/schema/index'
+import type { UserSettingsData } from '../../database/schema/index'
 
 export const usersRepository = {
   async findById(id: string) {

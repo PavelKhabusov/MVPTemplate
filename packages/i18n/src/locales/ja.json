@@ -1,0 +1,128 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "retry": "再試行",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "confirm": "確認",
+    "back": "戻る",
+    "next": "次へ",
+    "done": "完了",
+    "search": "検索",
+    "noResults": "結果が見つかりません",
+    "empty": "まだ何もありません",
+    "viewAll": "すべて表示"
+  },
+  "auth": {
+    "signIn": "ログイン",
+    "signUp": "新規登録",
+    "signOut": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード確認",
+    "name": "名前",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "noAccount": "アカウントをお持ちでないですか？",
+    "hasAccount": "すでにアカウントをお持ちですか？",
+    "createAccount": "アカウント作成",
+    "validation": {
+      "nameRequired": "名前は必須です",
+      "emailRequired": "メールアドレスは必須です",
+      "passwordMin": "パスワードは8文字以上必要です",
+      "passwordsMismatch": "パスワードが一致しません"
+    }
+  },
+  "tabs": {
+    "home": "ホーム",
+    "explore": "探索",
+    "profile": "プロフィール"
+  },
+  "settings": {
+    "title": "設定",
+    "theme": "テーマ",
+    "themeSystem": "システム",
+    "themeLight": "ライト",
+    "themeDark": "ダーク",
+    "language": "言語",
+    "notifications": "通知",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "about": "アプリについて",
+    "version": "バージョン",
+    "signOut": "ログアウト"
+  },
+  "profile": {
+    "title": "プロフィール",
+    "editProfile": "プロフィール編集",
+    "avatar": "アバター",
+    "name": "名前",
+    "email": "メールアドレス",
+    "signInPrompt": "ログインしてプロフィールとすべての機能にアクセス",
+    "projects": "プロジェクト",
+    "tasksCompleted": "完了",
+    "streak": "連続日数"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "通知はまだありません",
+    "markAllRead": "すべて既読にする"
+  },
+  "onboarding": {
+    "skip": "スキップ",
+    "getStarted": "始める",
+    "slide1Title": "ようこそ",
+    "slide1Description": "アプリへようこそ",
+    "slide2Title": "探索",
+    "slide2Description": "素晴らしい機能を発見しましょう",
+    "slide3Title": "始めましょう",
+    "slide3Description": "アカウントを作成して始めましょう"
+  },
+  "home": {
+    "welcome": "おかえりなさい",
+    "welcomeGuest": "ようこそ",
+    "subtitle": "今日の状況です",
+    "quickActions": "クイックアクション",
+    "recentActivity": "最近のアクティビティ",
+    "newProject": "新規プロジェクト",
+    "viewTasks": "タスクを見る",
+    "analytics": "分析",
+    "activity1": "プロジェクト「Alpha」が更新されました",
+    "activity2": "新しいチームメンバーが参加",
+    "activity3": "タスク #42 が完了",
+    "activity4": "デプロイ成功",
+    "activeProjects": "アクティブプロジェクト",
+    "completedTasks": "完了",
+    "teamMembers": "チーム"
+  },
+  "explore": {
+    "title": "探索",
+    "subtitle": "テンプレートとリソースを発見",
+    "featured": "注目",
+    "categories": "カテゴリー",
+    "trending": "トレンド",
+    "catDesign": "デザイン",
+    "catDev": "開発",
+    "catMarketing": "マーケティング",
+    "catAnalytics": "分析",
+    "item1Title": "ランディングページキット",
+    "item1Desc": "美しくレスポンシブなランディングページコンポーネント",
+    "item2Title": "Dashboard Pro",
+    "item2Desc": "チャート付き完全な分析ダッシュボード",
+    "item3Title": "Auth Starter",
+    "item3Desc": "ソーシャルログイン付き完全な認証フロー",
+    "item4Title": "API Toolkit",
+    "item4Desc": "REST & GraphQL APIユーティリティ"
+  },
+  "interactive": {
+    "notes": "メモ",
+    "addNote": "メモを追加",
+    "notePlaceholder": "何か書いてください...",
+    "noteEmpty": "メモはまだありません。+をタップして追加。",
+    "bookmarks": "ブックマーク",
+    "bookmarkEmpty": "ブックマークはまだありません",
+    "bookmark": "ブックマーク",
+    "unbookmark": "削除"
+  }
+}

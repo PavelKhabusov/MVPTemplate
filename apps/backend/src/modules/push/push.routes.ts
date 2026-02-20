@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
-import { authenticate } from '../../common/middleware/authenticate.js'
-import { sendSuccess } from '../../common/utils/response.js'
-import { db } from '../../config/database.js'
-import { pushTokens } from '../../database/schema/index.js'
+import { authenticate } from '../../common/middleware/authenticate'
+import { sendSuccess } from '../../common/utils/response'
+import { db } from '../../config/database'
+import { pushTokens } from '../../database/schema/index'
 
 const registerTokenSchema = z.object({
   token: z.string(),

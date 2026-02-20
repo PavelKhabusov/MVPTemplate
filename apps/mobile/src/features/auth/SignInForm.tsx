@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { YStack } from 'tamagui'
+import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
 import { authApi } from './auth.service'
@@ -16,6 +17,7 @@ export function SignInForm() {
     setLoading(true)
     try {
       await authApi.login({ email, password })
+      router.replace('/')
     } catch (err: any) {
       setError(err?.response?.data?.message ?? t('common.error'))
     } finally {

@@ -1,5 +1,5 @@
 import { pgTable, uuid, jsonb, timestamp } from 'drizzle-orm/pg-core'
-import { users } from './users.js'
+import { users } from './users'
 
 export interface UserSettingsData {
   theme?: 'system' | 'light' | 'dark'
