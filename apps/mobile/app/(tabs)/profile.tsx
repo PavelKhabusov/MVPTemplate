@@ -142,26 +142,42 @@ function EditProfileSection() {
   const setUser = useAuthStore((s) => s.setUser)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(user?.name ?? '')
+  const [bio, setBio] = useState(user?.bio ?? '')
+  const [phone, setPhone] = useState(user?.phone ?? '')
+  const [location, setLocation] = useState(user?.location ?? '')
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
-    const trimmed = name.trim()
-    if (!trimmed || trimmed === user?.name) {
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setEditing(false)
+      return
+    }
+
+    const payload: Record<string, string | null> = {}
+    if (trimmedName !== user?.name) payload.name = trimmedName
+    const trimmedBio = bio.trim()
+    if (trimmedBio !== (user?.bio ?? '')) payload.bio = trimmedBio || null
+    const trimmedPhone = phone.trim()
+    if (trimmedPhone !== (user?.phone ?? '')) payload.phone = trimmedPhone || null
+    const trimmedLocation = location.trim()
+    if (trimmedLocation !== (user?.location ?? '')) payload.location = trimmedLocation || null
+
+    if (Object.keys(payload).length === 0) {
       setEditing(false)
       return
     }
 
     setSaving(true)
     try {
-      const { data } = await api.patch('/users/profile', { name: trimmed })
+      const { data } = await api.patch('/users/profile', payload)
       if (data?.data && user) {
-        setUser({ ...user, name: data.data.name })
+        setUser({ ...user, ...data.data })
       }
       setEditing(false)
     } catch (err: any) {
-      // In demo mode (no backend), update locally
       if (!err.response && user) {
-        const updated = { ...user, name: trimmed }
+        const updated = { ...user, name: trimmedName, bio: trimmedBio || null, phone: trimmedPhone || null, location: trimmedLocation || null }
         setUser(updated)
         await secureStorage.set('demoUser', JSON.stringify(updated))
         setEditing(false)
@@ -175,7 +191,21 @@ function EditProfileSection() {
 
   const handleCancel = () => {
     setName(user?.name ?? '')
+    setBio(user?.bio ?? '')
+    setPhone(user?.phone ?? '')
+    setLocation(user?.location ?? '')
     setEditing(false)
+  }
+
+  const inputStyle = {
+    backgroundColor: '$subtleBackground' as const,
+    borderWidth: 1,
+    borderColor: '$borderColor' as const,
+    borderRadius: '$3' as const,
+    paddingHorizontal: '$3' as const,
+    height: 42,
+    fontSize: '$3' as const,
+    color: '$color' as const,
   }
 
   if (editing) {
@@ -190,19 +220,32 @@ function EditProfileSection() {
 
         <YStack gap="$2">
           <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.name')}</Text>
+          <Input value={name} onChangeText={setName} {...inputStyle} autoFocus />
+        </YStack>
+
+        <YStack gap="$2">
+          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.bio')}</Text>
           <Input
-            value={name}
-            onChangeText={setName}
-            backgroundColor="$subtleBackground"
-            borderWidth={1}
-            borderColor="$borderColor"
-            borderRadius="$3"
-            paddingHorizontal="$3"
-            height={42}
-            fontSize="$3"
-            color="$color"
-            autoFocus
+            value={bio}
+            onChangeText={setBio}
+            {...inputStyle}
+            height={80}
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+            placeholder={t('profile.bioPlaceholder')}
+            placeholderTextColor={theme.mutedText.val}
           />
+        </YStack>
+
+        <YStack gap="$2">
+          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.phone')}</Text>
+          <Input value={phone} onChangeText={setPhone} {...inputStyle} keyboardType="phone-pad" />
+        </YStack>
+
+        <YStack gap="$2">
+          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.location')}</Text>
+          <Input value={location} onChangeText={setLocation} {...inputStyle} />
         </YStack>
 
         <YStack gap="$2">
@@ -234,6 +277,33 @@ function EditProfileSection() {
         <Text color="$mutedText">{user?.name ?? '-'}</Text>
       </YStack>
       <YStack width="100%" height={1} backgroundColor="$borderColor" />
+      {user?.bio ? (
+        <>
+          <YStack gap="$2">
+            <Text fontWeight="600" color="$color">{t('profile.bio')}</Text>
+            <Text color="$mutedText">{user.bio}</Text>
+          </YStack>
+          <YStack width="100%" height={1} backgroundColor="$borderColor" />
+        </>
+      ) : null}
+      {user?.phone ? (
+        <>
+          <YStack gap="$2">
+            <Text fontWeight="600" color="$color">{t('profile.phone')}</Text>
+            <Text color="$mutedText">{user.phone}</Text>
+          </YStack>
+          <YStack width="100%" height={1} backgroundColor="$borderColor" />
+        </>
+      ) : null}
+      {user?.location ? (
+        <>
+          <YStack gap="$2">
+            <Text fontWeight="600" color="$color">{t('profile.location')}</Text>
+            <Text color="$mutedText">{user.location}</Text>
+          </YStack>
+          <YStack width="100%" height={1} backgroundColor="$borderColor" />
+        </>
+      ) : null}
       <YStack gap="$2">
         <Text fontWeight="600" color="$color">{t('profile.email')}</Text>
         <Text color="$mutedText">{user?.email ?? '-'}</Text>

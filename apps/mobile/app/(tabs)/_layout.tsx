@@ -3,7 +3,12 @@ import { Tabs, Slot, usePathname, router } from 'expo-router'
 import { XStack, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { WebSidebar, AnimatedTabIcon } from '@mvp/ui'
+import { WebSidebar, LottieTabIcon } from '@mvp/ui'
+import { Ionicons } from '@expo/vector-icons'
+
+const homeIcon = require('../../assets/icons/home.json')
+const exploreIcon = require('../../assets/icons/explore.json')
+const profileIcon = require('../../assets/icons/profile.json')
 
 export default function TabsLayout() {
   const { t } = useTranslation()
@@ -36,12 +41,11 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.home'),
           tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon
-              name="home-outline"
-              nameFilled="home"
+            <LottieTabIcon
+              source={homeIcon}
               focused={focused}
               color={color}
-              animation="bounce"
+              size={28}
             />
           ),
         }}
@@ -51,12 +55,11 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.explore'),
           tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon
-              name="compass-outline"
-              nameFilled="compass"
+            <LottieTabIcon
+              source={exploreIcon}
               focused={focused}
               color={color}
-              animation="rotate"
+              size={28}
             />
           ),
         }}
@@ -66,12 +69,11 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.profile'),
           tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon
-              name="person-outline"
-              nameFilled="person"
+            <LottieTabIcon
+              source={profileIcon}
               focused={focused}
               color={color}
-              animation="pop"
+              size={28}
             />
           ),
         }}

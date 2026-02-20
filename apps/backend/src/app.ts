@@ -13,6 +13,7 @@ import { usersRoutes } from './modules/users/users.routes'
 import { pushRoutes } from './modules/push/push.routes'
 import { notificationsRoutes } from './modules/notifications/notifications.routes'
 import { searchRoutes } from './modules/search/search.routes'
+import { adminRoutes } from './modules/admin/admin.routes'
 import { sseRoutes } from './realtime/sse'
 
 export async function buildApp() {
@@ -85,6 +86,7 @@ export async function buildApp() {
   await app.register(pushRoutes, { prefix: '/api/push' })
   await app.register(notificationsRoutes, { prefix: '/api/notifications' })
   await app.register(searchRoutes, { prefix: '/api/search' })
+  await app.register(adminRoutes, { prefix: '/api/admin' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

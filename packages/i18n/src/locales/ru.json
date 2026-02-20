@@ -59,10 +59,27 @@
     "avatar": "Аватар",
     "name": "Имя",
     "email": "Email",
+    "bio": "О себе",
+    "bioPlaceholder": "Расскажите о себе...",
+    "phone": "Телефон",
+    "location": "Местоположение",
     "signInPrompt": "Войдите, чтобы увидеть профиль и получить доступ ко всем функциям",
     "projects": "Проекты",
     "tasksCompleted": "Завершено",
     "streak": "Дней подряд"
+  },
+  "admin": {
+    "title": "Админ панель",
+    "users": "Пользователи",
+    "totalUsers": "Всего пользователей",
+    "newThisWeek": "Новых за неделю",
+    "role": "Роль",
+    "features": "Функции",
+    "roleUser": "Пользователь",
+    "roleAdmin": "Админ",
+    "roleModerator": "Модератор",
+    "saveChanges": "Сохранить",
+    "noUsers": "Пользователи не найдены"
   },
   "notifications": {
     "title": "Уведомления",

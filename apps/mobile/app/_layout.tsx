@@ -41,6 +41,7 @@ function RootNavigator() {
       <Stack.Screen name="sign-up" options={{ title: t('auth.signUp'), presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   )

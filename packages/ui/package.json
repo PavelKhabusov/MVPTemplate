@@ -16,6 +16,7 @@
     "@tamagui/config": "*",
     "@tamagui/portal": "*",
     "moti": "*",
-    "react-native-reanimated": "*"
+    "react-native-reanimated": "*",
+    "lottie-react-native": "*"
   }
 }

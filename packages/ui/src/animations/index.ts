@@ -4,6 +4,7 @@ export { ScalePress } from './ScalePress'
 export { AnimatedListItem } from './AnimatedList'
 export { AnimatedView } from './AnimatedView'
 export { AnimatedTabIcon } from './AnimatedTabIcon'
+export { LottieTabIcon } from './LottieTabIcon'
 export { RefreshSpinner } from './RefreshSpinner'
 export { useShake, useFade, useSpringScale } from './useAnimatedStyle'
 export {

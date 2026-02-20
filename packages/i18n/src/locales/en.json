@@ -59,10 +59,27 @@
     "avatar": "Avatar",
     "name": "Name",
     "email": "Email",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us about yourself...",
+    "phone": "Phone",
+    "location": "Location",
     "signInPrompt": "Sign in to view your profile and access all features",
     "projects": "Projects",
     "tasksCompleted": "Completed",
     "streak": "Day Streak"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "users": "Users",
+    "totalUsers": "Total Users",
+    "newThisWeek": "New This Week",
+    "role": "Role",
+    "features": "Features",
+    "roleUser": "User",
+    "roleAdmin": "Admin",
+    "roleModerator": "Moderator",
+    "saveChanges": "Save Changes",
+    "noUsers": "No users found"
   },
   "notifications": {
     "title": "Notifications",

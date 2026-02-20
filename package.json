@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=mobile --filter=backend",
     "dev:mobile": "turbo dev --filter=mobile",
     "dev:backend": "turbo dev --filter=backend",
     "build": "turbo build",

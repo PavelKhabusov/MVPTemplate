@@ -39,6 +39,7 @@ export function SettingsContent() {
   }
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const userRole = useAuthStore((s) => s.user?.role)
 
   const handleSignOut = async () => {
     await authApi.logout()
@@ -121,8 +122,18 @@ export function SettingsContent() {
           />
         </AnimatedListItem>
 
-        {isAuthenticated && (
+        {userRole === 'admin' && (
           <AnimatedListItem index={5}>
+            <SettingRow
+              icon="shield-checkmark-outline"
+              label={t('admin.title')}
+              onPress={() => router.push('/admin')}
+            />
+          </AnimatedListItem>
+        )}
+
+        {isAuthenticated && (
+          <AnimatedListItem index={userRole === 'admin' ? 6 : 5}>
             <SettingRow
               icon="log-out-outline"
               label={t('settings.signOut')}

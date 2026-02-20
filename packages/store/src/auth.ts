@@ -5,6 +5,11 @@ interface AuthUser {
   email: string
   name: string
   avatarUrl?: string | null
+  bio?: string | null
+  phone?: string | null
+  location?: string | null
+  role?: string
+  features?: string[]
 }
 
 interface AuthState {

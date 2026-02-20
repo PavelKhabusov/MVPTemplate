@@ -59,10 +59,27 @@
     "avatar": "アバター",
     "name": "名前",
     "email": "メールアドレス",
+    "bio": "自己紹介",
+    "bioPlaceholder": "自分について教えてください...",
+    "phone": "電話番号",
+    "location": "場所",
     "signInPrompt": "ログインしてプロフィールとすべての機能にアクセス",
     "projects": "プロジェクト",
     "tasksCompleted": "完了",
     "streak": "連続日数"
+  },
+  "admin": {
+    "title": "管理パネル",
+    "users": "ユーザー",
+    "totalUsers": "総ユーザー数",
+    "newThisWeek": "今週の新規",
+    "role": "役割",
+    "features": "機能",
+    "roleUser": "ユーザー",
+    "roleAdmin": "管理者",
+    "roleModerator": "モデレーター",
+    "saveChanges": "変更を保存",
+    "noUsers": "ユーザーが見つかりません"
   },
   "notifications": {
     "title": "通知",
