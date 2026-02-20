@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",

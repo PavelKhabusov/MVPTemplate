@@ -113,7 +113,10 @@
     "item3Title": "Auth Starter",
     "item3Desc": "Full authentication flow with social login",
     "item4Title": "API Toolkit",
-    "item4Desc": "REST & GraphQL API utilities and helpers"
+    "item4Desc": "REST & GraphQL API utilities and helpers",
+    "searchPlaceholder": "Search people...",
+    "searchResults": "Results",
+    "noResults": "No results found"
   },
   "interactive": {
     "notes": "Notes",

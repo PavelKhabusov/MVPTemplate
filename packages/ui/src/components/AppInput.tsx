@@ -55,6 +55,9 @@ export function AppInput({ label, error, helper, ...props }: AppInputProps) {
         fontSize="$3"
         color="$color"
         placeholderTextColor="$mutedText"
+        aria-label={label}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${label}-error` : undefined}
         focusStyle={{
           borderColor: error ? '$error' : '$primary',
           borderWidth: 2,

@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { authenticate } from '../common/middleware/authenticate'
+import { env } from '../config/env'
 
 const connections = new Map<string, FastifyReply[]>()
 
@@ -18,13 +19,25 @@ export function sendSSE(userId: string, event: string, data: unknown) {
   }
 }
 
+/**
+ * Authenticate SSE — supports both Authorization header and ?token= query param
+ * (EventSource API doesn't support custom headers)
+ */
+async function authenticateSSE(request: FastifyRequest, reply: FastifyReply) {
+  const queryToken = (request.query as Record<string, string>).token
+  if (!request.headers.authorization && queryToken) {
+    request.headers.authorization = `Bearer ${queryToken}`
+  }
+  return authenticate(request, reply)
+}
+
 export async function sseRoutes(app: FastifyInstance) {
-  app.get('/events', { preHandler: [authenticate] }, async (request, reply) => {
+  app.get('/events', { preHandler: [authenticateSSE] }, async (request, reply) => {
     reply.raw.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': env.CORS_ORIGIN,
     })
 
     // Send initial connected event

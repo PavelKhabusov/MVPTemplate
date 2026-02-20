@@ -1,10 +1,9 @@
 import { Platform } from 'react-native'
 import { Tabs, Slot, usePathname, router } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
 import { XStack, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { WebSidebar } from '@mvp/ui'
+import { WebSidebar, AnimatedTabIcon } from '@mvp/ui'
 
 export default function TabsLayout() {
   const { t } = useTranslation()
@@ -37,7 +36,13 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.home'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
+            <AnimatedTabIcon
+              name="home-outline"
+              nameFilled="home"
+              focused={focused}
+              color={color}
+              animation="bounce"
+            />
           ),
         }}
       />
@@ -46,10 +51,12 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.explore'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'compass' : 'compass-outline'}
-              size={24}
+            <AnimatedTabIcon
+              name="compass-outline"
+              nameFilled="compass"
+              focused={focused}
               color={color}
+              animation="rotate"
             />
           ),
         }}
@@ -59,10 +66,12 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.profile'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'person' : 'person-outline'}
-              size={24}
+            <AnimatedTabIcon
+              name="person-outline"
+              nameFilled="person"
+              focused={focused}
               color={color}
+              animation="pop"
             />
           ),
         }}

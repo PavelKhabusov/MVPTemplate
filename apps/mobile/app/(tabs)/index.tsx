@@ -1,11 +1,11 @@
-import { useState } from 'react'
-import { ScrollView, Platform } from 'react-native'
+import { useState, useCallback } from 'react'
+import { ScrollView, Platform, RefreshControl, View } from 'react-native'
 import { YStack, XStack, Text, H2, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore, useNotesStore } from '@mvp/store'
 import { router } from 'expo-router'
-import { FadeIn, SlideIn, AnimatedListItem, AppCard, AppButton, ScalePress } from '@mvp/ui'
+import { FadeIn, SlideIn, AnimatedListItem, AppCard, AppButton, ScalePress, RefreshSpinner } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 
 function StatCard({ value, label, icon, color }: { value: string; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }) {
@@ -47,6 +47,13 @@ export default function HomeScreen() {
   const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const theme = useTheme()
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    // Simulate refresh — in production, invalidate TanStack Query cache here
+    setTimeout(() => setRefreshing(false), 1200)
+  }, [])
 
   const greeting = isAuthenticated
     ? `${t('home.welcome')}, ${user?.name?.split(' ')[0] ?? ''}`
@@ -56,6 +63,18 @@ export default function HomeScreen() {
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.background.val }}
       contentContainerStyle={{ paddingBottom: 40 }}
+      refreshControl={
+        Platform.OS !== 'web' ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.accent.val}
+            colors={[theme.accent.val]}
+            progressBackgroundColor={theme.cardBackground.val}
+            title=""
+          />
+        ) : undefined
+      }
     >
       <YStack
         flex={1}

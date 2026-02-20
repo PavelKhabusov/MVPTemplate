@@ -68,6 +68,9 @@ export function AppButton({
         fontWeight="600"
         disabled={isDisabled}
         opacity={isDisabled ? 0.5 : 1}
+        role="button"
+        aria-disabled={isDisabled}
+        aria-busy={loading}
         {...variantStyles[variant]}
         {...sizeStyles[size]}
         {...props}

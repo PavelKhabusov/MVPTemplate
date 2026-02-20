@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { analytics } from './analytics'
 
 let lastScreenName: string | null = null
@@ -11,4 +12,18 @@ export function trackScreen(pathname: string) {
     analytics.screen(screenName, { pathname })
     lastScreenName = screenName
   }
+}
+
+/**
+ * Hook to track screen views. Pass usePathname() from expo-router.
+ */
+export function useScreenTracking(pathname: string) {
+  const prevRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (pathname && pathname !== prevRef.current) {
+      trackScreen(pathname)
+      prevRef.current = pathname
+    }
+  }, [pathname])
 }

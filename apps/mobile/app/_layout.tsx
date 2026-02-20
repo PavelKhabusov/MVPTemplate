@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Stack, SplashScreen } from 'expo-router'
+import { Stack, SplashScreen, usePathname } from 'expo-router'
 import { TamaguiProvider, useTheme } from 'tamagui'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -10,6 +10,7 @@ import { tamaguiConfig } from '@mvp/ui'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
+import { analytics, useScreenTracking } from '@mvp/analytics'
 import { queryClient } from '../src/services/query-client'
 import { authApi } from '../src/features/auth/auth.service'
 
@@ -22,6 +23,9 @@ SplashScreen.preventAutoHideAsync()
 function RootNavigator() {
   const theme = useTheme()
   const { t } = useTranslation()
+  const pathname = usePathname()
+
+  useScreenTracking(pathname)
 
   return (
     <Stack
@@ -56,6 +60,12 @@ export default function RootLayout() {
   useEffect(() => {
     initI18n(savedLanguage)
     setI18nReady(true)
+  }, [])
+
+  useEffect(() => {
+    // Initialize analytics — uses PostHog if posthog-react-native is installed and key provided
+    const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY
+    analytics.init(posthogKey)
   }, [])
 
   useEffect(() => {

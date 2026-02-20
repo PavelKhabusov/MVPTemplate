@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint . --ignore-pattern node_modules --ignore-pattern .expo",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -38,6 +38,7 @@
     "expo-status-bar": "~3.0.9",
     "expo-system-ui": "~6.0.9",
     "i18next": "^25.8.13",
+    "lottie-react-native": "~7.3.1",
     "moti": "^0.30.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -58,7 +59,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.6.0"
   },
   "private": true
 }

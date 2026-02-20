@@ -1,10 +1,12 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
+import rateLimit from '@fastify/rate-limit'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import { env } from './config/env'
 import { loggerConfig } from './config/logger'
+import { redis } from './config/redis'
 import { errorHandler } from './common/middleware/error-handler'
 import { authRoutes } from './modules/auth/auth.routes'
 import { usersRoutes } from './modules/users/users.routes'
@@ -16,9 +18,30 @@ import { sseRoutes } from './realtime/sse'
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
 
-  // Security
-  await app.register(helmet, { global: true })
+  // Security headers
+  await app.register(helmet, {
+    global: true,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"], // unsafe-inline for Swagger UI
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'"],
+      },
+    },
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  })
   await app.register(cors, { origin: env.CORS_ORIGIN, credentials: true })
+
+  // Global rate limiting (100 req/min per IP)
+  await app.register(rateLimit, {
+    max: 100,
+    timeWindow: '1 minute',
+    redis,
+    keyGenerator: (request) => request.ip,
+  })
 
   // Documentation
   await app.register(swagger, {

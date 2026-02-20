@@ -1,10 +1,12 @@
-import { ScrollView, Platform } from 'react-native'
-import { YStack, XStack, Text, H2, useTheme } from 'tamagui'
+import { useState, useCallback } from 'react'
+import { ScrollView, Platform, ActivityIndicator, RefreshControl } from 'react-native'
+import { YStack, XStack, Text, H2, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { useBookmarksStore } from '@mvp/store'
-import { FadeIn, SlideIn, AnimatedListItem, AppCard, ScalePress } from '@mvp/ui'
+import { FadeIn, SlideIn, AnimatedListItem, AppCard, ScalePress, AppAvatar } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
+import { useSearch } from '../../src/features/search/useSearch'
 
 const CATEGORIES = [
   { key: 'catDesign', icon: 'color-palette-outline' as const, gradient: ['#FF6B35', '#FF8F66'] },
@@ -25,11 +27,31 @@ export default function ExploreScreen() {
   const insets = useSafeAreaInsets()
   const theme = useTheme()
   const { bookmarkedIds, toggle: toggleBookmark } = useBookmarksStore()
+  const { query, setQuery, results, isLoading, addRecentSearch } = useSearch()
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    setTimeout(() => setRefreshing(false), 1200)
+  }, [])
+
+  const hasSearchResults = query.length >= 2
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.background.val }}
       contentContainerStyle={{ paddingBottom: 40 }}
+      refreshControl={
+        Platform.OS !== 'web' ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.accent.val}
+            colors={[theme.accent.val]}
+            progressBackgroundColor={theme.cardBackground.val}
+          />
+        ) : undefined
+      }
     >
       <YStack
         flex={1}
@@ -45,6 +67,69 @@ export default function ExploreScreen() {
             <Text color="$mutedText" fontSize="$3">{t('explore.subtitle')}</Text>
           </YStack>
         </FadeIn>
+
+        {/* Search Bar */}
+        <FadeIn>
+          <XStack
+            backgroundColor="$subtleBackground"
+            borderRadius="$3"
+            borderWidth={1}
+            borderColor="$borderColor"
+            paddingHorizontal="$3"
+            alignItems="center"
+            gap="$2"
+          >
+            <Ionicons name="search-outline" size={18} color={theme.mutedText.val} />
+            <Input
+              flex={1}
+              placeholder={t('explore.searchPlaceholder')}
+              value={query}
+              onChangeText={setQuery}
+              onSubmitEditing={() => { if (query.length >= 2) addRecentSearch(query) }}
+              backgroundColor="transparent"
+              borderWidth={0}
+              height={42}
+              fontSize="$2"
+              color="$color"
+              placeholderTextColor="$placeholderColor"
+            />
+            {isLoading && <ActivityIndicator size="small" />}
+            {query.length > 0 && (
+              <ScalePress onPress={() => setQuery('')}>
+                <Ionicons name="close-circle" size={18} color={theme.mutedText.val} />
+              </ScalePress>
+            )}
+          </XStack>
+        </FadeIn>
+
+        {/* Search Results */}
+        {hasSearchResults && (
+          <SlideIn from="bottom">
+            <YStack gap="$3">
+              <Text fontWeight="600" fontSize="$4" color="$color">
+                {t('explore.searchResults')} ({results.length})
+              </Text>
+              {results.length === 0 && !isLoading ? (
+                <Text color="$mutedText" fontSize="$2" textAlign="center" paddingVertical="$4">
+                  {t('explore.noResults')}
+                </Text>
+              ) : (
+                <YStack gap="$2">
+                  {results.map((user: any, idx: number) => (
+                    <AnimatedListItem key={user.id} index={idx}>
+                      <AppCard animated={false}>
+                        <XStack gap="$3" alignItems="center">
+                          <AppAvatar name={user.name} uri={user.avatar_url} size={40} />
+                          <Text fontWeight="600" fontSize="$3" color="$color">{user.name}</Text>
+                        </XStack>
+                      </AppCard>
+                    </AnimatedListItem>
+                  ))}
+                </YStack>
+              )}
+            </YStack>
+          </SlideIn>
+        )}
 
         {/* Categories */}
         <SlideIn from="bottom" delay={100}>

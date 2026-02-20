@@ -3,6 +3,8 @@ export { SlideIn } from './SlideIn'
 export { ScalePress } from './ScalePress'
 export { AnimatedListItem } from './AnimatedList'
 export { AnimatedView } from './AnimatedView'
+export { AnimatedTabIcon } from './AnimatedTabIcon'
+export { RefreshSpinner } from './RefreshSpinner'
 export { useShake, useFade, useSpringScale } from './useAnimatedStyle'
 export {
   SPRING_CONFIG,

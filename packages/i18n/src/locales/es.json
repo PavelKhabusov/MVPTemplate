@@ -113,7 +113,10 @@
     "item3Title": "Auth Starter",
     "item3Desc": "Flujo completo de autenticación con login social",
     "item4Title": "API Toolkit",
-    "item4Desc": "Utilidades para API REST y GraphQL"
+    "item4Desc": "Utilidades para API REST y GraphQL",
+    "searchPlaceholder": "Buscar personas...",
+    "searchResults": "Resultados",
+    "noResults": "No se encontraron resultados"
   },
   "interactive": {
     "notes": "Notas",

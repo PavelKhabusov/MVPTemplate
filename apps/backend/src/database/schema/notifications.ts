@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, boolean, timestamp, jsonb, index } from 'drizzle-orm/pg-core'
 import { users } from './users'
 
 export const notifications = pgTable('notifications', {
@@ -12,7 +12,10 @@ export const notifications = pgTable('notifications', {
   data: jsonb('data').$type<Record<string, unknown>>(),
   isRead: boolean('is_read').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => [
+  index('notifications_user_id_idx').on(table.userId),
+  index('notifications_user_id_created_at_idx').on(table.userId, table.createdAt),
+])
 
 export type Notification = typeof notifications.$inferSelect
 export type NewNotification = typeof notifications.$inferInsert

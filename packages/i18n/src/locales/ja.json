@@ -113,7 +113,10 @@
     "item3Title": "Auth Starter",
     "item3Desc": "ソーシャルログイン付き完全な認証フロー",
     "item4Title": "API Toolkit",
-    "item4Desc": "REST & GraphQL APIユーティリティ"
+    "item4Desc": "REST & GraphQL APIユーティリティ",
+    "searchPlaceholder": "ユーザーを検索...",
+    "searchResults": "検索結果",
+    "noResults": "結果が見つかりません"
   },
   "interactive": {
     "notes": "メモ",

@@ -1,7 +1,9 @@
 /**
  * Feature flags abstraction.
- * Supports local (env-based) and remote (PostHog) flags.
+ * Priority: local (env-based) > remote (PostHog) > default value.
  */
+
+import { analytics } from './analytics'
 
 type FlagValue = boolean | string | number
 
@@ -21,6 +23,9 @@ export const featureFlags = {
     // Local flags take precedence
     if (key in localFlags) return !!localFlags[key]
     if (key in remoteFlags) return !!remoteFlags[key]
+    // Try PostHog remote flags
+    const phValue = analytics.isFeatureEnabled(key)
+    if (phValue !== undefined) return phValue
     return defaultValue
   },
 

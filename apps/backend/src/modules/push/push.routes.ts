@@ -7,7 +7,7 @@ import { db } from '../../config/database'
 import { pushTokens } from '../../database/schema/index'
 
 const registerTokenSchema = z.object({
-  token: z.string(),
+  token: z.string().min(1).max(500),
   platform: z.enum(['ios', 'android', 'web']),
 })
 

@@ -113,7 +113,10 @@
     "item3Title": "Auth Starter",
     "item3Desc": "Полный поток аутентификации с соц. входом",
     "item4Title": "API Toolkit",
-    "item4Desc": "Утилиты для REST и GraphQL API"
+    "item4Desc": "Утилиты для REST и GraphQL API",
+    "searchPlaceholder": "Поиск людей...",
+    "searchResults": "Результаты",
+    "noResults": "Ничего не найдено"
   },
   "interactive": {
     "notes": "Заметки",

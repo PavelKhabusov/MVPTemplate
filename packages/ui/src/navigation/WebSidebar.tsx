@@ -70,7 +70,7 @@ export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSideba
         </XStack>
 
         {/* Navigation Items */}
-        <YStack gap="$1" paddingHorizontal="$2" flex={1}>
+        <YStack gap="$1" paddingHorizontal="$2" flex={1} role="navigation" aria-label="Main navigation">
           {items.map((item) => {
             const isActive = currentPath === item.href ||
               (item.href !== '/' && currentPath.startsWith(item.href))
@@ -148,6 +148,9 @@ function SidebarItem({
       hoverStyle={{ backgroundColor: '$backgroundHover' }}
       cursor="pointer"
       onPress={onPress}
+      role="link"
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={item.label}
     >
       <Ionicons
         name={isActive ? item.iconFilled : item.icon}
