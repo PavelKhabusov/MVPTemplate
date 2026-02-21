@@ -6,16 +6,22 @@ import { useTranslation } from '@mvp/i18n'
 import { AppButton, FadeIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAuthStore } from '@mvp/store'
 import { authApi } from '../src/services/auth'
 
 export default function VerifyEmailScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const { token } = useLocalSearchParams<{ token: string }>()
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'idle'>(
     token ? 'loading' : 'idle'
   )
+
+  useEffect(() => {
+    if (isAuthenticated) router.replace('/settings')
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (!token) return
