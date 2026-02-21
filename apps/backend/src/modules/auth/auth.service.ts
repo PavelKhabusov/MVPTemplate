@@ -5,7 +5,7 @@ import { env } from '../../config/env'
 import { AppError } from '../../common/errors/app-error'
 import { hashToken } from '../../common/utils/crypto'
 import { authRepository } from './auth.repository'
-import type { RegisterInput, LoginInput } from './auth.schema'
+import type { RegisterInput, LoginInput, GoogleAuthInput } from './auth.schema'
 
 const SALT_ROUNDS = 12
 
@@ -66,9 +66,52 @@ export const authService = {
       throw AppError.unauthorized('Invalid email or password')
     }
 
+    if (!user.passwordHash) {
+      throw AppError.unauthorized('This account uses Google sign-in')
+    }
+
     const valid = await bcrypt.compare(input.password, user.passwordHash)
     if (!valid) {
       throw AppError.unauthorized('Invalid email or password')
+    }
+
+    return this.createTokenPair(user.id, user.email)
+  },
+
+  async googleAuth(input: GoogleAuthInput): Promise<TokenPair> {
+    // Verify Google ID token
+    const res = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${input.idToken}`,
+    )
+    if (!res.ok) {
+      throw AppError.unauthorized('Invalid Google token')
+    }
+
+    const payload = await res.json() as {
+      sub: string
+      email: string
+      email_verified: string
+      name: string
+      picture?: string
+    }
+
+    if (env.GOOGLE_CLIENT_ID && payload.aud !== env.GOOGLE_CLIENT_ID) {
+      throw AppError.unauthorized('Invalid Google token audience')
+    }
+
+    if (payload.email_verified !== 'true') {
+      throw AppError.unauthorized('Google email not verified')
+    }
+
+    // Find existing user or create new one
+    let user = await authRepository.findUserByEmail(payload.email)
+
+    if (!user) {
+      user = await authRepository.createUser({
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        avatarUrl: payload.picture ?? null,
+      })
     }
 
     return this.createTokenPair(user.id, user.email)

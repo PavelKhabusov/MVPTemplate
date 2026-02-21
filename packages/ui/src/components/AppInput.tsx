@@ -51,23 +51,14 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
         </Text>
       )}
 
-      <XStack
-        backgroundColor="$cardBackground"
-        borderWidth={1}
-        borderColor={error ? '$error' : '$borderColor'}
-        borderRadius="$3"
-        height={44}
-        alignItems="center"
-        focusStyle={{
-          borderColor: error ? '$error' : '$primary',
-          borderWidth: 2,
-        }}
-      >
+      <YStack>
         <Input
-          flex={1}
-          backgroundColor="transparent"
-          borderWidth={0}
+          backgroundColor="$cardBackground"
+          borderWidth={1}
+          borderColor={error ? '$error' : '$borderColor'}
+          borderRadius="$3"
           paddingHorizontal="$3"
+          paddingRight={isPassword ? 44 : '$3'}
           height={44}
           fontSize="$3"
           color="$color"
@@ -76,13 +67,25 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
           aria-invalid={!!error}
           aria-describedby={error ? `${label}-error` : undefined}
           secureTextEntry={isPassword && !showPassword}
+          focusStyle={{
+            borderColor: error ? '$error' : '$primary',
+            borderWidth: 2,
+          }}
           {...props}
         />
         {isPassword && (
           <Pressable
             onPress={() => setShowPassword((v) => !v)}
             hitSlop={8}
-            style={{ paddingRight: 12 }}
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: 44,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -91,7 +94,7 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
             />
           </Pressable>
         )}
-      </XStack>
+      </YStack>
 
       {error && (
         <Text fontSize="$1" color="$error">

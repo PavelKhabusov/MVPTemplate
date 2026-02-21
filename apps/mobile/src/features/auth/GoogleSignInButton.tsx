@@ -1,0 +1,78 @@
+import { useState } from 'react'
+import { XStack, Text, useTheme } from 'tamagui'
+import { Pressable, ActivityIndicator } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
+import * as Google from 'expo-auth-session/providers/google'
+import * as WebBrowser from 'expo-web-browser'
+import { authApi } from './auth.service'
+
+WebBrowser.maybeCompleteAuthSession()
+
+const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? ''
+
+export function GoogleSignInButton() {
+  const theme = useTheme()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const [, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: GOOGLE_WEB_CLIENT_ID,
+  })
+
+  const handlePress = async () => {
+    setError('')
+    setLoading(true)
+
+    try {
+      const result = await promptAsync()
+
+      if (result?.type === 'success') {
+        const idToken = result.params.id_token
+        await authApi.googleLogin(idToken)
+        router.replace('/')
+      } else if (result?.type === 'error') {
+        setError(result.error?.message ?? 'Google sign-in failed')
+      }
+    } catch (err: any) {
+      const message = err?.response?.data?.message ?? 'Google sign-in failed'
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <Pressable onPress={handlePress} disabled={loading}>
+        <XStack
+          backgroundColor="$cardBackground"
+          borderWidth={1}
+          borderColor="$borderColor"
+          borderRadius="$3"
+          height={48}
+          alignItems="center"
+          justifyContent="center"
+          gap="$2.5"
+          opacity={loading ? 0.6 : 1}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color={theme.color.val} />
+          ) : (
+            <>
+              <Ionicons name="logo-google" size={20} color={theme.color.val} />
+              <Text fontSize="$3" fontWeight="600" color="$color">
+                Continue with Google
+              </Text>
+            </>
+          )}
+        </XStack>
+      </Pressable>
+      {error ? (
+        <Text fontSize="$1" color="$error" textAlign="center">
+          {error}
+        </Text>
+      ) : null}
+    </>
+  )
+}

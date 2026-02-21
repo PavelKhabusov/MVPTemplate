@@ -1,11 +1,12 @@
 import { KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from 'react-native'
-import { YStack, Text, H1, useTheme } from 'tamagui'
+import { YStack, XStack, Text, H1, Separator, useTheme } from 'tamagui'
 import { Link, router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { FadeIn, SlideIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SignInForm } from '../src/features/auth/SignInForm'
+import { GoogleSignInButton } from '../src/features/auth/GoogleSignInButton'
 
 export default function SignInScreen() {
   const { t } = useTranslation()
@@ -36,6 +37,17 @@ export default function SignInScreen() {
           <SignInForm />
 
           <SlideIn from="bottom" delay={300}>
+            <YStack width="100%" maxWidth={400} gap="$3">
+              <XStack alignItems="center" gap="$3">
+                <Separator flex={1} />
+                <Text color="$mutedText" fontSize="$2">{t('auth.or')}</Text>
+                <Separator flex={1} />
+              </XStack>
+              <GoogleSignInButton />
+            </YStack>
+          </SlideIn>
+
+          <SlideIn from="bottom" delay={400}>
             <Text color="$mutedText" textAlign="center">
               {t('auth.noAccount')}{' '}
               <Link href="/sign-up">
