@@ -66,15 +66,15 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: t('tabs.profile'),
+          title: t('settings.title'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon
-              name="person-outline"
-              nameFilled="person"
+              name="settings-outline"
+              nameFilled="settings"
               focused={focused}
               color={color}
               size={24}
-              animation="pop"
+              animation="wiggle"
             />
           ),
         }}
