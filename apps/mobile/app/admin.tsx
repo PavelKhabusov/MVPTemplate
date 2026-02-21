@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions } from 'react-native'
-import { YStack, XStack, Text, H2, H4, Input, useTheme, Switch } from 'tamagui'
+import { YStack, XStack, Text, H2, H4, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { AppAvatar, AppButton, AppCard, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
+import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
 import { useTemplateConfigStore } from '@mvp/template-config'
@@ -557,14 +557,10 @@ export default function AdminScreen() {
                 <Text color="$color" fontSize="$3">
                   {FEATURE_LABELS[feature] ?? feature}
                 </Text>
-                <Switch
-                  size="$3"
+                <AppSwitch
                   checked={editFeatures.includes(feature)}
                   onCheckedChange={() => toggleFeature(feature)}
-                  backgroundColor={editFeatures.includes(feature) ? '$accent' : '$borderColor'}
-                >
-                  <Switch.Thumb {...{ animation: 'quick' } as any} />
-                </Switch>
+                />
               </XStack>
             ))}
           </YStack>

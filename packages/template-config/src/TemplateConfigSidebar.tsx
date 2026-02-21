@@ -1,5 +1,6 @@
 import { Platform, ScrollView, Pressable } from 'react-native'
-import { YStack, XStack, Text, Switch, useTheme } from 'tamagui'
+import { YStack, XStack, Text, useTheme } from 'tamagui'
+import { AppSwitch } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { AnimatePresence, MotiView } from 'moti'
 import { useTranslation } from '@mvp/i18n'
@@ -147,14 +148,11 @@ export function TemplateConfigSidebar() {
                             {t(flag.labelKey)}
                           </Text>
                         </XStack>
-                        <Switch
-                          size="$2"
+                        <AppSwitch
+                          size="sm"
                           checked={getFlagValue(flag.key, flag.defaultValue)}
                           onCheckedChange={(checked) => setFlag(flag.key, checked)}
-                          backgroundColor={getFlagValue(flag.key, flag.defaultValue) ? '$accent' : '$borderColor'}
-                        >
-                          <Switch.Thumb {...{ animation: 'quick' } as any} />
-                        </Switch>
+                        />
                       </XStack>
                     ))}
                   </YStack>
@@ -210,14 +208,11 @@ export function TemplateConfigSidebar() {
                             {t(flag.labelKey)}
                           </Text>
                         </XStack>
-                        <Switch
-                          size="$2"
+                        <AppSwitch
+                          size="sm"
                           checked={getFlagValue(flag.key, flag.defaultValue)}
                           onCheckedChange={(checked) => setFlag(flag.key, checked)}
-                          backgroundColor={getFlagValue(flag.key, flag.defaultValue) ? '$accent' : '$borderColor'}
-                        >
-                          <Switch.Thumb {...{ animation: 'quick' } as any} />
-                        </Switch>
+                        />
                       </XStack>
                     ))}
                   </YStack>
