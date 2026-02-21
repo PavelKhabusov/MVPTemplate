@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Platform, LogBox } from 'react-native'
+import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, Theme, XStack, useTheme } from 'tamagui'
 import { PortalProvider } from '@tamagui/portal'
@@ -12,8 +12,10 @@ import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
+import { storage } from '@mvp/lib'
 import { queryClient } from '../src/services/query-client'
 import { authApi } from '../src/features/auth/auth.service'
+import { getAccessToken } from '../src/services/api'
 
 // Moti's declarative API writes shared values during render by design — disable strict mode
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false })
@@ -110,6 +112,31 @@ export default function RootLayout() {
     // Initialize analytics — uses PostHog if posthog-react-native is installed and key provided
     const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY
     analytics.init(posthogKey)
+
+    // Configure internal analytics backend
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+    let deviceId = storage.getString('analytics_device_id')
+    if (!deviceId) {
+      deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+      })
+      storage.set('analytics_device_id', deviceId)
+    }
+    analytics.configureBackend({ apiUrl, deviceId, getToken: getAccessToken })
+    analytics.startSession()
+  }, [])
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        analytics.startSession()
+      } else if (state === 'background' || state === 'inactive') {
+        analytics.endSession()
+        analytics.flush()
+      }
+    })
+    return () => sub.remove()
   }, [])
 
   useEffect(() => {

@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "f7c156f4-8f59-422e-a618-bdb24cecfb8f"
+      }
+    },
+    "owner": "pashenka",
+    "android": {
+      "package": "com.PavelKhabusov.MVPTemplate"
+    }
+  }
+}

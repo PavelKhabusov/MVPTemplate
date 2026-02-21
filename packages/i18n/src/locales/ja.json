@@ -86,7 +86,12 @@
     "roleAdmin": "管理者",
     "roleModerator": "モデレーター",
     "saveChanges": "変更を保存",
-    "noUsers": "ユーザーが見つかりません"
+    "noUsers": "ユーザーが見つかりません",
+    "analytics": "アナリティクス",
+    "avgSession": "平均セッション",
+    "dailyActivity": "日次アクティビティ (30日)",
+    "popularScreens": "人気の画面",
+    "noData": "アナリティクスデータなし"
   },
   "notifications": {
     "title": "通知",

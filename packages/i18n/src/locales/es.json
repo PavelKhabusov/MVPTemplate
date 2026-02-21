@@ -86,7 +86,12 @@
     "roleAdmin": "Admin",
     "roleModerator": "Moderador",
     "saveChanges": "Guardar cambios",
-    "noUsers": "No se encontraron usuarios"
+    "noUsers": "No se encontraron usuarios",
+    "analytics": "Analíticas",
+    "avgSession": "Sesión prom.",
+    "dailyActivity": "Actividad diaria (30d)",
+    "popularScreens": "Pantallas populares",
+    "noData": "Sin datos de analíticas"
   },
   "notifications": {
     "title": "Notificaciones",

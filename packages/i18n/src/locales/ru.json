@@ -86,7 +86,12 @@
     "roleAdmin": "Админ",
     "roleModerator": "Модератор",
     "saveChanges": "Сохранить",
-    "noUsers": "Пользователи не найдены"
+    "noUsers": "Пользователи не найдены",
+    "analytics": "Аналитика",
+    "avgSession": "Ср. сессия",
+    "dailyActivity": "Активность (30д)",
+    "popularScreens": "Популярные экраны",
+    "noData": "Нет данных аналитики"
   },
   "notifications": {
     "title": "Уведомления",
