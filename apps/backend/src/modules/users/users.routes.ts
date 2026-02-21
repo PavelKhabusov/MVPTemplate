@@ -70,8 +70,8 @@ export async function usersRoutes(app: FastifyInstance) {
     const filename = `${request.userId}-${randomUUID()}${ext}`
     await writeFile(join(UPLOADS_DIR, filename), buffer)
 
-    const baseUrl = `${request.protocol}://${request.hostname}`
-    const avatarUrl = `${baseUrl}/uploads/avatars/${filename}`
+    const host = request.headers.host ?? `${env.HOST}:${env.PORT}`
+    const avatarUrl = `${request.protocol}://${host}/uploads/avatars/${filename}`
 
     const user = await usersRepository.updateProfile(request.userId, { avatarUrl })
     if (!user) throw AppError.notFound('User not found')

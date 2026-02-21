@@ -48,6 +48,8 @@ export default function EditProfileScreen() {
     if (result.canceled || !result.assets[0]) return
 
     const asset = result.assets[0]
+    // Show picked image locally right away
+    setAvatarUri(asset.uri)
     setUploadingPhoto(true)
     try {
       const formData = new FormData()
@@ -62,10 +64,13 @@ export default function EditProfileScreen() {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       if (data?.data) {
-        setAvatarUri(data.data.avatarUrl)
-        if (user) setUser({ ...user, avatarUrl: data.data.avatarUrl })
+        const serverUrl = data.data.avatarUrl
+        setAvatarUri(serverUrl)
+        if (user) setUser({ ...user, avatarUrl: serverUrl })
       }
     } catch {
+      // Revert to previous avatar on error
+      setAvatarUri(user?.avatarUrl ?? null)
       Alert.alert(t('common.error'), t('common.retry'))
     } finally {
       setUploadingPhoto(false)
@@ -113,15 +118,15 @@ export default function EditProfileScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7} style={{ paddingHorizontal: 8 }}>
           <Text fontSize={17} color="$accent">{t('common.cancel')}</Text>
         </TouchableOpacity>
       ),
       headerRight: () =>
         saving ? (
-          <ActivityIndicator size="small" color={theme.accent.val} />
+          <ActivityIndicator size="small" color={theme.accent.val} style={{ paddingHorizontal: 8 }} />
         ) : (
-          <TouchableOpacity onPress={handleSave} activeOpacity={0.7}>
+          <TouchableOpacity onPress={handleSave} activeOpacity={0.7} style={{ paddingHorizontal: 8 }}>
             <Text fontSize={17} fontWeight="600" color="$accent">{t('common.done')}</Text>
           </TouchableOpacity>
         ),

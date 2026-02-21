@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { AppAvatar } from '../components/AppAvatar'
 
-const HEADER_EXPANDED = 100
+const HEADER_EXPANDED = 180
 const HEADER_COLLAPSED = 56
 const SCROLL_RANGE = HEADER_EXPANDED - HEADER_COLLAPSED
 const AVATAR_SIZE = 80
