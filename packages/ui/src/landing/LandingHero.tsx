@@ -44,6 +44,15 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }
       }
+      .hero-gradient-text {
+        background: linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val}, ${theme.accent.val}, ${theme.accentGradientStart.val}) !important;
+        background-size: 200% auto !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: heroGradientShift 4s ease-in-out infinite;
+        letter-spacing: -0.02em;
+      }
     `
     document.head.appendChild(style)
     return () => { document.head.removeChild(style) }
@@ -136,15 +145,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
             fontSize={52}
             lineHeight={60}
             fontWeight="bold"
-            style={{
-              letterSpacing: '-0.02em',
-              background: `linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val}, ${theme.accent.val}, ${theme.accentGradientStart.val})`,
-              backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              animation: 'heroGradientShift 4s ease-in-out infinite',
-            } as any}
+            className="hero-gradient-text"
           >
             {t('landing.heroTitle')}
           </H1>

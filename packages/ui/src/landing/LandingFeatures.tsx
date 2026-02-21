@@ -67,11 +67,20 @@ export function LandingFeatures() {
     style.textContent = `
       @media (max-width: 800px) {
         #bento-features {
+          grid-template-columns: 1fr 1fr !important;
+        }
+        #bento-features > * {
+          grid-column: span 1 !important;
+        }
+      }
+      @media (max-width: 600px) {
+        #bento-features {
           grid-template-columns: 1fr !important;
         }
         #bento-features > * {
           grid-column: span 1 !important;
         }
+        #features-title { font-size: 26px !important; }
       }
       .bento-card {
         transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
