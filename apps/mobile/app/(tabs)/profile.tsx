@@ -249,6 +249,13 @@ function AuthenticatedProfileView({
                 value={user.location}
               />
             ) : null}
+            {user?.birthday ? (
+              <SettingsGroupItem
+                icon="calendar-outline"
+                label={t('profile.birthday')}
+                value={new Date(user.birthday).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+              />
+            ) : null}
           </SettingsGroup>
         </StaggerGroup>
 
@@ -395,6 +402,13 @@ function WebProfileView() {
                 icon="location-outline"
                 label={t('profile.location')}
                 value={user.location}
+              />
+            ) : null}
+            {user?.birthday ? (
+              <SettingsGroupItem
+                icon="calendar-outline"
+                label={t('profile.birthday')}
+                value={new Date(user.birthday).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
               />
             ) : null}
           </SettingsGroup>

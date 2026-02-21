@@ -6,6 +6,7 @@ export const updateProfileSchema = z.object({
   bio: z.string().max(500).nullable().optional(),
   phone: z.string().max(50).nullable().optional(),
   location: z.string().max(255).nullable().optional(),
+  birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
 })
 
 export const updateSettingsSchema = z.object({

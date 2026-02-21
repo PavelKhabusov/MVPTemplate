@@ -1,7 +1,10 @@
+import { join } from 'path'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
+import multipart from '@fastify/multipart'
+import fastifyStatic from '@fastify/static'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import { env } from './config/env'
@@ -72,6 +75,16 @@ export async function buildApp() {
   await app.register(swaggerUi, {
     routePrefix: '/docs',
     uiConfig: { docExpansion: 'list' },
+  })
+
+  // File uploads
+  await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024 } })
+
+  // Serve uploaded files
+  await app.register(fastifyStatic, {
+    root: join(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
+    decorateReply: false,
   })
 
   // Error handler

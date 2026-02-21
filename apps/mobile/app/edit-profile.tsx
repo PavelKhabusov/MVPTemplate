@@ -6,6 +6,7 @@ import { useTranslation } from '@mvp/i18n'
 import { useAuthStore, useThemeStore } from '@mvp/store'
 import { AppAvatar, SettingsGroup, SettingsGroupItem, PhoneInput, LocationInput } from '@mvp/ui'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import * as ImagePicker from 'expo-image-picker'
 import { api } from '../src/services/api'
 import { useLocationSearch } from '../src/hooks/useLocationSearch'
 import { authApi } from '../src/features/auth/auth.service'
@@ -26,13 +27,50 @@ export default function EditProfileScreen() {
   const [birthday, setBirthday] = useState<Date | null>(
     user?.birthday ? new Date(user.birthday) : null,
   )
+  const [avatarUri, setAvatarUri] = useState(user?.avatarUrl ?? null)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   const { results: locationResults, isLoading: locationLoading } = useLocationSearch(locationQuery)
 
   const formatDate = (date: Date) =>
     date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+
+  const handlePickPhoto = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    })
+
+    if (result.canceled || !result.assets[0]) return
+
+    const asset = result.assets[0]
+    setUploadingPhoto(true)
+    try {
+      const formData = new FormData()
+      const ext = asset.uri.split('.').pop() ?? 'jpg'
+      formData.append('file', {
+        uri: asset.uri,
+        name: `avatar.${ext}`,
+        type: asset.mimeType ?? `image/${ext}`,
+      } as any)
+
+      const { data } = await api.post('/users/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (data?.data) {
+        setAvatarUri(data.data.avatarUrl)
+        if (user) setUser({ ...user, avatarUrl: data.data.avatarUrl })
+      }
+    } catch {
+      Alert.alert(t('common.error'), t('common.retry'))
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
 
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim()
@@ -115,8 +153,27 @@ export default function EditProfileScreen() {
       >
         {/* Avatar */}
         <YStack alignItems="center" paddingVertical="$4" gap="$2">
-          <AppAvatar uri={user?.avatarUrl} name={user?.name} size={100} />
-          <TouchableOpacity activeOpacity={0.7}>
+          <TouchableOpacity onPress={handlePickPhoto} activeOpacity={0.7} disabled={uploadingPhoto}>
+            <YStack>
+              <AppAvatar uri={avatarUri} name={user?.name} size={100} />
+              {uploadingPhoto && (
+                <YStack
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  right={0}
+                  bottom={0}
+                  borderRadius={50}
+                  backgroundColor="rgba(0,0,0,0.4)"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <ActivityIndicator color="white" />
+                </YStack>
+              )}
+            </YStack>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handlePickPhoto} activeOpacity={0.7} disabled={uploadingPhoto}>
             <Text fontSize={16} color="$accent">{t('profile.setNewPhoto')}</Text>
           </TouchableOpacity>
         </YStack>

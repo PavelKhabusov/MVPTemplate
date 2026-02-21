@@ -1,6 +1,7 @@
 import { Platform, TouchableOpacity } from 'react-native'
-import { YStack, XStack, Text, useTheme } from 'tamagui'
+import { YStack, Text, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -9,10 +10,10 @@ import Animated, {
 } from 'react-native-reanimated'
 import { AppAvatar } from '../components/AppAvatar'
 
-const HEADER_EXPANDED = 260
+const HEADER_EXPANDED = 100
 const HEADER_COLLAPSED = 56
 const SCROLL_RANGE = HEADER_EXPANDED - HEADER_COLLAPSED
-const AVATAR_SIZE = 100
+const AVATAR_SIZE = 80
 
 export { HEADER_EXPANDED, HEADER_COLLAPSED }
 
@@ -62,20 +63,28 @@ export function CollapsibleHeader({
   const expandedHeight = HEADER_EXPANDED + insets.top
   const collapsedHeight = HEADER_COLLAPSED + insets.top
 
-  // Positions when expanded (relative to top of safe area content)
   const safeTop = insets.top
-  const avatarTopExpanded = safeTop + 24
-  const nameTopExpanded = avatarTopExpanded + AVATAR_SIZE + 12
-  const statusTopExpanded = nameTopExpanded + 28
+  const avatarTopExpanded = safeTop + 16
+  const nameTopExpanded = avatarTopExpanded + AVATAR_SIZE + 10
+  const statusTopExpanded = nameTopExpanded + 26
 
-  // Name position when collapsed: vertically centered in collapsed header
-  const nameTopCollapsed = safeTop + (HEADER_COLLAPSED - 22) / 2
+  const nameTopCollapsed = safeTop + (HEADER_COLLAPSED - 20) / 2
 
   const headerStyle = useAnimatedStyle(() => ({
     height: interpolate(
       scrollY.value,
       [0, SCROLL_RANGE],
       [expandedHeight, collapsedHeight],
+      Extrapolation.CLAMP,
+    ),
+  }))
+
+  // Gradient fades out on scroll
+  const gradientStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, SCROLL_RANGE * 0.6],
+      [1, 0],
       Extrapolation.CLAMP,
     ),
   }))
@@ -157,7 +166,22 @@ export function CollapsibleHeader({
         headerStyle,
       ]}
     >
-      {/* Right action button — always visible */}
+      {/* Accent gradient — fades on scroll */}
+      <Animated.View
+        style={[
+          { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+          gradientStyle,
+        ]}
+      >
+        <LinearGradient
+          colors={[theme.accent.val, 'transparent']}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{ flex: 1, opacity: 0.15 }}
+        />
+      </Animated.View>
+
+      {/* Right action button */}
       {rightAction && (
         <TouchableOpacity
           onPress={rightAction.onPress}
@@ -180,7 +204,7 @@ export function CollapsibleHeader({
         <AppAvatar uri={avatarUri} name={avatarName} size={AVATAR_SIZE} />
       </Animated.View>
 
-      {/* Name — stays visible, moves to center of collapsed header */}
+      {/* Name */}
       <Animated.View style={nameStyle}>
         <Text fontSize={22} fontWeight="bold" color="$color" textAlign="center">
           {userName}
