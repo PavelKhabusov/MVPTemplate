@@ -34,12 +34,31 @@ export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSideba
   const [collapsed, setCollapsed] = useState(false)
   const theme = useTheme()
 
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    const style = document.createElement('style')
+    style.textContent = `
+      #web-sidebar { display: flex; }
+      #web-bottom-nav { display: none; }
+      .web-main-content { padding-bottom: 0; }
+      @media (max-width: 768px) {
+        #web-sidebar { display: none !important; }
+        #web-bottom-nav { display: flex !important; }
+        .web-main-content { padding-bottom: 64px !important; }
+      }
+    `
+    document.head.appendChild(style)
+    return () => { document.head.removeChild(style) }
+  }, [])
+
   if (Platform.OS !== 'web') return null
 
   const width = collapsed ? 72 : 240
 
   return (
+    <>
     <MotiView
+      nativeID="web-sidebar"
       animate={{ width }}
       transition={{ type: 'timing', duration: 200 }}
       style={{
@@ -132,6 +151,57 @@ export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSideba
         </YStack>
       </YStack>
     </MotiView>
+
+    {/* Mobile bottom navigation */}
+    <XStack
+      nativeID="web-bottom-nav"
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        backgroundColor: theme.sidebarBg.val,
+        borderTopWidth: 1,
+        borderTopColor: theme.sidebarBorder.val,
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        height: 56,
+        display: 'none',
+      } as any}
+    >
+      {items.map((item) => {
+        const isActive = currentPath === item.href ||
+          (item.href !== '/' && currentPath.startsWith(item.href))
+        return (
+          <YStack
+            key={item.href}
+            flex={1}
+            alignItems="center"
+            justifyContent="center"
+            paddingVertical="$1.5"
+            cursor="pointer"
+            onPress={() => onNavigate(item.href)}
+          >
+            <Ionicons
+              name={isActive ? item.iconFilled : item.icon}
+              size={22}
+              color={isActive ? theme.accent.val : theme.mutedText.val}
+            />
+            <Text
+              fontSize={10}
+              color={isActive ? '$accent' : '$mutedText'}
+              fontWeight={isActive ? '600' : '400'}
+              marginTop={2}
+            >
+              {item.label}
+            </Text>
+          </YStack>
+        )
+      })}
+    </XStack>
+    </>
   )
 }
 

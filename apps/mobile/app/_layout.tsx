@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
-import { TamaguiProvider, Theme, XStack } from 'tamagui'
+import { TamaguiProvider, Theme, XStack, YStack } from 'tamagui'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -105,7 +105,9 @@ function WebRootLayout() {
         currentPath={pathname}
         onNavigate={(href) => router.push(href as any)}
       />
-      <Slot />
+      <YStack flex={1} style={{ overflow: 'auto', paddingBottom: 0 } as any} className="web-main-content">
+        <Slot />
+      </YStack>
     </XStack>
   )
 }
