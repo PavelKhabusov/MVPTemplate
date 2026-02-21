@@ -36,6 +36,7 @@ export async function buildApp() {
     },
     hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
   await app.register(cors, {
     origin: env.NODE_ENV === 'development' ? true : env.CORS_ORIGIN,

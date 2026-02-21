@@ -40,7 +40,9 @@ export async function usersRoutes(app: FastifyInstance) {
 
   // POST /api/users/avatar — upload avatar image
   app.post('/avatar', async (request, reply) => {
+    request.log.info({ contentType: request.headers['content-type'] }, 'avatar upload start')
     const file = await request.file()
+    request.log.info({ hasFile: !!file, filename: file?.filename, mimetype: file?.mimetype }, 'avatar file parsed')
     if (!file) throw AppError.badRequest('No file uploaded')
     if (!ALLOWED_TYPES.includes(file.mimetype)) {
       throw AppError.badRequest('Only JPEG, PNG, and WebP images are allowed')

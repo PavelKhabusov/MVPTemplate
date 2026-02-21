@@ -79,13 +79,18 @@ export default function EditProfileScreen() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       })
-      if (!uploadRes.ok) throw new Error('Upload failed')
+      if (!uploadRes.ok) {
+        const errBody = await uploadRes.text()
+        console.error('Avatar upload failed:', uploadRes.status, errBody)
+        throw new Error(errBody)
+      }
       const { data: profile } = await uploadRes.json()
       if (profile) {
         setAvatarUri(profile.avatarUrl)
         if (user) setUser({ ...user, avatarUrl: profile.avatarUrl })
       }
-    } catch {
+    } catch (err) {
+      console.error('Avatar upload error:', err)
       setAvatarUri(user?.avatarUrl ?? null)
       Alert.alert(t('common.error'), t('common.retry'))
     } finally {
