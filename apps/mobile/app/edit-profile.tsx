@@ -149,7 +149,7 @@ export default function EditProfileScreen() {
     if (Platform.OS === 'web') return
     navigation.setOptions({
       headerLeft: () => (
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7} style={{ paddingHorizontal: 8 }}>
+        <TouchableOpacity onPress={goBack} activeOpacity={0.7} style={{ paddingHorizontal: 8 }}>
           <Text fontSize={17} color="$accent">{t('common.cancel')}</Text>
         </TouchableOpacity>
       ),
@@ -162,7 +162,7 @@ export default function EditProfileScreen() {
           </TouchableOpacity>
         ),
     })
-  }, [navigation, handleSave, saving, t, theme])
+  }, [navigation, handleSave, goBack, saving, t, theme])
 
   const inputStyle = {
     backgroundColor: 'transparent' as const,
@@ -195,7 +195,7 @@ export default function EditProfileScreen() {
             paddingHorizontal="$4"
             paddingVertical="$3"
           >
-            <ScalePress onPress={() => router.back()}>
+            <ScalePress onPress={goBack}>
               <Text fontSize={17} color="$accent">{t('common.cancel')}</Text>
             </ScalePress>
             {saving ? (
