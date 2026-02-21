@@ -62,7 +62,7 @@ export function SettingsGroupItem({
       ) : (
         <>
           {value && (
-            <Text color="$mutedText" fontSize={16}>
+            <Text color="$mutedText" fontSize={16} flexShrink={1} numberOfLines={1}>
               {value}
             </Text>
           )}
