@@ -190,18 +190,24 @@ export default function RootLayout() {
 
   const navTheme = resolvedTheme === 'dark' ? darkNavTheme : lightNavTheme
 
+  const content = (
+    <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
+      <Theme name={resolvedTheme}>
+        <PortalProvider>
+          <RootNavigator />
+        </PortalProvider>
+      </Theme>
+    </TamaguiProvider>
+  )
+
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider value={navTheme}>
-          <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
-            <Theme name={resolvedTheme}>
-              <PortalProvider>
-                <RootNavigator />
-              </PortalProvider>
-            </Theme>
-          </TamaguiProvider>
-        </ThemeProvider>
+        {Platform.OS === 'web' ? content : (
+          <ThemeProvider value={navTheme}>
+            {content}
+          </ThemeProvider>
+        )}
       </QueryClientProvider>
     </SafeAreaProvider>
   )
