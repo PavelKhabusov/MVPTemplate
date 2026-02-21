@@ -47,25 +47,20 @@ export default function DocsLayout() {
           headerTintColor: theme.accent.val,
           headerShadowVisible: false,
           contentStyle: { backgroundColor: theme.background.val },
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} hitSlop={8} style={{ padding: 4 }}>
+              <Ionicons name="chevron-back" size={24} color={theme.accent.val} />
+            </Pressable>
+          ),
         }}
       >
         <Stack.Screen
           name="index"
-          options={{
-            title: t('docs.title'),
-            headerLeft: () => (
-              <Pressable onPress={() => router.back()} style={{ marginRight: 8 }}>
-                <Ionicons name="chevron-back" size={24} color={theme.accent.val} />
-              </Pressable>
-            ),
-          }}
+          options={{ title: t('docs.title') }}
         />
         <Stack.Screen
           name="[page]"
-          options={{
-            headerShown: true,
-            headerBackTitle: '',
-          }}
+          options={{ headerShown: true }}
         />
       </Stack>
     )

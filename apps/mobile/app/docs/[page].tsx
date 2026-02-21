@@ -14,7 +14,7 @@ export default function DocsPageScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: pageTitle, headerBackTitle: '' }} />
+      <Stack.Screen options={{ title: pageTitle }} />
       <ScrollView
         style={{ flex: 1, backgroundColor: theme.background.val }}
         contentContainerStyle={{
