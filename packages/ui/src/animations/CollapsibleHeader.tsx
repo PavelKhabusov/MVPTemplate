@@ -55,6 +55,15 @@ export function CollapsibleHeader({
   const expandedHeight = HEADER_EXPANDED + insets.top
   const collapsedHeight = HEADER_COLLAPSED + insets.top
 
+  // Positions when expanded (relative to top of safe area content)
+  const safeTop = insets.top
+  const avatarTopExpanded = safeTop + 24
+  const nameTopExpanded = avatarTopExpanded + AVATAR_SIZE + 12
+  const statusTopExpanded = nameTopExpanded + 28
+
+  // Name position when collapsed: vertically centered in collapsed header
+  const nameTopCollapsed = safeTop + (HEADER_COLLAPSED - 22) / 2
+
   const headerStyle = useAnimatedStyle(() => ({
     height: interpolate(
       scrollY.value,
@@ -64,28 +73,58 @@ export function CollapsibleHeader({
     ),
   }))
 
-  // Avatar: scale down + fade out
+  // Avatar: fade out + scale down
   const avatarStyle = useAnimatedStyle(() => {
-    const scale = interpolate(
-      scrollY.value,
-      [0, SCROLL_RANGE * 0.6],
-      [1, 0.4],
-      Extrapolation.CLAMP,
-    )
     const opacity = interpolate(
       scrollY.value,
       [0, SCROLL_RANGE * 0.5],
       [1, 0],
       Extrapolation.CLAMP,
     )
+    const scale = interpolate(
+      scrollY.value,
+      [0, SCROLL_RANGE * 0.6],
+      [1, 0.5],
+      Extrapolation.CLAMP,
+    )
     return {
-      transform: [{ scale }],
+      position: 'absolute' as const,
+      top: avatarTopExpanded,
+      alignSelf: 'center' as const,
       opacity,
+      transform: [{ scale }],
+    }
+  })
+
+  // Name: moves from expanded position to collapsed center
+  const nameStyle = useAnimatedStyle(() => {
+    const top = interpolate(
+      scrollY.value,
+      [0, SCROLL_RANGE],
+      [nameTopExpanded, nameTopCollapsed],
+      Extrapolation.CLAMP,
+    )
+    const scale = interpolate(
+      scrollY.value,
+      [0, SCROLL_RANGE],
+      [1, 17 / 22],
+      Extrapolation.CLAMP,
+    )
+    return {
+      position: 'absolute' as const,
+      top,
+      left: 0,
+      right: 0,
+      transform: [{ scale }],
     }
   })
 
   // Status: fade out early
   const statusStyle = useAnimatedStyle(() => ({
+    position: 'absolute' as const,
+    top: statusTopExpanded,
+    left: 0,
+    right: 0,
     opacity: interpolate(
       scrollY.value,
       [0, SCROLL_RANGE * 0.3],
@@ -93,19 +132,6 @@ export function CollapsibleHeader({
       Extrapolation.CLAMP,
     ),
   }))
-
-  // Name: stays centered, just gets slightly smaller
-  const nameStyle = useAnimatedStyle(() => {
-    const fontSize = interpolate(
-      scrollY.value,
-      [0, SCROLL_RANGE],
-      [22, 17],
-      Extrapolation.CLAMP,
-    )
-    return {
-      transform: [{ scale: fontSize / 22 }],
-    }
-  })
 
   return (
     <Animated.View
@@ -116,6 +142,7 @@ export function CollapsibleHeader({
           left: 0,
           right: 0,
           zIndex: 10,
+          overflow: 'hidden',
           backgroundColor: theme.cardBackground.val,
           borderBottomWidth: 0.5,
           borderBottomColor: theme.borderColor.val,
@@ -123,34 +150,26 @@ export function CollapsibleHeader({
         headerStyle,
       ]}
     >
-      <YStack
-        flex={1}
-        paddingTop={insets.top + 8}
-        alignItems="center"
-        justifyContent="center"
-        gap="$2"
-      >
-        {/* Avatar — fades out on scroll */}
-        <Animated.View style={avatarStyle}>
-          <AppAvatar uri={avatarUri} name={avatarName} size={AVATAR_SIZE} />
-        </Animated.View>
+      {/* Avatar */}
+      <Animated.View style={avatarStyle}>
+        <AppAvatar uri={avatarUri} name={avatarName} size={AVATAR_SIZE} />
+      </Animated.View>
 
-        {/* Name — stays centered, scales down slightly */}
-        <Animated.View style={nameStyle}>
-          <Text fontSize={22} fontWeight="bold" color="$color" textAlign="center">
-            {userName}
+      {/* Name — stays visible, moves to center of collapsed header */}
+      <Animated.View style={nameStyle}>
+        <Text fontSize={22} fontWeight="bold" color="$color" textAlign="center">
+          {userName}
+        </Text>
+      </Animated.View>
+
+      {/* Status */}
+      <Animated.View style={statusStyle}>
+        {userStatus && (
+          <Text fontSize={15} color="$mutedText" textAlign="center">
+            {userStatus}
           </Text>
-        </Animated.View>
-
-        {/* Status — fades out */}
-        <Animated.View style={statusStyle}>
-          {userStatus && (
-            <Text fontSize={15} color="$mutedText" textAlign="center">
-              {userStatus}
-            </Text>
-          )}
-        </Animated.View>
-      </YStack>
+        )}
+      </Animated.View>
     </Animated.View>
   )
 }

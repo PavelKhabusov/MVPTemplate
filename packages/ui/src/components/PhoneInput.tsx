@@ -2,8 +2,8 @@ import { useState, useMemo, useCallback } from 'react'
 import { FlatList, Modal, Platform } from 'react-native'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
-import { countries, applyMask, extractDigits } from '@mvp/lib/src/countries'
-import type { Country } from '@mvp/lib/src/countries'
+import { countries, applyMask, extractDigits } from '@mvp/lib'
+import type { Country } from '@mvp/lib'
 import { ScalePress } from '../animations/ScalePress'
 
 interface PhoneInputProps {
