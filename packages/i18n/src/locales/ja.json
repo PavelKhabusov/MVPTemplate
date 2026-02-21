@@ -68,6 +68,8 @@
     "bioPlaceholder": "自分について教えてください...",
     "phone": "電話番号",
     "location": "場所",
+    "birthday": "誕生日",
+    "setNewPhoto": "写真を変更",
     "signInPrompt": "ログインしてプロフィールとすべての機能にアクセス",
     "projects": "プロジェクト",
     "tasksCompleted": "完了",

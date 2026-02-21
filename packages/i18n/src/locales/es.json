@@ -68,6 +68,8 @@
     "bioPlaceholder": "Cuéntanos sobre ti...",
     "phone": "Teléfono",
     "location": "Ubicación",
+    "birthday": "Cumpleaños",
+    "setNewPhoto": "Cambiar foto",
     "signInPrompt": "Inicia sesión para ver tu perfil y acceder a todas las funciones",
     "projects": "Proyectos",
     "tasksCompleted": "Completadas",

@@ -68,6 +68,8 @@
     "bioPlaceholder": "Tell us about yourself...",
     "phone": "Phone",
     "location": "Location",
+    "birthday": "Birthday",
+    "setNewPhoto": "Set New Photo",
     "signInPrompt": "Sign in to view your profile and access all features",
     "projects": "Projects",
     "tasksCompleted": "Completed",

@@ -8,6 +8,7 @@ interface AuthUser {
   bio?: string | null
   phone?: string | null
   location?: string | null
+  birthday?: string | null
   role?: string
   features?: string[]
 }

@@ -164,16 +164,12 @@ export function CollapsibleHeader({
           activeOpacity={0.7}
           style={{
             position: 'absolute',
-            top: safeTop + (HEADER_COLLAPSED - 34) / 2,
+            top: safeTop + (HEADER_COLLAPSED - 22) / 2,
             right: 16,
             zIndex: 20,
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 16,
-            backgroundColor: theme.subtleBackground.val,
           }}
         >
-          <Text fontSize={15} fontWeight="600" color="$accent">
+          <Text fontSize={17} color="$accent">
             {rightAction.label}
           </Text>
         </TouchableOpacity>

@@ -53,9 +53,9 @@ function RootNavigator() {
       <Stack.Screen
         name="edit-profile"
         options={{
-          title: t('profile.editProfile'),
+          title: '',
           headerBackVisible: false,
-          presentation: 'modal',
+          headerShadowVisible: false,
         }}
       />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />

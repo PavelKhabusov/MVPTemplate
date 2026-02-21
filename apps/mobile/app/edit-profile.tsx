@@ -3,10 +3,12 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Ac
 import { YStack, Text, Input, useTheme } from 'tamagui'
 import { router, useNavigation } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
-import { useAuthStore } from '@mvp/store'
-import { SettingsGroup, PhoneInput, LocationInput } from '@mvp/ui'
+import { useAuthStore, useThemeStore } from '@mvp/store'
+import { AppAvatar, SettingsGroup, SettingsGroupItem, PhoneInput, LocationInput } from '@mvp/ui'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { api } from '../src/services/api'
 import { useLocationSearch } from '../src/hooks/useLocationSearch'
+import { authApi } from '../src/features/auth/auth.service'
 
 export default function EditProfileScreen() {
   const { t } = useTranslation()
@@ -14,15 +16,23 @@ export default function EditProfileScreen() {
   const navigation = useNavigation()
   const user = useAuthStore((s) => s.user)
   const setUser = useAuthStore((s) => s.setUser)
+  const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
 
   const [name, setName] = useState(user?.name ?? '')
   const [bio, setBio] = useState(user?.bio ?? '')
   const [phone, setPhone] = useState(user?.phone ?? '')
   const [location, setLocation] = useState(user?.location ?? '')
   const [locationQuery, setLocationQuery] = useState(user?.location ?? '')
+  const [birthday, setBirthday] = useState<Date | null>(
+    user?.birthday ? new Date(user.birthday) : null,
+  )
+  const [showDatePicker, setShowDatePicker] = useState(false)
   const [saving, setSaving] = useState(false)
 
   const { results: locationResults, isLoading: locationLoading } = useLocationSearch(locationQuery)
+
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim()
@@ -35,6 +45,8 @@ export default function EditProfileScreen() {
     if (phone !== (user?.phone ?? '')) payload.phone = phone || null
     const trimmedLocation = location.trim()
     if (trimmedLocation !== (user?.location ?? '')) payload.location = trimmedLocation || null
+    const birthdayStr = birthday ? birthday.toISOString().split('T')[0] : null
+    if (birthdayStr !== (user?.birthday ?? null)) payload.birthday = birthdayStr
 
     if (Object.keys(payload).length === 0) {
       router.back()
@@ -53,7 +65,12 @@ export default function EditProfileScreen() {
     } finally {
       setSaving(false)
     }
-  }, [name, bio, phone, location, user, setUser, t])
+  }, [name, bio, phone, location, birthday, user, setUser, t])
+
+  const handleSignOut = async () => {
+    await authApi.logout()
+    router.replace('/')
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -74,14 +91,12 @@ export default function EditProfileScreen() {
   }, [navigation, handleSave, saving, t, theme])
 
   const inputStyle = {
-    backgroundColor: '$subtleBackground' as const,
-    borderWidth: 1,
-    borderColor: '$borderColor' as const,
-    borderRadius: '$3' as const,
-    paddingHorizontal: '$3' as const,
+    backgroundColor: 'transparent' as const,
+    borderWidth: 0,
     height: 44,
-    fontSize: '$3' as const,
+    fontSize: 17 as const,
     color: '$color' as const,
+    paddingHorizontal: 0 as const,
   }
 
   return (
@@ -93,65 +108,111 @@ export default function EditProfileScreen() {
       <ScrollView
         style={{ flex: 1, backgroundColor: theme.background.val }}
         contentContainerStyle={{
-          padding: 16,
           paddingBottom: 60,
           gap: 20,
         }}
         keyboardShouldPersistTaps="handled"
       >
-        <SettingsGroup>
-        <YStack padding="$3" gap="$3">
-          <YStack gap="$1.5">
-            <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.name')}</Text>
-            <Input value={name} onChangeText={setName} {...inputStyle} autoFocus />
-          </YStack>
-
-          <YStack gap="$1.5">
-            <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.bio')}</Text>
-            <Input
-              value={bio}
-              onChangeText={setBio}
-              {...inputStyle}
-              height={80}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-              placeholder={t('profile.bioPlaceholder')}
-              placeholderTextColor={theme.mutedText.val}
-            />
-          </YStack>
-
-          <YStack gap="$1.5">
-            <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.phone')}</Text>
-            <PhoneInput
-              value={phone}
-              onChangePhone={setPhone}
-            />
-          </YStack>
-
-          <YStack gap="$1.5">
-            <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.location')}</Text>
-            <LocationInput
-              value={locationQuery}
-              onChangeText={(text) => {
-                setLocationQuery(text)
-                setLocation(text)
-              }}
-              onSelectLocation={(loc) => {
-                setLocationQuery(loc)
-                setLocation(loc)
-              }}
-              suggestions={locationResults}
-              isLoading={locationLoading}
-            />
-          </YStack>
-
-          <YStack gap="$1.5">
-            <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.email')}</Text>
-            <Text color="$mutedText" fontSize={15} paddingLeft="$1">{user?.email ?? '-'}</Text>
-          </YStack>
+        {/* Avatar */}
+        <YStack alignItems="center" paddingVertical="$4" gap="$2">
+          <AppAvatar uri={user?.avatarUrl} name={user?.name} size={100} />
+          <TouchableOpacity activeOpacity={0.7}>
+            <Text fontSize={16} color="$accent">{t('profile.setNewPhoto')}</Text>
+          </TouchableOpacity>
         </YStack>
-      </SettingsGroup>
+
+        {/* Name & Bio */}
+        <YStack paddingHorizontal={16}>
+          <SettingsGroup>
+            <YStack paddingHorizontal="$3">
+              <Input
+                value={name}
+                onChangeText={setName}
+                placeholder={t('profile.name')}
+                placeholderTextColor={theme.mutedText.val}
+                {...inputStyle}
+              />
+              <YStack height={0.5} backgroundColor="$borderColor" marginLeft={0} />
+              <Input
+                value={bio}
+                onChangeText={setBio}
+                placeholder={t('profile.bio')}
+                placeholderTextColor={theme.mutedText.val}
+                {...inputStyle}
+                height={80}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            </YStack>
+          </SettingsGroup>
+        </YStack>
+
+        {/* Birthday */}
+        <YStack paddingHorizontal={16}>
+          <SettingsGroup>
+            <SettingsGroupItem
+              icon="calendar-outline"
+              label={t('profile.birthday')}
+              value={birthday ? formatDate(birthday) : undefined}
+              onPress={() => setShowDatePicker(!showDatePicker)}
+            />
+          </SettingsGroup>
+          {showDatePicker && (
+            <DateTimePicker
+              value={birthday ?? new Date(2000, 0, 1)}
+              mode="date"
+              display="spinner"
+              maximumDate={new Date()}
+              onChange={(_event, date) => {
+                if (Platform.OS === 'android') setShowDatePicker(false)
+                if (date) setBirthday(date)
+              }}
+              themeVariant={resolvedTheme}
+            />
+          )}
+        </YStack>
+
+        {/* Phone & Location */}
+        <YStack paddingHorizontal={16} gap="$3">
+          <SettingsGroup>
+            <YStack padding="$3" gap="$3">
+              <YStack gap="$1">
+                <Text fontSize={13} color="$mutedText" paddingLeft="$0.5">{t('profile.phone')}</Text>
+                <PhoneInput value={phone} onChangePhone={setPhone} />
+              </YStack>
+              <YStack height={0.5} backgroundColor="$borderColor" />
+              <YStack gap="$1">
+                <Text fontSize={13} color="$mutedText" paddingLeft="$0.5">{t('profile.location')}</Text>
+                <LocationInput
+                  value={locationQuery}
+                  onChangeText={(text) => {
+                    setLocationQuery(text)
+                    setLocation(text)
+                  }}
+                  onSelectLocation={(loc) => {
+                    setLocationQuery(loc)
+                    setLocation(loc)
+                  }}
+                  suggestions={locationResults}
+                  isLoading={locationLoading}
+                />
+              </YStack>
+            </YStack>
+          </SettingsGroup>
+        </YStack>
+
+        {/* Sign Out */}
+        <YStack paddingHorizontal={16}>
+          <SettingsGroup>
+            <SettingsGroupItem
+              icon="log-out-outline"
+              label={t('settings.signOut')}
+              onPress={handleSignOut}
+              danger
+            />
+          </SettingsGroup>
+        </YStack>
       </ScrollView>
     </KeyboardAvoidingView>
   )

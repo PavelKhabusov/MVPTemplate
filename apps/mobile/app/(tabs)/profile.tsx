@@ -186,11 +186,6 @@ function AuthenticatedProfileView({
     setShowLangPicker(false)
   }
 
-  const handleSignOut = async () => {
-    await authApi.logout()
-    router.replace('/')
-  }
-
   const expandedHeight = HEADER_EXPANDED + insets.top
 
   let groupIndex = 0
@@ -325,17 +320,6 @@ function AuthenticatedProfileView({
           </StaggerGroup>
         )}
 
-        {/* Sign Out */}
-        <StaggerGroup index={groupIndex++}>
-          <SettingsGroup>
-            <SettingsGroupItem
-              icon="log-out-outline"
-              label={t('settings.signOut')}
-              onPress={handleSignOut}
-              danger
-            />
-          </SettingsGroup>
-        </StaggerGroup>
       </Animated.ScrollView>
     </YStack>
   )
