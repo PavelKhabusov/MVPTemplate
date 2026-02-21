@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Platform } from 'react-native'
+import { Platform, LogBox } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, Theme, XStack, useTheme } from 'tamagui'
 import { PortalProvider } from '@tamagui/portal'
@@ -17,6 +17,11 @@ import { authApi } from '../src/features/auth/auth.service'
 
 // Moti's declarative API writes shared values during render by design — disable strict mode
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false })
+
+LogBox.ignoreLogs([
+  "Must call import '@tamagui/native/setup-zeego'",
+  'SafeAreaView has been deprecated',
+])
 
 // Prevent splash screen from hiding before fonts load
 SplashScreen.preventAutoHideAsync()
