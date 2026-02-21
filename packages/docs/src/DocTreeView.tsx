@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { Platform } from 'react-native'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { MotiView, AnimatePresence } from 'moti'
@@ -6,6 +7,53 @@ import { useTranslation, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import { ScalePress } from '@mvp/ui'
 import { DOC_GROUPS } from './docData'
 import type { DocGroup } from './docData'
+
+interface PageListProps {
+  pages: DocGroup['pages']
+  selectedPageId?: string | null
+  onPageSelect?: (pageId: string) => void
+  theme: ReturnType<typeof useTheme>
+  t: (key: string) => string
+}
+
+function PageList({ pages, selectedPageId, onPageSelect, theme, t }: PageListProps) {
+  return (
+    <YStack paddingLeft="$4" gap="$0.5">
+      {pages.map((page) => {
+        const isSelected = selectedPageId === page.id
+        return (
+          <ScalePress
+            key={page.id}
+            onPress={() => onPageSelect?.(page.id)}
+          >
+            <XStack
+              paddingVertical="$2"
+              paddingHorizontal="$3"
+              borderRadius="$2"
+              alignItems="center"
+              gap="$2"
+              backgroundColor={isSelected ? '$subtleBackground' : 'transparent'}
+              hoverStyle={{ backgroundColor: '$backgroundHover' }}
+            >
+              <Ionicons
+                name={isSelected ? 'document' : 'document-outline'}
+                size={14}
+                color={isSelected ? theme.accent.val : theme.mutedText.val}
+              />
+              <Text
+                fontSize="$2"
+                color={isSelected ? '$accent' : '$mutedText'}
+                fontWeight={isSelected ? '600' : '400'}
+              >
+                {t(page.titleKey)}
+              </Text>
+            </XStack>
+          </ScalePress>
+        )
+      })}
+    </YStack>
+  )
+}
 
 interface DocTreeViewProps {
   onPageSelect?: (pageId: string) => void
@@ -153,52 +201,37 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
                 </ScalePress>
 
                 {/* Pages */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <MotiView
-                      from={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' as any }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: 'timing', duration: 200 }}
-                      style={{ overflow: 'hidden' }}
-                    >
-                      <YStack paddingLeft="$4" gap="$0.5">
-                        {group.pages.map((page) => {
-                          const isSelected = selectedPageId === page.id
-                          return (
-                            <ScalePress
-                              key={page.id}
-                              onPress={() => onPageSelect?.(page.id)}
-                            >
-                              <XStack
-                                paddingVertical="$2"
-                                paddingHorizontal="$3"
-                                borderRadius="$2"
-                                alignItems="center"
-                                gap="$2"
-                                backgroundColor={isSelected ? '$subtleBackground' : 'transparent'}
-                                hoverStyle={{ backgroundColor: '$backgroundHover' }}
-                              >
-                                <Ionicons
-                                  name={isSelected ? 'document' : 'document-outline'}
-                                  size={14}
-                                  color={isSelected ? theme.accent.val : theme.mutedText.val}
-                                />
-                                <Text
-                                  fontSize="$2"
-                                  color={isSelected ? '$accent' : '$mutedText'}
-                                  fontWeight={isSelected ? '600' : '400'}
-                                >
-                                  {t(page.titleKey)}
-                                </Text>
-                              </XStack>
-                            </ScalePress>
-                          )
-                        })}
-                      </YStack>
-                    </MotiView>
-                  )}
-                </AnimatePresence>
+                {Platform.OS === 'web' ? (
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <MotiView
+                        from={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' as any }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ type: 'timing', duration: 200 }}
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <PageList
+                          pages={group.pages}
+                          selectedPageId={selectedPageId}
+                          onPageSelect={onPageSelect}
+                          theme={theme}
+                          t={t}
+                        />
+                      </MotiView>
+                    )}
+                  </AnimatePresence>
+                ) : (
+                  isExpanded && (
+                    <PageList
+                      pages={group.pages}
+                      selectedPageId={selectedPageId}
+                      onPageSelect={onPageSelect}
+                      theme={theme}
+                      t={t}
+                    />
+                  )
+                )}
               </YStack>
             )
           })}
