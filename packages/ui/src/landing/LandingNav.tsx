@@ -54,11 +54,11 @@ export function LandingNav({ onNavigate }: LandingNavProps) {
       <XStack
         width="100%"
         maxWidth={1200}
-        alignSelf="center"
         paddingHorizontal="$5"
         height={64}
         alignItems="center"
         justifyContent="space-between"
+        style={{ margin: '0 auto' } as any}
       >
         {/* Logo */}
         <ScalePress onPress={() => onNavigate('/landing')}>

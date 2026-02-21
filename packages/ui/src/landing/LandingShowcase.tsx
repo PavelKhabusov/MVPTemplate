@@ -5,8 +5,13 @@ import { useTranslation } from '@mvp/i18n'
 import { SlideIn } from '../animations/SlideIn'
 
 const CHECKLIST = [
-  'showcaseItem1', 'showcaseItem2', 'showcaseItem3',
-  'showcaseItem4', 'showcaseItem5', 'showcaseItem6', 'showcaseItem7',
+  { key: 'showcaseItem1', icon: 'search-outline' },
+  { key: 'showcaseItem2', icon: 'notifications-outline' },
+  { key: 'showcaseItem3', icon: 'sparkles-outline' },
+  { key: 'showcaseItem4', icon: 'lock-closed-outline' },
+  { key: 'showcaseItem5', icon: 'globe-outline' },
+  { key: 'showcaseItem6', icon: 'terminal-outline' },
+  { key: 'showcaseItem7', icon: 'rocket-outline' },
 ] as const
 
 const TECH_STACK = [
@@ -46,23 +51,23 @@ export function LandingShowcase() {
         <XStack flexWrap="wrap" gap="$8" justifyContent="center">
           {/* Checklist */}
           <SlideIn from="left" delay={100}>
-            <YStack gap="$3" style={{ minWidth: 340, flex: 1 } as any}>
-              {CHECKLIST.map((key, i) => (
-                <XStack key={key} gap="$3" alignItems="center">
+            <YStack gap="$3.5" style={{ minWidth: 340, flex: 1 } as any}>
+              {CHECKLIST.map((item) => (
+                <XStack key={item.key} gap="$3" alignItems="center">
                   <YStack
-                    width={28}
-                    height={28}
-                    borderRadius={14}
+                    width={32}
+                    height={32}
+                    borderRadius={8}
                     alignItems="center"
                     justifyContent="center"
                     style={{
-                      background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
+                      background: `linear-gradient(135deg, ${theme.accentGradientStart.val}20, ${theme.accentGradientEnd.val}20)`,
                     } as any}
                   >
-                    <Ionicons name="checkmark" size={16} color="white" />
+                    <Ionicons name={item.icon as any} size={18} color={theme.accent.val} />
                   </YStack>
                   <Text fontSize="$4" color="$color">
-                    {t(`landing.${key}` as any)}
+                    {t(`landing.${item.key}` as any)}
                   </Text>
                 </XStack>
               ))}

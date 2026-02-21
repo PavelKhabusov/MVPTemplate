@@ -39,10 +39,17 @@ export function LandingFeatures() {
           </YStack>
         </SlideIn>
 
-        {/* Features grid */}
-        <XStack flexWrap="wrap" gap="$4" justifyContent="center">
+        {/* Features grid — CSS grid for equal-height cards */}
+        <YStack
+          width="100%"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 16,
+          } as any}
+        >
           {FEATURES.map((feature, i) => (
-            <SlideIn key={feature.title} from="bottom" delay={i * 80}>
+            <SlideIn key={feature.title} from="bottom" delay={i * 80} style={{ height: '100%' } as any}>
               <YStack
                 backgroundColor="$cardBackground"
                 borderRadius="$4"
@@ -50,7 +57,7 @@ export function LandingFeatures() {
                 borderColor="$borderColor"
                 padding="$5"
                 gap="$3"
-                style={{ minWidth: 300, flexBasis: '30%', maxWidth: 380 } as any}
+                flex={1}
                 hoverStyle={{
                   borderColor: '$accent',
                   shadowColor: '$cardShadow',
@@ -81,7 +88,7 @@ export function LandingFeatures() {
               </YStack>
             </SlideIn>
           ))}
-        </XStack>
+        </YStack>
       </YStack>
     </YStack>
   )

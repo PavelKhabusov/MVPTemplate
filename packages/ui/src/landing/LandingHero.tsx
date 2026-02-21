@@ -107,35 +107,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
           </XStack>
         </SlideIn>
 
-        {/* Tech stack preview */}
-        <SlideIn from="bottom" delay={400}>
-          <XStack
-            marginTop="$6"
-            backgroundColor="$cardBackground"
-            borderRadius="$4"
-            borderWidth={1}
-            borderColor="$borderColor"
-            padding="$4"
-            gap="$4"
-            flexWrap="wrap"
-            justifyContent="center"
-            maxWidth={600}
-          >
-            {['Expo', 'React Native', 'Tamagui', 'TypeScript', 'Fastify', 'Drizzle'].map((tech) => (
-              <XStack
-                key={tech}
-                backgroundColor="$subtleBackground"
-                paddingHorizontal="$2.5"
-                paddingVertical="$1.5"
-                borderRadius="$2"
-                borderWidth={1}
-                borderColor="$borderColor"
-              >
-                <Text fontSize="$2" fontWeight="500" color="$mutedText">{tech}</Text>
-              </XStack>
-            ))}
-          </XStack>
-        </SlideIn>
+
       </YStack>
     </YStack>
   )
