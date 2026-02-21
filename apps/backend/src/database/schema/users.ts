@@ -3,7 +3,7 @@ import { pgTable, uuid, varchar, timestamp, text, jsonb, date } from 'drizzle-or
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+  passwordHash: varchar('password_hash', { length: 255 }),
   name: varchar('name', { length: 255 }).notNull(),
   avatarUrl: text('avatar_url'),
   bio: text('bio'),
