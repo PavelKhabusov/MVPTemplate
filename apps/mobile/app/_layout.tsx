@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, Theme, XStack } from 'tamagui'
-import { ThemeProvider, useTheme as useNavTheme, type Theme as NavTheme } from '@react-navigation/native'
+import { ThemeProvider, type Theme as NavTheme } from '@react-navigation/native'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -63,7 +63,7 @@ const darkNavTheme: NavTheme = {
 }
 
 function RootNavigator() {
-  const { colors } = useNavTheme()
+  const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
   const { t } = useTranslation()
   const pathname = usePathname()
 
@@ -73,11 +73,13 @@ function RootNavigator() {
     return <WebRootLayout />
   }
 
+  const bg = resolvedTheme === 'dark' ? darkNavTheme.colors.background : lightNavTheme.colors.background
+
   return (
     <Stack
       screenOptions={{
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: bg },
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t('common.back') }} />
