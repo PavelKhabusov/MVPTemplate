@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Platform } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
-import { TamaguiProvider, XStack, useTheme } from 'tamagui'
+import { TamaguiProvider, Theme, XStack, useTheme } from 'tamagui'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -45,6 +45,7 @@ function RootNavigator() {
       <Stack.Screen name="sign-in" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="sign-up" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="edit-profile" options={{ title: t('profile.editProfile'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="+not-found" />
@@ -118,9 +119,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
-          <PortalProvider>
-            <RootNavigator />
-          </PortalProvider>
+          <Theme name={resolvedTheme}>
+            <PortalProvider>
+              <RootNavigator />
+            </PortalProvider>
+          </Theme>
         </TamaguiProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

@@ -5,6 +5,8 @@ export { AnimatedListItem } from './AnimatedList'
 export { AnimatedView } from './AnimatedView'
 export { AnimatedTabIcon } from './AnimatedTabIcon'
 export { RefreshSpinner } from './RefreshSpinner'
+export { CollapsibleHeader, HEADER_EXPANDED, HEADER_COLLAPSED } from './CollapsibleHeader'
+export { StaggerGroup } from './StaggerGroup'
 export { useShake, useFade, useSpringScale } from './useAnimatedStyle'
 export {
   SPRING_CONFIG,

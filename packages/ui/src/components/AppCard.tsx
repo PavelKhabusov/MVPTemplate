@@ -1,4 +1,4 @@
-import { YStack, GetProps } from 'tamagui'
+import { YStack, GetProps, useTheme } from 'tamagui'
 import { MotiView, AnimatePresence } from 'moti'
 
 interface AppCardProps extends GetProps<typeof YStack> {
@@ -13,17 +13,16 @@ export function AppCard({
   flex,
   ...props
 }: AppCardProps) {
+  const theme = useTheme()
+
   const card = (
     <YStack
       backgroundColor="$cardBackground"
       borderRadius="$4"
       padding="$4"
-      borderWidth={1}
-      borderColor="$borderColor"
-      shadowColor="rgba(0,0,0,0.06)"
-      shadowOffset={{ width: 0, height: 2 }}
-      shadowOpacity={1}
-      shadowRadius={8}
+      borderWidth={0.5}
+      borderColor={theme.cardBorder.val}
+      shadowColor={theme.cardShadow.val}
       flex={animated ? flex : flex}
       {...props}
     >

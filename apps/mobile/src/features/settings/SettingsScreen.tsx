@@ -6,9 +6,9 @@ import { useTranslation, SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
 import { useThemeStore, useAuthStore, useLanguageStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
-import { AnimatedListItem, ScalePress, AppCard } from '@mvp/ui'
+import { ScalePress, AppCard, StaggerGroup, SettingsGroup, SettingsGroupItem } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
-import { SettingRow } from './SettingRow'
+import { AnimatePresence, MotiView } from 'moti'
 import { authApi } from '../auth/auth.service'
 
 const THEME_LABELS: Record<ThemeMode, string> = {
@@ -46,103 +46,111 @@ export function SettingsContent() {
     router.replace('/')
   }
 
+  let groupIndex = 0
+
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-      <YStack padding="$4" gap="$3">
-        <AnimatedListItem index={0}>
-          <SettingRow
+    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 20 }}>
+      <StaggerGroup index={groupIndex++}>
+        <SettingsGroup header={t('settings.theme')}>
+          <SettingsGroupItem
             icon="color-palette-outline"
             label={t('settings.theme')}
             value={t(THEME_LABELS[mode])}
             onPress={cycleTheme}
           />
-        </AnimatedListItem>
-
-        <AnimatedListItem index={1}>
-          <SettingRow
+          <SettingsGroupItem
             icon="language-outline"
             label={t('settings.language')}
             value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
             onPress={() => setShowLangPicker(!showLangPicker)}
           />
-        </AnimatedListItem>
+        </SettingsGroup>
 
-        {showLangPicker && (
-          <AppCard padding="$2" gap="$1">
-            {SUPPORTED_LANGUAGES.map((lang) => {
-              const isActive = i18n.language === lang
-              return (
-                <ScalePress key={lang} onPress={() => selectLanguage(lang)}>
-                  <XStack
-                    paddingVertical="$2.5"
-                    paddingHorizontal="$3"
-                    borderRadius="$3"
-                    backgroundColor={isActive ? '$subtleBackground' : 'transparent'}
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Text
-                      color={isActive ? '$color' : '$mutedText'}
-                      fontWeight={isActive ? '600' : '400'}
-                      fontSize="$3"
-                    >
-                      {LANGUAGE_LABELS[lang]}
-                    </Text>
-                    {isActive && (
-                      <Ionicons name="checkmark" size={18} color={theme.accent.val} />
-                    )}
-                  </XStack>
-                </ScalePress>
-              )
-            })}
-          </AppCard>
-        )}
+        <AnimatePresence>
+          {showLangPicker && (
+            <MotiView
+              from={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'timing', duration: 200 }}
+            >
+              <AppCard padding="$2" gap="$1" marginTop="$2">
+                {SUPPORTED_LANGUAGES.map((lang) => {
+                  const isActive = i18n.language === lang
+                  return (
+                    <ScalePress key={lang} onPress={() => selectLanguage(lang)}>
+                      <XStack
+                        paddingVertical="$2.5"
+                        paddingHorizontal="$3"
+                        borderRadius="$3"
+                        backgroundColor={isActive ? '$subtleBackground' : 'transparent'}
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Text
+                          color={isActive ? '$color' : '$mutedText'}
+                          fontWeight={isActive ? '600' : '400'}
+                          fontSize="$3"
+                        >
+                          {LANGUAGE_LABELS[lang]}
+                        </Text>
+                        {isActive && (
+                          <Ionicons name="checkmark" size={18} color={theme.accent.val} />
+                        )}
+                      </XStack>
+                    </ScalePress>
+                  )
+                })}
+              </AppCard>
+            </MotiView>
+          )}
+        </AnimatePresence>
+      </StaggerGroup>
 
-        <AnimatedListItem index={2}>
-          <SettingRow
+      <StaggerGroup index={groupIndex++}>
+        <SettingsGroup header={t('settings.title')}>
+          <SettingsGroupItem
             icon="notifications-outline"
             label={t('settings.notifications')}
             onPress={() => {}}
           />
-        </AnimatedListItem>
-
-        <AnimatedListItem index={3}>
-          <SettingRow
+          <SettingsGroupItem
             icon="shield-outline"
             label={t('settings.privacy')}
             onPress={() => router.push('/privacy')}
           />
-        </AnimatedListItem>
-
-        <AnimatedListItem index={4}>
-          <SettingRow
+          <SettingsGroupItem
             icon="information-circle-outline"
             label={t('settings.about')}
             value="1.0.0"
           />
-        </AnimatedListItem>
+        </SettingsGroup>
+      </StaggerGroup>
 
-        {userRole === 'admin' && (
-          <AnimatedListItem index={5}>
-            <SettingRow
+      {userRole === 'admin' && (
+        <StaggerGroup index={groupIndex++}>
+          <SettingsGroup header={t('admin.title')}>
+            <SettingsGroupItem
               icon="shield-checkmark-outline"
               label={t('admin.title')}
               onPress={() => router.push('/admin')}
             />
-          </AnimatedListItem>
-        )}
+          </SettingsGroup>
+        </StaggerGroup>
+      )}
 
-        {isAuthenticated && (
-          <AnimatedListItem index={userRole === 'admin' ? 6 : 5}>
-            <SettingRow
+      {isAuthenticated && (
+        <StaggerGroup index={groupIndex++}>
+          <SettingsGroup>
+            <SettingsGroupItem
               icon="log-out-outline"
               label={t('settings.signOut')}
               onPress={handleSignOut}
               danger
             />
-          </AnimatedListItem>
-        )}
-      </YStack>
+          </SettingsGroup>
+        </StaggerGroup>
+      )}
     </ScrollView>
   )
 }

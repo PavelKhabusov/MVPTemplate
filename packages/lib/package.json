@@ -13,6 +13,7 @@
     "react": "*",
     "react-native": "*",
     "react-native-mmkv": "*",
+    "@react-native-async-storage/async-storage": "*",
     "expo-constants": "*",
     "expo-secure-store": "*"
   }
