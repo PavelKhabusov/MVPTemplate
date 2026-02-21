@@ -84,7 +84,6 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
             </Text>
             <FooterLink label={t('landing.footerDocs')} onPress={() => onNavigate('/docs')} />
             <FooterLink label={t('landing.footerGitHub')} onPress={() => window.open('https://github.com/PavelKhabusov/MVPTemplate', '_blank')} />
-            <FooterLink label={t('landing.footerCommunity')} onPress={() => {}} />
           </YStack>
 
           {/* Legal */}
@@ -93,7 +92,7 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
               {t('landing.footerLegal')}
             </Text>
             <FooterLink label={t('settings.privacy')} onPress={() => onNavigate('/privacy')} />
-            <FooterLink label={t('settings.terms')} onPress={() => {}} />
+            <FooterLink label={t('settings.terms')} onPress={() => onNavigate('/terms')} />
           </YStack>
         </XStack>
 
