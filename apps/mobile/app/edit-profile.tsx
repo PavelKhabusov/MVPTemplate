@@ -1,15 +1,19 @@
 import { useState, useCallback, useLayoutEffect } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
-import { YStack, Text, Input, useTheme } from 'tamagui'
+import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { router, useNavigation } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore, useThemeStore } from '@mvp/store'
-import { AppAvatar, SettingsGroup, SettingsGroupItem, PhoneInput, LocationInput } from '@mvp/ui'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import { AppAvatar, SettingsGroup, SettingsGroupItem, ScalePress, PhoneInput, LocationInput } from '@mvp/ui'
 import * as ImagePicker from 'expo-image-picker'
 import { api } from '../src/services/api'
 import { useLocationSearch } from '../src/hooks/useLocationSearch'
 import { authApi } from '../src/features/auth/auth.service'
+
+let DateTimePicker: any = null
+if (Platform.OS !== 'web') {
+  DateTimePicker = require('@react-native-community/datetimepicker').default
+}
 
 export default function EditProfileScreen() {
   const { t } = useTranslation()
@@ -48,18 +52,28 @@ export default function EditProfileScreen() {
     if (result.canceled || !result.assets[0]) return
 
     const asset = result.assets[0]
-    // Show picked image locally right away
     setAvatarUri(asset.uri)
     setUploadingPhoto(true)
     try {
       const formData = new FormData()
-      const ext = asset.uri.split('.').pop() ?? 'jpg'
-      formData.append('file', {
-        uri: asset.uri,
-        name: `avatar.${ext}`,
-        type: asset.mimeType ?? `image/${ext}`,
-      } as any)
 
+      if (Platform.OS === 'web') {
+        // On web, fetch the blob from the URI and append as File
+        const response = await fetch(asset.uri)
+        const blob = await response.blob()
+        const ext = asset.uri.split('.').pop()?.split('?')[0] ?? 'jpg'
+        formData.append('file', blob, `avatar.${ext}`)
+      } else {
+        // On native, use the {uri, name, type} pattern
+        const ext = asset.uri.split('.').pop() ?? 'jpg'
+        formData.append('file', {
+          uri: asset.uri,
+          name: `avatar.${ext}`,
+          type: asset.mimeType ?? `image/${ext}`,
+        } as any)
+      }
+
+      // Override default JSON content-type; axios will add the boundary automatically
       const { data } = await api.post('/users/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
@@ -69,7 +83,6 @@ export default function EditProfileScreen() {
         if (user) setUser({ ...user, avatarUrl: serverUrl })
       }
     } catch {
-      // Revert to previous avatar on error
       setAvatarUri(user?.avatarUrl ?? null)
       Alert.alert(t('common.error'), t('common.retry'))
     } finally {
@@ -115,7 +128,9 @@ export default function EditProfileScreen() {
     router.replace('/')
   }
 
+  // Native header buttons
   useLayoutEffect(() => {
+    if (Platform.OS === 'web') return
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7} style={{ paddingHorizontal: 8 }}>
@@ -156,6 +171,27 @@ export default function EditProfileScreen() {
         }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Web header with Cancel / Done */}
+        {Platform.OS === 'web' && (
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            paddingHorizontal="$4"
+            paddingVertical="$3"
+          >
+            <ScalePress onPress={() => router.back()}>
+              <Text fontSize={17} color="$accent">{t('common.cancel')}</Text>
+            </ScalePress>
+            {saving ? (
+              <ActivityIndicator size="small" color={theme.accent.val} />
+            ) : (
+              <ScalePress onPress={handleSave}>
+                <Text fontSize={17} fontWeight="600" color="$accent">{t('common.done')}</Text>
+              </ScalePress>
+            )}
+          </XStack>
+        )}
+
         {/* Avatar */}
         <YStack alignItems="center" paddingVertical="$4" gap="$2">
           <TouchableOpacity onPress={handlePickPhoto} activeOpacity={0.7} disabled={uploadingPhoto}>
@@ -217,16 +253,27 @@ export default function EditProfileScreen() {
               icon="calendar-outline"
               label={t('profile.birthday')}
               value={birthday ? formatDate(birthday) : undefined}
-              onPress={() => setShowDatePicker(!showDatePicker)}
+              onPress={() => {
+                if (Platform.OS === 'web') {
+                  // Fallback: prompt for date string on web
+                  const input = window.prompt('Birthday (YYYY-MM-DD)', birthday ? birthday.toISOString().split('T')[0] : '')
+                  if (input) {
+                    const d = new Date(input)
+                    if (!isNaN(d.getTime())) setBirthday(d)
+                  }
+                } else {
+                  setShowDatePicker(!showDatePicker)
+                }
+              }}
             />
           </SettingsGroup>
-          {showDatePicker && (
+          {showDatePicker && DateTimePicker && Platform.OS !== 'web' && (
             <DateTimePicker
               value={birthday ?? new Date(2000, 0, 1)}
               mode="date"
               display="spinner"
               maximumDate={new Date()}
-              onChange={(_event, date) => {
+              onChange={(_event: any, date: Date | undefined) => {
                 if (Platform.OS === 'android') setShowDatePicker(false)
                 if (date) setBirthday(date)
               }}
