@@ -14,6 +14,7 @@ import { useTranslation } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
 import { storage } from '@mvp/lib'
 import { queryClient } from '../src/services/query-client'
+import { AuthProvider } from '@mvp/auth'
 import { authApi } from '../src/services/auth'
 import { getAccessToken } from '../src/services/api'
 

@@ -10,7 +10,13 @@
   },
   "dependencies": {},
   "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "tamagui": "*",
+    "@expo/vector-icons": "*",
     "@mvp/lib": "*",
-    "@mvp/store": "*"
+    "@mvp/store": "*",
+    "@mvp/i18n": "*",
+    "@mvp/ui": "*"
   }
 }
