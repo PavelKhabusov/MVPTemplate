@@ -5,7 +5,7 @@ import { useTranslation } from '@mvp/i18n'
 import { FadeIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ResetPasswordForm } from '../src/features/auth/ResetPasswordForm'
+import { ResetPasswordForm } from '@mvp/auth'
 
 export default function ResetPasswordScreen() {
   const { t } = useTranslation()

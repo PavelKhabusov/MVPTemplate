@@ -5,7 +5,7 @@ import { useTranslation } from '@mvp/i18n'
 import { FadeIn, SlideIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ForgotPasswordForm } from '../src/features/auth/ForgotPasswordForm'
+import { ForgotPasswordForm } from '@mvp/auth'
 
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation()

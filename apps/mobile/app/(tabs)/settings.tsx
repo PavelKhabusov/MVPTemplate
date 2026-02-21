@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Platform, RefreshControl, ScrollView } from 'react-native'
-import { YStack, XStack, Text, H2, H3, useTheme, Separator } from 'tamagui'
+import { YStack, XStack, Text, H2, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
@@ -20,7 +20,6 @@ import {
   StaggerGroup,
   SettingsGroup,
   SettingsGroupItem,
-  DocTreeView,
 } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { AnimatePresence, MotiView } from 'moti'
@@ -29,7 +28,6 @@ import Animated, {
   useAnimatedScrollHandler,
 } from 'react-native-reanimated'
 import { authApi } from '../../src/services/auth'
-import { MarkdownView } from '../../src/features/documentation/MarkdownView'
 
 const THEME_LABELS: Record<ThemeMode, string> = {
   system: 'settings.themeSystem',
@@ -60,7 +58,6 @@ function UnauthenticatedSettingsView() {
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
-  const [selectedDocPage, setSelectedDocPage] = useState<string | null>(null)
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -150,24 +147,16 @@ function UnauthenticatedSettingsView() {
             onPress={() => router.push('/privacy')}
           />
           <SettingsGroupItem
+            icon="book-outline"
+            label={t('docs.title')}
+            onPress={() => router.push('/docs')}
+          />
+          <SettingsGroupItem
             icon="information-circle-outline"
             label={t('settings.about')}
             value="1.0.0"
           />
         </SettingsGroup>
-      </SlideIn>
-
-      {/* Documentation */}
-      <SlideIn from="bottom" delay={300}>
-        <Separator marginVertical="$2" />
-        <H3 color="$color" marginBottom="$2">{t('docs.title')}</H3>
-        <DocTreeView
-          selectedPageId={selectedDocPage}
-          onPageSelect={(id) => setSelectedDocPage(selectedDocPage === id ? null : id)}
-          renderContent={(contentKey) => (
-            <MarkdownView content={t(contentKey)} embedded />
-          )}
-        />
       </SlideIn>
     </ScrollView>
   )
@@ -182,7 +171,6 @@ function AuthenticatedSettingsView() {
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
-  const [selectedDocPage, setSelectedDocPage] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
   const scrollY = useSharedValue(0)
@@ -334,6 +322,11 @@ function AuthenticatedSettingsView() {
               onPress={() => router.push('/privacy')}
             />
             <SettingsGroupItem
+              icon="book-outline"
+              label={t('docs.title')}
+              onPress={() => router.push('/docs')}
+            />
+            <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
               value="1.0.0"
@@ -365,19 +358,6 @@ function AuthenticatedSettingsView() {
             />
           </SettingsGroup>
         </StaggerGroup>
-
-        {/* Documentation */}
-        <StaggerGroup index={groupIndex++}>
-          <Separator marginVertical="$2" />
-          <H3 color="$color" marginBottom="$2">{t('docs.title')}</H3>
-          <DocTreeView
-            selectedPageId={selectedDocPage}
-            onPageSelect={(id) => setSelectedDocPage(selectedDocPage === id ? null : id)}
-            renderContent={(contentKey) => (
-              <MarkdownView content={t(contentKey)} embedded />
-            )}
-          />
-        </StaggerGroup>
       </Animated.ScrollView>
     </YStack>
   )
@@ -392,7 +372,6 @@ function WebSettingsView() {
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
-  const [selectedDocPage, setSelectedDocPage] = useState<string | null>(null)
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -534,6 +513,11 @@ function WebSettingsView() {
               onPress={() => router.push('/privacy')}
             />
             <SettingsGroupItem
+              icon="book-outline"
+              label={t('docs.title')}
+              onPress={() => router.push('/docs')}
+            />
+            <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
               value="1.0.0"
@@ -567,17 +551,6 @@ function WebSettingsView() {
             </SettingsGroup>
           </StaggerGroup>
         )}
-
-        {/* Documentation */}
-        <Separator marginVertical="$2" />
-        <H3 color="$color" marginBottom="$2">{t('docs.title')}</H3>
-        <DocTreeView
-          selectedPageId={selectedDocPage}
-          onPageSelect={(id) => setSelectedDocPage(selectedDocPage === id ? null : id)}
-          renderContent={(contentKey) => (
-            <MarkdownView content={t(contentKey)} embedded />
-          )}
-        />
       </ScrollView>
     </YStack>
   )

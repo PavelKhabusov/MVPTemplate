@@ -5,7 +5,7 @@ import { useTranslation } from '@mvp/i18n'
 import { FadeIn, SlideIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { SignUpForm } from '../src/features/auth/SignUpForm'
+import { SignUpForm } from '@mvp/auth'
 import { GoogleSignInButton, isGoogleAuthEnabled } from '../src/features/auth/GoogleSignInButton'
 
 export default function SignUpScreen() {
