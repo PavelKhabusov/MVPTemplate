@@ -52,7 +52,7 @@ export default function DocsLayout() {
           name="index"
           options={{
             title: t('docs.title'),
-            headerShown: false,
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen

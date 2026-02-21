@@ -123,7 +123,7 @@ function RootNavigator() {
           headerShadowVisible: false,
         }}
       />
-      <Stack.Screen name="docs" options={{ title: t('docs.title'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="docs" options={{ headerShown: false }} />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="terms" options={{ title: t('settings.terms'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
