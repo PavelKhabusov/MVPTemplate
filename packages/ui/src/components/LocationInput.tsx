@@ -30,7 +30,36 @@ export function LocationInput({
   const showDropdown = focused && value.length >= 2 && suggestions.length > 0
 
   return (
-    <YStack>
+    <YStack zIndex={10}>
+      {showDropdown && (
+        <YStack
+          backgroundColor="$cardBackground"
+          borderWidth={1}
+          borderColor="$borderColor"
+          borderRadius="$3"
+          marginBottom="$1"
+          overflow="hidden"
+        >
+          {suggestions.map((s, i) => (
+            <ScalePress key={i} onPress={() => onSelectLocation(s.displayName)}>
+              <XStack
+                paddingVertical="$2.5"
+                paddingHorizontal="$3"
+                gap="$2"
+                alignItems="center"
+                borderBottomWidth={i < suggestions.length - 1 ? 0.5 : 0}
+                borderBottomColor="$borderColor"
+              >
+                <Ionicons name="navigate-outline" size={16} color={theme.accent.val} />
+                <Text flex={1} fontSize={14} color="$color" numberOfLines={1}>
+                  {s.displayName}
+                </Text>
+              </XStack>
+            </ScalePress>
+          ))}
+        </YStack>
+      )}
+
       <XStack
         backgroundColor="$subtleBackground"
         borderWidth={1}
@@ -61,35 +90,6 @@ export function LocationInput({
           <Ionicons name="hourglass-outline" size={16} color={theme.mutedText.val} />
         )}
       </XStack>
-
-      {showDropdown && (
-        <YStack
-          backgroundColor="$cardBackground"
-          borderWidth={1}
-          borderColor="$borderColor"
-          borderRadius="$3"
-          marginTop="$1"
-          overflow="hidden"
-        >
-          {suggestions.map((s, i) => (
-            <ScalePress key={i} onPress={() => onSelectLocation(s.displayName)}>
-              <XStack
-                paddingVertical="$2.5"
-                paddingHorizontal="$3"
-                gap="$2"
-                alignItems="center"
-                borderBottomWidth={i < suggestions.length - 1 ? 0.5 : 0}
-                borderBottomColor="$borderColor"
-              >
-                <Ionicons name="navigate-outline" size={16} color={theme.accent.val} />
-                <Text flex={1} fontSize={14} color="$color" numberOfLines={1}>
-                  {s.displayName}
-                </Text>
-              </XStack>
-            </ScalePress>
-          ))}
-        </YStack>
-      )}
     </YStack>
   )
 }
