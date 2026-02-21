@@ -156,12 +156,6 @@ export default function RootLayout() {
   const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      console.log('[RootLayout] ready:', { fontsLoaded, fontError, i18nReady, isInitialized, isThemeHydrated, ready })
-    }
-  }, [fontsLoaded, fontError, i18nReady, isInitialized, isThemeHydrated, ready])
-
-  useEffect(() => {
     if (ready) {
       SplashScreen.hideAsync().catch(() => {})
     }

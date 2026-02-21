@@ -34,19 +34,24 @@ export const useThemeStore = create<ThemeState>()(
       name: 'theme-storage',
       storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({ mode: state.mode }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          useThemeStore.setState({
-            resolvedTheme: resolveTheme(state.mode),
-            _hasHydrated: true,
-          })
-        } else {
-          useThemeStore.setState({ _hasHydrated: true })
-        }
-      },
     }
   )
 )
+
+// Mark hydration complete — uses onFinishHydration listener + immediate check
+// (onRehydrateStorage inner callback fires as a microtask, which on web causes
+// _hasHydrated to still be false on first React render)
+useThemeStore.persist.onFinishHydration((state) => {
+  useThemeStore.setState({
+    resolvedTheme: resolveTheme(state.mode),
+    _hasHydrated: true,
+  })
+})
+
+if (useThemeStore.persist.hasHydrated()) {
+  const { mode } = useThemeStore.getState()
+  useThemeStore.setState({ resolvedTheme: resolveTheme(mode), _hasHydrated: true })
+}
 
 // Listen for system theme changes and update resolvedTheme when mode is 'system'
 Appearance.addChangeListener(({ colorScheme }) => {
