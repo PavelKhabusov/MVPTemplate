@@ -46,7 +46,7 @@ export function SettingsGroupItem({
         <Ionicons name={icon} size={18} color={color} />
       </YStack>
 
-      <Text flex={1} color={danger ? '$error' : '$color'} fontSize={16}>
+      <Text flex={1} flexShrink={0} color={danger ? '$error' : '$color'} fontSize={16} numberOfLines={1}>
         {label}
       </Text>
 
