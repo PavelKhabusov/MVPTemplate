@@ -23,7 +23,7 @@ export function AppCard({
       borderWidth={0.5}
       borderColor={theme.cardBorder.val}
       shadowColor={theme.cardShadow.val}
-      flex={animated ? flex : flex}
+      flex={flex}
       {...props}
     >
       {children}
@@ -40,7 +40,10 @@ export function AppCard({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ type: 'timing', duration: 200 }}
-          style={flex != null ? { flex: flex as number } : undefined}
+          style={{
+            ...(flex != null ? { flex: flex as number } : undefined),
+            alignSelf: 'stretch' as const,
+          }}
         >
           {card}
         </MotiView>
