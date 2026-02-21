@@ -191,6 +191,8 @@ function WebRootLayout() {
         currentPath={pathname}
         onNavigate={(href) => router.push(href as any)}
         footer={(collapsed) => <ThemeToggle collapsed={collapsed} />}
+        logo={require('../assets/icon.png')}
+        title="MVP Template"
       />
       <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
         <Slot />
