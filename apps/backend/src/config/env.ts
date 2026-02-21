@@ -1,6 +1,12 @@
 import 'dotenv/config'
 import { z } from 'zod'
 
+// z.coerce.boolean() treats "false" as true (any non-empty string is truthy)
+const envBoolean = z
+  .union([z.boolean(), z.string()])
+  .default(false)
+  .transform((v) => v === true || v === 'true' || v === '1')
+
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
@@ -16,8 +22,8 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
 
   // Email
-  EMAIL_ENABLED: z.coerce.boolean().default(false),
-  EMAIL_VERIFICATION_REQUIRED: z.coerce.boolean().default(false),
+  EMAIL_ENABLED: envBoolean,
+  EMAIL_VERIFICATION_REQUIRED: envBoolean,
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
