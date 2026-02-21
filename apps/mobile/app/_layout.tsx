@@ -182,7 +182,14 @@ export default function RootLayout() {
         <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
           <Theme name={resolvedTheme}>
             <PortalProvider>
-              <RootNavigator />
+              <AuthProvider
+                authApi={authApi}
+                onAuthSuccess={() => router.replace('/')}
+                onNavigateToSignIn={() => router.replace('/sign-in')}
+                onNavigateToForgotPassword={() => router.push('/forgot-password')}
+              >
+                <RootNavigator />
+              </AuthProvider>
             </PortalProvider>
           </Theme>
         </TamaguiProvider>
