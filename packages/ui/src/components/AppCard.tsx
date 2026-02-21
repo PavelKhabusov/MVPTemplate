@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import { YStack, GetProps, useTheme } from 'tamagui'
 import { MotiView, AnimatePresence } from 'moti'
 
@@ -23,7 +24,8 @@ export function AppCard({
       borderWidth={0.5}
       borderColor={theme.cardBorder.val}
       shadowColor={theme.cardShadow.val}
-      flex={flex}
+      flex={animated ? undefined : flex}
+      {...(animated && flex != null && Platform.OS === 'web' ? { height: '100%' as any } : {})}
       {...props}
     >
       {children}
