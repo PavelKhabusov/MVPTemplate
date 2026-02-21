@@ -1,18 +1,17 @@
 import { useState } from 'react'
-import { Alert, Platform } from 'react-native'
+import { Alert } from 'react-native'
 import { ScrollView } from 'react-native'
 import { YStack, Text, Input, useTheme } from 'tamagui'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
-import { AppButton, SettingsGroup } from '@mvp/ui'
+import { AppButton, SettingsGroup, PhoneInput, LocationInput } from '@mvp/ui'
 import { api } from '../src/services/api'
+import { useLocationSearch } from '../src/hooks/useLocationSearch'
 
 export default function EditProfileScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const user = useAuthStore((s) => s.user)
   const setUser = useAuthStore((s) => s.setUser)
 
@@ -20,7 +19,10 @@ export default function EditProfileScreen() {
   const [bio, setBio] = useState(user?.bio ?? '')
   const [phone, setPhone] = useState(user?.phone ?? '')
   const [location, setLocation] = useState(user?.location ?? '')
+  const [locationQuery, setLocationQuery] = useState(user?.location ?? '')
   const [saving, setSaving] = useState(false)
+
+  const { results: locationResults, isLoading: locationLoading } = useLocationSearch(locationQuery)
 
   const handleSave = async () => {
     const trimmedName = name.trim()
@@ -30,8 +32,7 @@ export default function EditProfileScreen() {
     if (trimmedName !== user?.name) payload.name = trimmedName
     const trimmedBio = bio.trim()
     if (trimmedBio !== (user?.bio ?? '')) payload.bio = trimmedBio || null
-    const trimmedPhone = phone.trim()
-    if (trimmedPhone !== (user?.phone ?? '')) payload.phone = trimmedPhone || null
+    if (phone !== (user?.phone ?? '')) payload.phone = phone || null
     const trimmedLocation = location.trim()
     if (trimmedLocation !== (user?.location ?? '')) payload.location = trimmedLocation || null
 
@@ -73,6 +74,7 @@ export default function EditProfileScreen() {
         paddingBottom: 40,
         gap: 20,
       }}
+      keyboardShouldPersistTaps="handled"
     >
       <SettingsGroup>
         <YStack padding="$3" gap="$3">
@@ -98,12 +100,27 @@ export default function EditProfileScreen() {
 
           <YStack gap="$1.5">
             <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.phone')}</Text>
-            <Input value={phone} onChangeText={setPhone} {...inputStyle} keyboardType="phone-pad" />
+            <PhoneInput
+              value={phone}
+              onChangePhone={setPhone}
+            />
           </YStack>
 
           <YStack gap="$1.5">
             <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.location')}</Text>
-            <Input value={location} onChangeText={setLocation} {...inputStyle} />
+            <LocationInput
+              value={locationQuery}
+              onChangeText={(text) => {
+                setLocationQuery(text)
+                setLocation(text)
+              }}
+              onSelectLocation={(loc) => {
+                setLocationQuery(loc)
+                setLocation(loc)
+              }}
+              suggestions={locationResults}
+              isLoading={locationLoading}
+            />
           </YStack>
 
           <YStack gap="$1.5">
