@@ -3,7 +3,7 @@ import { router } from 'expo-router'
 
 export default function SettingsScreen() {
   useEffect(() => {
-    router.replace('/(tabs)/profile')
+    router.replace('/(tabs)/settings')
   }, [])
 
   return null

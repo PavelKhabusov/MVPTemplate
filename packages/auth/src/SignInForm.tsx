@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { YStack } from 'tamagui'
-import { router } from 'expo-router'
+import { YStack, Text } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
+import { useAuthStore } from '@mvp/store'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
-import { authApi } from './auth.service'
+import { useAuth } from './AuthProvider'
 
 function getErrorMessage(err: any, t: (key: string) => string): string {
   if (!err?.response) return t('auth.errorNetwork')
@@ -17,6 +17,7 @@ function getErrorMessage(err: any, t: (key: string) => string): string {
 
 export function SignInForm() {
   const { t } = useTranslation()
+  const { authApi, onAuthSuccess, onNavigateToForgotPassword } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -27,7 +28,7 @@ export function SignInForm() {
     setLoading(true)
     try {
       await authApi.login({ email, password })
-      router.replace('/')
+      onAuthSuccess()
     } catch (err: any) {
       setError(getErrorMessage(err, t))
     } finally {
@@ -50,14 +51,27 @@ export function SignInForm() {
       </FadeIn>
 
       <SlideIn from="bottom" delay={100}>
-        <AppInput
-          label={t('auth.password')}
-          placeholder="********"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          error={error || undefined}
-        />
+        <YStack gap="$1.5">
+          <AppInput
+            label={t('auth.password')}
+            placeholder="********"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            error={error || undefined}
+          />
+          {useAuthStore.getState().user?.emailEnabled !== false && (
+            <Text
+              color="$primary"
+              fontSize="$2"
+              textAlign="right"
+              cursor="pointer"
+              onPress={onNavigateToForgotPassword}
+            >
+              {t('auth.forgotPassword')}
+            </Text>
+          )}
+        </YStack>
       </SlideIn>
 
       <SlideIn from="bottom" delay={200}>

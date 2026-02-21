@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { YStack } from 'tamagui'
-import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
-import { authApi } from './auth.service'
+import { useAuth } from './AuthProvider'
 
 function getErrorMessage(err: any, t: (key: string) => string): string {
   if (!err?.response) return t('auth.errorNetwork')
@@ -17,6 +16,7 @@ function getErrorMessage(err: any, t: (key: string) => string): string {
 
 export function SignUpForm() {
   const { t } = useTranslation()
+  const { authApi, onAuthSuccess } = useAuth()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -44,7 +44,7 @@ export function SignUpForm() {
     setLoading(true)
     try {
       await authApi.register({ email, password, name })
-      router.replace('/')
+      onAuthSuccess()
     } catch (err: any) {
       setErrors({ form: getErrorMessage(err, t) })
     } finally {

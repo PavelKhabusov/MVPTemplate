@@ -27,14 +27,84 @@ interface WebSidebarProps {
   items: NavItem[]
   currentPath: string
   onNavigate: (href: string) => void
-  footer?: React.ReactNode
+  footer?: React.ReactNode | ((collapsed: boolean) => React.ReactNode)
+}
+
+export function useIsMobileWeb() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (Platform.OS !== 'web') return false
+    return window.innerWidth <= 768
+  })
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    const mql = window.matchMedia('(max-width: 768px)')
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    setIsMobile(mql.matches)
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+
+  return isMobile
 }
 
 export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const theme = useTheme()
+  const isMobile = useIsMobileWeb()
 
   if (Platform.OS !== 'web') return null
+
+  if (isMobile) {
+    return (
+      <XStack
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          backgroundColor: theme.sidebarBg.val,
+          borderTopWidth: 1,
+          borderTopColor: theme.sidebarBorder.val,
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          height: 56,
+        } as any}
+      >
+        {items.map((item) => {
+          const isActive = currentPath === item.href ||
+            (item.href !== '/' && currentPath.startsWith(item.href))
+          return (
+            <YStack
+              key={item.href}
+              flex={1}
+              alignItems="center"
+              justifyContent="center"
+              paddingVertical="$1.5"
+              cursor="pointer"
+              onPress={() => onNavigate(item.href)}
+            >
+              <Ionicons
+                name={isActive ? item.iconFilled : item.icon}
+                size={22}
+                color={isActive ? theme.accent.val : theme.mutedText.val}
+              />
+              <Text
+                fontSize={10}
+                color={isActive ? '$accent' : '$mutedText'}
+                fontWeight={isActive ? '600' : '400'}
+                marginTop={2}
+              >
+                {item.label}
+              </Text>
+            </YStack>
+          )
+        })}
+      </XStack>
+    )
+  }
 
   const width = collapsed ? 72 : 240
 
@@ -101,7 +171,7 @@ export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSideba
         {/* Footer (user info, etc.) */}
         {footer && (
           <YStack paddingHorizontal="$2" paddingBottom="$2">
-            {footer}
+            {typeof footer === 'function' ? footer(collapsed) : footer}
           </YStack>
         )}
 

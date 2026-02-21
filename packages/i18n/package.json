@@ -14,6 +14,7 @@
   },
   "peerDependencies": {
     "react": "*",
-    "expo-localization": "*"
+    "expo-localization": "*",
+    "@mvp/store": "*"
   }
 }

@@ -13,7 +13,9 @@
       "@mvp/lib": ["../../packages/lib/src"],
       "@mvp/lib/*": ["../../packages/lib/src/*"],
       "@mvp/analytics": ["../../packages/analytics/src"],
-      "@mvp/analytics/*": ["../../packages/analytics/src/*"]
+      "@mvp/analytics/*": ["../../packages/analytics/src/*"],
+      "@mvp/auth": ["../../packages/auth/src"],
+      "@mvp/auth/*": ["../../packages/auth/src/*"]
     }
   },
   "include": [

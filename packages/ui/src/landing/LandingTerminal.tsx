@@ -92,6 +92,10 @@ export function LandingTerminal() {
         from { opacity: 0; transform: translateX(-12px); }
         to { opacity: 1; transform: translateX(0); }
       }
+      @media (max-width: 768px) {
+        #terminal-title { font-size: 26px !important; }
+        .terminal-panel { min-width: 0 !important; max-width: 100% !important; }
+      }
     `
     document.head.appendChild(style)
     return () => { document.head.removeChild(style) }
@@ -157,7 +161,7 @@ export function LandingTerminal() {
       >
         <SlideIn from="bottom">
           <YStack alignItems="center" gap="$2">
-            <Text fontWeight="bold" fontSize={36} color="$color" textAlign="center">
+            <Text nativeID="terminal-title" fontWeight="bold" fontSize={36} color="$color" textAlign="center">
               {t('landing.terminalTitle')}
             </Text>
             <Text fontSize="$4" color="$mutedText" textAlign="center" maxWidth={500}>
@@ -170,6 +174,7 @@ export function LandingTerminal() {
           {/* ── Terminal panel ── */}
           <SlideIn from="left" delay={100}>
             <YStack
+              className="terminal-panel"
               borderRadius="$4"
               overflow="hidden"
               borderWidth={1}
@@ -268,6 +273,7 @@ export function LandingTerminal() {
           {/* ── Project tree panel ── */}
           <SlideIn from="right" delay={200}>
             <YStack
+              className="terminal-panel"
               borderRadius="$4"
               overflow="hidden"
               borderWidth={1}

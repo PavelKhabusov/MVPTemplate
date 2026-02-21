@@ -1,3 +1,3 @@
 export { WebHeader } from './WebHeader'
-export { WebSidebar } from './WebSidebar'
+export { WebSidebar, useIsMobileWeb } from './WebSidebar'
 export { Breadcrumbs } from './Breadcrumbs'

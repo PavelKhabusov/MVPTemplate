@@ -1,7 +1,7 @@
 import { YStack } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { FadeIn } from '@mvp/ui'
-import { MarkdownView } from '../src/features/documentation/MarkdownView'
+import { MarkdownView } from '@mvp/docs'
 import { getPrivacyPolicy } from '../assets/content/privacy-policy'
 
 export default function PrivacyScreen() {

@@ -14,7 +14,7 @@ const GREETINGS = [
 const API_ROUTES = [
   { method: 'GET', color: '#7ee787', path: '/api/users' },
   { method: 'POST', color: '#f0883e', path: '/api/auth/login' },
-  { method: 'GET', color: '#7ee787', path: '/api/search?q=...' },
+  { method: 'POST', color: '#f0883e', path: '/api/mail/send' },
   { method: 'WS', color: '#d2a8ff', path: '/api/events/sse' },
 ]
 
@@ -67,11 +67,20 @@ export function LandingFeatures() {
     style.textContent = `
       @media (max-width: 800px) {
         #bento-features {
+          grid-template-columns: 1fr 1fr !important;
+        }
+        #bento-features > * {
+          grid-column: span 1 !important;
+        }
+      }
+      @media (max-width: 600px) {
+        #bento-features {
           grid-template-columns: 1fr !important;
         }
         #bento-features > * {
           grid-column: span 1 !important;
         }
+        #features-title { font-size: 26px !important; }
       }
       .bento-card {
         transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
@@ -109,7 +118,7 @@ export function LandingFeatures() {
     <YStack id="features" paddingVertical="$10" paddingHorizontal="$5" alignItems="center">
       <YStack maxWidth={1200} width="100%" gap="$8">
         <YStack alignItems="center" gap="$2">
-          <Text fontWeight="bold" fontSize={36} color="$color" textAlign="center">
+          <Text nativeID="features-title" fontWeight="bold" fontSize={36} color="$color" textAlign="center">
             {t('landing.featuresTitle')}
           </Text>
           <Text fontSize="$4" color="$mutedText" textAlign="center" maxWidth={500}>

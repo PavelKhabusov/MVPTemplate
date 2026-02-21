@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
@@ -12,6 +13,18 @@ export function LandingCTA({ onNavigate }: LandingCTAProps) {
   const { t } = useTranslation()
   const theme = useTheme()
 
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    const style = document.createElement('style')
+    style.textContent = `
+      @media (max-width: 768px) {
+        #cta-title { font-size: 26px !important; }
+      }
+    `
+    document.head.appendChild(style)
+    return () => { document.head.removeChild(style) }
+  }, [])
+
   if (Platform.OS !== 'web') return null
 
   return (
@@ -25,7 +38,7 @@ export function LandingCTA({ onNavigate }: LandingCTAProps) {
     >
       <SlideIn from="bottom">
         <YStack maxWidth={600} alignItems="center" gap="$4">
-          <Text fontWeight="bold" fontSize={36} color="white" textAlign="center">
+          <Text nativeID="cta-title" fontWeight="bold" fontSize={36} color="white" textAlign="center">
             {t('landing.ctaTitle')}
           </Text>
           <Text fontSize="$4" color="white" textAlign="center" opacity={0.85}>
@@ -46,7 +59,7 @@ export function LandingCTA({ onNavigate }: LandingCTAProps) {
               </XStack>
             </ScalePress>
 
-            <ScalePress onPress={() => onNavigate('/privacy')}>
+            <ScalePress onPress={() => onNavigate('/docs')}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"

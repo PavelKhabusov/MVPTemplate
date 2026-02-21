@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { YStack, XStack, Text, Separator, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
@@ -10,6 +11,19 @@ interface LandingFooterProps {
 export function LandingFooter({ onNavigate }: LandingFooterProps) {
   const { t } = useTranslation()
   const theme = useTheme()
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    const style = document.createElement('style')
+    style.textContent = `
+      @media (max-width: 768px) {
+        .footer-col { min-width: 0 !important; }
+        .footer-brand { min-width: 100% !important; }
+      }
+    `
+    document.head.appendChild(style)
+    return () => { document.head.removeChild(style) }
+  }, [])
 
   if (Platform.OS !== 'web') return null
 
@@ -26,7 +40,7 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
         {/* Columns */}
         <XStack flexWrap="wrap" gap="$8">
           {/* Brand */}
-          <YStack gap="$3" style={{ minWidth: 240, flex: 1 } as any}>
+          <YStack className="footer-brand" gap="$3" style={{ minWidth: 240, flex: 1 } as any}>
             <XStack alignItems="center" gap="$2">
               <YStack
                 width={28}
@@ -48,7 +62,7 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
           </YStack>
 
           {/* Product */}
-          <YStack gap="$3" style={{ minWidth: 160 } as any}>
+          <YStack className="footer-col" gap="$3" style={{ minWidth: 160 } as any}>
             <Text fontWeight="bold" fontSize="$3" color="$color">
               {t('landing.footerProduct')}
             </Text>
@@ -59,17 +73,17 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
           </YStack>
 
           {/* Resources */}
-          <YStack gap="$3" style={{ minWidth: 160 } as any}>
+          <YStack className="footer-col" gap="$3" style={{ minWidth: 160 } as any}>
             <Text fontWeight="bold" fontSize="$3" color="$color">
               {t('landing.footerResources')}
             </Text>
-            <FooterLink label={t('landing.footerDocs')} onPress={() => {}} />
+            <FooterLink label={t('landing.footerDocs')} onPress={() => onNavigate('/docs')} />
             <FooterLink label={t('landing.footerGitHub')} onPress={() => window.open('https://github.com/PavelKhabusov/MVPTemplate', '_blank')} />
             <FooterLink label={t('landing.footerCommunity')} onPress={() => {}} />
           </YStack>
 
           {/* Legal */}
-          <YStack gap="$3" style={{ minWidth: 160 } as any}>
+          <YStack className="footer-col" gap="$3" style={{ minWidth: 160 } as any}>
             <Text fontWeight="bold" fontSize="$3" color="$color">
               {t('landing.footerLegal')}
             </Text>

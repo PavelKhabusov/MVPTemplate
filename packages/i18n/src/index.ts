@@ -52,3 +52,4 @@ export function initI18n(savedLanguage?: string | null) {
 
 export { i18n, SUPPORTED_LANGUAGES }
 export { useTranslation } from 'react-i18next'
+export { useAppTranslation } from './useAppTranslation'

@@ -44,6 +44,23 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }
       }
+      .hero-gradient-text {
+        background: linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val}, ${theme.accent.val}, ${theme.accentGradientStart.val}) !important;
+        background-size: 200% auto !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: heroGradientShift 4s ease-in-out infinite;
+        letter-spacing: -0.02em;
+      }
+      @media (max-width: 768px) {
+        #hero-floats { display: none !important; }
+        .hero-gradient-text { font-size: 32px !important; line-height: 38px !important; }
+        #hero-section { min-height: 60vh !important; padding-top: 40px !important; padding-bottom: 40px !important; }
+      }
+      @media (max-width: 480px) {
+        .hero-gradient-text { font-size: 26px !important; line-height: 32px !important; }
+      }
     `
     document.head.appendChild(style)
     return () => { document.head.removeChild(style) }
@@ -53,6 +70,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
 
   return (
     <YStack
+      nativeID="hero-section"
       paddingVertical="$10"
       paddingHorizontal="$5"
       alignItems="center"
@@ -65,6 +83,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
       } as any}
     >
       {/* Floating decorative elements */}
+      <View nativeID="hero-floats" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' } as any}>
       <View
         style={{
           position: 'absolute', top: '15%', left: '10%',
@@ -110,6 +129,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
           pointerEvents: 'none',
         } as any}
       />
+      </View>
 
       <YStack maxWidth={800} alignItems="center" gap="$5" zIndex={1}>
         {/* Badge */}
@@ -136,15 +156,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
             fontSize={52}
             lineHeight={60}
             fontWeight="bold"
-            style={{
-              letterSpacing: '-0.02em',
-              background: `linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val}, ${theme.accent.val}, ${theme.accentGradientStart.val})`,
-              backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              animation: 'heroGradientShift 4s ease-in-out infinite',
-            } as any}
+            className="hero-gradient-text"
           >
             {t('landing.heroTitle')}
           </H1>

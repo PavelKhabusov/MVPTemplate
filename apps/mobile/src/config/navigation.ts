@@ -21,9 +21,9 @@ export const TABS: TabConfig[] = [
     iconFocused: 'compass',
   },
   {
-    name: 'profile',
-    titleKey: 'tabs.profile',
-    icon: 'person-outline',
-    iconFocused: 'person',
+    name: 'settings',
+    titleKey: 'settings.title',
+    icon: 'settings-outline',
+    iconFocused: 'settings',
   },
 ]

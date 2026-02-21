@@ -1,0 +1,22 @@
+{
+  "name": "@mvp/auth",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "tamagui": "*",
+    "@expo/vector-icons": "*",
+    "@mvp/lib": "*",
+    "@mvp/store": "*",
+    "@mvp/i18n": "*",
+    "@mvp/ui": "*"
+  }
+}

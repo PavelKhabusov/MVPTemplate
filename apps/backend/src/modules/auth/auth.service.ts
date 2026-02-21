@@ -4,10 +4,13 @@ import { randomBytes } from 'crypto'
 import { env } from '../../config/env'
 import { AppError } from '../../common/errors/app-error'
 import { hashToken } from '../../common/utils/crypto'
+import { emailService } from '../email/email.service'
 import { authRepository } from './auth.repository'
 import type { RegisterInput, LoginInput, GoogleAuthInput } from './auth.schema'
 
 const SALT_ROUNDS = 12
+
+type EmailLocale = 'en' | 'ru' | 'es' | 'ja'
 
 interface TokenPair {
   accessToken: string
@@ -44,7 +47,7 @@ function parseRefreshExpiry(): Date {
 }
 
 export const authService = {
-  async register(input: RegisterInput): Promise<TokenPair> {
+  async register(input: RegisterInput & { locale?: string }): Promise<TokenPair> {
     const existing = await authRepository.findUserByEmail(input.email)
     if (existing) {
       throw AppError.conflict('Email already registered')
@@ -55,7 +58,19 @@ export const authService = {
       email: input.email,
       passwordHash,
       name: input.name,
+      emailVerified: !env.EMAIL_ENABLED,
     })
+
+    if (env.EMAIL_ENABLED) {
+      const token = randomBytes(32).toString('hex')
+      const tokenHash = hashToken(token)
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      await authRepository.saveEmailVerificationToken(user.id, tokenHash, expiresAt)
+
+      const locale = (input.locale as EmailLocale) || 'en'
+      emailService.sendVerificationEmail(user.email, token, user.name, locale)
+        .catch((err) => console.error('Failed to send verification email:', err))
+    }
 
     return this.createTokenPair(user.id, user.email)
   },
@@ -73,6 +88,10 @@ export const authService = {
     const valid = await bcrypt.compare(input.password, user.passwordHash)
     if (!valid) {
       throw AppError.unauthorized('Invalid email or password')
+    }
+
+    if (env.EMAIL_ENABLED && env.EMAIL_VERIFICATION_REQUIRED && !user.emailVerified) {
+      throw AppError.forbidden('Please verify your email address before signing in')
     }
 
     return this.createTokenPair(user.id, user.email)
@@ -112,10 +131,114 @@ export const authService = {
         email: payload.email,
         name: payload.name || payload.email.split('@')[0],
         avatarUrl: payload.picture ?? null,
+        emailVerified: true,
       })
+    } else if (!user.emailVerified) {
+      await authRepository.updateUser(user.id, { emailVerified: true })
     }
 
     return this.createTokenPair(user.id, user.email)
+  },
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    if (!env.EMAIL_ENABLED) {
+      throw AppError.badRequest('Email is not enabled')
+    }
+
+    const tokenHash = hashToken(token)
+    const stored = await authRepository.findEmailVerificationToken(tokenHash)
+
+    if (!stored) {
+      throw AppError.badRequest('Invalid verification token')
+    }
+    if (stored.verifiedAt) {
+      throw AppError.badRequest('Email already verified')
+    }
+    if (stored.expiresAt < new Date()) {
+      throw AppError.badRequest('Verification token has expired')
+    }
+
+    await authRepository.markEmailVerified(tokenHash, stored.userId)
+
+    const user = await authRepository.findUserById(stored.userId)
+    if (user) {
+      emailService.sendWelcomeEmail(user.email, user.name)
+        .catch((err) => console.error('Failed to send welcome email:', err))
+    }
+
+    return { message: 'Email verified successfully' }
+  },
+
+  async requestPasswordReset(email: string, locale: string = 'en'): Promise<{ message: string }> {
+    if (!env.EMAIL_ENABLED) {
+      throw AppError.badRequest('Email is not enabled')
+    }
+
+    const message = 'If that email is registered, you will receive a reset link'
+
+    const user = await authRepository.findUserByEmail(email)
+    if (!user) {
+      return { message }
+    }
+
+    const token = randomBytes(32).toString('hex')
+    const tokenHash = hashToken(token)
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+    await authRepository.savePasswordResetToken(user.id, tokenHash, expiresAt)
+
+    emailService.sendPasswordResetEmail(user.email, token, user.name, (locale as EmailLocale) || 'en')
+      .catch((err) => console.error('Failed to send password reset email:', err))
+
+    return { message }
+  },
+
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    if (!env.EMAIL_ENABLED) {
+      throw AppError.badRequest('Email is not enabled')
+    }
+
+    const tokenHash = hashToken(token)
+    const stored = await authRepository.findPasswordResetToken(tokenHash)
+
+    if (!stored) {
+      throw AppError.badRequest('Invalid reset token')
+    }
+    if (stored.usedAt) {
+      throw AppError.badRequest('This reset link has already been used')
+    }
+    if (stored.expiresAt < new Date()) {
+      throw AppError.badRequest('Reset token has expired')
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS)
+    await authRepository.updateUserPassword(stored.userId, passwordHash)
+    await authRepository.markPasswordResetUsed(tokenHash)
+    await authRepository.deleteAllUserRefreshTokens(stored.userId)
+
+    return { message: 'Password reset successfully' }
+  },
+
+  async resendVerification(userId: string, locale: string = 'en'): Promise<{ message: string }> {
+    if (!env.EMAIL_ENABLED) {
+      throw AppError.badRequest('Email is not enabled')
+    }
+
+    const user = await authRepository.findUserById(userId)
+    if (!user) throw AppError.notFound('User not found')
+
+    if (user.emailVerified) {
+      throw AppError.badRequest('Email is already verified')
+    }
+
+    const token = randomBytes(32).toString('hex')
+    const tokenHash = hashToken(token)
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+
+    await authRepository.saveEmailVerificationToken(user.id, tokenHash, expiresAt)
+    await emailService.sendVerificationEmail(user.email, token, user.name, (locale as EmailLocale) || 'en')
+
+    return { message: 'Verification email sent' }
   },
 
   async refresh(refreshToken: string): Promise<TokenPair> {
@@ -146,7 +269,7 @@ export const authService = {
     if (!user) throw AppError.notFound('User not found')
 
     const { passwordHash, ...profile } = user
-    return profile
+    return { ...profile, emailEnabled: env.EMAIL_ENABLED }
   },
 
   verifyAccessToken(token: string): JwtPayload {

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@mvp/i18n'
 import { StateView, FadeIn, AnimatedListItem, AppCard, ScalePress } from '@mvp/ui'
 import { api } from '../../services/api'
-import { useQueryState } from '../../hooks/useQueryState'
+import { useQueryState } from '@mvp/lib'
 
 interface Notification {
   id: string

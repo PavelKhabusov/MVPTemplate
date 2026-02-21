@@ -1,20 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
-import { TamaguiProvider, Theme, XStack } from 'tamagui'
+import { TamaguiProvider, XStack, YStack, Text, useTheme } from 'tamagui'
+import { forceUpdateThemes } from '@tamagui/web'
+import { Ionicons } from '@expo/vector-icons'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
+import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
 import { storage } from '@mvp/lib'
+import { SEO } from '@mvp/ui'
+import { getPageById } from '@mvp/docs'
 import { queryClient } from '../src/services/query-client'
-import { authApi } from '../src/features/auth/auth.service'
+import { AuthProvider } from '@mvp/auth'
+import { authApi } from '../src/services/auth'
 import { getAccessToken } from '../src/services/api'
 
 // Moti's declarative API writes shared values during render by design — disable strict mode
@@ -33,6 +39,50 @@ SplashScreen.preventAutoHideAsync()
 const navColors = {
   light: { background: '#FAFAFA', tint: '#0891B2', text: '#0A0A0A' },
   dark: { background: '#09090B', tint: '#38E8FF', text: '#FAFAFA' },
+}
+
+const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark']
+const THEME_ICONS: Record<ThemeMode, keyof typeof Ionicons.glyphMap> = {
+  system: 'contrast-outline',
+  light: 'sunny-outline',
+  dark: 'moon-outline',
+}
+const THEME_LABELS: Record<ThemeMode, string> = {
+  system: 'settings.themeSystem',
+  light: 'settings.themeLight',
+  dark: 'settings.themeDark',
+}
+
+const PAGE_META: Record<string, { titleKey: string; descKey: string }> = {
+  '/':               { titleKey: 'tabs.home',                descKey: 'meta.homeDesc' },
+  '/explore':        { titleKey: 'explore.title',            descKey: 'meta.exploreDesc' },
+  '/settings':       { titleKey: 'settings.title',           descKey: 'meta.settingsDesc' },
+  '/sign-in':        { titleKey: 'auth.signIn',              descKey: 'meta.signInDesc' },
+  '/sign-up':        { titleKey: 'auth.signUp',              descKey: 'meta.signUpDesc' },
+  '/forgot-password': { titleKey: 'auth.forgotPasswordTitle', descKey: 'meta.forgotPasswordDesc' },
+  '/reset-password': { titleKey: 'auth.resetPassword',       descKey: 'meta.resetPasswordDesc' },
+  '/verify-email':   { titleKey: 'auth.verifyEmailTitle',    descKey: 'meta.verifyEmailDesc' },
+  '/docs':           { titleKey: 'docs.title',               descKey: 'meta.docsDesc' },
+  '/privacy':        { titleKey: 'settings.privacy',         descKey: 'meta.privacyDesc' },
+  '/admin':          { titleKey: 'admin.title',              descKey: 'meta.adminDesc' },
+  '/edit-profile':   { titleKey: 'profile.editProfile',      descKey: 'meta.editProfileDesc' },
+  '/landing':        { titleKey: 'landing.heroTitle',        descKey: 'landing.heroSubtitle' },
+}
+
+function PageSEO() {
+  const { t } = useTranslation()
+  const pathname = usePathname()
+
+  const meta = PAGE_META[pathname]
+  if (meta) return <SEO title={t(meta.titleKey)} description={t(meta.descKey)} />
+
+  // Dynamic docs routes: /docs/quick-start, /docs/auth, etc.
+  if (pathname.startsWith('/docs/')) {
+    const docPage = getPageById(pathname.replace('/docs/', ''))
+    if (docPage) return <SEO title={t(docPage.titleKey)} description={t('meta.docsDesc')} />
+  }
+
+  return null
 }
 
 function RootNavigator() {
@@ -60,6 +110,9 @@ function RootNavigator() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t('common.back') }} />
       <Stack.Screen name="sign-in" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="sign-up" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="forgot-password" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="reset-password" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="verify-email" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen
         name="edit-profile"
@@ -69,11 +122,45 @@ function RootNavigator() {
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen name="docs" options={{ title: t('docs.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="terms" options={{ title: t('settings.terms'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="landing" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
+  )
+}
+
+function ThemeToggle({ collapsed }: { collapsed: boolean }) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const { mode, setMode } = useThemeStore()
+
+  const cycleTheme = () => {
+    const idx = THEME_CYCLE.indexOf(mode)
+    setMode(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length])
+  }
+
+  return (
+    <XStack
+      paddingVertical="$2.5"
+      paddingHorizontal="$3"
+      borderRadius="$3"
+      alignItems="center"
+      justifyContent={collapsed ? 'center' : 'flex-start'}
+      gap="$3"
+      hoverStyle={{ backgroundColor: '$backgroundHover' }}
+      cursor="pointer"
+      onPress={cycleTheme}
+    >
+      <Ionicons name={THEME_ICONS[mode]} size={20} color={theme.mutedText.val} />
+      {!collapsed && (
+        <Text color="$mutedText" fontSize="$3" numberOfLines={1}>
+          {t(THEME_LABELS[mode])}
+        </Text>
+      )}
+    </XStack>
   )
 }
 
@@ -82,6 +169,7 @@ function WebRootLayout() {
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin'
+  const isMobile = useIsMobileWeb()
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
@@ -91,7 +179,7 @@ function WebRootLayout() {
   const navItems = [
     { href: '/', label: t('tabs.home'), icon: 'home-outline' as const, iconFilled: 'home' as const, animation: 'bounce' as const },
     { href: '/explore', label: t('tabs.explore'), icon: 'compass-outline' as const, iconFilled: 'compass' as const, animation: 'rotate' as const },
-    { href: '/profile', label: t('tabs.profile'), icon: 'person-outline' as const, iconFilled: 'person' as const, animation: 'pop' as const },
+    { href: '/settings', label: t('settings.title'), icon: 'settings-outline' as const, iconFilled: 'settings' as const, animation: 'wiggle' as const },
     ...(isAdmin ? [{ href: '/admin', label: t('admin.title'), icon: 'shield-outline' as const, iconFilled: 'shield' as const, animation: 'bell' as const }] : []),
   ]
 
@@ -101,8 +189,12 @@ function WebRootLayout() {
         items={navItems}
         currentPath={pathname}
         onNavigate={(href) => router.push(href as any)}
+        footer={(collapsed) => <ThemeToggle collapsed={collapsed} />}
       />
-      <Slot />
+      <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
+        <Slot />
+      </YStack>
+      <CookieBanner />
     </XStack>
   )
 }
@@ -119,10 +211,18 @@ export default function RootLayout() {
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   })
 
+  const { i18n } = useTranslation()
+
   useEffect(() => {
     initI18n(savedLanguage)
     setI18nReady(true)
   }, [])
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.documentElement.lang = i18n.language
+    }
+  }, [i18n.language])
 
   useEffect(() => {
     // Initialize analytics — uses PostHog if posthog-react-native is installed and key provided
@@ -159,6 +259,15 @@ export default function RootLayout() {
     authApi.initialize()
   }, [])
 
+  // Force all Tamagui theme consumers to re-render when the resolved theme changes.
+  // TamaguiProvider's internal Theme updates CSS variables, but components using
+  // useTheme().val in inline styles may not pick up changes without this.
+  useLayoutEffect(() => {
+    if (Platform.OS === 'web') {
+      forceUpdateThemes()
+    }
+  }, [resolvedTheme])
+
   const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 
   useEffect(() => {
@@ -173,11 +282,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
-          <Theme name={resolvedTheme}>
-            <PortalProvider>
+          <PortalProvider>
+            <AuthProvider
+              authApi={authApi}
+              onAuthSuccess={() => router.replace('/')}
+              onNavigateToSignIn={() => router.replace('/sign-in')}
+              onNavigateToForgotPassword={() => router.push('/forgot-password')}
+            >
+              <PageSEO />
               <RootNavigator />
-            </PortalProvider>
-          </Theme>
+            </AuthProvider>
+          </PortalProvider>
         </TamaguiProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

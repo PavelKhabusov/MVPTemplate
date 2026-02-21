@@ -15,3 +15,9 @@ export type { UserSettings, NewUserSettings, UserSettingsData } from './user-set
 
 export { analyticsEvents } from './analytics-events'
 export type { AnalyticsEvent, NewAnalyticsEvent } from './analytics-events'
+
+export { emailVerificationTokens } from './email-verification-tokens'
+export type { EmailVerificationToken, NewEmailVerificationToken } from './email-verification-tokens'
+
+export { passwordResetTokens } from './password-reset-tokens'
+export type { PasswordResetToken, NewPasswordResetToken } from './password-reset-tokens'

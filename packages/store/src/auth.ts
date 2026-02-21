@@ -11,6 +11,8 @@ interface AuthUser {
   birthday?: string | null
   role?: string
   features?: string[]
+  emailVerified?: boolean
+  emailEnabled?: boolean
 }
 
 interface AuthState {

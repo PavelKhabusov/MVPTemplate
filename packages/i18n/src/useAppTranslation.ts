@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
-import { useTranslation, i18n } from '@mvp/i18n'
+import { useTranslation } from 'react-i18next'
 import { useLanguageStore } from '@mvp/store'
-import type { SupportedLanguage } from '@mvp/i18n'
+import type { SupportedLanguage } from './index'
 
 export function useAppTranslation() {
   const { t, i18n: i18nInstance } = useTranslation()
-  const { language, setLanguage } = useLanguageStore()
+  const { setLanguage } = useLanguageStore()
 
   const changeLanguage = useCallback(
     async (lang: SupportedLanguage | null) => {
