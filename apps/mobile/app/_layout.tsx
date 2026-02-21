@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, Theme, XStack } from 'tamagui'
-import { ThemeProvider, type Theme as NavTheme } from '@react-navigation/native'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -29,37 +28,11 @@ LogBox.ignoreLogs([
 // Prevent splash screen from hiding before fonts load
 SplashScreen.preventAutoHideAsync()
 
-const navFonts = {
-  regular: { fontFamily: 'Inter', fontWeight: '400' as const },
-  medium: { fontFamily: 'Inter', fontWeight: '500' as const },
-  bold: { fontFamily: 'InterBold', fontWeight: '700' as const },
-  heavy: { fontFamily: 'InterBold', fontWeight: '800' as const },
-}
-
-const lightNavTheme: NavTheme = {
-  dark: false,
-  colors: {
-    primary: '#0891B2',
-    background: '#FAFAFA',
-    card: '#FAFAFA',
-    text: '#0A0A0A',
-    border: '#E5E5E5',
-    notification: '#0891B2',
-  },
-  fonts: navFonts,
-}
-
-const darkNavTheme: NavTheme = {
-  dark: true,
-  colors: {
-    primary: '#38E8FF',
-    background: '#09090B',
-    card: '#09090B',
-    text: '#FAFAFA',
-    border: '#27272A',
-    notification: '#38E8FF',
-  },
-  fonts: navFonts,
+// Static navigation colors matching tamagui.config.ts — used in screenOptions
+// so colors are available on first render (no useTheme() delay)
+const navColors = {
+  light: { background: '#FAFAFA', tint: '#0891B2', text: '#0A0A0A' },
+  dark: { background: '#09090B', tint: '#38E8FF', text: '#FAFAFA' },
 }
 
 function RootNavigator() {
@@ -73,13 +46,15 @@ function RootNavigator() {
     return <WebRootLayout />
   }
 
-  const bg = resolvedTheme === 'dark' ? darkNavTheme.colors.background : lightNavTheme.colors.background
+  const colors = navColors[resolvedTheme]
 
   return (
     <Stack
       screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.tint,
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: bg },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t('common.back') }} />
@@ -188,26 +163,16 @@ export default function RootLayout() {
 
   if (!ready) return null
 
-  const navTheme = resolvedTheme === 'dark' ? darkNavTheme : lightNavTheme
-
-  const content = (
-    <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
-      <Theme name={resolvedTheme}>
-        <PortalProvider>
-          <RootNavigator />
-        </PortalProvider>
-      </Theme>
-    </TamaguiProvider>
-  )
-
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        {Platform.OS === 'web' ? content : (
-          <ThemeProvider value={navTheme}>
-            {content}
-          </ThemeProvider>
-        )}
+        <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
+          <Theme name={resolvedTheme}>
+            <PortalProvider>
+              <RootNavigator />
+            </PortalProvider>
+          </Theme>
+        </TamaguiProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   )
