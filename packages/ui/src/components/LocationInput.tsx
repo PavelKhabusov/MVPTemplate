@@ -49,7 +49,7 @@ export function LocationInput({
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 200)}
           placeholder={placeholder ?? 'Search city or address...'}
-          placeholderTextColor={theme.placeholder.val}
+          placeholderTextColor={theme.mutedText.val}
           borderWidth={0}
           backgroundColor="transparent"
           height={44}

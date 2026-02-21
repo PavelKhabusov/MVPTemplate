@@ -112,7 +112,7 @@ export function PhoneInput({
           onChangeText={handleTextChange}
           keyboardType="phone-pad"
           placeholder={placeholder ?? country.mask.replace(/#/g, '0')}
-          placeholderTextColor={theme.placeholder.val}
+          placeholderTextColor={theme.mutedText.val}
           borderWidth={0}
           backgroundColor="transparent"
           height={44}
@@ -144,7 +144,7 @@ export function PhoneInput({
               value={search}
               onChangeText={setSearch}
               placeholder="Search country..."
-              placeholderTextColor={theme.placeholder.val}
+              placeholderTextColor={theme.mutedText.val}
               backgroundColor="$subtleBackground"
               borderWidth={1}
               borderColor="$borderColor"
