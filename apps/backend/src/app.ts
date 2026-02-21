@@ -105,7 +105,9 @@ export async function buildApp() {
   await app.register(notificationsRoutes, { prefix: '/api/notifications' })
   await app.register(searchRoutes, { prefix: '/api/search' })
   await app.register(adminRoutes, { prefix: '/api/admin' })
-  await app.register(analyticsRoutes, { prefix: '/api/analytics' })
+  if (env.ANALYTICS_ENABLED) {
+    await app.register(analyticsRoutes, { prefix: '/api/analytics' })
+  }
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

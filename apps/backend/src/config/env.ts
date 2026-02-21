@@ -21,6 +21,9 @@ const envSchema = z.object({
   EXPO_ACCESS_TOKEN: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
 
+  // Analytics
+  ANALYTICS_ENABLED: envBoolean.default(true),
+
   // Logging
   REQUEST_LOGGING: envBoolean,
 

@@ -171,6 +171,12 @@ export default function AdminScreen() {
   const insets = useSafeAreaInsets()
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const [activeTab, setActiveTab] = useState<'analytics' | 'users'>(analyticsEnabled ? 'analytics' : 'users')
+
+  useEffect(() => {
+    if (!analyticsEnabled && activeTab === 'analytics') {
+      setActiveTab('users')
+    }
+  }, [analyticsEnabled, activeTab])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
