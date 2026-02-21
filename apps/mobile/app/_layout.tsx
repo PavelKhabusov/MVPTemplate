@@ -7,7 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar, useIsMobileWeb } from '@mvp/ui'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
@@ -85,6 +85,7 @@ function WebRootLayout() {
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin'
+  const isMobile = useIsMobileWeb()
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
@@ -105,7 +106,7 @@ function WebRootLayout() {
         currentPath={pathname}
         onNavigate={(href) => router.push(href as any)}
       />
-      <YStack flex={1} style={{ overflow: 'auto', paddingBottom: 0 } as any} className="web-main-content">
+      <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
         <Slot />
       </YStack>
     </XStack>
