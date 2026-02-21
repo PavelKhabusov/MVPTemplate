@@ -16,6 +16,7 @@
     "moti": "*",
     "zustand": "*",
     "@mvp/lib": "*",
-    "@mvp/i18n": "*"
+    "@mvp/i18n": "*",
+    "@mvp/ui": "*"
   }
 }
