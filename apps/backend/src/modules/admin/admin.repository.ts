@@ -79,7 +79,7 @@ export const adminRepository = {
       db
         .select({ total: count() })
         .from(users)
-        .where(sql`${users.createdAt} >= ${oneWeekAgo}`),
+        .where(sql`${users.createdAt} >= ${oneWeekAgo.toISOString()}`),
     ])
 
     return {
