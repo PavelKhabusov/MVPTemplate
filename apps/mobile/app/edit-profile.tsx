@@ -6,7 +6,7 @@ import { useTranslation } from '@mvp/i18n'
 import { useAuthStore, useThemeStore } from '@mvp/store'
 import { AppAvatar, SettingsGroup, SettingsGroupItem, ScalePress, PhoneInput, LocationInput } from '@mvp/ui'
 import * as ImagePicker from 'expo-image-picker'
-import { api } from '../src/services/api'
+import { api, getAccessToken } from '../src/services/api'
 import { useLocationSearch } from '../src/hooks/useLocationSearch'
 import { authApi } from '../src/features/auth/auth.service'
 
@@ -58,13 +58,11 @@ export default function EditProfileScreen() {
       const formData = new FormData()
 
       if (Platform.OS === 'web') {
-        // On web, fetch the blob from the URI and append as File
         const response = await fetch(asset.uri)
         const blob = await response.blob()
-        const ext = asset.uri.split('.').pop()?.split('?')[0] ?? 'jpg'
-        formData.append('file', blob, `avatar.${ext}`)
+        const ext = asset.mimeType === 'image/png' ? 'png' : asset.mimeType === 'image/webp' ? 'webp' : 'jpg'
+        formData.append('file', new File([blob], `avatar.${ext}`, { type: asset.mimeType ?? 'image/jpeg' }))
       } else {
-        // On native, use the {uri, name, type} pattern
         const ext = asset.uri.split('.').pop() ?? 'jpg'
         formData.append('file', {
           uri: asset.uri,
@@ -73,14 +71,19 @@ export default function EditProfileScreen() {
         } as any)
       }
 
-      // Override default JSON content-type; axios will add the boundary automatically
-      const { data } = await api.post('/users/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      // Use fetch directly to avoid axios Content-Type conflicts with FormData
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+      const token = getAccessToken()
+      const uploadRes = await fetch(`${apiUrl}/api/users/avatar`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
       })
-      if (data?.data) {
-        const serverUrl = data.data.avatarUrl
-        setAvatarUri(serverUrl)
-        if (user) setUser({ ...user, avatarUrl: serverUrl })
+      if (!uploadRes.ok) throw new Error('Upload failed')
+      const { data: profile } = await uploadRes.json()
+      if (profile) {
+        setAvatarUri(profile.avatarUrl)
+        if (user) setUser({ ...user, avatarUrl: profile.avatarUrl })
       }
     } catch {
       setAvatarUri(user?.avatarUrl ?? null)
