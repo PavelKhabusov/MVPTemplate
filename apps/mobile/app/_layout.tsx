@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
-import { TamaguiProvider, Theme, XStack, YStack } from 'tamagui'
+import { TamaguiProvider, Theme, XStack, YStack, Text, useTheme } from 'tamagui'
+import { Ionicons } from '@expo/vector-icons'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -9,6 +10,7 @@ import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, useIsMobileWeb } from '@mvp/ui'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
+import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
@@ -36,6 +38,18 @@ SplashScreen.preventAutoHideAsync()
 const navColors = {
   light: { background: '#FAFAFA', tint: '#0891B2', text: '#0A0A0A' },
   dark: { background: '#09090B', tint: '#38E8FF', text: '#FAFAFA' },
+}
+
+const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark']
+const THEME_ICONS: Record<ThemeMode, keyof typeof Ionicons.glyphMap> = {
+  system: 'contrast-outline',
+  light: 'sunny-outline',
+  dark: 'moon-outline',
+}
+const THEME_LABELS: Record<ThemeMode, string> = {
+  system: 'settings.themeSystem',
+  light: 'settings.themeLight',
+  dark: 'settings.themeDark',
 }
 
 const PAGE_META: Record<string, { titleKey: string; descKey: string }> = {
@@ -116,6 +130,38 @@ function RootNavigator() {
   )
 }
 
+function ThemeToggle({ collapsed }: { collapsed: boolean }) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const { mode, setMode } = useThemeStore()
+
+  const cycleTheme = () => {
+    const idx = THEME_CYCLE.indexOf(mode)
+    setMode(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length])
+  }
+
+  return (
+    <XStack
+      paddingVertical="$2.5"
+      paddingHorizontal="$3"
+      borderRadius="$3"
+      alignItems="center"
+      justifyContent={collapsed ? 'center' : 'flex-start'}
+      gap="$3"
+      hoverStyle={{ backgroundColor: '$backgroundHover' }}
+      cursor="pointer"
+      onPress={cycleTheme}
+    >
+      <Ionicons name={THEME_ICONS[mode]} size={20} color={theme.mutedText.val} />
+      {!collapsed && (
+        <Text color="$mutedText" fontSize="$3" numberOfLines={1}>
+          {t(THEME_LABELS[mode])}
+        </Text>
+      )}
+    </XStack>
+  )
+}
+
 function WebRootLayout() {
   const { t } = useTranslation()
   const pathname = usePathname()
@@ -141,6 +187,7 @@ function WebRootLayout() {
         items={navItems}
         currentPath={pathname}
         onNavigate={(href) => router.push(href as any)}
+        footer={(collapsed) => <ThemeToggle collapsed={collapsed} />}
       />
       <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
         <Slot />

@@ -27,7 +27,7 @@ interface WebSidebarProps {
   items: NavItem[]
   currentPath: string
   onNavigate: (href: string) => void
-  footer?: React.ReactNode
+  footer?: React.ReactNode | ((collapsed: boolean) => React.ReactNode)
 }
 
 export function useIsMobileWeb() {
@@ -171,7 +171,7 @@ export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSideba
         {/* Footer (user info, etc.) */}
         {footer && (
           <YStack paddingHorizontal="$2" paddingBottom="$2">
-            {footer}
+            {typeof footer === 'function' ? footer(collapsed) : footer}
           </YStack>
         )}
 
