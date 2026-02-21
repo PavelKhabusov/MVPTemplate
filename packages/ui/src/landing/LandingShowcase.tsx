@@ -35,7 +35,6 @@ export function LandingShowcase() {
       backgroundColor="$subtleBackground"
     >
       <YStack maxWidth={1200} width="100%" gap="$8">
-        {/* Section header */}
         <SlideIn from="bottom">
           <YStack alignItems="center" gap="$2">
             <Text fontWeight="bold" fontSize={36} color="$color" textAlign="center">
@@ -47,11 +46,18 @@ export function LandingShowcase() {
           </YStack>
         </SlideIn>
 
-        {/* Two columns */}
-        <XStack flexWrap="wrap" gap="$8" justifyContent="center">
-          {/* Checklist */}
+        <XStack flexWrap="wrap" gap="$5" justifyContent="center">
+          {/* Checklist card */}
           <SlideIn from="left" delay={100}>
-            <YStack gap="$3.5" style={{ minWidth: 340, flex: 1 } as any}>
+            <YStack
+              backgroundColor="$cardBackground"
+              borderRadius="$4"
+              borderWidth={1}
+              borderColor="$borderColor"
+              padding="$5"
+              gap="$3.5"
+              style={{ minWidth: 360, flex: 1 } as any}
+            >
               {CHECKLIST.map((item) => (
                 <XStack key={item.key} gap="$3" alignItems="center">
                   <YStack
@@ -74,15 +80,23 @@ export function LandingShowcase() {
             </YStack>
           </SlideIn>
 
-          {/* Tech stack badges */}
+          {/* Tech stack card */}
           <SlideIn from="right" delay={200}>
-            <YStack gap="$4" style={{ minWidth: 340, flex: 1 } as any}>
+            <YStack
+              backgroundColor="$cardBackground"
+              borderRadius="$4"
+              borderWidth={1}
+              borderColor="$borderColor"
+              padding="$5"
+              gap="$4"
+              style={{ minWidth: 360, flex: 1 } as any}
+            >
               <Text fontWeight="bold" fontSize="$5" color="$color">Tech Stack</Text>
               <XStack flexWrap="wrap" gap="$2.5">
                 {TECH_STACK.map((tech) => (
                   <XStack
                     key={tech}
-                    backgroundColor="$cardBackground"
+                    backgroundColor="$subtleBackground"
                     paddingHorizontal="$3"
                     paddingVertical="$2"
                     borderRadius="$3"
