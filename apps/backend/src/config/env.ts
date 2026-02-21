@@ -21,6 +21,9 @@ const envSchema = z.object({
   EXPO_ACCESS_TOKEN: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
 
+  // Logging
+  REQUEST_LOGGING: envBoolean,
+
   // Email
   EMAIL_ENABLED: envBoolean,
   EMAIL_VERIFICATION_REQUIRED: envBoolean,

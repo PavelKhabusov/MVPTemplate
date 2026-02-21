@@ -64,6 +64,10 @@ export function LandingShowcase() {
         from { opacity: 0; transform: scale(0.6); }
         to { opacity: 1; transform: scale(1); }
       }
+      @media (max-width: 768px) {
+        #showcase-title { font-size: 26px !important; }
+        .showcase-card { min-width: 0 !important; }
+      }
     `
     document.head.appendChild(style)
     return () => { document.head.removeChild(style) }
@@ -118,7 +122,7 @@ export function LandingShowcase() {
       <View ref={sectionRef} style={{ maxWidth: 1200, width: '100%', gap: 32 } as any}>
         <SlideIn from="bottom">
           <YStack alignItems="center" gap="$2">
-            <Text fontWeight="bold" fontSize={36} color="$color" textAlign="center">
+            <Text nativeID="showcase-title" fontWeight="bold" fontSize={36} color="$color" textAlign="center">
               {t('landing.showcaseTitle')}
             </Text>
             <Text fontSize="$4" color="$mutedText" textAlign="center" maxWidth={500}>
@@ -131,6 +135,7 @@ export function LandingShowcase() {
           {/* Checklist card */}
           <SlideIn from="left" delay={100}>
             <YStack
+              className="showcase-card"
               backgroundColor="$cardBackground"
               borderRadius="$4"
               borderWidth={1}
@@ -172,6 +177,7 @@ export function LandingShowcase() {
           {/* Tech stack card */}
           <SlideIn from="right" delay={200}>
             <YStack
+              className="showcase-card"
               backgroundColor="$cardBackground"
               borderRadius="$4"
               borderWidth={1}

@@ -118,7 +118,7 @@ export function LandingFeatures() {
     <YStack id="features" paddingVertical="$10" paddingHorizontal="$5" alignItems="center">
       <YStack maxWidth={1200} width="100%" gap="$8">
         <YStack alignItems="center" gap="$2">
-          <Text fontWeight="bold" fontSize={36} color="$color" textAlign="center">
+          <Text nativeID="features-title" fontWeight="bold" fontSize={36} color="$color" textAlign="center">
             {t('landing.featuresTitle')}
           </Text>
           <Text fontSize="$4" color="$mutedText" textAlign="center" maxWidth={500}>
