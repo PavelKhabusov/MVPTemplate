@@ -20,7 +20,7 @@ const CORE_STACK = [
 ]
 
 const INTEGRATIONS = [
-  'Fastify v5', 'Drizzle ORM', 'PostgreSQL', 'Redis', 'TanStack Query', 'PostHog',
+  'Fastify v5', 'Drizzle ORM', 'PostgreSQL', 'Redis', 'Nodemailer', 'TanStack Query', 'PostHog',
 ]
 
 const ALL_TECH = [...CORE_STACK, ...INTEGRATIONS]
