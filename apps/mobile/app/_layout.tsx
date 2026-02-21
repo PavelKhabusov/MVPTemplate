@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Stack, SplashScreen, usePathname } from 'expo-router'
-import { TamaguiProvider, useTheme } from 'tamagui'
+import { Platform } from 'react-native'
+import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
+import { TamaguiProvider, XStack, useTheme } from 'tamagui'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar } from '@mvp/ui'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
@@ -27,6 +28,10 @@ function RootNavigator() {
 
   useScreenTracking(pathname)
 
+  if (Platform.OS === 'web') {
+    return <WebRootLayout />
+  }
+
   return (
     <Stack
       screenOptions={{
@@ -37,13 +42,39 @@ function RootNavigator() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t('common.back') }} />
-      <Stack.Screen name="sign-in" options={{ title: t('auth.signIn'), presentation: 'modal' }} />
-      <Stack.Screen name="sign-up" options={{ title: t('auth.signUp'), presentation: 'modal' }} />
+      <Stack.Screen name="sign-in" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="sign-up" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="+not-found" />
     </Stack>
+  )
+}
+
+function WebRootLayout() {
+  const { t } = useTranslation()
+  const pathname = usePathname()
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = user?.role === 'admin'
+
+  const navItems = [
+    { href: '/', label: t('tabs.home'), icon: 'home-outline' as const, iconFilled: 'home' as const, animation: 'bounce' as const },
+    { href: '/explore', label: t('tabs.explore'), icon: 'compass-outline' as const, iconFilled: 'compass' as const, animation: 'rotate' as const },
+    { href: '/profile', label: t('tabs.profile'), icon: 'person-outline' as const, iconFilled: 'person' as const, animation: 'pop' as const },
+    { href: '/settings', label: t('settings.title'), icon: 'settings-outline' as const, iconFilled: 'settings' as const, animation: 'wiggle' as const },
+    ...(isAdmin ? [{ href: '/admin', label: t('admin.title'), icon: 'shield-outline' as const, iconFilled: 'shield' as const, animation: 'bell' as const }] : []),
+  ]
+
+  return (
+    <XStack flex={1} backgroundColor="$background" style={{ height: '100vh' } as any}>
+      <WebSidebar
+        items={navItems}
+        currentPath={pathname}
+        onNavigate={(href) => router.push(href as any)}
+      />
+      <Slot />
+    </XStack>
   )
 }
 
@@ -77,7 +108,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (ready) {
-      SplashScreen.hideAsync()
+      SplashScreen.hideAsync().catch(() => {})
     }
   }, [ready])
 

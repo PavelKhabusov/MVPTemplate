@@ -27,6 +27,10 @@
     "noAccount": "¿No tienes cuenta?",
     "hasAccount": "¿Ya tienes cuenta?",
     "createAccount": "Crear cuenta",
+    "errorNetwork": "No se pudo conectar al servidor. Verifica tu conexión a internet.",
+    "errorInvalidCredentials": "Correo o contraseña incorrectos",
+    "errorEmailExists": "Este correo ya está registrado",
+    "errorTooMany": "Demasiados intentos. Inténtalo más tarde.",
     "validation": {
       "nameRequired": "El nombre es obligatorio",
       "emailRequired": "El correo es obligatorio",

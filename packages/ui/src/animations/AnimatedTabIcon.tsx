@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { useEffect } from 'react'
+import { StyleSheet } from 'react-native'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -39,26 +39,26 @@ export function AnimatedTabIcon({
   animation = 'bounce',
 }: AnimatedTabIconProps) {
   const progress = useSharedValue(0)
-  const prevFocused = useRef(focused)
 
   useEffect(() => {
-    // Only animate when becoming focused (not on initial render or unfocus)
-    if (focused && !prevFocused.current) {
+    if (focused) {
       switch (animation) {
         case 'bounce':
-          progress.value = 0
-          progress.value = withSpring(1, springConfig)
+          progress.value = withSequence(
+            withTiming(0, { duration: 0 }),
+            withSpring(1, springConfig),
+          )
           break
         case 'rotate':
-          progress.value = 0
           progress.value = withSequence(
+            withTiming(0, { duration: 0 }),
             withTiming(1, { duration: 300, easing: Easing.out(Easing.back(2)) }),
             withTiming(0, { duration: 0 }),
           )
           break
         case 'wiggle':
-          progress.value = 0
           progress.value = withSequence(
+            withTiming(0, { duration: 0 }),
             withTiming(1, { duration: 80 }),
             withTiming(-1, { duration: 80 }),
             withTiming(0.5, { duration: 80 }),
@@ -67,15 +67,15 @@ export function AnimatedTabIcon({
           )
           break
         case 'pop':
-          progress.value = 0
           progress.value = withSequence(
+            withTiming(0, { duration: 0 }),
             withSpring(1.3, { damping: 6, stiffness: 300, mass: 0.5 }),
             withSpring(1, { damping: 10, stiffness: 200 }),
           )
           break
         case 'bell':
-          progress.value = 0
           progress.value = withSequence(
+            withTiming(0, { duration: 0 }),
             withTiming(1, { duration: 60 }),
             withTiming(-1, { duration: 100 }),
             withTiming(0.7, { duration: 80 }),
@@ -85,13 +85,9 @@ export function AnimatedTabIcon({
           )
           break
       }
-    }
-
-    if (!focused && prevFocused.current) {
+    } else {
       progress.value = withTiming(0, { duration: 150 })
     }
-
-    prevFocused.current = focused
   }, [focused])
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -126,7 +122,7 @@ export function AnimatedTabIcon({
         return {
           transform: [
             { rotate: `${progress.value * 20}deg` },
-            { scale: focused ? 1 : interpolate(progress.value, [-1, 0, 1], [1.05, 1, 1.05]) },
+            { scale: interpolate(progress.value, [-1, 0, 1], [1.05, 1, 1.05]) },
           ],
         }
       default:

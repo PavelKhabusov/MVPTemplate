@@ -5,6 +5,16 @@ import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
 import { authApi } from './auth.service'
 
+function getErrorMessage(err: any, t: (key: string) => string): string {
+  if (!err?.response) return t('auth.errorNetwork')
+  const status = err.response.status
+  const message = err.response.data?.message
+  if (status === 401) return t('auth.errorInvalidCredentials')
+  if (status === 429) return t('auth.errorTooMany')
+  if (message) return message
+  return t('common.error')
+}
+
 export function SignInForm() {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
@@ -19,7 +29,7 @@ export function SignInForm() {
       await authApi.login({ email, password })
       router.replace('/')
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? t('common.error'))
+      setError(getErrorMessage(err, t))
     } finally {
       setLoading(false)
     }

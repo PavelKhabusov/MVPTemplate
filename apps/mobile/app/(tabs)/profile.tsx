@@ -8,7 +8,6 @@ import { useAuthStore } from '@mvp/store'
 import { FadeIn, SlideIn, AppAvatar, AppButton, AppCard, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { api } from '../../src/services/api'
-import { secureStorage } from '@mvp/lib'
 
 function ProfileStat({ value, label }: { value: string; label: string }) {
   return (
@@ -60,6 +59,12 @@ export default function ProfileScreen() {
             </AppButton>
             <AppButton variant="outline" onPress={() => router.push('/sign-up')}>
               {t('auth.createAccount')}
+            </AppButton>
+            <AppButton variant="outline" onPress={() => router.push('/settings')}>
+              <XStack gap="$2" alignItems="center">
+                <Ionicons name="settings-outline" size={18} color={theme.color.val} />
+                <Text color="$color" fontWeight="600">{t('settings.title')}</Text>
+              </XStack>
             </AppButton>
           </YStack>
         </SlideIn>
@@ -175,15 +180,8 @@ function EditProfileSection() {
         setUser({ ...user, ...data.data })
       }
       setEditing(false)
-    } catch (err: any) {
-      if (!err.response && user) {
-        const updated = { ...user, name: trimmedName, bio: trimmedBio || null, phone: trimmedPhone || null, location: trimmedLocation || null }
-        setUser(updated)
-        await secureStorage.set('demoUser', JSON.stringify(updated))
-        setEditing(false)
-      } else {
-        Alert.alert(t('common.error'), t('common.retry'))
-      }
+    } catch {
+      Alert.alert(t('common.error'), t('common.retry'))
     } finally {
       setSaving(false)
     }

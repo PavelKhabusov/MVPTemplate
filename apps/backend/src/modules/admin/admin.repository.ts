@@ -6,37 +6,29 @@ export const adminRepository = {
   async listUsers(page: number, limit: number, search?: string) {
     const offset = (page - 1) * limit
 
-    let whereClause
-    if (search) {
-      whereClause = or(
-        ilike(users.name, `%${search}%`),
-        ilike(users.email, `%${search}%`)
-      )
+    const searchFilter = search
+      ? or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`))
+      : undefined
+
+    const selectFields = {
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      avatarUrl: users.avatarUrl,
+      bio: users.bio,
+      phone: users.phone,
+      location: users.location,
+      role: users.role,
+      features: users.features,
+      createdAt: users.createdAt,
     }
 
+    const itemsQuery = db.select(selectFields).from(users).orderBy(users.createdAt).limit(limit).offset(offset)
+    const countQuery = db.select({ total: count() }).from(users)
+
     const [items, [{ total }]] = await Promise.all([
-      db
-        .select({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          avatarUrl: users.avatarUrl,
-          bio: users.bio,
-          phone: users.phone,
-          location: users.location,
-          role: users.role,
-          features: users.features,
-          createdAt: users.createdAt,
-        })
-        .from(users)
-        .where(whereClause)
-        .orderBy(users.createdAt)
-        .limit(limit)
-        .offset(offset),
-      db
-        .select({ total: count() })
-        .from(users)
-        .where(whereClause),
+      searchFilter ? itemsQuery.where(searchFilter) : itemsQuery,
+      searchFilter ? countQuery.where(searchFilter) : countQuery,
     ])
 
     return { items, total }

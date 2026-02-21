@@ -27,6 +27,10 @@
     "noAccount": "アカウントをお持ちでないですか？",
     "hasAccount": "すでにアカウントをお持ちですか？",
     "createAccount": "アカウント作成",
+    "errorNetwork": "サーバーに接続できません。インターネット接続を確認してください。",
+    "errorInvalidCredentials": "メールアドレスまたはパスワードが正しくありません",
+    "errorEmailExists": "このメールアドレスは既に登録されています",
+    "errorTooMany": "試行回数が多すぎます。しばらくしてからお試しください。",
     "validation": {
       "nameRequired": "名前は必須です",
       "emailRequired": "メールアドレスは必須です",

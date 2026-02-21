@@ -9,7 +9,7 @@ import { redis } from '../../config/redis'
 export async function authRoutes(app: FastifyInstance) {
   // Rate limit auth endpoints
   await app.register(rateLimit, {
-    max: 5,
+    max: 30,
     timeWindow: '1 minute',
     redis,
     keyGenerator: (request) => request.ip,

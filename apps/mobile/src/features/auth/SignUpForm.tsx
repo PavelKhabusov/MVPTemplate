@@ -5,6 +5,16 @@ import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
 import { authApi } from './auth.service'
 
+function getErrorMessage(err: any, t: (key: string) => string): string {
+  if (!err?.response) return t('auth.errorNetwork')
+  const status = err.response.status
+  const message = err.response.data?.message
+  if (status === 409) return t('auth.errorEmailExists')
+  if (status === 429) return t('auth.errorTooMany')
+  if (message) return message
+  return t('common.error')
+}
+
 export function SignUpForm() {
   const { t } = useTranslation()
   const [name, setName] = useState('')
@@ -36,7 +46,7 @@ export function SignUpForm() {
       await authApi.register({ email, password, name })
       router.replace('/')
     } catch (err: any) {
-      setErrors({ form: err?.response?.data?.message ?? t('common.error') })
+      setErrors({ form: getErrorMessage(err, t) })
     } finally {
       setLoading(false)
     }

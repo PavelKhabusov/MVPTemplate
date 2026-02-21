@@ -1,14 +1,9 @@
 import { Platform } from 'react-native'
-import { Tabs, Slot, usePathname, router } from 'expo-router'
-import { XStack, useTheme } from 'tamagui'
+import { Tabs, Slot } from 'expo-router'
+import { useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { WebSidebar, LottieTabIcon } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
-
-const homeIcon = require('../../assets/icons/home.json')
-const exploreIcon = require('../../assets/icons/explore.json')
-const profileIcon = require('../../assets/icons/profile.json')
+import { AnimatedTabIcon } from '@mvp/ui'
 
 export default function TabsLayout() {
   const { t } = useTranslation()
@@ -16,7 +11,7 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets()
 
   if (Platform.OS === 'web') {
-    return <WebLayout />
+    return <Slot />
   }
 
   return (
@@ -41,11 +36,13 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.home'),
           tabBarIcon: ({ color, focused }) => (
-            <LottieTabIcon
-              source={homeIcon}
+            <AnimatedTabIcon
+              name="home-outline"
+              nameFilled="home"
               focused={focused}
               color={color}
-              size={28}
+              size={24}
+              animation="bounce"
             />
           ),
         }}
@@ -55,11 +52,13 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.explore'),
           tabBarIcon: ({ color, focused }) => (
-            <LottieTabIcon
-              source={exploreIcon}
+            <AnimatedTabIcon
+              name="compass-outline"
+              nameFilled="compass"
               focused={focused}
               color={color}
-              size={28}
+              size={24}
+              animation="rotate"
             />
           ),
         }}
@@ -69,39 +68,17 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.profile'),
           tabBarIcon: ({ color, focused }) => (
-            <LottieTabIcon
-              source={profileIcon}
+            <AnimatedTabIcon
+              name="person-outline"
+              nameFilled="person"
               focused={focused}
               color={color}
-              size={28}
+              size={24}
+              animation="pop"
             />
           ),
         }}
       />
     </Tabs>
-  )
-}
-
-function WebLayout() {
-  const { t } = useTranslation()
-  const pathname = usePathname()
-  const theme = useTheme()
-
-  const navItems = [
-    { href: '/', label: t('tabs.home'), icon: 'home-outline' as const, iconFilled: 'home' as const },
-    { href: '/explore', label: t('tabs.explore'), icon: 'compass-outline' as const, iconFilled: 'compass' as const },
-    { href: '/profile', label: t('tabs.profile'), icon: 'person-outline' as const, iconFilled: 'person' as const },
-    { href: '/settings', label: t('settings.title'), icon: 'settings-outline' as const, iconFilled: 'settings' as const },
-  ]
-
-  return (
-    <XStack flex={1} backgroundColor="$background" style={{ height: '100vh' } as any}>
-      <WebSidebar
-        items={navItems}
-        currentPath={pathname}
-        onNavigate={(href) => router.push(href as any)}
-      />
-      <Slot />
-    </XStack>
   )
 }

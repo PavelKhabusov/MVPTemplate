@@ -15,6 +15,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     resizeMode: 'contain',
     backgroundColor: '#ffffff',
   },
+  // Note: splash above is for Expo Go fallback;
+  // expo-splash-screen plugin in plugins[] handles dev/production builds
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.mvptemplate.app',
@@ -32,7 +34,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     output: 'static',
     favicon: './assets/favicon.png',
   },
-  plugins: ['expo-router', 'expo-font', 'expo-secure-store'],
+  plugins: [
+    'expo-router',
+    'expo-font',
+    'expo-secure-store',
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/splash-icon.png',
+        imageWidth: 200,
+        resizeMode: 'contain',
+        backgroundColor: '#ffffff',
+      },
+    ],
+  ],
   experiments: {
     typedRoutes: true,
   },

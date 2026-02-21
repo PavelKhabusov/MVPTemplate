@@ -10,6 +10,7 @@ export function AppCard({
   children,
   animated = true,
   visible = true,
+  flex,
   ...props
 }: AppCardProps) {
   const card = (
@@ -23,6 +24,7 @@ export function AppCard({
       shadowOffset={{ width: 0, height: 2 }}
       shadowOpacity={1}
       shadowRadius={8}
+      flex={animated ? flex : flex}
       {...props}
     >
       {children}
@@ -39,6 +41,7 @@ export function AppCard({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ type: 'timing', duration: 200 }}
+          style={flex != null ? { flex: flex as number } : undefined}
         >
           {card}
         </MotiView>

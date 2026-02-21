@@ -27,6 +27,10 @@
     "noAccount": "Нет аккаунта?",
     "hasAccount": "Уже есть аккаунт?",
     "createAccount": "Создать аккаунт",
+    "errorNetwork": "Не удалось подключиться к серверу. Проверьте интернет-соединение.",
+    "errorInvalidCredentials": "Неверный email или пароль",
+    "errorEmailExists": "Этот email уже зарегистрирован",
+    "errorTooMany": "Слишком много попыток. Попробуйте позже.",
     "validation": {
       "nameRequired": "Введите имя",
       "emailRequired": "Введите email",

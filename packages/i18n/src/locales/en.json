@@ -27,6 +27,10 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "createAccount": "Create Account",
+    "errorNetwork": "Unable to connect to server. Check your internet connection.",
+    "errorInvalidCredentials": "Invalid email or password",
+    "errorEmailExists": "This email is already registered",
+    "errorTooMany": "Too many attempts. Please try again later.",
     "validation": {
       "nameRequired": "Name is required",
       "emailRequired": "Email is required",
