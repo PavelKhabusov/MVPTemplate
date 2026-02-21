@@ -5,9 +5,8 @@ import { router } from 'expo-router'
 import { SEO } from '../SEO'
 import { LandingNav } from './LandingNav'
 import { LandingHero } from './LandingHero'
-import { LandingStats } from './LandingStats'
 import { LandingFeatures } from './LandingFeatures'
-import { LandingHowItWorks } from './LandingHowItWorks'
+import { LandingTerminal } from './LandingTerminal'
 import { LandingShowcase } from './LandingShowcase'
 import { LandingCTA } from './LandingCTA'
 import { LandingFooter } from './LandingFooter'
@@ -30,9 +29,8 @@ export function LandingPage() {
       <LandingNav onNavigate={navigate} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <LandingHero onNavigate={navigate} />
-        <LandingStats />
         <LandingFeatures />
-        <LandingHowItWorks />
+        <LandingTerminal />
         <LandingShowcase />
         <LandingCTA onNavigate={navigate} />
         <LandingFooter onNavigate={navigate} />
