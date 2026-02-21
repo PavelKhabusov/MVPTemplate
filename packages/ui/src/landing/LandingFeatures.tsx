@@ -39,56 +39,55 @@ export function LandingFeatures() {
           </YStack>
         </SlideIn>
 
-        {/* Features grid — CSS grid for equal-height cards */}
-        <YStack
-          width="100%"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 16,
-          } as any}
-        >
-          {FEATURES.map((feature, i) => (
-            <SlideIn key={feature.title} from="bottom" delay={i * 80} style={{ height: '100%' } as any}>
-              <YStack
-                backgroundColor="$cardBackground"
-                borderRadius="$4"
-                borderWidth={1}
-                borderColor="$borderColor"
-                padding="$5"
-                gap="$3"
-                flex={1}
-                hoverStyle={{
-                  borderColor: '$accent',
-                  shadowColor: '$cardShadow',
-                  shadowRadius: 12,
-                  shadowOpacity: 1,
-                } as any}
+        {/* Features grid — rows of 3 */}
+        {[0, 3].map((rowStart) => (
+          <XStack key={rowStart} gap="$4" justifyContent="center" alignItems="stretch" flexWrap="wrap">
+            {FEATURES.slice(rowStart, rowStart + 3).map((feature, i) => (
+              <SlideIn
+                key={feature.title}
+                from="bottom"
+                delay={(rowStart + i) * 80}
+                style={{ flex: 1, minWidth: 300, maxWidth: 380 } as any}
               >
-                {/* Icon */}
                 <YStack
-                  width={48}
-                  height={48}
-                  borderRadius={12}
-                  alignItems="center"
-                  justifyContent="center"
-                  style={{
-                    background: `linear-gradient(135deg, ${theme.accentGradientStart.val}20, ${theme.accentGradientEnd.val}20)`,
+                  backgroundColor="$cardBackground"
+                  borderRadius="$4"
+                  borderWidth={1}
+                  borderColor="$borderColor"
+                  padding="$5"
+                  gap="$3"
+                  flex={1}
+                  hoverStyle={{
+                    borderColor: '$accent',
+                    shadowColor: '$cardShadow',
+                    shadowRadius: 12,
+                    shadowOpacity: 1,
                   } as any}
                 >
-                  <Ionicons name={feature.icon as any} size={24} color={theme.accent.val} />
-                </YStack>
+                  <YStack
+                    width={48}
+                    height={48}
+                    borderRadius={12}
+                    alignItems="center"
+                    justifyContent="center"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.accentGradientStart.val}20, ${theme.accentGradientEnd.val}20)`,
+                    } as any}
+                  >
+                    <Ionicons name={feature.icon as any} size={24} color={theme.accent.val} />
+                  </YStack>
 
-                <Text fontWeight="bold" fontSize="$5" color="$color">
-                  {t(`landing.${feature.title}` as any)}
-                </Text>
-                <Text fontSize="$3" color="$mutedText" lineHeight={22}>
-                  {t(`landing.${feature.desc}` as any)}
-                </Text>
-              </YStack>
-            </SlideIn>
-          ))}
-        </YStack>
+                  <Text fontWeight="bold" fontSize="$5" color="$color">
+                    {t(`landing.${feature.title}` as any)}
+                  </Text>
+                  <Text fontSize="$3" color="$mutedText" lineHeight={22}>
+                    {t(`landing.${feature.desc}` as any)}
+                  </Text>
+                </YStack>
+              </SlideIn>
+            ))}
+          </XStack>
+        ))}
       </YStack>
     </YStack>
   )
