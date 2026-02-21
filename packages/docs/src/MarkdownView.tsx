@@ -3,6 +3,7 @@ import { Platform, ScrollView } from 'react-native'
 import { YStack, useTheme } from 'tamagui'
 import Markdown from 'react-native-marked'
 import type { MarkedStyles } from 'react-native-marked'
+import { DocsRenderer } from './DocsRenderer'
 
 interface MarkdownViewProps {
   content: string
@@ -12,8 +13,9 @@ interface MarkdownViewProps {
 export function MarkdownView({ content, embedded }: MarkdownViewProps) {
   const theme = useTheme()
 
+  const renderer = useMemo(() => new DocsRenderer(), [])
+
   const styles = useMemo<MarkedStyles>(() => {
-    const codeBg = theme.subtleBackground.val
     const borderCol = theme.borderColor.val
     const monoFont = Platform.select({
       ios: 'Menlo',
@@ -23,15 +25,14 @@ export function MarkdownView({ content, embedded }: MarkdownViewProps) {
 
     return {
       code: {
-        backgroundColor: codeBg,
-        borderRadius: 8,
+        // Container style — overridden by custom renderer, but kept as fallback
+        backgroundColor: '#0d1117',
+        borderRadius: 10,
         padding: 16,
-        borderWidth: 1,
-        borderColor: borderCol,
         minWidth: '100%' as any,
       },
       codespan: {
-        backgroundColor: codeBg,
+        backgroundColor: theme.subtleBackground.val,
         borderRadius: 4,
         fontFamily: monoFont,
         fontSize: 14,
@@ -91,6 +92,7 @@ export function MarkdownView({ content, embedded }: MarkdownViewProps) {
       <Markdown
         value={content}
         styles={styles}
+        renderer={renderer}
         flatListProps={{
           scrollEnabled: false,
           style: { backgroundColor: theme.background.val },
@@ -101,7 +103,7 @@ export function MarkdownView({ content, embedded }: MarkdownViewProps) {
             text: theme.color.val,
             link: theme.accent.val,
             border: theme.borderColor.val,
-            code: theme.subtleBackground.val,
+            code: '#0d1117',
           },
         }}
       />
