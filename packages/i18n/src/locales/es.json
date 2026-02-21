@@ -227,12 +227,27 @@
     "bookmark": "Guardar",
     "unbookmark": "Eliminar"
   },
+  "meta": {
+    "homeDesc": "Tu panel con proyectos, tareas y actividad",
+    "exploreDesc": "Descubre plantillas, recursos y personas",
+    "settingsDesc": "Gestiona tu cuenta, tema y preferencias",
+    "signInDesc": "Inicia sesión en tu cuenta",
+    "signUpDesc": "Crea una nueva cuenta",
+    "forgotPasswordDesc": "Restablece tu contraseña por correo",
+    "resetPasswordDesc": "Establece una nueva contraseña",
+    "verifyEmailDesc": "Verifica tu correo electrónico",
+    "docsDesc": "Documentación y guías del proyecto",
+    "privacyDesc": "Política de privacidad",
+    "adminDesc": "Panel de administración para usuarios y funciones",
+    "editProfileDesc": "Actualiza tu información de perfil"
+  },
   "docs": {
     "title": "Documentación",
     "search": "Buscar documentación...",
     "expandAll": "Expandir todo",
     "collapseAll": "Contraer todo",
     "noResults": "No se encontraron páginas",
+    "selectPage": "Selecciona una página del menú lateral",
     "groupGettingStarted": "Primeros pasos",
     "groupConfiguration": "Configuración",
     "groupFeatures": "Características",

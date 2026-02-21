@@ -227,12 +227,27 @@
     "bookmark": "ブックマーク",
     "unbookmark": "削除"
   },
+  "meta": {
+    "homeDesc": "プロジェクト、タスク、アクティビティのダッシュボード",
+    "exploreDesc": "テンプレート、リソース、ユーザーを発見",
+    "settingsDesc": "アカウント、テーマ、設定の管理",
+    "signInDesc": "アカウントにログイン",
+    "signUpDesc": "新しいアカウントを作成",
+    "forgotPasswordDesc": "メールでパスワードをリセット",
+    "resetPasswordDesc": "新しいパスワードを設定",
+    "verifyEmailDesc": "メールアドレスを確認",
+    "docsDesc": "プロジェクトのドキュメントとガイド",
+    "privacyDesc": "プライバシーポリシー",
+    "adminDesc": "ユーザーと機能の管理パネル",
+    "editProfileDesc": "プロフィール情報を更新"
+  },
   "docs": {
     "title": "ドキュメント",
     "search": "ドキュメントを検索...",
     "expandAll": "すべて展開",
     "collapseAll": "すべて折りたたむ",
     "noResults": "ページが見つかりません",
+    "selectPage": "サイドバーからページを選択してください",
     "groupGettingStarted": "はじめに",
     "groupConfiguration": "設定",
     "groupFeatures": "機能",

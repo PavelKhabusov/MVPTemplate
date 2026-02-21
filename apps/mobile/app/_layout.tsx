@@ -13,6 +13,8 @@ import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
 import { storage } from '@mvp/lib'
+import { SEO } from '@mvp/ui'
+import { getPageById } from '@mvp/docs'
 import { queryClient } from '../src/services/query-client'
 import { AuthProvider } from '@mvp/auth'
 import { authApi } from '../src/services/auth'
@@ -34,6 +36,38 @@ SplashScreen.preventAutoHideAsync()
 const navColors = {
   light: { background: '#FAFAFA', tint: '#0891B2', text: '#0A0A0A' },
   dark: { background: '#09090B', tint: '#38E8FF', text: '#FAFAFA' },
+}
+
+const PAGE_META: Record<string, { titleKey: string; descKey: string }> = {
+  '/':               { titleKey: 'tabs.home',                descKey: 'meta.homeDesc' },
+  '/explore':        { titleKey: 'explore.title',            descKey: 'meta.exploreDesc' },
+  '/settings':       { titleKey: 'settings.title',           descKey: 'meta.settingsDesc' },
+  '/sign-in':        { titleKey: 'auth.signIn',              descKey: 'meta.signInDesc' },
+  '/sign-up':        { titleKey: 'auth.signUp',              descKey: 'meta.signUpDesc' },
+  '/forgot-password': { titleKey: 'auth.forgotPasswordTitle', descKey: 'meta.forgotPasswordDesc' },
+  '/reset-password': { titleKey: 'auth.resetPassword',       descKey: 'meta.resetPasswordDesc' },
+  '/verify-email':   { titleKey: 'auth.verifyEmailTitle',    descKey: 'meta.verifyEmailDesc' },
+  '/docs':           { titleKey: 'docs.title',               descKey: 'meta.docsDesc' },
+  '/privacy':        { titleKey: 'settings.privacy',         descKey: 'meta.privacyDesc' },
+  '/admin':          { titleKey: 'admin.title',              descKey: 'meta.adminDesc' },
+  '/edit-profile':   { titleKey: 'profile.editProfile',      descKey: 'meta.editProfileDesc' },
+  '/landing':        { titleKey: 'landing.heroTitle',        descKey: 'landing.heroSubtitle' },
+}
+
+function PageSEO() {
+  const { t } = useTranslation()
+  const pathname = usePathname()
+
+  const meta = PAGE_META[pathname]
+  if (meta) return <SEO title={t(meta.titleKey)} description={t(meta.descKey)} />
+
+  // Dynamic docs routes: /docs/quick-start, /docs/auth, etc.
+  if (pathname.startsWith('/docs/')) {
+    const docPage = getPageById(pathname.replace('/docs/', ''))
+    if (docPage) return <SEO title={t(docPage.titleKey)} description={t('meta.docsDesc')} />
+  }
+
+  return null
 }
 
 function RootNavigator() {
@@ -127,10 +161,18 @@ export default function RootLayout() {
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   })
 
+  const { i18n } = useTranslation()
+
   useEffect(() => {
     initI18n(savedLanguage)
     setI18nReady(true)
   }, [])
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.documentElement.lang = i18n.language
+    }
+  }, [i18n.language])
 
   useEffect(() => {
     // Initialize analytics — uses PostHog if posthog-react-native is installed and key provided
@@ -189,6 +231,7 @@ export default function RootLayout() {
                 onNavigateToSignIn={() => router.replace('/sign-in')}
                 onNavigateToForgotPassword={() => router.push('/forgot-password')}
               >
+                <PageSEO />
                 <RootNavigator />
               </AuthProvider>
             </PortalProvider>

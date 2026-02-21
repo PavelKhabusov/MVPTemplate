@@ -227,12 +227,27 @@
     "bookmark": "Bookmark",
     "unbookmark": "Remove"
   },
+  "meta": {
+    "homeDesc": "Your dashboard with projects, tasks, and activity",
+    "exploreDesc": "Discover templates, resources, and people",
+    "settingsDesc": "Manage your account, theme, and preferences",
+    "signInDesc": "Sign in to your account",
+    "signUpDesc": "Create a new account",
+    "forgotPasswordDesc": "Reset your password via email",
+    "resetPasswordDesc": "Set a new password for your account",
+    "verifyEmailDesc": "Verify your email address",
+    "docsDesc": "Project documentation and guides",
+    "privacyDesc": "Privacy policy",
+    "adminDesc": "Admin dashboard for user and feature management",
+    "editProfileDesc": "Update your profile information"
+  },
   "docs": {
     "title": "Documentation",
     "search": "Search documentation...",
     "expandAll": "Expand all",
     "collapseAll": "Collapse all",
     "noResults": "No pages found",
+    "selectPage": "Select a page from the sidebar to get started",
     "groupGettingStarted": "Getting Started",
     "groupConfiguration": "Configuration",
     "groupFeatures": "Features",
