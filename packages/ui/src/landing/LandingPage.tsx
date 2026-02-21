@@ -10,7 +10,11 @@ import { LandingCTA } from './LandingCTA'
 import { LandingFooter } from './LandingFooter'
 import { CookieBanner } from '../components/CookieBanner'
 
-export function LandingPage() {
+interface LandingPageProps {
+  logo?: any
+}
+
+export function LandingPage({ logo }: LandingPageProps) {
   if (Platform.OS !== 'web') return null
 
   const navigate = (href: string) => {
@@ -19,14 +23,14 @@ export function LandingPage() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <LandingNav onNavigate={navigate} />
+      <LandingNav onNavigate={navigate} logo={logo} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <LandingHero onNavigate={navigate} />
         <LandingFeatures />
         <LandingTerminal />
         <LandingShowcase />
         <LandingCTA onNavigate={navigate} />
-        <LandingFooter onNavigate={navigate} />
+        <LandingFooter onNavigate={navigate} logo={logo} />
       </ScrollView>
       <CookieBanner />
     </YStack>

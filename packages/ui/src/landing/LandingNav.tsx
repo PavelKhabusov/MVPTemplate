@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Platform, TouchableOpacity } from 'react-native'
+import { Image, Platform, TouchableOpacity } from 'react-native'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from '@mvp/i18n'
@@ -11,9 +11,10 @@ import { ScalePress } from '../animations/ScalePress'
 
 interface LandingNavProps {
   onNavigate: (href: string) => void
+  logo?: any
 }
 
-export function LandingNav({ onNavigate }: LandingNavProps) {
+export function LandingNav({ onNavigate, logo }: LandingNavProps) {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const { mode, setMode } = useThemeStore()
@@ -82,19 +83,23 @@ export function LandingNav({ onNavigate }: LandingNavProps) {
         {/* Logo */}
         <ScalePress onPress={() => onNavigate('/landing')}>
           <XStack alignItems="center" gap="$2">
-            <YStack
-              width={32}
-              height={32}
-              borderRadius={8}
-              alignItems="center"
-              justifyContent="center"
-              style={{
-                background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
-              } as any}
-            >
-              <Text color="white" fontWeight="bold" fontSize={16}>M</Text>
-            </YStack>
-            <Text fontWeight="bold" fontSize="$4" color="$color">MVPTemplate</Text>
+            {logo ? (
+              <Image source={logo} style={{ width: 32, height: 32, borderRadius: 8 }} />
+            ) : (
+              <YStack
+                width={32}
+                height={32}
+                borderRadius={8}
+                alignItems="center"
+                justifyContent="center"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
+                } as any}
+              >
+                <Text color="white" fontWeight="bold" fontSize={16}>M</Text>
+              </YStack>
+            )}
+            <Text fontWeight="bold" fontSize="$4" color="$color">MVP Template</Text>
           </XStack>
         </ScalePress>
 
