@@ -116,6 +116,7 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 |--------|------|------|-------------|
 | `POST` | `/auth/register` | — | Create account |
 | `POST` | `/auth/login` | — | Sign in |
+| `POST` | `/auth/google` | — | Google sign-in (feature flag) |
 | `POST` | `/auth/refresh` | — | Refresh tokens |
 | `POST` | `/auth/logout` | Yes | Sign out |
 | `GET` | `/auth/me` | Yes | Current user |
@@ -165,6 +166,7 @@ PORT=3000
 HOST=0.0.0.0
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:8081
+GOOGLE_CLIENT_ID=                                # optional — enables Google sign-in
 ```
 
 ### Mobile (`apps/mobile/.env`)
@@ -172,13 +174,39 @@ CORS_ORIGIN=http://localhost:8081
 ```env
 EXPO_PUBLIC_API_URL=http://localhost:3000
 EXPO_PUBLIC_POSTHOG_KEY=
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=               # optional — enables Google sign-in
 ```
 
 For physical devices use your local IP: `http://192.168.x.x:3000`
 
+## Google Sign-In (optional)
+
+Google sign-in is a **feature flag** — the button only appears when `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` is set.
+
+### Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create a project (or select existing)
+3. **OAuth consent screen** → External → fill app name, email, scopes (`email`, `profile`)
+4. **Credentials** → Create OAuth client ID:
+   - Application type: **Web application**
+   - Authorized redirect URIs: `https://auth.expo.io/@your-username/mvp-template`
+   - Copy the **Client ID**
+5. Set environment variables:
+   ```env
+   # apps/mobile/.env
+   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=123456789.apps.googleusercontent.com
+
+   # apps/backend/.env
+   GOOGLE_CLIENT_ID=123456789.apps.googleusercontent.com
+   ```
+6. Run `npm run db:push -w apps/backend` to update the schema (passwordHash is now nullable for OAuth users)
+
+For production builds (EAS), create additional OAuth clients for iOS and Android and pass `iosClientId` / `androidClientId` to `useIdTokenAuthRequest` in `GoogleSignInButton.tsx`.
+
 ## Features
 
-- **Auth**: JWT with refresh rotation, rate limiting (30 req/min)
+- **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in
 - **Admin Panel**: role/feature management, user stats, protected by middleware
 - **Profile**: name, bio, phone, location — inline editing
 - **Navigation**: animated tab bar (mobile), collapsible sidebar with gradient indicator (web)

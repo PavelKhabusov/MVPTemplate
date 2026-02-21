@@ -6,7 +6,7 @@ import { FadeIn, SlideIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SignUpForm } from '../src/features/auth/SignUpForm'
-import { GoogleSignInButton } from '../src/features/auth/GoogleSignInButton'
+import { GoogleSignInButton, isGoogleAuthEnabled } from '../src/features/auth/GoogleSignInButton'
 
 export default function SignUpScreen() {
   const { t } = useTranslation()
@@ -36,18 +36,20 @@ export default function SignUpScreen() {
 
           <SignUpForm />
 
-          <SlideIn from="bottom" delay={500}>
-            <YStack width="100%" maxWidth={400} gap="$3">
-              <XStack alignItems="center" gap="$3">
-                <Separator flex={1} />
-                <Text color="$mutedText" fontSize="$2">{t('auth.or')}</Text>
-                <Separator flex={1} />
-              </XStack>
-              <GoogleSignInButton />
-            </YStack>
-          </SlideIn>
+          {isGoogleAuthEnabled && (
+            <SlideIn from="bottom" delay={500}>
+              <YStack width="100%" maxWidth={400} gap="$3">
+                <XStack alignItems="center" gap="$3">
+                  <Separator flex={1} />
+                  <Text color="$mutedText" fontSize="$2">{t('auth.or')}</Text>
+                  <Separator flex={1} />
+                </XStack>
+                <GoogleSignInButton />
+              </YStack>
+            </SlideIn>
+          )}
 
-          <SlideIn from="bottom" delay={600}>
+          <SlideIn from="bottom" delay={isGoogleAuthEnabled ? 600 : 500}>
             <Text color="$mutedText" textAlign="center">
               {t('auth.hasAccount')}{' '}
               <Link href="/sign-in">

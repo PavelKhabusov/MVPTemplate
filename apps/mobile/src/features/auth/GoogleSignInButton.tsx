@@ -12,6 +12,9 @@ WebBrowser.maybeCompleteAuthSession()
 
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? ''
 
+/** Returns true when Google sign-in is configured via env var */
+export const isGoogleAuthEnabled = GOOGLE_WEB_CLIENT_ID.length > 0
+
 export function GoogleSignInButton() {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -21,6 +24,8 @@ export function GoogleSignInButton() {
   const [, , promptAsync] = Google.useIdTokenAuthRequest({
     clientId: GOOGLE_WEB_CLIENT_ID,
   })
+
+  if (!isGoogleAuthEnabled) return null
 
   const handlePress = async () => {
     setError('')
