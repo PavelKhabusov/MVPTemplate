@@ -7,6 +7,7 @@ type CookieConsent = 'accepted' | 'declined' | null
 interface CookieConsentState {
   consent: CookieConsent
   setConsent: (choice: 'accepted' | 'declined') => void
+  resetConsent: () => void
 }
 
 export const useCookieConsentStore = create<CookieConsentState>()(
@@ -14,6 +15,7 @@ export const useCookieConsentStore = create<CookieConsentState>()(
     (set) => ({
       consent: null,
       setConsent: (choice) => set({ consent: choice }),
+      resetConsent: () => set({ consent: null }),
     }),
     {
       name: 'cookie-consent',

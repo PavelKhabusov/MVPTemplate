@@ -5,11 +5,12 @@ import { Ionicons } from '@expo/vector-icons'
 import { MotiView } from 'moti'
 import { useTranslation } from '@mvp/i18n'
 import { useIsMobileWeb } from '@mvp/ui'
+import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
 
-function FlagRow({ flag, value, onToggle }: { flag: TemplateFlag; value: boolean; onToggle: () => void }) {
+function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value: boolean; onToggle: () => void; action?: { label: string; onPress: () => void } }) {
   const theme = useTheme()
   const { t } = useTranslation()
 
@@ -32,25 +33,43 @@ function FlagRow({ flag, value, onToggle }: { flag: TemplateFlag; value: boolean
             {t(flag.labelKey)}
           </Text>
         </XStack>
-        <YStack
-          width={36}
-          height={20}
-          borderRadius={10}
-          backgroundColor={value ? '$accent' : '$borderColor'}
-          justifyContent="center"
-          paddingHorizontal={2}
-        >
-          <MotiView
-            animate={{ translateX: value ? 16 : 0 }}
-            transition={{ type: 'timing', duration: 150 }}
-            style={{
-              width: 16,
-              height: 16,
-              borderRadius: 8,
-              backgroundColor: 'white',
-            }}
-          />
-        </YStack>
+        <XStack alignItems="center" gap="$2">
+          {action && value && (
+            <Pressable onPress={(e) => { e.stopPropagation(); action.onPress() }}>
+              <XStack
+                paddingHorizontal="$1.5"
+                paddingVertical={2}
+                borderRadius="$1"
+                borderWidth={1}
+                borderColor="$borderColor"
+                hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+              >
+                <Text fontSize={10} color="$mutedText" fontWeight="600">
+                  {action.label}
+                </Text>
+              </XStack>
+            </Pressable>
+          )}
+          <YStack
+            width={36}
+            height={20}
+            borderRadius={10}
+            backgroundColor={value ? '$accent' : '$borderColor'}
+            justifyContent="center"
+            paddingHorizontal={2}
+          >
+            <MotiView
+              animate={{ translateX: value ? 16 : 0 }}
+              transition={{ type: 'timing', duration: 150 }}
+              style={{
+                width: 16,
+                height: 16,
+                borderRadius: 8,
+                backgroundColor: 'white',
+              }}
+            />
+          </YStack>
+        </XStack>
       </XStack>
     </Pressable>
   )
@@ -88,6 +107,7 @@ export function TemplateConfigSidebar() {
   const overrides = useTemplateConfigStore((s) => s.overrides)
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
+  const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
 
   const envOutput = useMemo(() => buildEnvOutput(overrides), [overrides])
@@ -176,6 +196,7 @@ export function TemplateConfigSidebar() {
               flag={flag}
               value={getFlagValue(flag.key, flag.defaultValue)}
               onToggle={() => setFlag(flag.key, !getFlagValue(flag.key, flag.defaultValue))}
+              action={flag.key === 'cookieBanner' ? { label: t('templateConfig.showBanner'), onPress: resetConsent } : undefined}
             />
           ))}
         </YStack>

@@ -304,6 +304,7 @@
     "analytics": "Analíticas internas",
     "posthog": "PostHog",
     "cookieBanner": "Banner de cookies",
-    "pushNotifications": "Notificaciones push"
+    "pushNotifications": "Notificaciones push",
+    "showBanner": "Mostrar"
   }
 }

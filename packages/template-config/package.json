@@ -17,6 +17,7 @@
     "zustand": "*",
     "@mvp/lib": "*",
     "@mvp/i18n": "*",
-    "@mvp/ui": "*"
+    "@mvp/ui": "*",
+    "@mvp/store": "*"
   }
 }
