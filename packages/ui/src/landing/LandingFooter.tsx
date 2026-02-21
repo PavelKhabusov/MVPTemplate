@@ -64,7 +64,7 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
               {t('landing.footerResources')}
             </Text>
             <FooterLink label={t('landing.footerDocs')} onPress={() => {}} />
-            <FooterLink label={t('landing.footerGitHub')} onPress={() => window.open('https://github.com', '_blank')} />
+            <FooterLink label={t('landing.footerGitHub')} onPress={() => window.open('https://github.com/PavelKhabusov/MVPTemplate', '_blank')} />
             <FooterLink label={t('landing.footerCommunity')} onPress={() => {}} />
           </YStack>
 

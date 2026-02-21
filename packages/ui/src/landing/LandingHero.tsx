@@ -90,7 +90,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
               </XStack>
             </ScalePress>
 
-            <ScalePress onPress={() => window.open('https://github.com', '_blank')}>
+            <ScalePress onPress={() => window.open('https://github.com/PavelKhabusov/MVPTemplate', '_blank')}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"
