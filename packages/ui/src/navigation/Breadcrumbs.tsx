@@ -30,8 +30,8 @@ export function Breadcrumbs({ pathname }: BreadcrumbsProps) {
           )}
           {i < crumbs.length - 1 ? (
             <Text
+              // @ts-expect-error — web-only tag prop
               tag="a"
-              // @ts-ignore — web-only href prop
               href={crumb.href}
               color="$primary"
               fontSize="$2"

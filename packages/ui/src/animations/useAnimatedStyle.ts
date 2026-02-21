@@ -18,11 +18,13 @@ export function useShake() {
     transform: [{ translateX: offset.value }],
   }))
 
+  const shakeConfig = { ...SPRING_CONFIG, stiffness: 400 } as Parameters<typeof withSpring>[1]
+
   const trigger = () => {
-    offset.value = withSpring(10, { ...SPRING_CONFIG, stiffness: 400 }, () => {
-      offset.value = withSpring(-8, { ...SPRING_CONFIG, stiffness: 400 }, () => {
-        offset.value = withSpring(6, { ...SPRING_CONFIG, stiffness: 400 }, () => {
-          offset.value = withSpring(-4, { ...SPRING_CONFIG, stiffness: 400 }, () => {
+    offset.value = withSpring(10, shakeConfig, () => {
+      offset.value = withSpring(-8, shakeConfig, () => {
+        offset.value = withSpring(6, shakeConfig, () => {
+          offset.value = withSpring(-4, shakeConfig, () => {
             offset.value = withSpring(0, SPRING_CONFIG)
           })
         })

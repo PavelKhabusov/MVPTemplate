@@ -7,8 +7,6 @@ export const SPRING_CONFIG: WithSpringConfig = {
   stiffness: 150,
   mass: 1,
   overshootClamping: false,
-  restDisplacementThreshold: 0.01,
-  restSpeedThreshold: 0.01,
 }
 
 /** Gentle spring for larger elements */

@@ -302,7 +302,7 @@ export default function AdminScreen() {
                   onChangeText={setSearch}
                   onSubmitEditing={handleSearch}
                   placeholder={t('common.search')}
-                  placeholderTextColor={theme.mutedText.val}
+                  placeholderTextColor={theme.mutedText.val as any}
                   backgroundColor="$subtleBackground"
                   borderWidth={1}
                   borderColor="$borderColor"
@@ -501,7 +501,7 @@ export default function AdminScreen() {
                   onCheckedChange={() => toggleFeature(feature)}
                   backgroundColor={editFeatures.includes(feature) ? '$accent' : '$borderColor'}
                 >
-                  <Switch.Thumb animation="quick" />
+                  <Switch.Thumb {...{ animation: 'quick' } as any} />
                 </Switch>
               </XStack>
             ))}

@@ -11,7 +11,7 @@ export interface LocationResult {
 export function useLocationSearch(query: string) {
   const [results, setResults] = useState<LocationResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current)

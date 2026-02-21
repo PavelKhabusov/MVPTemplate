@@ -20,9 +20,11 @@ interface JwtPayload {
 }
 
 function generateAccessToken(userId: string, email: string): string {
-  return jwt.sign({ sub: userId, email } satisfies JwtPayload, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_EXPIRY,
-  })
+  return jwt.sign(
+    { sub: userId, email } satisfies JwtPayload,
+    env.JWT_ACCESS_SECRET,
+    { expiresIn: env.JWT_ACCESS_EXPIRY } as jwt.SignOptions,
+  )
 }
 
 function generateRefreshToken(): string {

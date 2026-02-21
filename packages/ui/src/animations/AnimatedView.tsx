@@ -22,7 +22,7 @@ interface AnimatedViewProps extends Omit<MotiProps, 'style'> {
  */
 export function AnimatedView({ children, style, ...motiProps }: AnimatedViewProps) {
   return (
-    <MotiView style={style} {...motiProps}>
+    <MotiView style={style} {...(motiProps as any)}>
       {children}
     </MotiView>
   )

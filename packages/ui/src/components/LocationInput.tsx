@@ -34,7 +34,7 @@ export function LocationInput({
       <XStack
         backgroundColor="$subtleBackground"
         borderWidth={1}
-        borderColor={focused ? theme.accent.val : '$borderColor'}
+        borderColor={focused ? (theme.accent.val as any) : '$borderColor'}
         borderRadius="$3"
         height={44}
         alignItems="center"
@@ -49,7 +49,7 @@ export function LocationInput({
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 200)}
           placeholder={placeholder ?? 'Search city or address...'}
-          placeholderTextColor={theme.mutedText.val}
+          placeholderTextColor={theme.mutedText.val as any}
           borderWidth={0}
           backgroundColor="transparent"
           height={44}

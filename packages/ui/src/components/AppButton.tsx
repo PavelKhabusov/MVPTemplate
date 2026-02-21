@@ -65,7 +65,6 @@ export function AppButton({
       <Button
         size={sizeToToken[size]}
         borderRadius="$3"
-        fontWeight="600"
         disabled={isDisabled}
         opacity={isDisabled ? 0.5 : 1}
         role="button"

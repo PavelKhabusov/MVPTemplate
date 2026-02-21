@@ -32,8 +32,8 @@ export function WebHeader() {
 function NavLink({ href, label }: { href: string; label: string }) {
   return (
     <Text
+      // @ts-expect-error — web-only tag prop
       tag="a"
-      // @ts-ignore — web-only href prop
       href={href}
       color="$color"
       fontSize="$3"

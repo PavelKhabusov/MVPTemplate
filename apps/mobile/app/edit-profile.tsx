@@ -243,7 +243,7 @@ export default function EditProfileScreen() {
                 value={name}
                 onChangeText={setName}
                 placeholder={t('profile.name')}
-                placeholderTextColor={theme.mutedText.val}
+                placeholderTextColor={theme.mutedText.val as any}
                 {...inputStyle}
               />
               <YStack height={0.5} backgroundColor="$borderColor" marginLeft={0} />
@@ -251,7 +251,7 @@ export default function EditProfileScreen() {
                 value={bio}
                 onChangeText={setBio}
                 placeholder={t('profile.bio')}
-                placeholderTextColor={theme.mutedText.val}
+                placeholderTextColor={theme.mutedText.val as any}
                 {...inputStyle}
                 height={80}
                 multiline
