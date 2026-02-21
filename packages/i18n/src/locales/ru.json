@@ -167,7 +167,7 @@
     "featureAuth": "Аутентификация",
     "featureAuthDesc": "JWT с email/паролем и Google OAuth. Ролевой контроль доступа включён.",
     "featureBackend": "Full-Stack бэкенд",
-    "featureBackendDesc": "Fastify API с Drizzle ORM, PostgreSQL, Redis и SMTP-почта через любой провайдер как feature flag.",
+    "featureBackendDesc": "Fastify API с Drizzle ORM, PostgreSQL, Redis и отправка email через любой SMTP — включается одной настройкой.",
     "featureAnalytics": "Встроенная аналитика",
     "featureAnalyticsDesc": "Интеграция с PostHog: отслеживание сессий, экранов и админ-панель.",
     "showcaseTitle": "И это ещё не всё",

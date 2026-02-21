@@ -167,7 +167,7 @@
     "featureAuth": "Autenticación",
     "featureAuthDesc": "JWT con email/contraseña y Google OAuth. Control de acceso por roles incluido.",
     "featureBackend": "Backend completo",
-    "featureBackendDesc": "API Fastify con Drizzle ORM, PostgreSQL, Redis y email SMTP con cualquier proveedor como feature flag.",
+    "featureBackendDesc": "API Fastify con Drizzle ORM, PostgreSQL, Redis y envío de email por cualquier SMTP — se activa con un solo ajuste.",
     "featureAnalytics": "Analítica integrada",
     "featureAnalyticsDesc": "Integración PostHog con seguimiento de sesiones, pantallas y panel de admin.",
     "showcaseTitle": "Y eso no es todo",
