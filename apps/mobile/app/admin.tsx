@@ -178,13 +178,13 @@ export default function AdminScreen() {
         {stats && (
           <FadeIn>
             <XStack gap="$3">
-              <AppCard flex={1}>
+              <AppCard flex={1} animated={false}>
                 <YStack alignItems="center" gap="$1">
                   <Text fontSize="$7" fontWeight="bold" color="$accent">{stats.totalUsers}</Text>
                   <Text fontSize="$1" color="$mutedText">{t('admin.totalUsers')}</Text>
                 </YStack>
               </AppCard>
-              <AppCard flex={1}>
+              <AppCard flex={1} animated={false}>
                 <YStack alignItems="center" gap="$1">
                   <Text fontSize="$7" fontWeight="bold" color="$accent">{stats.newThisWeek}</Text>
                   <Text fontSize="$1" color="$mutedText">{t('admin.newThisWeek')}</Text>
