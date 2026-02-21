@@ -295,12 +295,14 @@
     "backend": "バックエンド",
     "server": "サーバー",
     "reset": "リセット",
+    "copy": "コピー",
     "docs": "ドキュメント",
     "email": "メールシステム",
     "emailVerification": "メール認証",
     "googleAuth": "Googleログイン",
     "requestLogging": "リクエストログ",
-    "analytics": "アナリティクス",
+    "analytics": "内部アナリティクス",
+    "posthog": "PostHog",
     "cookieBanner": "Cookieバナー",
     "pushNotifications": "プッシュ通知"
   }

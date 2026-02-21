@@ -6,7 +6,7 @@ import { useTranslation } from '@mvp/i18n'
 import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
-import { useTemplateConfigStore } from '@mvp/template-config'
+import { useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { api } from '../src/services/api'
 
 const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
@@ -169,7 +169,8 @@ export default function AdminScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users'>('analytics')
+  const analyticsEnabled = useTemplateFlag('analytics', true)
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users'>(analyticsEnabled ? 'analytics' : 'users')
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
@@ -192,7 +193,9 @@ export default function AdminScreen() {
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
-        api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null),
+        analyticsEnabled
+          ? api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null)
+          : Promise.resolve(null),
       ])
       setUsers(usersRes.data.data)
       setTotalPages(usersRes.data.pagination?.totalPages ?? 1)
@@ -204,7 +207,7 @@ export default function AdminScreen() {
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, analyticsEnabled])
 
   useEffect(() => {
     fetchData()
@@ -298,18 +301,20 @@ export default function AdminScreen() {
       <YStack padding="$4" paddingTop={Platform.OS === 'web' ? '$4' : 16} gap="$3">
         {/* Tab Switcher */}
         <XStack gap="$2">
-          <ScalePress onPress={() => setActiveTab('analytics')}>
-            <XStack
-              backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              borderRadius="$3"
-            >
-              <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                {t('admin.analytics')}
-              </Text>
-            </XStack>
-          </ScalePress>
+          {analyticsEnabled && (
+            <ScalePress onPress={() => setActiveTab('analytics')}>
+              <XStack
+                backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+              >
+                <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.analytics')}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
           <ScalePress onPress={() => setActiveTab('users')}>
             <XStack
               backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
@@ -401,7 +406,7 @@ export default function AdminScreen() {
       </YStack>
 
       {/* Analytics Tab */}
-      {activeTab === 'analytics' && (
+      {analyticsEnabled && activeTab === 'analytics' && (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
           {analyticsData ? (
             <FadeIn>

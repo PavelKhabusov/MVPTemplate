@@ -295,12 +295,14 @@
     "backend": "Бэкенд",
     "server": "Сервер",
     "reset": "Сбросить",
+    "copy": "Копировать",
     "docs": "Документация",
     "email": "Система email",
     "emailVerification": "Верификация email",
     "googleAuth": "Вход через Google",
     "requestLogging": "Логирование запросов",
-    "analytics": "Аналитика",
+    "analytics": "Внутренняя аналитика",
+    "posthog": "PostHog",
     "cookieBanner": "Баннер cookie",
     "pushNotifications": "Push-уведомления"
   }

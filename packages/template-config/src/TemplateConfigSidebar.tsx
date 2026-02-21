@@ -1,11 +1,84 @@
+import { useMemo } from 'react'
 import { Platform, ScrollView, Pressable } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { AppSwitch } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
-import { AnimatePresence, MotiView } from 'moti'
+import { MotiView } from 'moti'
 import { useTranslation } from '@mvp/i18n'
+import { useIsMobileWeb } from '@mvp/ui'
 import { useTemplateConfigStore } from './store'
 import { TEMPLATE_FLAGS } from './flags'
+import type { TemplateFlag } from './flags'
+
+function FlagRow({ flag, value, onToggle }: { flag: TemplateFlag; value: boolean; onToggle: () => void }) {
+  const theme = useTheme()
+  const { t } = useTranslation()
+
+  return (
+    <Pressable onPress={onToggle}>
+      <XStack
+        alignItems="center"
+        justifyContent="space-between"
+        paddingHorizontal="$3"
+        paddingVertical="$2"
+        hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+      >
+        <XStack alignItems="center" gap="$2" flex={1}>
+          <Ionicons
+            name={flag.icon}
+            size={16}
+            color={value ? theme.accent.val : theme.mutedText.val}
+          />
+          <Text fontSize="$2" color="$color" flex={1} numberOfLines={1}>
+            {t(flag.labelKey)}
+          </Text>
+        </XStack>
+        <YStack
+          width={36}
+          height={20}
+          borderRadius={10}
+          backgroundColor={value ? '$accent' : '$borderColor'}
+          justifyContent="center"
+          paddingHorizontal={2}
+        >
+          <MotiView
+            animate={{ translateX: value ? 16 : 0 }}
+            transition={{ type: 'timing', duration: 150 }}
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: 8,
+              backgroundColor: 'white',
+            }}
+          />
+        </YStack>
+      </XStack>
+    </Pressable>
+  )
+}
+
+function buildEnvOutput(overrides: Record<string, boolean>): string {
+  const lines: string[] = ['# Template Configuration']
+
+  for (const flag of TEMPLATE_FLAGS) {
+    if (!flag.envVar) continue
+    const value = overrides[flag.key] !== undefined ? overrides[flag.key] : flag.defaultValue
+
+    if (flag.envType === 'boolean') {
+      lines.push(`${flag.envVar}=${value}`)
+    } else {
+      if (value) {
+        lines.push(`${flag.envVar}=your-${flag.envVar.toLowerCase().replace(/_/g, '-')}`)
+      } else {
+        lines.push(`# ${flag.envVar}=`)
+      }
+    }
+  }
+
+  lines.push('')
+  lines.push('EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG=false')
+
+  return lines.join('\n')
+}
 
 export function TemplateConfigSidebar() {
   const { t } = useTranslation()
@@ -15,8 +88,13 @@ export function TemplateConfigSidebar() {
   const overrides = useTemplateConfigStore((s) => s.overrides)
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
+  const isMobile = useIsMobileWeb()
+
+  const envOutput = useMemo(() => buildEnvOutput(overrides), [overrides])
 
   if (Platform.OS !== 'web') return null
+  if (isMobile) return null
+  if (!sidebarOpen) return null
 
   const frontendFlags = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend')
   const backendFlags = TEMPLATE_FLAGS.filter((f) => f.scope !== 'frontend')
@@ -26,223 +104,177 @@ export function TemplateConfigSidebar() {
 
   const hasOverrides = Object.keys(overrides).length > 0
 
-  return (
-    <AnimatePresence>
-      {sidebarOpen && (
-        <>
-          {/* Backdrop */}
-          <MotiView
-            from={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'timing', duration: 200 }}
-            style={{
-              position: 'fixed' as any,
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.3)',
-              zIndex: 999,
-            } as any}
-          >
-            <Pressable
-              style={{ flex: 1 }}
-              onPress={() => setSidebarOpen(false)}
-            />
-          </MotiView>
+  const handleCopy = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(envOutput)
+    }
+  }
 
-          {/* Sidebar */}
-          <MotiView
-            from={{ translateX: 320 }}
-            animate={{ translateX: 0 }}
-            exit={{ translateX: 320 }}
-            transition={{ type: 'timing', duration: 250 }}
-            style={{
-              position: 'fixed' as any,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: 320,
-              zIndex: 1000,
-              backgroundColor: theme.background.val,
-              borderLeftWidth: 1,
-              borderLeftColor: theme.borderColor.val,
-              boxShadow: '-4px 0 24px rgba(0,0,0,0.1)',
-            } as any}
+  return (
+    <YStack
+      width={300}
+      height="100%"
+      borderLeftWidth={1}
+      borderLeftColor="$borderColor"
+      backgroundColor="$background"
+      style={{ flexShrink: 0, overflow: 'hidden' } as any}
+    >
+      {/* Header */}
+      <XStack
+        alignItems="center"
+        justifyContent="space-between"
+        paddingHorizontal="$3"
+        paddingVertical="$2.5"
+        borderBottomWidth={1}
+        borderBottomColor="$borderColor"
+      >
+        <XStack alignItems="center" gap="$2">
+          <Ionicons name="construct-outline" size={18} color={theme.accent.val} />
+          <Text fontWeight="700" fontSize="$3" color="$color">
+            {t('templateConfig.title')}
+          </Text>
+        </XStack>
+        <Pressable onPress={() => setSidebarOpen(false)}>
+          <YStack
+            width={28}
+            height={28}
+            borderRadius="$2"
+            alignItems="center"
+            justifyContent="center"
+            hoverStyle={{ backgroundColor: '$backgroundHover' }}
           >
-            <YStack flex={1}>
-              {/* Header */}
+            <Ionicons name="close" size={18} color={theme.mutedText.val} />
+          </YStack>
+        </Pressable>
+      </XStack>
+
+      {/* Content */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingVertical: 12 }}
+      >
+        <Text fontSize="$1" color="$mutedText" paddingHorizontal="$3" marginBottom="$3" lineHeight={16}>
+          {t('templateConfig.description')}
+        </Text>
+
+        {/* Frontend Flags */}
+        <Text
+          fontSize={11}
+          fontWeight="700"
+          color="$mutedText"
+          textTransform="uppercase"
+          letterSpacing={1}
+          paddingHorizontal="$3"
+          marginBottom="$1"
+        >
+          {t('templateConfig.frontend')}
+        </Text>
+        <YStack marginBottom="$3">
+          {frontendFlags.map((flag) => (
+            <FlagRow
+              key={flag.key}
+              flag={flag}
+              value={getFlagValue(flag.key, flag.defaultValue)}
+              onToggle={() => setFlag(flag.key, !getFlagValue(flag.key, flag.defaultValue))}
+            />
+          ))}
+        </YStack>
+
+        {/* Backend Flags */}
+        <XStack alignItems="center" gap="$1.5" paddingHorizontal="$3" marginBottom="$1">
+          <Text
+            fontSize={11}
+            fontWeight="700"
+            color="$mutedText"
+            textTransform="uppercase"
+            letterSpacing={1}
+          >
+            {t('templateConfig.backend')}
+          </Text>
+          <XStack
+            backgroundColor="$subtleBackground"
+            paddingHorizontal="$1"
+            paddingVertical={1}
+            borderRadius="$1"
+          >
+            <Text fontSize={9} color="$mutedText" fontWeight="600">
+              .env
+            </Text>
+          </XStack>
+        </XStack>
+        <YStack marginBottom="$3">
+          {backendFlags.map((flag) => (
+            <FlagRow
+              key={flag.key}
+              flag={flag}
+              value={getFlagValue(flag.key, flag.defaultValue)}
+              onToggle={() => setFlag(flag.key, !getFlagValue(flag.key, flag.defaultValue))}
+            />
+          ))}
+        </YStack>
+
+        {/* .env Output */}
+        <YStack paddingHorizontal="$3" gap="$2">
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontSize={11} fontWeight="700" color="$mutedText" textTransform="uppercase" letterSpacing={1}>
+              .env
+            </Text>
+            <Pressable onPress={handleCopy}>
               <XStack
                 alignItems="center"
-                justifyContent="space-between"
-                paddingHorizontal="$4"
-                paddingVertical="$3"
-                borderBottomWidth={1}
-                borderBottomColor="$borderColor"
+                gap="$1"
+                paddingHorizontal="$2"
+                paddingVertical="$1"
+                borderRadius="$2"
+                hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
               >
-                <XStack alignItems="center" gap="$2">
-                  <Ionicons name="construct-outline" size={20} color={theme.accent.val} />
-                  <Text fontWeight="700" fontSize="$4" color="$color">
-                    {t('templateConfig.title')}
-                  </Text>
-                </XStack>
-                <Pressable onPress={() => setSidebarOpen(false)}>
-                  <YStack
-                    width={32}
-                    height={32}
-                    borderRadius="$2"
-                    alignItems="center"
-                    justifyContent="center"
-                    hoverStyle={{ backgroundColor: '$backgroundHover' }}
-                  >
-                    <Ionicons name="close" size={20} color={theme.mutedText.val} />
-                  </YStack>
-                </Pressable>
-              </XStack>
-
-              {/* Content */}
-              <ScrollView
-                style={{ flex: 1 }}
-                contentContainerStyle={{ padding: 16, gap: 16 }}
-              >
-                <Text fontSize="$2" color="$mutedText" lineHeight={18}>
-                  {t('templateConfig.description')}
+                <Ionicons name="copy-outline" size={12} color={theme.mutedText.val} />
+                <Text fontSize={11} color="$mutedText">
+                  {t('templateConfig.copy')}
                 </Text>
+              </XStack>
+            </Pressable>
+          </XStack>
+          <YStack
+            backgroundColor="$subtleBackground"
+            borderRadius="$2"
+            borderWidth={1}
+            borderColor="$borderColor"
+            padding="$2"
+          >
+            <Text
+              fontSize={11}
+              color="$color"
+              style={{ fontFamily: 'monospace', whiteSpace: 'pre', userSelect: 'all' } as any}
+            >
+              {envOutput}
+            </Text>
+          </YStack>
+        </YStack>
 
-                {/* Frontend Flags */}
-                <YStack gap="$2">
-                  <Text
-                    fontSize="$1"
-                    fontWeight="700"
-                    color="$mutedText"
-                    textTransform="uppercase"
-                    letterSpacing={1}
-                  >
-                    {t('templateConfig.frontend')}
-                  </Text>
-                  <YStack
-                    backgroundColor="$cardBackground"
-                    borderRadius="$3"
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                    overflow="hidden"
-                  >
-                    {frontendFlags.map((flag, i) => (
-                      <XStack
-                        key={flag.key}
-                        alignItems="center"
-                        justifyContent="space-between"
-                        paddingHorizontal="$3"
-                        paddingVertical="$2.5"
-                        borderTopWidth={i > 0 ? 1 : 0}
-                        borderTopColor="$borderColor"
-                      >
-                        <XStack alignItems="center" gap="$2.5" flex={1}>
-                          <Ionicons
-                            name={flag.icon}
-                            size={18}
-                            color={getFlagValue(flag.key, flag.defaultValue) ? theme.accent.val : theme.mutedText.val}
-                          />
-                          <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                            {t(flag.labelKey)}
-                          </Text>
-                        </XStack>
-                        <AppSwitch
-                          size="sm"
-                          checked={getFlagValue(flag.key, flag.defaultValue)}
-                          onCheckedChange={(checked) => setFlag(flag.key, checked)}
-                        />
-                      </XStack>
-                    ))}
-                  </YStack>
-                </YStack>
-
-                {/* Backend Flags */}
-                <YStack gap="$2">
-                  <XStack alignItems="center" gap="$2">
-                    <Text
-                      fontSize="$1"
-                      fontWeight="700"
-                      color="$mutedText"
-                      textTransform="uppercase"
-                      letterSpacing={1}
-                    >
-                      {t('templateConfig.backend')}
-                    </Text>
-                    <XStack
-                      backgroundColor="$subtleBackground"
-                      paddingHorizontal="$1.5"
-                      paddingVertical={2}
-                      borderRadius="$1"
-                    >
-                      <Text fontSize={10} color="$mutedText" fontWeight="600">
-                        {t('templateConfig.server')}
-                      </Text>
-                    </XStack>
-                  </XStack>
-                  <YStack
-                    backgroundColor="$cardBackground"
-                    borderRadius="$3"
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                    overflow="hidden"
-                  >
-                    {backendFlags.map((flag, i) => (
-                      <XStack
-                        key={flag.key}
-                        alignItems="center"
-                        justifyContent="space-between"
-                        paddingHorizontal="$3"
-                        paddingVertical="$2.5"
-                        borderTopWidth={i > 0 ? 1 : 0}
-                        borderTopColor="$borderColor"
-                      >
-                        <XStack alignItems="center" gap="$2.5" flex={1}>
-                          <Ionicons
-                            name={flag.icon}
-                            size={18}
-                            color={getFlagValue(flag.key, flag.defaultValue) ? theme.accent.val : theme.mutedText.val}
-                          />
-                          <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                            {t(flag.labelKey)}
-                          </Text>
-                        </XStack>
-                        <AppSwitch
-                          size="sm"
-                          checked={getFlagValue(flag.key, flag.defaultValue)}
-                          onCheckedChange={(checked) => setFlag(flag.key, checked)}
-                        />
-                      </XStack>
-                    ))}
-                  </YStack>
-                </YStack>
-
-                {/* Reset Button */}
-                {hasOverrides && (
-                  <Pressable onPress={resetAll}>
-                    <XStack
-                      alignItems="center"
-                      justifyContent="center"
-                      gap="$2"
-                      paddingVertical="$2.5"
-                      borderRadius="$3"
-                      borderWidth={1}
-                      borderColor="$borderColor"
-                      hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
-                    >
-                      <Ionicons name="refresh-outline" size={16} color={theme.mutedText.val} />
-                      <Text fontSize="$2" color="$mutedText" fontWeight="600">
-                        {t('templateConfig.reset')}
-                      </Text>
-                    </XStack>
-                  </Pressable>
-                )}
-              </ScrollView>
-            </YStack>
-          </MotiView>
-        </>
-      )}
-    </AnimatePresence>
+        {/* Reset Button */}
+        {hasOverrides && (
+          <YStack paddingHorizontal="$3" marginTop="$3">
+            <Pressable onPress={resetAll}>
+              <XStack
+                alignItems="center"
+                justifyContent="center"
+                gap="$1.5"
+                paddingVertical="$2"
+                borderRadius="$2"
+                borderWidth={1}
+                borderColor="$borderColor"
+                hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+              >
+                <Ionicons name="refresh-outline" size={14} color={theme.mutedText.val} />
+                <Text fontSize="$2" color="$mutedText" fontWeight="600">
+                  {t('templateConfig.reset')}
+                </Text>
+              </XStack>
+            </Pressable>
+          </YStack>
+        )}
+      </ScrollView>
+    </YStack>
   )
 }

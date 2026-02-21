@@ -295,12 +295,14 @@
     "backend": "Backend",
     "server": "Server",
     "reset": "Reset Defaults",
+    "copy": "Copy",
     "docs": "Documentation",
     "email": "Email System",
     "emailVerification": "Email Verification",
     "googleAuth": "Google Sign-In",
     "requestLogging": "Request Logging",
-    "analytics": "Analytics",
+    "analytics": "Internal Analytics",
+    "posthog": "PostHog",
     "cookieBanner": "Cookie Banner",
     "pushNotifications": "Push Notifications"
   }
