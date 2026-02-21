@@ -13,6 +13,11 @@ export const authApi = {
     await handleAuthResponse(response.data.data)
   },
 
+  async googleLogin(idToken: string) {
+    const response = await api.post('/auth/google', { idToken })
+    await handleAuthResponse(response.data.data)
+  },
+
   async logout() {
     try {
       const refreshToken = await secureStorage.get('refreshToken')

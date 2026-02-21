@@ -1,4 +1,5 @@
-import { YStack, Text, Image, GetProps } from 'tamagui'
+import { Image } from 'react-native'
+import { YStack, Text, GetProps, useTheme } from 'tamagui'
 
 interface AppAvatarProps extends GetProps<typeof YStack> {
   uri?: string | null
@@ -16,6 +17,8 @@ function getInitials(name: string): string {
 }
 
 export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
+  const theme = useTheme()
+
   if (uri) {
     return (
       <YStack
@@ -27,8 +30,7 @@ export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
       >
         <Image
           source={{ uri }}
-          width={size}
-          height={size}
+          style={{ width: size, height: size }}
           resizeMode="cover"
         />
       </YStack>
@@ -40,7 +42,7 @@ export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
       width={size}
       height={size}
       borderRadius={size / 2}
-      backgroundColor="$primary"
+      backgroundColor={theme.accent.val}
       alignItems="center"
       justifyContent="center"
       {...props}

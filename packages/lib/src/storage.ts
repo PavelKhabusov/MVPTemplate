@@ -30,10 +30,33 @@ function getLocalStorage(): Storage | null {
 }
 
 /**
+ * Get AsyncStorage for native fallback (Expo Go).
+ * Returns null on web or if the package is unavailable.
+ */
+let asyncStorageInstance: any = null
+let asyncStorageChecked = false
+
+function getAsyncStorage(): any {
+  if (asyncStorageInstance) return asyncStorageInstance
+  if (asyncStorageChecked) return null
+  asyncStorageChecked = true
+
+  if (Platform.OS !== 'web') {
+    try {
+      asyncStorageInstance = require('@react-native-async-storage/async-storage').default
+    } catch {
+      // Not available
+    }
+  }
+  return asyncStorageInstance
+}
+
+/**
  * Zustand-compatible StateStorage adapter.
- * - Native: backed by MMKV (synchronous, 10x faster than AsyncStorage)
+ * - Native (dev build): backed by MMKV (synchronous, 10x faster than AsyncStorage)
+ * - Native (Expo Go): backed by AsyncStorage (async, persists to disk)
  * - Web: backed by localStorage
- * - Fallback: in-memory (if neither is available)
+ * - Fallback: in-memory (if nothing else is available)
  */
 const memoryStore = new Map<string, string>()
 
@@ -43,6 +66,8 @@ export const mmkvStorage: StateStorage = {
     if (mmkv) return mmkv.getString(name) ?? null
     const ls = getLocalStorage()
     if (ls) return ls.getItem(name)
+    const asyncStorage = getAsyncStorage()
+    if (asyncStorage) return asyncStorage.getItem(name) // returns Promise<string | null>
     return memoryStore.get(name) ?? null
   },
   setItem: (name: string, value: string) => {
@@ -50,6 +75,8 @@ export const mmkvStorage: StateStorage = {
     if (mmkv) { mmkv.set(name, value); return }
     const ls = getLocalStorage()
     if (ls) { ls.setItem(name, value); return }
+    const asyncStorage = getAsyncStorage()
+    if (asyncStorage) { asyncStorage.setItem(name, value); return }
     memoryStore.set(name, value)
   },
   removeItem: (name: string) => {
@@ -57,6 +84,8 @@ export const mmkvStorage: StateStorage = {
     if (mmkv) { mmkv.delete(name); return }
     const ls = getLocalStorage()
     if (ls) { ls.removeItem(name); return }
+    const asyncStorage = getAsyncStorage()
+    if (asyncStorage) { asyncStorage.removeItem(name); return }
     memoryStore.delete(name)
   },
 }
@@ -77,6 +106,8 @@ export const storage = {
     if (mmkv) { mmkv.set(key, value); return }
     const ls = getLocalStorage()
     if (ls) { ls.setItem(key, value); return }
+    const asyncStorage = getAsyncStorage()
+    if (asyncStorage) { asyncStorage.setItem(key, value); return }
     memoryStore.set(key, value)
   },
   delete(key: string): void {
@@ -84,6 +115,8 @@ export const storage = {
     if (mmkv) { mmkv.delete(key); return }
     const ls = getLocalStorage()
     if (ls) { ls.removeItem(key); return }
+    const asyncStorage = getAsyncStorage()
+    if (asyncStorage) { asyncStorage.removeItem(key); return }
     memoryStore.delete(key)
   },
 }

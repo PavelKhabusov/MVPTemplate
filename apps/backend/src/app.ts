@@ -1,7 +1,10 @@
+import { join } from 'path'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
+import multipart from '@fastify/multipart'
+import fastifyStatic from '@fastify/static'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import { env } from './config/env'
@@ -14,6 +17,7 @@ import { pushRoutes } from './modules/push/push.routes'
 import { notificationsRoutes } from './modules/notifications/notifications.routes'
 import { searchRoutes } from './modules/search/search.routes'
 import { adminRoutes } from './modules/admin/admin.routes'
+import { analyticsRoutes } from './modules/analytics/analytics.routes'
 import { sseRoutes } from './realtime/sse'
 
 export async function buildApp() {
@@ -33,6 +37,7 @@ export async function buildApp() {
     },
     hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
   await app.register(cors, {
     origin: env.NODE_ENV === 'development' ? true : env.CORS_ORIGIN,
@@ -74,6 +79,16 @@ export async function buildApp() {
     uiConfig: { docExpansion: 'list' },
   })
 
+  // File uploads
+  await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024 } })
+
+  // Serve uploaded files
+  await app.register(fastifyStatic, {
+    root: join(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
+    decorateReply: false,
+  })
+
   // Error handler
   app.setErrorHandler(errorHandler)
 
@@ -90,6 +105,7 @@ export async function buildApp() {
   await app.register(notificationsRoutes, { prefix: '/api/notifications' })
   await app.register(searchRoutes, { prefix: '/api/search' })
   await app.register(adminRoutes, { prefix: '/api/admin' })
+  await app.register(analyticsRoutes, { prefix: '/api/analytics' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

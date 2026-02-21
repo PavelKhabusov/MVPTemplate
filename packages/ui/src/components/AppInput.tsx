@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Input, YStack, Text, XStack, GetProps } from 'tamagui'
+import { Input, YStack, Text, XStack, GetProps, useTheme } from 'tamagui'
+import { Platform, TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -15,9 +17,11 @@ interface AppInputProps extends GetProps<typeof Input> {
   helper?: string
 }
 
-export function AppInput({ label, error, helper, ...props }: AppInputProps) {
+export function AppInput({ label, error, helper, secureTextEntry, ...props }: AppInputProps) {
+  const theme = useTheme()
   const shakeX = useSharedValue(0)
   const [prevError, setPrevError] = useState<string | undefined>()
+  const [showPassword, setShowPassword] = useState(false)
 
   // Trigger shake animation when error appears
   if (error && error !== prevError) {
@@ -37,6 +41,15 @@ export function AppInput({ label, error, helper, ...props }: AppInputProps) {
     transform: [{ translateX: shakeX.value }],
   }))
 
+  const isPassword = secureTextEntry === true
+  const hideText = isPassword && !showPassword
+
+  // Tamagui Input doesn't map secureTextEntry to type="password" on web
+  const webPasswordProps =
+    Platform.OS === 'web' && isPassword
+      ? ({ inputMode: 'text', type: hideText ? 'password' : 'text' } as any)
+      : {}
+
   return (
     <AnimatedYStack gap="$1" style={shakeStyle}>
       {label && (
@@ -45,25 +58,48 @@ export function AppInput({ label, error, helper, ...props }: AppInputProps) {
         </Text>
       )}
 
-      <Input
-        backgroundColor="$cardBackground"
-        borderWidth={1}
-        borderColor={error ? '$error' : '$borderColor'}
-        borderRadius="$3"
-        paddingHorizontal="$3"
-        height={44}
-        fontSize="$3"
-        color="$color"
-        placeholderTextColor="$mutedText"
-        aria-label={label}
-        aria-invalid={!!error}
-        aria-describedby={error ? `${label}-error` : undefined}
-        focusStyle={{
-          borderColor: error ? '$error' : '$primary',
-          borderWidth: 2,
-        }}
-        {...props}
-      />
+      <YStack position="relative">
+        <Input
+          backgroundColor="$cardBackground"
+          borderWidth={1}
+          borderColor={error ? '$error' : '$borderColor'}
+          borderRadius="$3"
+          paddingHorizontal="$3"
+          paddingRight={isPassword ? 44 : '$3'}
+          height={44}
+          fontSize="$3"
+          color="$color"
+          placeholderTextColor="$mutedText"
+          aria-label={label}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${label}-error` : undefined}
+          secureTextEntry={hideText}
+          {...webPasswordProps}
+          {...props}
+        />
+        {isPassword && (
+          <TouchableOpacity
+            onPress={() => setShowPassword((v) => !v)}
+            hitSlop={8}
+            activeOpacity={0.6}
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              height: 44,
+              width: 44,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={theme.mutedText.val}
+            />
+          </TouchableOpacity>
+        )}
+      </YStack>
 
       {error && (
         <Text fontSize="$1" color="$error">

@@ -13,6 +13,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CORS_ORIGIN: z.string().default('http://localhost:8081'),
   EXPO_ACCESS_TOKEN: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
 })
 
 function loadEnv() {

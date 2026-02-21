@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { FlatList, Platform, Modal, Alert } from 'react-native'
+import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions } from 'react-native'
 import { YStack, XStack, Text, H2, H4, Input, useTheme, Switch } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppAvatar, AppButton, AppCard, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
+import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
 import { api } from '../src/services/api'
 
 interface AdminUser {
@@ -30,6 +31,14 @@ interface AdminConfig {
   features: string[]
 }
 
+interface AnalyticsDashboard {
+  activeUsers: { dau: number; wau: number; mau: number }
+  registrations: Array<{ day: string; count: number }>
+  popularScreens: Array<{ screenName: string; views: number }>
+  dailyActivity: Array<{ day: string; events: number; uniqueUsers: number }>
+  avgSessionTime: number
+}
+
 const FEATURE_LABELS: Record<string, string> = {
   beta_access: 'Beta Access',
   premium: 'Premium',
@@ -47,13 +56,72 @@ const ROLE_COLORS: Record<string, string> = {
   user: '#6B7280',
 }
 
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return s > 0 ? `${m}m ${s}s` : `${m}m`
+}
+
+function formatShortDate(iso: string): string {
+  const d = new Date(iso)
+  return `${d.getDate()}/${d.getMonth() + 1}`
+}
+
+function SimpleBarChart({ data }: { data: Array<{ day: string; events: number; uniqueUsers: number }> }) {
+  const theme = useTheme()
+  const { width: screenWidth } = useWindowDimensions()
+
+  if (!data || data.length === 0) {
+    return <Text color="$mutedText" fontSize="$2">No data yet</Text>
+  }
+
+  const maxEvents = Math.max(...data.map((d) => d.events), 1)
+  const chartWidth = Math.min(screenWidth - 80, 400)
+  const chartHeight = 120
+  const barWidth = Math.max(4, (chartWidth - 20) / data.length - 2)
+
+  return (
+    <Svg width="100%" height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
+      <Line
+        x1={0} y1={chartHeight - 15}
+        x2={chartWidth} y2={chartHeight - 15}
+        stroke={theme.borderColor.val} strokeWidth={0.5}
+      />
+      {data.map((d, i) => {
+        const barHeight = (d.events / maxEvents) * (chartHeight - 25)
+        const x = 10 + i * (barWidth + 2)
+        const y = chartHeight - 15 - barHeight
+        return (
+          <Rect
+            key={d.day}
+            x={x} y={y}
+            width={barWidth} height={Math.max(barHeight, 1)}
+            rx={2}
+            fill={theme.accent.val}
+            opacity={0.85}
+          />
+        )
+      })}
+      <SvgText x={10} y={chartHeight - 2} fontSize={8} fill={theme.mutedText.val}>
+        {formatShortDate(data[0].day)}
+      </SvgText>
+      <SvgText x={chartWidth - 40} y={chartHeight - 2} fontSize={8} fill={theme.mutedText.val}>
+        {formatShortDate(data[data.length - 1].day)}
+      </SvgText>
+    </Svg>
+  )
+}
+
 export default function AdminScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users'>('analytics')
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -68,15 +136,17 @@ export default function AdminScreen() {
       setLoading(true)
       const params: Record<string, string | number> = { page: p, limit: 20 }
       if (q) params.search = q
-      const [usersRes, statsRes, configRes] = await Promise.all([
+      const [usersRes, statsRes, configRes, analyticsRes] = await Promise.all([
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
+        api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null),
       ])
       setUsers(usersRes.data.data)
       setTotalPages(usersRes.data.pagination?.totalPages ?? 1)
       setStats(statsRes.data.data)
       setConfig(configRes.data.data)
+      if (analyticsRes) setAnalyticsData(analyticsRes.data.data)
     } catch (err: any) {
       Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
     } finally {
@@ -173,79 +243,190 @@ export default function AdminScreen() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <YStack padding="$4" paddingTop={Platform.OS === 'web' ? '$4' : 16} gap="$4">
-        {/* Stats */}
-        {stats && (
-          <FadeIn>
-            <XStack gap="$3">
-              <AppCard flex={1}>
-                <YStack alignItems="center" gap="$1">
-                  <Text fontSize="$7" fontWeight="bold" color="$accent">{stats.totalUsers}</Text>
-                  <Text fontSize="$1" color="$mutedText">{t('admin.totalUsers')}</Text>
-                </YStack>
-              </AppCard>
-              <AppCard flex={1}>
-                <YStack alignItems="center" gap="$1">
-                  <Text fontSize="$7" fontWeight="bold" color="$accent">{stats.newThisWeek}</Text>
-                  <Text fontSize="$1" color="$mutedText">{t('admin.newThisWeek')}</Text>
-                </YStack>
-              </AppCard>
-            </XStack>
-          </FadeIn>
-        )}
-
-        {/* Search */}
-        <SlideIn from="bottom" delay={100}>
-          <XStack gap="$2" alignItems="center">
-            <Input
-              flex={1}
-              value={search}
-              onChangeText={setSearch}
-              onSubmitEditing={handleSearch}
-              placeholder={t('common.search')}
-              placeholderTextColor={theme.mutedText.val}
-              backgroundColor="$subtleBackground"
-              borderWidth={1}
-              borderColor="$borderColor"
-              borderRadius="$3"
+      <YStack padding="$4" paddingTop={Platform.OS === 'web' ? '$4' : 16} gap="$3">
+        {/* Tab Switcher */}
+        <XStack gap="$2">
+          <ScalePress onPress={() => setActiveTab('analytics')}>
+            <XStack
+              backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
               paddingHorizontal="$3"
-              height={42}
-              fontSize="$3"
-              color="$color"
-              returnKeyType="search"
-            />
-            <ScalePress onPress={handleSearch}>
-              <YStack
-                backgroundColor="$accent"
-                width={42}
-                height={42}
-                borderRadius="$3"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Ionicons name="search" size={20} color="white" />
-              </YStack>
-            </ScalePress>
-          </XStack>
-        </SlideIn>
+              paddingVertical="$2"
+              borderRadius="$3"
+            >
+              <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                {t('admin.analytics')}
+              </Text>
+            </XStack>
+          </ScalePress>
+          <ScalePress onPress={() => setActiveTab('users')}>
+            <XStack
+              backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
+              paddingHorizontal="$3"
+              paddingVertical="$2"
+              borderRadius="$3"
+            >
+              <Text color={activeTab === 'users' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                {t('admin.users')}
+              </Text>
+            </XStack>
+          </ScalePress>
+        </XStack>
+
+        {/* Users Tab — Stats + Search */}
+        {activeTab === 'users' && (
+          <>
+            {stats && (
+              <FadeIn>
+                <XStack gap="$3">
+                  <AppCard flex={1} animated={false}>
+                    <YStack alignItems="center" gap="$1">
+                      <Text fontSize="$7" fontWeight="bold" color="$accent">{stats.totalUsers}</Text>
+                      <Text fontSize="$1" color="$mutedText">{t('admin.totalUsers')}</Text>
+                    </YStack>
+                  </AppCard>
+                  <AppCard flex={1} animated={false}>
+                    <YStack alignItems="center" gap="$1">
+                      <Text fontSize="$7" fontWeight="bold" color="$accent">{stats.newThisWeek}</Text>
+                      <Text fontSize="$1" color="$mutedText">{t('admin.newThisWeek')}</Text>
+                    </YStack>
+                  </AppCard>
+                </XStack>
+              </FadeIn>
+            )}
+
+            <SlideIn from="bottom" delay={100}>
+              <XStack gap="$2" alignItems="center">
+                <Input
+                  flex={1}
+                  value={search}
+                  onChangeText={setSearch}
+                  onSubmitEditing={handleSearch}
+                  placeholder={t('common.search')}
+                  placeholderTextColor={theme.mutedText.val as any}
+                  backgroundColor="$subtleBackground"
+                  borderWidth={1}
+                  borderColor="$borderColor"
+                  borderRadius="$3"
+                  paddingHorizontal="$3"
+                  height={42}
+                  fontSize="$3"
+                  color="$color"
+                  returnKeyType="search"
+                />
+                <ScalePress onPress={handleSearch}>
+                  <YStack
+                    backgroundColor="$accent"
+                    width={42}
+                    height={42}
+                    borderRadius="$3"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Ionicons name="search" size={20} color="white" />
+                  </YStack>
+                </ScalePress>
+              </XStack>
+            </SlideIn>
+          </>
+        )}
       </YStack>
 
-      {/* Users List */}
-      <FlatList
-        data={users}
-        renderItem={renderUser}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListEmptyComponent={
-          !loading ? (
+      {/* Analytics Tab */}
+      {activeTab === 'analytics' && (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+          {analyticsData ? (
+            <FadeIn>
+              <YStack gap="$3">
+                {/* DAU / WAU / MAU */}
+                <XStack gap="$2">
+                  <AppCard flex={1} animated={false}>
+                    <YStack alignItems="center" gap="$1">
+                      <Text fontSize="$6" fontWeight="bold" color="$accent">
+                        {analyticsData.activeUsers.dau}
+                      </Text>
+                      <Text fontSize="$1" color="$mutedText">DAU</Text>
+                    </YStack>
+                  </AppCard>
+                  <AppCard flex={1} animated={false}>
+                    <YStack alignItems="center" gap="$1">
+                      <Text fontSize="$6" fontWeight="bold" color="$accent">
+                        {analyticsData.activeUsers.wau}
+                      </Text>
+                      <Text fontSize="$1" color="$mutedText">WAU</Text>
+                    </YStack>
+                  </AppCard>
+                  <AppCard flex={1} animated={false}>
+                    <YStack alignItems="center" gap="$1">
+                      <Text fontSize="$6" fontWeight="bold" color="$accent">
+                        {analyticsData.activeUsers.mau}
+                      </Text>
+                      <Text fontSize="$1" color="$mutedText">MAU</Text>
+                    </YStack>
+                  </AppCard>
+                </XStack>
+
+                {/* Avg Session */}
+                <AppCard animated={false}>
+                  <YStack alignItems="center" gap="$1">
+                    <Text fontSize="$6" fontWeight="bold" color="$accent">
+                      {formatDuration(analyticsData.avgSessionTime)}
+                    </Text>
+                    <Text fontSize="$1" color="$mutedText">{t('admin.avgSession')}</Text>
+                  </YStack>
+                </AppCard>
+
+                {/* Activity Chart */}
+                <AppCard animated={false}>
+                  <Text fontWeight="600" color="$color" fontSize="$3" marginBottom="$2">
+                    {t('admin.dailyActivity')}
+                  </Text>
+                  <SimpleBarChart data={analyticsData.dailyActivity} />
+                </AppCard>
+
+                {/* Popular Screens */}
+                {analyticsData.popularScreens.length > 0 && (
+                  <AppCard animated={false}>
+                    <Text fontWeight="600" color="$color" fontSize="$3" marginBottom="$2">
+                      {t('admin.popularScreens')}
+                    </Text>
+                    <YStack gap="$1">
+                      {analyticsData.popularScreens.map((s, i) => (
+                        <XStack key={s.screenName} justifyContent="space-between" paddingVertical="$1">
+                          <Text color="$color" fontSize="$2">{i + 1}. {s.screenName}</Text>
+                          <Text color="$mutedText" fontSize="$2">{s.views}</Text>
+                        </XStack>
+                      ))}
+                    </YStack>
+                  </AppCard>
+                )}
+              </YStack>
+            </FadeIn>
+          ) : (
             <YStack alignItems="center" padding="$6">
-              <Text color="$mutedText">{t('admin.noUsers')}</Text>
+              <Text color="$mutedText">{loading ? t('common.loading') : t('admin.noData')}</Text>
             </YStack>
-          ) : null
-        }
-      />
+          )}
+        </ScrollView>
+      )}
+
+      {/* Users List */}
+      {activeTab === 'users' && (
+        <FlatList
+          data={users}
+          renderItem={renderUser}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListEmptyComponent={
+            !loading ? (
+              <YStack alignItems="center" padding="$6">
+                <Text color="$mutedText">{t('admin.noUsers')}</Text>
+              </YStack>
+            ) : null
+          }
+        />
+      )}
 
       {/* Edit User Modal */}
       <Modal
@@ -320,7 +501,7 @@ export default function AdminScreen() {
                   onCheckedChange={() => toggleFeature(feature)}
                   backgroundColor={editFeatures.includes(feature) ? '$accent' : '$borderColor'}
                 >
-                  <Switch.Thumb animation="quick" />
+                  <Switch.Thumb {...{ animation: 'quick' } as any} />
                 </Switch>
               </XStack>
             ))}

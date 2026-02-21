@@ -13,7 +13,8 @@
     "search": "Поиск",
     "noResults": "Ничего не найдено",
     "empty": "Пока здесь пусто",
-    "viewAll": "Смотреть все"
+    "viewAll": "Смотреть все",
+    "edit": "Изм."
   },
   "auth": {
     "signIn": "Войти",
@@ -30,6 +31,9 @@
     "errorNetwork": "Не удалось подключиться к серверу. Проверьте интернет-соединение.",
     "errorInvalidCredentials": "Неверный email или пароль",
     "errorEmailExists": "Этот email уже зарегистрирован",
+    "or": "или",
+    "continueWithGoogle": "Войти через Google",
+    "errorGoogleSignIn": "Ошибка входа через Google",
     "errorTooMany": "Слишком много попыток. Попробуйте позже.",
     "validation": {
       "nameRequired": "Введите имя",
@@ -67,6 +71,8 @@
     "bioPlaceholder": "Расскажите о себе...",
     "phone": "Телефон",
     "location": "Местоположение",
+    "birthday": "Дата рождения",
+    "setNewPhoto": "Изменить фото",
     "signInPrompt": "Войдите, чтобы увидеть профиль и получить доступ ко всем функциям",
     "projects": "Проекты",
     "tasksCompleted": "Завершено",
@@ -83,7 +89,12 @@
     "roleAdmin": "Админ",
     "roleModerator": "Модератор",
     "saveChanges": "Сохранить",
-    "noUsers": "Пользователи не найдены"
+    "noUsers": "Пользователи не найдены",
+    "analytics": "Аналитика",
+    "avgSession": "Ср. сессия",
+    "dailyActivity": "Активность (30д)",
+    "popularScreens": "Популярные экраны",
+    "noData": "Нет данных аналитики"
   },
   "notifications": {
     "title": "Уведомления",

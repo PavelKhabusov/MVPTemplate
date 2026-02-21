@@ -16,7 +16,7 @@ interface RefreshSpinnerProps {
   size?: number
 }
 
-export function RefreshSpinner({ spinning, color = '#00D4FF', size = 28 }: RefreshSpinnerProps) {
+export function RefreshSpinner({ spinning, color = '#0891B2', size = 28 }: RefreshSpinnerProps) {
   const rotation = useSharedValue(0)
   const scale = useSharedValue(0)
 

@@ -152,7 +152,7 @@ export default function HomeScreen() {
         {/* Sign in CTA for guests */}
         {!isAuthenticated && (
           <SlideIn from="bottom" delay={400}>
-            <AppCard borderColor="$accent" borderWidth={1}>
+            <AppCard borderColor="$accent" borderWidth={0.5}>
               <YStack gap="$3" alignItems="center">
                 <Text fontWeight="600" fontSize="$3" color="$color" textAlign="center">
                   {t('profile.signInPrompt')}

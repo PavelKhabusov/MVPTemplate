@@ -13,7 +13,8 @@
     "search": "Search",
     "noResults": "No results found",
     "empty": "Nothing here yet",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "edit": "Edit"
   },
   "auth": {
     "signIn": "Sign In",
@@ -30,6 +31,9 @@
     "errorNetwork": "Unable to connect to server. Check your internet connection.",
     "errorInvalidCredentials": "Invalid email or password",
     "errorEmailExists": "This email is already registered",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "errorGoogleSignIn": "Google sign-in failed",
     "errorTooMany": "Too many attempts. Please try again later.",
     "validation": {
       "nameRequired": "Name is required",
@@ -67,6 +71,8 @@
     "bioPlaceholder": "Tell us about yourself...",
     "phone": "Phone",
     "location": "Location",
+    "birthday": "Birthday",
+    "setNewPhoto": "Set New Photo",
     "signInPrompt": "Sign in to view your profile and access all features",
     "projects": "Projects",
     "tasksCompleted": "Completed",
@@ -83,7 +89,12 @@
     "roleAdmin": "Admin",
     "roleModerator": "Moderator",
     "saveChanges": "Save Changes",
-    "noUsers": "No users found"
+    "noUsers": "No users found",
+    "analytics": "Analytics",
+    "avgSession": "Avg Session",
+    "dailyActivity": "Daily Activity (30d)",
+    "popularScreens": "Popular Screens",
+    "noData": "No analytics data yet"
   },
   "notifications": {
     "title": "Notifications",

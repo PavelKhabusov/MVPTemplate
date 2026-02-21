@@ -9,7 +9,7 @@ export const usersRepository = {
     return result[0] ?? null
   },
 
-  async updateProfile(id: string, data: { name?: string; avatarUrl?: string | null; bio?: string | null; phone?: string | null; location?: string | null }) {
+  async updateProfile(id: string, data: { name?: string; avatarUrl?: string | null; bio?: string | null; phone?: string | null; location?: string | null; birthday?: string | null }) {
     const result = await db
       .update(users)
       .set({ ...data, updatedAt: new Date() })

@@ -10,16 +10,16 @@ import { useSearch } from '../../src/features/search/useSearch'
 
 const CATEGORIES = [
   { key: 'catDesign', icon: 'color-palette-outline' as const, gradient: ['#FF6B35', '#FF8F66'] },
-  { key: 'catDev', icon: 'code-slash-outline' as const, gradient: ['#00D4FF', '#38E8FF'] },
+  { key: 'catDev', icon: 'code-slash-outline' as const, gradient: ['#0891B2', '#06B6D4'] },
   { key: 'catMarketing', icon: 'megaphone-outline' as const, gradient: ['#A855F7', '#C084FC'] },
   { key: 'catAnalytics', icon: 'bar-chart-outline' as const, gradient: ['#10B981', '#34D399'] },
 ]
 
 const FEATURED = [
-  { titleKey: 'item1Title', descKey: 'item1Desc', icon: 'layers-outline' as const, accent: '#00D4FF' },
-  { titleKey: 'item2Title', descKey: 'item2Desc', icon: 'analytics-outline' as const, accent: '#A855F7' },
-  { titleKey: 'item3Title', descKey: 'item3Desc', icon: 'lock-closed-outline' as const, accent: '#FF6B35' },
-  { titleKey: 'item4Title', descKey: 'item4Desc', icon: 'server-outline' as const, accent: '#10B981' },
+  { titleKey: 'item1Title', descKey: 'item1Desc', icon: 'layers-outline' as const, accent: '#0891B2' },
+  { titleKey: 'item2Title', descKey: 'item2Desc', icon: 'analytics-outline' as const, accent: '#7C3AED' },
+  { titleKey: 'item3Title', descKey: 'item3Desc', icon: 'lock-closed-outline' as const, accent: '#E5541A' },
+  { titleKey: 'item4Title', descKey: 'item4Desc', icon: 'server-outline' as const, accent: '#059669' },
 ]
 
 export default function ExploreScreen() {

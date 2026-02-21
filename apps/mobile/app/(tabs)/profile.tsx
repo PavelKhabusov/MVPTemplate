@@ -1,29 +1,44 @@
 import { useState, useCallback } from 'react'
-import { ScrollView, Platform, Alert, RefreshControl } from 'react-native'
-import { YStack, XStack, Text, H2, Input, useTheme } from 'tamagui'
+import { Platform, RefreshControl, ScrollView } from 'react-native'
+import { YStack, XStack, Text, H2, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
-import { useAuthStore } from '@mvp/store'
-import { FadeIn, SlideIn, AppAvatar, AppButton, AppCard, ScalePress } from '@mvp/ui'
+import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from '@mvp/i18n'
+import type { SupportedLanguage } from '@mvp/i18n'
+import { useAuthStore, useThemeStore, useLanguageStore } from '@mvp/store'
+import type { ThemeMode } from '@mvp/store'
+import {
+  FadeIn,
+  SlideIn,
+  AppAvatar,
+  AppButton,
+  AppCard,
+  ScalePress,
+  CollapsibleHeader,
+  HEADER_EXPANDED,
+  StaggerGroup,
+  SettingsGroup,
+  SettingsGroupItem,
+} from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
-import { api } from '../../src/services/api'
+import { AnimatePresence, MotiView } from 'moti'
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+} from 'react-native-reanimated'
+import { authApi } from '../../src/features/auth/auth.service'
 
-function ProfileStat({ value, label }: { value: string; label: string }) {
-  return (
-    <YStack flex={1} alignItems="center" gap="$1">
-      <Text fontSize="$6" fontWeight="bold" color="$color">{value}</Text>
-      <Text fontSize="$1" color="$mutedText">{label}</Text>
-    </YStack>
-  )
+const THEME_LABELS: Record<ThemeMode, string> = {
+  system: 'settings.themeSystem',
+  light: 'settings.themeLight',
+  dark: 'settings.themeDark',
 }
 
+const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark']
+
 export default function ProfileScreen() {
-  const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
-  const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const theme = useTheme()
   const [refreshing, setRefreshing] = useState(false)
 
   const onRefresh = useCallback(() => {
@@ -32,52 +47,170 @@ export default function ProfileScreen() {
   }, [])
 
   if (!isAuthenticated) {
-    return (
-      <YStack
-        flex={1}
-        alignItems="center"
-        justifyContent="center"
-        padding="$4"
-        paddingTop={Platform.OS === 'web' ? '$4' : insets.top}
-        gap="$4"
-        backgroundColor="$background"
-      >
-        <FadeIn>
-          <YStack alignItems="center" gap="$3">
-            <AppAvatar name="?" size={80} />
-            <H2>{t('auth.signIn')}</H2>
-            <Text color="$mutedText" textAlign="center" maxWidth={300}>
-              {t('profile.signInPrompt')}
-            </Text>
-          </YStack>
-        </FadeIn>
+    return <UnauthenticatedView />
+  }
 
-        <SlideIn from="bottom" delay={200}>
-          <YStack gap="$3" width={250}>
-            <AppButton onPress={() => router.push('/sign-in')}>
-              {t('auth.signIn')}
-            </AppButton>
-            <AppButton variant="outline" onPress={() => router.push('/sign-up')}>
-              {t('auth.createAccount')}
-            </AppButton>
-            <AppButton variant="outline" onPress={() => router.push('/settings')}>
-              <XStack gap="$2" alignItems="center">
-                <Ionicons name="settings-outline" size={18} color={theme.color.val} />
-                <Text color="$color" fontWeight="600">{t('settings.title')}</Text>
-              </XStack>
-            </AppButton>
-          </YStack>
-        </SlideIn>
-      </YStack>
-    )
+  if (Platform.OS === 'web') {
+    return <WebProfileView />
   }
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.background.val }}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      refreshControl={
-        Platform.OS !== 'web' ? (
+    <AuthenticatedProfileView
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    />
+  )
+}
+
+function UnauthenticatedView() {
+  const { t, i18n } = useTranslation()
+  const insets = useSafeAreaInsets()
+  const theme = useTheme()
+  const { mode, setMode } = useThemeStore()
+  const setLanguage = useLanguageStore((s) => s.setLanguage)
+  const [showLangPicker, setShowLangPicker] = useState(false)
+
+  const cycleTheme = () => {
+    const currentIdx = THEME_CYCLE.indexOf(mode)
+    const next = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length]
+    setMode(next)
+  }
+
+  const selectLanguage = (lang: SupportedLanguage) => {
+    i18n.changeLanguage(lang)
+    setLanguage(lang)
+    setShowLangPicker(false)
+  }
+
+  return (
+    <YStack
+      flex={1}
+      alignItems="center"
+      justifyContent="center"
+      padding="$4"
+      paddingTop={Platform.OS === 'web' ? '$4' : insets.top}
+      gap="$4"
+      backgroundColor="$background"
+    >
+      <FadeIn>
+        <YStack alignItems="center" gap="$3">
+          <AppAvatar name="?" size={80} />
+          <H2>{t('auth.signIn')}</H2>
+          <Text color="$mutedText" textAlign="center" maxWidth={300}>
+            {t('profile.signInPrompt')}
+          </Text>
+        </YStack>
+      </FadeIn>
+
+      <SlideIn from="bottom" delay={200}>
+        <YStack gap="$3" width={250}>
+          <AppButton onPress={() => router.push('/sign-in')}>
+            {t('auth.signIn')}
+          </AppButton>
+          <AppButton variant="outline" onPress={() => router.push('/sign-up')}>
+            {t('auth.createAccount')}
+          </AppButton>
+        </YStack>
+      </SlideIn>
+
+      <SlideIn from="bottom" delay={400}>
+        <YStack gap="$3" width={280} paddingTop="$2">
+          <SettingsGroup>
+            <SettingsGroupItem
+              icon="color-palette-outline"
+              label={t('settings.theme')}
+              value={t(THEME_LABELS[mode])}
+              onPress={cycleTheme}
+            />
+            <SettingsGroupItem
+              icon="language-outline"
+              label={t('settings.language')}
+              value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
+              onPress={() => setShowLangPicker(!showLangPicker)}
+            />
+          </SettingsGroup>
+
+          <AnimatePresence>
+            {showLangPicker && (
+              <MotiView
+                from={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: 'timing', duration: 200 }}
+              >
+                <LanguagePicker
+                  currentLang={i18n.language as SupportedLanguage}
+                  onSelect={selectLanguage}
+                />
+              </MotiView>
+            )}
+          </AnimatePresence>
+        </YStack>
+      </SlideIn>
+    </YStack>
+  )
+}
+
+function AuthenticatedProfileView({
+  refreshing,
+  onRefresh,
+}: {
+  refreshing: boolean
+  onRefresh: () => void
+}) {
+  const { t, i18n } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const user = useAuthStore((s) => s.user)
+  const userRole = useAuthStore((s) => s.user?.role)
+  const { mode, setMode } = useThemeStore()
+  const setLanguage = useLanguageStore((s) => s.setLanguage)
+  const [showLangPicker, setShowLangPicker] = useState(false)
+
+  const scrollY = useSharedValue(0)
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y
+    },
+  })
+
+  const cycleTheme = () => {
+    const currentIdx = THEME_CYCLE.indexOf(mode)
+    const next = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length]
+    setMode(next)
+  }
+
+  const selectLanguage = (lang: SupportedLanguage) => {
+    i18n.changeLanguage(lang)
+    setLanguage(lang)
+    setShowLangPicker(false)
+  }
+
+  const expandedHeight = HEADER_EXPANDED + insets.top
+
+  let groupIndex = 0
+
+  return (
+    <YStack flex={1} backgroundColor="$background">
+      <CollapsibleHeader
+        scrollY={scrollY}
+        avatarUri={user?.avatarUrl}
+        avatarName={user?.name}
+        userName={user?.name ?? 'Guest'}
+        userStatus={user?.email}
+        rightAction={{ label: t('common.edit'), onPress: () => router.push('/edit-profile') }}
+      />
+
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        contentContainerStyle={{
+          paddingTop: expandedHeight + 16,
+          paddingHorizontal: 16,
+          paddingBottom: 40,
+          gap: 20,
+        }}
+        refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
@@ -85,227 +218,323 @@ export default function ProfileScreen() {
             colors={[theme.accent.val]}
             progressBackgroundColor={theme.cardBackground.val}
           />
-        ) : undefined
-      }
-    >
-      <YStack
-        flex={1}
-        padding="$4"
-        paddingTop={Platform.OS === 'web' ? '$4' : insets.top + 16}
-        gap="$5"
-        backgroundColor="$background"
+        }
       >
-        {/* Profile Header */}
-        <FadeIn>
-          <YStack alignItems="center" gap="$3">
-            <AppAvatar uri={user?.avatarUrl} name={user?.name} size={88} />
-            <YStack alignItems="center" gap="$1">
-              <H2 color="$color">{user?.name ?? 'Guest'}</H2>
-              <Text color="$mutedText" fontSize="$3">{user?.email ?? ''}</Text>
-            </YStack>
-          </YStack>
-        </FadeIn>
+        {/* Account */}
+        <StaggerGroup index={groupIndex++}>
+          <SettingsGroup header={t('profile.title')}>
+            {user?.phone ? (
+              <SettingsGroupItem
+                icon="call-outline"
+                label={t('profile.phone')}
+                value={user.phone}
+              />
+            ) : null}
+            <SettingsGroupItem
+              icon="mail-outline"
+              label={t('profile.email')}
+              value={user?.email ?? '-'}
+            />
+            {user?.bio ? (
+              <SettingsGroupItem
+                icon="document-text-outline"
+                label={t('profile.bio')}
+                value={user.bio.length > 30 ? user.bio.slice(0, 30) + '...' : user.bio}
+              />
+            ) : null}
+            {user?.location ? (
+              <SettingsGroupItem
+                icon="location-outline"
+                label={t('profile.location')}
+                value={user.location}
+              />
+            ) : null}
+            {user?.birthday ? (
+              <SettingsGroupItem
+                icon="calendar-outline"
+                label={t('profile.birthday')}
+                value={new Date(user.birthday).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+              />
+            ) : null}
+          </SettingsGroup>
+        </StaggerGroup>
 
-        {/* Stats Row */}
-        <SlideIn from="bottom" delay={100}>
-          <AppCard>
-            <XStack>
-              <ProfileStat value="5" label={t('profile.projects')} />
-              <YStack width={1} backgroundColor="$borderColor" />
-              <ProfileStat value="23" label={t('profile.tasksCompleted')} />
-              <YStack width={1} backgroundColor="$borderColor" />
-              <ProfileStat value="7" label={t('profile.streak')} />
-            </XStack>
-          </AppCard>
-        </SlideIn>
+        {/* Appearance */}
+        <StaggerGroup index={groupIndex++}>
+          <SettingsGroup header={t('settings.theme')}>
+            <SettingsGroupItem
+              icon="color-palette-outline"
+              label={t('settings.theme')}
+              value={t(THEME_LABELS[mode])}
+              onPress={cycleTheme}
+            />
+            <SettingsGroupItem
+              icon="language-outline"
+              label={t('settings.language')}
+              value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
+              onPress={() => setShowLangPicker(!showLangPicker)}
+            />
+          </SettingsGroup>
 
-        {/* Profile Details / Edit */}
-        <SlideIn from="bottom" delay={200}>
-          <EditProfileSection />
-        </SlideIn>
+          <AnimatePresence>
+            {showLangPicker && (
+              <MotiView
+                from={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: 'timing', duration: 200 }}
+              >
+                <LanguagePicker
+                  currentLang={i18n.language as SupportedLanguage}
+                  onSelect={selectLanguage}
+                />
+              </MotiView>
+            )}
+          </AnimatePresence>
+        </StaggerGroup>
 
-        {/* Actions */}
-        <SlideIn from="bottom" delay={300}>
-          <YStack gap="$3">
-            <AppButton variant="outline" onPress={() => router.push('/settings')}>
-              <XStack gap="$2" alignItems="center">
-                <Ionicons name="settings-outline" size={18} color={theme.color.val} />
-                <Text color="$color" fontWeight="600">{t('settings.title')}</Text>
-              </XStack>
-            </AppButton>
-          </YStack>
-        </SlideIn>
-      </YStack>
-    </ScrollView>
+        {/* General */}
+        <StaggerGroup index={groupIndex++}>
+          <SettingsGroup header={t('settings.title')}>
+            <SettingsGroupItem
+              icon="notifications-outline"
+              label={t('settings.notifications')}
+              onPress={() => {}}
+            />
+            <SettingsGroupItem
+              icon="shield-outline"
+              label={t('settings.privacy')}
+              onPress={() => router.push('/privacy')}
+            />
+            <SettingsGroupItem
+              icon="information-circle-outline"
+              label={t('settings.about')}
+              value="1.0.0"
+            />
+          </SettingsGroup>
+        </StaggerGroup>
+
+        {/* Admin (conditional) */}
+        {userRole === 'admin' && (
+          <StaggerGroup index={groupIndex++}>
+            <SettingsGroup header={t('admin.title')}>
+              <SettingsGroupItem
+                icon="shield-checkmark-outline"
+                label={t('admin.title')}
+                onPress={() => router.push('/admin')}
+              />
+            </SettingsGroup>
+          </StaggerGroup>
+        )}
+
+      </Animated.ScrollView>
+    </YStack>
   )
 }
 
-function EditProfileSection() {
-  const { t } = useTranslation()
+function WebProfileView() {
+  const { t, i18n } = useTranslation()
   const theme = useTheme()
   const user = useAuthStore((s) => s.user)
-  const setUser = useAuthStore((s) => s.setUser)
-  const [editing, setEditing] = useState(false)
-  const [name, setName] = useState(user?.name ?? '')
-  const [bio, setBio] = useState(user?.bio ?? '')
-  const [phone, setPhone] = useState(user?.phone ?? '')
-  const [location, setLocation] = useState(user?.location ?? '')
-  const [saving, setSaving] = useState(false)
+  const userRole = useAuthStore((s) => s.user?.role)
+  const { mode, setMode } = useThemeStore()
+  const setLanguage = useLanguageStore((s) => s.setLanguage)
+  const [showLangPicker, setShowLangPicker] = useState(false)
 
-  const handleSave = async () => {
-    const trimmedName = name.trim()
-    if (!trimmedName) {
-      setEditing(false)
-      return
-    }
-
-    const payload: Record<string, string | null> = {}
-    if (trimmedName !== user?.name) payload.name = trimmedName
-    const trimmedBio = bio.trim()
-    if (trimmedBio !== (user?.bio ?? '')) payload.bio = trimmedBio || null
-    const trimmedPhone = phone.trim()
-    if (trimmedPhone !== (user?.phone ?? '')) payload.phone = trimmedPhone || null
-    const trimmedLocation = location.trim()
-    if (trimmedLocation !== (user?.location ?? '')) payload.location = trimmedLocation || null
-
-    if (Object.keys(payload).length === 0) {
-      setEditing(false)
-      return
-    }
-
-    setSaving(true)
-    try {
-      const { data } = await api.patch('/users/profile', payload)
-      if (data?.data && user) {
-        setUser({ ...user, ...data.data })
-      }
-      setEditing(false)
-    } catch {
-      Alert.alert(t('common.error'), t('common.retry'))
-    } finally {
-      setSaving(false)
-    }
+  const cycleTheme = () => {
+    const currentIdx = THEME_CYCLE.indexOf(mode)
+    const next = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length]
+    setMode(next)
   }
 
-  const handleCancel = () => {
-    setName(user?.name ?? '')
-    setBio(user?.bio ?? '')
-    setPhone(user?.phone ?? '')
-    setLocation(user?.location ?? '')
-    setEditing(false)
+  const selectLanguage = (lang: SupportedLanguage) => {
+    i18n.changeLanguage(lang)
+    setLanguage(lang)
+    setShowLangPicker(false)
   }
 
-  const inputStyle = {
-    backgroundColor: '$subtleBackground' as const,
-    borderWidth: 1,
-    borderColor: '$borderColor' as const,
-    borderRadius: '$3' as const,
-    paddingHorizontal: '$3' as const,
-    height: 42,
-    fontSize: '$3' as const,
-    color: '$color' as const,
-  }
-
-  if (editing) {
-    return (
-      <AppCard gap="$3">
-        <XStack justifyContent="space-between" alignItems="center">
-          <Text fontWeight="600" fontSize="$4" color="$color">{t('profile.editProfile')}</Text>
-          <ScalePress onPress={handleCancel}>
-            <Ionicons name="close" size={20} color={theme.mutedText.val} />
-          </ScalePress>
-        </XStack>
-
-        <YStack gap="$2">
-          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.name')}</Text>
-          <Input value={name} onChangeText={setName} {...inputStyle} autoFocus />
-        </YStack>
-
-        <YStack gap="$2">
-          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.bio')}</Text>
-          <Input
-            value={bio}
-            onChangeText={setBio}
-            {...inputStyle}
-            height={80}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-            placeholder={t('profile.bioPlaceholder')}
-            placeholderTextColor={theme.mutedText.val}
-          />
-        </YStack>
-
-        <YStack gap="$2">
-          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.phone')}</Text>
-          <Input value={phone} onChangeText={setPhone} {...inputStyle} keyboardType="phone-pad" />
-        </YStack>
-
-        <YStack gap="$2">
-          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.location')}</Text>
-          <Input value={location} onChangeText={setLocation} {...inputStyle} />
-        </YStack>
-
-        <YStack gap="$2">
-          <Text fontWeight="600" color="$color" fontSize="$2">{t('profile.email')}</Text>
-          <Text color="$mutedText" fontSize="$3">{user?.email ?? '-'}</Text>
-        </YStack>
-
-        <AppButton onPress={handleSave} disabled={saving}>
-          {saving ? t('common.loading') : t('common.save')}
-        </AppButton>
-      </AppCard>
-    )
+  const handleSignOut = async () => {
+    await authApi.logout()
+    router.replace('/')
   }
 
   return (
-    <AppCard gap="$3">
-      <XStack justifyContent="space-between" alignItems="center">
-        <Text fontWeight="600" fontSize="$4" color="$color">{t('profile.title')}</Text>
-        <ScalePress onPress={() => setEditing(true)}>
-          <XStack gap="$1" alignItems="center">
-            <Ionicons name="pencil-outline" size={16} color={theme.accent.val} />
-            <Text fontSize="$2" color="$accent">{t('profile.editProfile')}</Text>
-          </XStack>
-        </ScalePress>
-      </XStack>
+    <YStack flex={1} backgroundColor="$background">
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 20 }}>
+        {/* Header */}
+        <YStack alignItems="center" gap="$3" paddingVertical="$4">
+          <AppAvatar uri={user?.avatarUrl} name={user?.name} size={88} />
+          <YStack alignItems="center" gap="$1">
+            <H2 color="$color">{user?.name ?? 'Guest'}</H2>
+            <Text color="$mutedText" fontSize="$3">{user?.email ?? ''}</Text>
+          </YStack>
+        </YStack>
 
-      <YStack gap="$2">
-        <Text fontWeight="600" color="$color">{t('profile.name')}</Text>
-        <Text color="$mutedText">{user?.name ?? '-'}</Text>
-      </YStack>
-      <YStack width="100%" height={1} backgroundColor="$borderColor" />
-      {user?.bio ? (
-        <>
-          <YStack gap="$2">
-            <Text fontWeight="600" color="$color">{t('profile.bio')}</Text>
-            <Text color="$mutedText">{user.bio}</Text>
-          </YStack>
-          <YStack width="100%" height={1} backgroundColor="$borderColor" />
-        </>
-      ) : null}
-      {user?.phone ? (
-        <>
-          <YStack gap="$2">
-            <Text fontWeight="600" color="$color">{t('profile.phone')}</Text>
-            <Text color="$mutedText">{user.phone}</Text>
-          </YStack>
-          <YStack width="100%" height={1} backgroundColor="$borderColor" />
-        </>
-      ) : null}
-      {user?.location ? (
-        <>
-          <YStack gap="$2">
-            <Text fontWeight="600" color="$color">{t('profile.location')}</Text>
-            <Text color="$mutedText">{user.location}</Text>
-          </YStack>
-          <YStack width="100%" height={1} backgroundColor="$borderColor" />
-        </>
-      ) : null}
-      <YStack gap="$2">
-        <Text fontWeight="600" color="$color">{t('profile.email')}</Text>
-        <Text color="$mutedText">{user?.email ?? '-'}</Text>
-      </YStack>
+        {/* Account */}
+        <StaggerGroup index={0}>
+          <SettingsGroup header={t('profile.title')}>
+            <SettingsGroupItem
+              icon="pencil-outline"
+              label={t('profile.editProfile')}
+              onPress={() => router.push('/edit-profile')}
+            />
+            {user?.phone ? (
+              <SettingsGroupItem
+                icon="call-outline"
+                label={t('profile.phone')}
+                value={user.phone}
+              />
+            ) : null}
+            <SettingsGroupItem
+              icon="mail-outline"
+              label={t('profile.email')}
+              value={user?.email ?? '-'}
+            />
+            {user?.bio ? (
+              <SettingsGroupItem
+                icon="document-text-outline"
+                label={t('profile.bio')}
+                value={user.bio.length > 30 ? user.bio.slice(0, 30) + '...' : user.bio}
+              />
+            ) : null}
+            {user?.location ? (
+              <SettingsGroupItem
+                icon="location-outline"
+                label={t('profile.location')}
+                value={user.location}
+              />
+            ) : null}
+            {user?.birthday ? (
+              <SettingsGroupItem
+                icon="calendar-outline"
+                label={t('profile.birthday')}
+                value={new Date(user.birthday).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+              />
+            ) : null}
+          </SettingsGroup>
+        </StaggerGroup>
+
+        {/* Appearance */}
+        <StaggerGroup index={1}>
+          <SettingsGroup header={t('settings.theme')}>
+            <SettingsGroupItem
+              icon="color-palette-outline"
+              label={t('settings.theme')}
+              value={t(THEME_LABELS[mode])}
+              onPress={cycleTheme}
+            />
+            <SettingsGroupItem
+              icon="language-outline"
+              label={t('settings.language')}
+              value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
+              onPress={() => setShowLangPicker(!showLangPicker)}
+            />
+          </SettingsGroup>
+
+          <AnimatePresence>
+            {showLangPicker && (
+              <MotiView
+                from={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: 'timing', duration: 200 }}
+              >
+                <LanguagePicker
+                  currentLang={i18n.language as SupportedLanguage}
+                  onSelect={selectLanguage}
+                />
+              </MotiView>
+            )}
+          </AnimatePresence>
+        </StaggerGroup>
+
+        {/* General */}
+        <StaggerGroup index={2}>
+          <SettingsGroup header={t('settings.title')}>
+            <SettingsGroupItem
+              icon="notifications-outline"
+              label={t('settings.notifications')}
+              onPress={() => {}}
+            />
+            <SettingsGroupItem
+              icon="shield-outline"
+              label={t('settings.privacy')}
+              onPress={() => router.push('/privacy')}
+            />
+            <SettingsGroupItem
+              icon="information-circle-outline"
+              label={t('settings.about')}
+              value="1.0.0"
+            />
+          </SettingsGroup>
+        </StaggerGroup>
+
+        {/* Admin */}
+        {userRole === 'admin' && (
+          <StaggerGroup index={3}>
+            <SettingsGroup header={t('admin.title')}>
+              <SettingsGroupItem
+                icon="shield-checkmark-outline"
+                label={t('admin.title')}
+                onPress={() => router.push('/admin')}
+              />
+            </SettingsGroup>
+          </StaggerGroup>
+        )}
+
+        {/* Sign Out */}
+        <StaggerGroup index={userRole === 'admin' ? 4 : 3}>
+          <SettingsGroup>
+            <SettingsGroupItem
+              icon="log-out-outline"
+              label={t('settings.signOut')}
+              onPress={handleSignOut}
+              danger
+            />
+          </SettingsGroup>
+        </StaggerGroup>
+      </ScrollView>
+    </YStack>
+  )
+}
+
+function LanguagePicker({
+  currentLang,
+  onSelect,
+}: {
+  currentLang: SupportedLanguage
+  onSelect: (lang: SupportedLanguage) => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <AppCard padding="$2" gap="$1">
+      {SUPPORTED_LANGUAGES.map((lang) => {
+        const isActive = currentLang === lang
+        return (
+          <ScalePress key={lang} onPress={() => onSelect(lang)}>
+            <XStack
+              paddingVertical="$2.5"
+              paddingHorizontal="$3"
+              borderRadius="$3"
+              backgroundColor={isActive ? '$subtleBackground' : 'transparent'}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Text
+                color={isActive ? '$color' : '$mutedText'}
+                fontWeight={isActive ? '600' : '400'}
+                fontSize="$3"
+              >
+                {LANGUAGE_LABELS[lang]}
+              </Text>
+              {isActive && (
+                <Ionicons name="checkmark" size={18} color={theme.accent.val} />
+              )}
+            </XStack>
+          </ScalePress>
+        )
+      })}
     </AppCard>
   )
 }

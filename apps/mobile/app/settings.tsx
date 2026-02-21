@@ -1,10 +1,10 @@
-import { YStack } from 'tamagui'
-import { SettingsContent } from '../src/features/settings/SettingsScreen'
+import { useEffect } from 'react'
+import { router } from 'expo-router'
 
 export default function SettingsScreen() {
-  return (
-    <YStack flex={1} backgroundColor="$background">
-      <SettingsContent />
-    </YStack>
-  )
+  useEffect(() => {
+    router.replace('/(tabs)/profile')
+  }, [])
+
+  return null
 }

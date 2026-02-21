@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import rateLimit from '@fastify/rate-limit'
 import { authService } from './auth.service'
-import { registerSchema, loginSchema, refreshSchema } from './auth.schema'
+import { registerSchema, loginSchema, refreshSchema, googleAuthSchema } from './auth.schema'
 import { authenticate } from '../../common/middleware/authenticate'
 import { sendSuccess } from '../../common/utils/response'
 import { redis } from '../../config/redis'
@@ -26,6 +26,13 @@ export async function authRoutes(app: FastifyInstance) {
   app.post('/login', async (request, reply) => {
     const body = loginSchema.parse(request.body)
     const tokens = await authService.login(body)
+    return sendSuccess(reply, tokens)
+  })
+
+  // POST /api/auth/google
+  app.post('/google', async (request, reply) => {
+    const body = googleAuthSchema.parse(request.body)
+    const tokens = await authService.googleAuth(body)
     return sendSuccess(reply, tokens)
   })
 

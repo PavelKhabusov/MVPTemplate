@@ -13,7 +13,8 @@
     "search": "Buscar",
     "noResults": "No se encontraron resultados",
     "empty": "Nada aquí todavía",
-    "viewAll": "Ver todo"
+    "viewAll": "Ver todo",
+    "edit": "Editar"
   },
   "auth": {
     "signIn": "Iniciar sesión",
@@ -30,6 +31,9 @@
     "errorNetwork": "No se pudo conectar al servidor. Verifica tu conexión a internet.",
     "errorInvalidCredentials": "Correo o contraseña incorrectos",
     "errorEmailExists": "Este correo ya está registrado",
+    "or": "o",
+    "continueWithGoogle": "Continuar con Google",
+    "errorGoogleSignIn": "Error al iniciar sesión con Google",
     "errorTooMany": "Demasiados intentos. Inténtalo más tarde.",
     "validation": {
       "nameRequired": "El nombre es obligatorio",
@@ -67,6 +71,8 @@
     "bioPlaceholder": "Cuéntanos sobre ti...",
     "phone": "Teléfono",
     "location": "Ubicación",
+    "birthday": "Cumpleaños",
+    "setNewPhoto": "Cambiar foto",
     "signInPrompt": "Inicia sesión para ver tu perfil y acceder a todas las funciones",
     "projects": "Proyectos",
     "tasksCompleted": "Completadas",
@@ -83,7 +89,12 @@
     "roleAdmin": "Admin",
     "roleModerator": "Moderador",
     "saveChanges": "Guardar cambios",
-    "noUsers": "No se encontraron usuarios"
+    "noUsers": "No se encontraron usuarios",
+    "analytics": "Analíticas",
+    "avgSession": "Sesión prom.",
+    "dailyActivity": "Actividad diaria (30d)",
+    "popularScreens": "Pantallas populares",
+    "noData": "Sin datos de analíticas"
   },
   "notifications": {
     "title": "Notificaciones",

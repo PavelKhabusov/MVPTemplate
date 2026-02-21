@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Platform } from 'react-native'
+import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
-import { TamaguiProvider, XStack, useTheme } from 'tamagui'
+import { TamaguiProvider, Theme, XStack } from 'tamagui'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -12,17 +12,31 @@ import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
 import { useTranslation } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
+import { storage } from '@mvp/lib'
 import { queryClient } from '../src/services/query-client'
 import { authApi } from '../src/features/auth/auth.service'
+import { getAccessToken } from '../src/services/api'
 
 // Moti's declarative API writes shared values during render by design — disable strict mode
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false })
 
+LogBox.ignoreLogs([
+  "Must call import '@tamagui/native/setup-zeego'",
+  'SafeAreaView has been deprecated',
+])
+
 // Prevent splash screen from hiding before fonts load
 SplashScreen.preventAutoHideAsync()
 
+// Static navigation colors matching tamagui.config.ts — used in screenOptions
+// so colors are available on first render (no useTheme() delay)
+const navColors = {
+  light: { background: '#FAFAFA', tint: '#0891B2', text: '#0A0A0A' },
+  dark: { background: '#09090B', tint: '#38E8FF', text: '#FAFAFA' },
+}
+
 function RootNavigator() {
-  const theme = useTheme()
+  const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
   const { t } = useTranslation()
   const pathname = usePathname()
 
@@ -32,19 +46,29 @@ function RootNavigator() {
     return <WebRootLayout />
   }
 
+  const colors = navColors[resolvedTheme]
+
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: theme.background.val },
-        headerTintColor: theme.color.val,
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.tint,
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: theme.background.val },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t('common.back') }} />
       <Stack.Screen name="sign-in" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="sign-up" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen
+        name="edit-profile"
+        options={{
+          title: '',
+          headerBackVisible: false,
+          headerShadowVisible: false,
+        }}
+      />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="+not-found" />
@@ -62,7 +86,6 @@ function WebRootLayout() {
     { href: '/', label: t('tabs.home'), icon: 'home-outline' as const, iconFilled: 'home' as const, animation: 'bounce' as const },
     { href: '/explore', label: t('tabs.explore'), icon: 'compass-outline' as const, iconFilled: 'compass' as const, animation: 'rotate' as const },
     { href: '/profile', label: t('tabs.profile'), icon: 'person-outline' as const, iconFilled: 'person' as const, animation: 'pop' as const },
-    { href: '/settings', label: t('settings.title'), icon: 'settings-outline' as const, iconFilled: 'settings' as const, animation: 'wiggle' as const },
     ...(isAdmin ? [{ href: '/admin', label: t('admin.title'), icon: 'shield-outline' as const, iconFilled: 'shield' as const, animation: 'bell' as const }] : []),
   ]
 
@@ -80,6 +103,7 @@ function WebRootLayout() {
 
 export default function RootLayout() {
   const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
+  const isThemeHydrated = useThemeStore((s) => s._hasHydrated)
   const savedLanguage = useLanguageStore((s) => s.language)
   const isInitialized = useAuthStore((s) => s.isInitialized)
   const [i18nReady, setI18nReady] = useState(false)
@@ -98,13 +122,38 @@ export default function RootLayout() {
     // Initialize analytics — uses PostHog if posthog-react-native is installed and key provided
     const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY
     analytics.init(posthogKey)
+
+    // Configure internal analytics backend
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+    let deviceId = storage.getString('analytics_device_id')
+    if (!deviceId) {
+      deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+      })
+      storage.set('analytics_device_id', deviceId)
+    }
+    analytics.configureBackend({ apiUrl, deviceId, getToken: getAccessToken })
+    analytics.startSession()
+  }, [])
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        analytics.startSession()
+      } else if (state === 'background' || state === 'inactive') {
+        analytics.endSession()
+        analytics.flush()
+      }
+    })
+    return () => sub.remove()
   }, [])
 
   useEffect(() => {
     authApi.initialize()
   }, [])
 
-  const ready = (fontsLoaded || fontError) && i18nReady && isInitialized
+  const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 
   useEffect(() => {
     if (ready) {
@@ -118,9 +167,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
-          <PortalProvider>
-            <RootNavigator />
-          </PortalProvider>
+          <Theme name={resolvedTheme}>
+            <PortalProvider>
+              <RootNavigator />
+            </PortalProvider>
+          </Theme>
         </TamaguiProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

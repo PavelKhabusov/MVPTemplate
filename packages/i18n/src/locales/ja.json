@@ -13,7 +13,8 @@
     "search": "検索",
     "noResults": "結果が見つかりません",
     "empty": "まだ何もありません",
-    "viewAll": "すべて表示"
+    "viewAll": "すべて表示",
+    "edit": "編集"
   },
   "auth": {
     "signIn": "ログイン",
@@ -30,6 +31,9 @@
     "errorNetwork": "サーバーに接続できません。インターネット接続を確認してください。",
     "errorInvalidCredentials": "メールアドレスまたはパスワードが正しくありません",
     "errorEmailExists": "このメールアドレスは既に登録されています",
+    "or": "または",
+    "continueWithGoogle": "Googleで続ける",
+    "errorGoogleSignIn": "Googleログインに失敗しました",
     "errorTooMany": "試行回数が多すぎます。しばらくしてからお試しください。",
     "validation": {
       "nameRequired": "名前は必須です",
@@ -67,6 +71,8 @@
     "bioPlaceholder": "自分について教えてください...",
     "phone": "電話番号",
     "location": "場所",
+    "birthday": "誕生日",
+    "setNewPhoto": "写真を変更",
     "signInPrompt": "ログインしてプロフィールとすべての機能にアクセス",
     "projects": "プロジェクト",
     "tasksCompleted": "完了",
@@ -83,7 +89,12 @@
     "roleAdmin": "管理者",
     "roleModerator": "モデレーター",
     "saveChanges": "変更を保存",
-    "noUsers": "ユーザーが見つかりません"
+    "noUsers": "ユーザーが見つかりません",
+    "analytics": "アナリティクス",
+    "avgSession": "平均セッション",
+    "dailyActivity": "日次アクティビティ (30日)",
+    "popularScreens": "人気の画面",
+    "noData": "アナリティクスデータなし"
   },
   "notifications": {
     "title": "通知",
