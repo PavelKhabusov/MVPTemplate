@@ -1,16 +1,18 @@
-import { useState } from 'react'
 import { Platform, ScrollView } from 'react-native'
-import { YStack, useTheme } from 'tamagui'
+import { router } from 'expo-router'
+import { YStack, Text, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { DocTreeView } from '@mvp/ui'
-import { MarkdownView } from '../src/features/documentation/MarkdownView'
+import { DocTreeView } from '@mvp/docs'
 
-export default function DocsScreen() {
+export default function DocsIndexScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const [selectedPageId, setSelectedPageId] = useState<string | null>(null)
+
+  const handlePageSelect = (pageId: string) => {
+    router.push(`/docs/${pageId}` as any)
+  }
 
   return (
     <ScrollView
@@ -23,11 +25,7 @@ export default function DocsScreen() {
     >
       <YStack gap="$3">
         <DocTreeView
-          selectedPageId={selectedPageId}
-          onPageSelect={(id) => setSelectedPageId(selectedPageId === id ? null : id)}
-          renderContent={(contentKey) => (
-            <MarkdownView content={t(contentKey)} embedded />
-          )}
+          onPageSelect={handlePageSelect}
         />
       </YStack>
     </ScrollView>

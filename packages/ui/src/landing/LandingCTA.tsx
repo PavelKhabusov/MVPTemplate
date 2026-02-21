@@ -59,7 +59,7 @@ export function LandingCTA({ onNavigate }: LandingCTAProps) {
               </XStack>
             </ScalePress>
 
-            <ScalePress onPress={() => onNavigate('/privacy')}>
+            <ScalePress onPress={() => onNavigate('/docs')}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"

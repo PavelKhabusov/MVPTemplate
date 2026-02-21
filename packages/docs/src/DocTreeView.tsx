@@ -3,80 +3,16 @@ import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { MotiView, AnimatePresence } from 'moti'
 import { useTranslation } from '@mvp/i18n'
-import { ScalePress } from '../animations'
-
-interface DocPage {
-  id: string
-  titleKey: string
-  contentKey: string
-}
-
-interface DocGroup {
-  id: string
-  titleKey: string
-  icon: keyof typeof Ionicons.glyphMap
-  pages: DocPage[]
-}
-
-const DOC_GROUPS: DocGroup[] = [
-  {
-    id: 'getting-started',
-    titleKey: 'docs.groupGettingStarted',
-    icon: 'rocket-outline',
-    pages: [
-      { id: 'quick-start', titleKey: 'docs.pageQuickStart', contentKey: 'docs.contentQuickStart' },
-      { id: 'prerequisites', titleKey: 'docs.pagePrerequisites', contentKey: 'docs.contentPrerequisites' },
-      { id: 'project-structure', titleKey: 'docs.pageProjectStructure', contentKey: 'docs.contentProjectStructure' },
-    ],
-  },
-  {
-    id: 'configuration',
-    titleKey: 'docs.groupConfiguration',
-    icon: 'construct-outline',
-    pages: [
-      { id: 'env-vars', titleKey: 'docs.pageEnvVars', contentKey: 'docs.contentEnvVars' },
-      { id: 'database-setup', titleKey: 'docs.pageDatabaseSetup', contentKey: 'docs.contentDatabaseSetup' },
-      { id: 'auth', titleKey: 'docs.pageAuth', contentKey: 'docs.contentAuth' },
-    ],
-  },
-  {
-    id: 'features',
-    titleKey: 'docs.groupFeatures',
-    icon: 'sparkles-outline',
-    pages: [
-      { id: 'theming', titleKey: 'docs.pageTheming', contentKey: 'docs.contentTheming' },
-      { id: 'i18n', titleKey: 'docs.pageI18n', contentKey: 'docs.contentI18n' },
-      { id: 'push-notifications', titleKey: 'docs.pagePushNotifications', contentKey: 'docs.contentPushNotifications' },
-      { id: 'email', titleKey: 'docs.pageEmail', contentKey: 'docs.contentEmail' },
-    ],
-  },
-  {
-    id: 'deployment',
-    titleKey: 'docs.groupDeployment',
-    icon: 'cloud-upload-outline',
-    pages: [
-      { id: 'build-production', titleKey: 'docs.pageBuildProduction', contentKey: 'docs.contentBuildProduction' },
-      { id: 'docker', titleKey: 'docs.pageDocker', contentKey: 'docs.contentDocker' },
-    ],
-  },
-  {
-    id: 'customization',
-    titleKey: 'docs.groupCustomization',
-    icon: 'color-palette-outline',
-    pages: [
-      { id: 'add-screens', titleKey: 'docs.pageAddScreens', contentKey: 'docs.contentAddScreens' },
-      { id: 'styling', titleKey: 'docs.pageStyling', contentKey: 'docs.contentStyling' },
-    ],
-  },
-]
+import { ScalePress } from '@mvp/ui'
+import { DOC_GROUPS } from './docData'
+import type { DocGroup } from './docData'
 
 interface DocTreeViewProps {
-  onPageSelect?: (contentKey: string) => void
+  onPageSelect?: (pageId: string) => void
   selectedPageId?: string | null
-  renderContent?: (contentKey: string) => React.ReactNode
 }
 
-export function DocTreeView({ onPageSelect, selectedPageId, renderContent }: DocTreeViewProps) {
+export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['getting-started']))
@@ -259,22 +195,6 @@ export function DocTreeView({ onPageSelect, selectedPageId, renderContent }: Doc
               </YStack>
             )
           })}
-        </YStack>
-      )}
-
-      {/* Content */}
-      {selectedPageId && renderContent && (
-        <YStack
-          borderTopWidth={1}
-          borderTopColor="$borderColor"
-          paddingTop="$3"
-          marginTop="$1"
-        >
-          {renderContent(
-            DOC_GROUPS
-              .flatMap((g) => g.pages)
-              .find((p) => p.id === selectedPageId)?.contentKey ?? ''
-          )}
         </YStack>
       )}
     </YStack>
