@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
-import { TamaguiProvider, Theme, XStack, useTheme } from 'tamagui'
+import { TamaguiProvider, Theme, XStack } from 'tamagui'
 import { ThemeProvider, type Theme as NavTheme } from '@react-navigation/native'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -29,17 +29,24 @@ LogBox.ignoreLogs([
 // Prevent splash screen from hiding before fonts load
 SplashScreen.preventAutoHideAsync()
 
+const navFonts = {
+  regular: { fontFamily: 'Inter', fontWeight: '400' as const },
+  medium: { fontFamily: 'Inter', fontWeight: '500' as const },
+  bold: { fontFamily: 'InterBold', fontWeight: '700' as const },
+  heavy: { fontFamily: 'InterBold', fontWeight: '800' as const },
+}
+
 const lightNavTheme: NavTheme = {
   dark: false,
   colors: {
     primary: '#0891B2',
     background: '#FAFAFA',
-    card: '#FFFFFF',
+    card: '#FAFAFA',
     text: '#0A0A0A',
     border: '#E5E5E5',
     notification: '#0891B2',
   },
-  fonts: { regular: { fontFamily: 'Inter', fontWeight: '400' }, medium: { fontFamily: 'Inter', fontWeight: '500' }, bold: { fontFamily: 'InterBold', fontWeight: '700' }, heavy: { fontFamily: 'InterBold', fontWeight: '800' } },
+  fonts: navFonts,
 }
 
 const darkNavTheme: NavTheme = {
@@ -47,16 +54,15 @@ const darkNavTheme: NavTheme = {
   colors: {
     primary: '#38E8FF',
     background: '#09090B',
-    card: '#18181B',
+    card: '#09090B',
     text: '#FAFAFA',
     border: '#27272A',
     notification: '#38E8FF',
   },
-  fonts: lightNavTheme.fonts,
+  fonts: navFonts,
 }
 
 function RootNavigator() {
-  const theme = useTheme()
   const { t } = useTranslation()
   const pathname = usePathname()
 
@@ -69,10 +75,7 @@ function RootNavigator() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: theme.background.val },
-        headerTintColor: theme.color.val,
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t('common.back') }} />
