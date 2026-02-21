@@ -25,5 +25,8 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2",
+  "dependencies": {
+    "expo-dev-client": "~6.0.20"
+  }
 }

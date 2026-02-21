@@ -8,6 +8,7 @@ export type ThemeMode = 'system' | 'light' | 'dark'
 interface ThemeState {
   mode: ThemeMode
   resolvedTheme: 'light' | 'dark'
+  _hasHydrated: boolean
   setMode: (mode: ThemeMode) => void
 }
 
@@ -23,6 +24,7 @@ export const useThemeStore = create<ThemeState>()(
     (set, get) => ({
       mode: 'system' as ThemeMode,
       resolvedTheme: resolveTheme('system'),
+      _hasHydrated: false,
 
       setMode: (mode: ThemeMode) => {
         set({ mode, resolvedTheme: resolveTheme(mode) })
@@ -34,7 +36,12 @@ export const useThemeStore = create<ThemeState>()(
       partialize: (state) => ({ mode: state.mode }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.resolvedTheme = resolveTheme(state.mode)
+          useThemeStore.setState({
+            resolvedTheme: resolveTheme(state.mode),
+            _hasHydrated: true,
+          })
+        } else {
+          useThemeStore.setState({ _hasHydrated: true })
         }
       },
     }

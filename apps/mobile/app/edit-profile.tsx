@@ -98,6 +98,14 @@ export default function EditProfileScreen() {
     }
   }
 
+  const goBack = useCallback(() => {
+    if (Platform.OS === 'web') {
+      router.replace('/profile')
+    } else {
+      router.back()
+    }
+  }, [])
+
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim()
     if (!trimmedName) return
@@ -113,7 +121,7 @@ export default function EditProfileScreen() {
     if (birthdayStr !== (user?.birthday ?? null)) payload.birthday = birthdayStr
 
     if (Object.keys(payload).length === 0) {
-      router.back()
+      goBack()
       return
     }
 
@@ -123,13 +131,13 @@ export default function EditProfileScreen() {
       if (data?.data && user) {
         setUser({ ...user, ...data.data })
       }
-      router.back()
+      goBack()
     } catch {
       Alert.alert(t('common.error'), t('common.retry'))
     } finally {
       setSaving(false)
     }
-  }, [name, bio, phone, location, birthday, user, setUser, t])
+  }, [name, bio, phone, location, birthday, user, setUser, t, goBack])
 
   const handleSignOut = async () => {
     await authApi.logout()

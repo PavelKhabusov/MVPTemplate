@@ -94,6 +94,7 @@ function WebRootLayout() {
 
 export default function RootLayout() {
   const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
+  const isThemeHydrated = useThemeStore((s) => s._hasHydrated)
   const savedLanguage = useLanguageStore((s) => s.language)
   const isInitialized = useAuthStore((s) => s.isInitialized)
   const [i18nReady, setI18nReady] = useState(false)
@@ -143,7 +144,7 @@ export default function RootLayout() {
     authApi.initialize()
   }, [])
 
-  const ready = (fontsLoaded || fontError) && i18nReady && isInitialized
+  const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 
   useEffect(() => {
     if (ready) {

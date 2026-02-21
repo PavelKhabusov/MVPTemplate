@@ -8,6 +8,12 @@
     "owner": "pashenka",
     "android": {
       "package": "com.PavelKhabusov.MVPTemplate"
+    },
+    "ios": {
+      "bundleIdentifier": "com.PavelKhabusov.MVPTemplate",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     }
   }
 }
