@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Alert } from 'react-native'
-import { ScrollView } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import { YStack, Text, Input, useTheme } from 'tamagui'
 import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
@@ -67,16 +66,21 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.background.val }}
-      contentContainerStyle={{
-        padding: 16,
-        paddingBottom: 40,
-        gap: 20,
-      }}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      <SettingsGroup>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: theme.background.val }}
+        contentContainerStyle={{
+          padding: 16,
+          paddingBottom: 60,
+          gap: 20,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <SettingsGroup>
         <YStack padding="$3" gap="$3">
           <YStack gap="$1.5">
             <Text fontWeight="600" color="$color" fontSize={14} paddingLeft="$1">{t('profile.name')}</Text>
@@ -130,9 +134,10 @@ export default function EditProfileScreen() {
         </YStack>
       </SettingsGroup>
 
-      <AppButton onPress={handleSave} loading={saving}>
-        {t('common.save')}
-      </AppButton>
-    </ScrollView>
+        <AppButton onPress={handleSave} loading={saving}>
+          {t('common.save')}
+        </AppButton>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
