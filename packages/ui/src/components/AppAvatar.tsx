@@ -1,4 +1,5 @@
-import { YStack, Text, Image, GetProps, useTheme } from 'tamagui'
+import { Image } from 'react-native'
+import { YStack, Text, GetProps, useTheme } from 'tamagui'
 
 interface AppAvatarProps extends GetProps<typeof YStack> {
   uri?: string | null
@@ -29,8 +30,7 @@ export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
       >
         <Image
           source={{ uri }}
-          width={size}
-          height={size}
+          style={{ width: size, height: size }}
           resizeMode="cover"
         />
       </YStack>

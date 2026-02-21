@@ -71,9 +71,9 @@ export default function EditProfileScreen() {
         } as any)
       }
 
-      // Use fetch directly to avoid axios Content-Type conflicts with FormData
       const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
       const token = getAccessToken()
+      console.log('Uploading avatar to', `${apiUrl}/api/users/avatar`, 'token:', !!token)
       const uploadRes = await fetch(`${apiUrl}/api/users/avatar`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
