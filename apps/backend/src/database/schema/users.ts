@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, text, jsonb, date } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, text, jsonb, date, boolean } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -12,6 +12,7 @@ export const users = pgTable('users', {
   birthday: date('birthday'),
   role: varchar('role', { length: 50 }).default('user').notNull(),
   features: jsonb('features').$type<string[]>().default([]).notNull(),
+  emailVerified: boolean('email_verified').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

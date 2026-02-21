@@ -14,7 +14,7 @@ const GREETINGS = [
 const API_ROUTES = [
   { method: 'GET', color: '#7ee787', path: '/api/users' },
   { method: 'POST', color: '#f0883e', path: '/api/auth/login' },
-  { method: 'GET', color: '#7ee787', path: '/api/search?q=...' },
+  { method: 'POST', color: '#f0883e', path: '/api/mail/send' },
   { method: 'WS', color: '#d2a8ff', path: '/api/events/sse' },
 ]
 

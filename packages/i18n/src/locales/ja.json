@@ -167,7 +167,7 @@
     "featureAuth": "認証",
     "featureAuthDesc": "メール/パスワードとGoogle OAuthのJWT認証。ロールベースアクセス制御付き。",
     "featureBackend": "フルスタックバックエンド",
-    "featureBackendDesc": "Fastify API、Drizzle ORM、PostgreSQL、Redis、すぐに使えるエンドポイント。",
+    "featureBackendDesc": "Fastify API、Drizzle ORM、PostgreSQL、Redis、任意のSMTPプロバイダーによるメール送信（feature flag対応）。",
     "featureAnalytics": "組み込みアナリティクス",
     "featureAnalyticsDesc": "PostHog連携でセッション追跡、画面分析、管理ダッシュボード。",
     "showcaseTitle": "それだけではありません",

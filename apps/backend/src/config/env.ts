@@ -14,6 +14,16 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:8081'),
   EXPO_ACCESS_TOKEN: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
+
+  // Email
+  EMAIL_ENABLED: z.coerce.boolean().default(false),
+  EMAIL_VERIFICATION_REQUIRED: z.coerce.boolean().default(false),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().default('noreply@example.com'),
+  APP_URL: z.string().default('http://localhost:8081'),
 })
 
 function loadEnv() {
