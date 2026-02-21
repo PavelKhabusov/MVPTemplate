@@ -120,6 +120,10 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/auth/refresh` | — | Refresh tokens |
 | `POST` | `/auth/logout` | Yes | Sign out |
 | `GET` | `/auth/me` | Yes | Current user |
+| `POST` | `/auth/verify-email` | — | Verify email token |
+| `POST` | `/auth/request-password-reset` | — | Request password reset |
+| `POST` | `/auth/reset-password` | — | Reset password with token |
+| `POST` | `/auth/resend-verification` | Yes | Resend verification email |
 | `PATCH` | `/users/profile` | Yes | Update profile (name, bio, phone, location) |
 | `GET` | `/users/settings` | Yes | Get settings |
 | `PUT` | `/users/settings` | Yes | Update settings |
@@ -141,8 +145,10 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 
 | Table | Key Fields |
 |-------|------------|
-| `users` | email, name, bio, phone, location, role, features (JSONB) |
+| `users` | email, name, bio, phone, location, role, features (JSONB), email_verified |
 | `refresh_tokens` | user_id, token_hash, expires_at |
+| `email_verification_tokens` | user_id, token_hash, expires_at, verified_at |
+| `password_reset_tokens` | user_id, token_hash, expires_at, used_at |
 | `push_tokens` | user_id, token, platform |
 | `notifications` | user_id, title, body, type, data (JSONB), is_read |
 | `user_settings` | user_id, settings (JSONB) |
@@ -203,6 +209,60 @@ Google sign-in is a **feature flag** — the button only appears when `EXPO_PUBL
 6. Run `npm run db:push -w apps/backend` to update the schema (passwordHash is now nullable for OAuth users)
 
 For production builds (EAS), create additional OAuth clients for iOS and Android and pass `iosClientId` / `androidClientId` to `useIdTokenAuthRequest` in `GoogleSignInButton.tsx`.
+
+## Email (Optional)
+
+Email functionality is disabled by default (`EMAIL_ENABLED=false`). When disabled, registration and login work as usual with no emails or verification checks.
+
+### Setup
+
+1. Set `EMAIL_ENABLED=true` in `apps/backend/.env`
+2. Configure SMTP credentials:
+
+   **Gmail (free, 500 emails/day):**
+   ```env
+   EMAIL_ENABLED=true
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your@gmail.com
+   SMTP_PASS=your-app-password
+   SMTP_FROM=your@gmail.com
+   ```
+   > Create an App Password: Google Account → Security → 2-Step Verification → App passwords
+
+   **Yandex (free):**
+   ```env
+   SMTP_HOST=smtp.yandex.ru
+   SMTP_PORT=465
+   SMTP_USER=your@yandex.ru
+   SMTP_PASS=your-app-password
+   SMTP_FROM=your@yandex.ru
+   ```
+
+   **Any SMTP provider** — just set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
+
+3. Optional: Set `EMAIL_VERIFICATION_REQUIRED=true` to block sign-in for unverified users
+4. In development without SMTP config, emails are captured by [Ethereal](https://ethereal.email) — check server console for preview URLs
+
+### Email Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EMAIL_ENABLED` | `false` | Enable/disable all email functionality |
+| `EMAIL_VERIFICATION_REQUIRED` | `false` | Block sign-in for unverified emails |
+| `SMTP_HOST` | — | SMTP server hostname |
+| `SMTP_PORT` | `587` | SMTP port (587 for TLS, 465 for SSL) |
+| `SMTP_USER` | — | SMTP username |
+| `SMTP_PASS` | — | SMTP password |
+| `SMTP_FROM` | `noreply@example.com` | Sender email address |
+| `APP_URL` | `http://localhost:8081` | Frontend URL for email links |
+
+### What it adds
+
+- **Email verification** on registration (verification link sent to inbox)
+- **Password reset** flow (forgot password → email link → new password)
+- **Welcome email** after successful verification
+- Templates in 4 languages (EN/RU/ES/JA), inline-styled for email clients
 
 ## Features
 

@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { YStack } from 'tamagui'
-import { router } from 'expo-router'
+import { YStack, Text } from 'tamagui'
+import { Link, router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
+import { useAuthStore } from '@mvp/store'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
 import { authApi } from './auth.service'
 
@@ -50,14 +51,28 @@ export function SignInForm() {
       </FadeIn>
 
       <SlideIn from="bottom" delay={100}>
-        <AppInput
-          label={t('auth.password')}
-          placeholder="********"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          error={error || undefined}
-        />
+        <YStack gap="$1.5">
+          <AppInput
+            label={t('auth.password')}
+            placeholder="********"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            error={error || undefined}
+          />
+          {useAuthStore.getState().user?.emailEnabled !== false && (
+            <Link href="/forgot-password" asChild>
+              <Text
+                color="$primary"
+                fontSize="$2"
+                textAlign="right"
+                cursor="pointer"
+              >
+                {t('auth.forgotPassword')}
+              </Text>
+            </Link>
+          )}
+        </YStack>
       </SlideIn>
 
       <SlideIn from="bottom" delay={200}>

@@ -60,6 +60,9 @@ function RootNavigator() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t('common.back') }} />
       <Stack.Screen name="sign-in" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="sign-up" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="forgot-password" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="reset-password" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="verify-email" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen
         name="edit-profile"

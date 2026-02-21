@@ -50,6 +50,22 @@ export const authApi = {
       useAuthStore.getState().setInitialized()
     }
   },
+
+  async requestPasswordReset(email: string) {
+    await api.post('/auth/request-password-reset', { email })
+  },
+
+  async resetPassword(token: string, password: string) {
+    await api.post('/auth/reset-password', { token, password })
+  },
+
+  async verifyEmail(token: string) {
+    await api.post('/auth/verify-email', { token })
+  },
+
+  async resendVerification(locale?: string) {
+    await api.post('/auth/resend-verification', { locale })
+  },
 }
 
 async function handleAuthResponse(data: {
