@@ -31,6 +31,9 @@
     "errorNetwork": "Unable to connect to server. Check your internet connection.",
     "errorInvalidCredentials": "Invalid email or password",
     "errorEmailExists": "This email is already registered",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "errorGoogleSignIn": "Google sign-in failed",
     "errorTooMany": "Too many attempts. Please try again later.",
     "validation": {
       "nameRequired": "Name is required",

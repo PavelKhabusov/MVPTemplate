@@ -31,6 +31,9 @@
     "errorNetwork": "No se pudo conectar al servidor. Verifica tu conexión a internet.",
     "errorInvalidCredentials": "Correo o contraseña incorrectos",
     "errorEmailExists": "Este correo ya está registrado",
+    "or": "o",
+    "continueWithGoogle": "Continuar con Google",
+    "errorGoogleSignIn": "Error al iniciar sesión con Google",
     "errorTooMany": "Demasiados intentos. Inténtalo más tarde.",
     "validation": {
       "nameRequired": "El nombre es obligatorio",

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Input, YStack, Text, XStack, GetProps, useTheme } from 'tamagui'
-import { Pressable } from 'react-native'
+import { Platform, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import Animated, {
   useAnimatedStyle,
@@ -42,6 +42,13 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
   }))
 
   const isPassword = secureTextEntry === true
+  const hideText = isPassword && !showPassword
+
+  // Tamagui Input doesn't map secureTextEntry to type="password" on web
+  const webPasswordProps =
+    Platform.OS === 'web' && isPassword
+      ? ({ inputMode: 'text', type: hideText ? 'password' : 'text' } as any)
+      : {}
 
   return (
     <AnimatedYStack gap="$1" style={shakeStyle}>
@@ -51,7 +58,7 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
         </Text>
       )}
 
-      <YStack>
+      <YStack position="relative">
         <Input
           backgroundColor="$cardBackground"
           borderWidth={1}
@@ -66,22 +73,20 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
           aria-label={label}
           aria-invalid={!!error}
           aria-describedby={error ? `${label}-error` : undefined}
-          secureTextEntry={isPassword && !showPassword}
-          focusStyle={{
-            borderColor: error ? '$error' : '$primary',
-            borderWidth: 2,
-          }}
+          secureTextEntry={hideText}
+          {...webPasswordProps}
           {...props}
         />
         {isPassword && (
-          <Pressable
+          <TouchableOpacity
             onPress={() => setShowPassword((v) => !v)}
             hitSlop={8}
+            activeOpacity={0.6}
             style={{
               position: 'absolute',
               right: 0,
               top: 0,
-              bottom: 0,
+              height: 44,
               width: 44,
               alignItems: 'center',
               justifyContent: 'center',
@@ -92,7 +97,7 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
               size={20}
               color={theme.mutedText.val}
             />
-          </Pressable>
+          </TouchableOpacity>
         )}
       </YStack>
 

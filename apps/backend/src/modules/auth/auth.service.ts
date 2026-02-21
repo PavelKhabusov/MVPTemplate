@@ -88,6 +88,7 @@ export const authService = {
     }
 
     const payload = await res.json() as {
+      aud: string
       sub: string
       email: string
       email_verified: string

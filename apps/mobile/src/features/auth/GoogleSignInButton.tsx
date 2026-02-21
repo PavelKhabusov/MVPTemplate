@@ -3,6 +3,7 @@ import { XStack, Text, useTheme } from 'tamagui'
 import { Pressable, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
+import { useTranslation } from '@mvp/i18n'
 import * as Google from 'expo-auth-session/providers/google'
 import * as WebBrowser from 'expo-web-browser'
 import { authApi } from './auth.service'
@@ -12,11 +13,12 @@ WebBrowser.maybeCompleteAuthSession()
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? ''
 
 export function GoogleSignInButton() {
+  const { t } = useTranslation()
   const theme = useTheme()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [, response, promptAsync] = Google.useIdTokenAuthRequest({
+  const [, , promptAsync] = Google.useIdTokenAuthRequest({
     clientId: GOOGLE_WEB_CLIENT_ID,
   })
 
@@ -32,10 +34,10 @@ export function GoogleSignInButton() {
         await authApi.googleLogin(idToken)
         router.replace('/')
       } else if (result?.type === 'error') {
-        setError(result.error?.message ?? 'Google sign-in failed')
+        setError(result.error?.message ?? t('auth.errorGoogleSignIn'))
       }
     } catch (err: any) {
-      const message = err?.response?.data?.message ?? 'Google sign-in failed'
+      const message = err?.response?.data?.message ?? t('auth.errorGoogleSignIn')
       setError(message)
     } finally {
       setLoading(false)
@@ -62,7 +64,7 @@ export function GoogleSignInButton() {
             <>
               <Ionicons name="logo-google" size={20} color={theme.color.val} />
               <Text fontSize="$3" fontWeight="600" color="$color">
-                Continue with Google
+                {t('auth.continueWithGoogle')}
               </Text>
             </>
           )}

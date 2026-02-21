@@ -31,6 +31,9 @@
     "errorNetwork": "サーバーに接続できません。インターネット接続を確認してください。",
     "errorInvalidCredentials": "メールアドレスまたはパスワードが正しくありません",
     "errorEmailExists": "このメールアドレスは既に登録されています",
+    "or": "または",
+    "continueWithGoogle": "Googleで続ける",
+    "errorGoogleSignIn": "Googleログインに失敗しました",
     "errorTooMany": "試行回数が多すぎます。しばらくしてからお試しください。",
     "validation": {
       "nameRequired": "名前は必須です",

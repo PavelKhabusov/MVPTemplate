@@ -31,6 +31,9 @@
     "errorNetwork": "Не удалось подключиться к серверу. Проверьте интернет-соединение.",
     "errorInvalidCredentials": "Неверный email или пароль",
     "errorEmailExists": "Этот email уже зарегистрирован",
+    "or": "или",
+    "continueWithGoogle": "Войти через Google",
+    "errorGoogleSignIn": "Ошибка входа через Google",
     "errorTooMany": "Слишком много попыток. Попробуйте позже.",
     "validation": {
       "nameRequired": "Введите имя",
