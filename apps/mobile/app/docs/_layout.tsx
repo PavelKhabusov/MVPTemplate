@@ -42,11 +42,26 @@ export default function DocsLayout() {
     return (
       <Stack
         screenOptions={{
-          headerShown: false,
+          headerStyle: { backgroundColor: theme.background.val },
+          headerTintColor: theme.accent.val,
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: theme.background.val },
         }}
       >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="[page]" />
+        <Stack.Screen
+          name="index"
+          options={{
+            title: t('docs.title'),
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="[page]"
+          options={{
+            headerShown: true,
+            headerBackTitle: t('docs.title'),
+          }}
+        />
       </Stack>
     )
   }

@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
+import { MotiView, AnimatePresence } from 'moti'
 import { useTranslation, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import { ScalePress } from '@mvp/ui'
 import { DOC_GROUPS } from './docData'
@@ -199,15 +200,25 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
                 </ScalePress>
 
                 {/* Pages */}
-                {isExpanded && (
-                  <PageList
-                    pages={group.pages}
-                    selectedPageId={selectedPageId}
-                    onPageSelect={onPageSelect}
-                    theme={theme}
-                    t={t}
-                  />
-                )}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <MotiView
+                      from={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' as any }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ type: 'timing', duration: 200 }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <PageList
+                        pages={group.pages}
+                        selectedPageId={selectedPageId}
+                        onPageSelect={onPageSelect}
+                        theme={theme}
+                        t={t}
+                      />
+                    </MotiView>
+                  )}
+                </AnimatePresence>
               </YStack>
             )
           })}
