@@ -22,6 +22,7 @@ import {
   SettingsGroupItem,
 } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
+import { useTemplateFlag } from '@mvp/template-config'
 import { AnimatePresence, MotiView } from 'moti'
 import Animated, {
   useSharedValue,
@@ -56,6 +57,7 @@ function UnauthenticatedSettingsView() {
   const insets = useSafeAreaInsets()
   const theme = useTheme()
   const { mode, setMode } = useThemeStore()
+  const docsEnabled = useTemplateFlag('docs', true)
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
 
@@ -151,11 +153,13 @@ function UnauthenticatedSettingsView() {
             label={t('settings.terms')}
             onPress={() => router.push('/terms')}
           />
-          <SettingsGroupItem
-            icon="book-outline"
-            label={t('docs.title')}
-            onPress={() => router.push('/docs')}
-          />
+          {docsEnabled && (
+            <SettingsGroupItem
+              icon="book-outline"
+              label={t('docs.title')}
+              onPress={() => router.push('/docs')}
+            />
+          )}
           <SettingsGroupItem
             icon="information-circle-outline"
             label={t('settings.about')}
@@ -175,6 +179,7 @@ function AuthenticatedSettingsView() {
   const userRole = useAuthStore((s) => s.user?.role)
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
+  const docsEnabled = useTemplateFlag('docs', true)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
 
@@ -331,11 +336,13 @@ function AuthenticatedSettingsView() {
               label={t('settings.terms')}
               onPress={() => router.push('/terms')}
             />
-            <SettingsGroupItem
-              icon="book-outline"
-              label={t('docs.title')}
-              onPress={() => router.push('/docs')}
-            />
+            {docsEnabled && (
+              <SettingsGroupItem
+                icon="book-outline"
+                label={t('docs.title')}
+                onPress={() => router.push('/docs')}
+              />
+            )}
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
@@ -381,6 +388,7 @@ function WebSettingsView() {
   const userRole = useAuthStore((s) => s.user?.role)
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
+  const docsEnabled = useTemplateFlag('docs', true)
   const [showLangPicker, setShowLangPicker] = useState(false)
 
   const cycleTheme = () => {
@@ -527,11 +535,13 @@ function WebSettingsView() {
               label={t('settings.terms')}
               onPress={() => router.push('/terms')}
             />
-            <SettingsGroupItem
-              icon="book-outline"
-              label={t('docs.title')}
-              onPress={() => router.push('/docs')}
-            />
+            {docsEnabled && (
+              <SettingsGroupItem
+                icon="book-outline"
+                label={t('docs.title')}
+                onPress={() => router.push('/docs')}
+              />
+            )}
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}

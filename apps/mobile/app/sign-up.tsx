@@ -6,12 +6,14 @@ import { FadeIn, SlideIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SignUpForm } from '@mvp/auth'
+import { useTemplateFlag } from '@mvp/template-config'
 import { GoogleSignInButton, isGoogleAuthEnabled } from '../src/features/auth/GoogleSignInButton'
 
 export default function SignUpScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const googleAuthVisible = useTemplateFlag('googleAuth', isGoogleAuthEnabled)
 
   return (
     <KeyboardAvoidingView
@@ -36,7 +38,7 @@ export default function SignUpScreen() {
 
           <SignUpForm />
 
-          {isGoogleAuthEnabled && (
+          {googleAuthVisible && (
             <SlideIn from="bottom" delay={500}>
               <YStack width="100%" maxWidth={400} gap="$3">
                 <XStack alignItems="center" gap="$3">
@@ -49,7 +51,7 @@ export default function SignUpScreen() {
             </SlideIn>
           )}
 
-          <SlideIn from="bottom" delay={isGoogleAuthEnabled ? 600 : 500}>
+          <SlideIn from="bottom" delay={googleAuthVisible ? 600 : 500}>
             <Text color="$mutedText" textAlign="center">
               {t('auth.hasAccount')}{' '}
               <Link href="/sign-in">

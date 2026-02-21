@@ -287,5 +287,21 @@
     "learnMore": "Learn more",
     "accept": "Accept",
     "decline": "Decline"
+  },
+  "templateConfig": {
+    "title": "Template Config",
+    "description": "Preview how the app looks with different feature settings",
+    "frontend": "Frontend",
+    "backend": "Backend",
+    "server": "Server",
+    "reset": "Reset Defaults",
+    "docs": "Documentation",
+    "email": "Email System",
+    "emailVerification": "Email Verification",
+    "googleAuth": "Google Sign-In",
+    "requestLogging": "Request Logging",
+    "analytics": "Analytics",
+    "cookieBanner": "Cookie Banner",
+    "pushNotifications": "Push Notifications"
   }
 }

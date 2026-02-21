@@ -287,5 +287,21 @@
     "learnMore": "Подробнее",
     "accept": "Принять",
     "decline": "Отклонить"
+  },
+  "templateConfig": {
+    "title": "Настройка шаблона",
+    "description": "Просмотрите, как выглядит приложение с разными настройками функций",
+    "frontend": "Фронтенд",
+    "backend": "Бэкенд",
+    "server": "Сервер",
+    "reset": "Сбросить",
+    "docs": "Документация",
+    "email": "Система email",
+    "emailVerification": "Верификация email",
+    "googleAuth": "Вход через Google",
+    "requestLogging": "Логирование запросов",
+    "analytics": "Аналитика",
+    "cookieBanner": "Баннер cookie",
+    "pushNotifications": "Push-уведомления"
   }
 }

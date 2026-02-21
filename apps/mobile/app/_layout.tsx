@@ -10,6 +10,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
+import { TemplateConfigSidebar } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -195,9 +196,12 @@ function WebRootLayout() {
         <Slot />
       </YStack>
       <CookieBanner />
+      {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
     </XStack>
   )
 }
+
+const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
 
 export default function RootLayout() {
   const resolvedTheme = useThemeStore((s) => s.resolvedTheme)

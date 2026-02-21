@@ -287,5 +287,21 @@
     "learnMore": "Más información",
     "accept": "Aceptar",
     "decline": "Rechazar"
+  },
+  "templateConfig": {
+    "title": "Configurador",
+    "description": "Vista previa de la app con diferentes configuraciones",
+    "frontend": "Frontend",
+    "backend": "Backend",
+    "server": "Servidor",
+    "reset": "Restablecer",
+    "docs": "Documentación",
+    "email": "Sistema de email",
+    "emailVerification": "Verificación de email",
+    "googleAuth": "Inicio con Google",
+    "requestLogging": "Registro de peticiones",
+    "analytics": "Analíticas",
+    "cookieBanner": "Banner de cookies",
+    "pushNotifications": "Notificaciones push"
   }
 }

@@ -287,5 +287,21 @@
     "learnMore": "詳しく見る",
     "accept": "同意する",
     "decline": "拒否する"
+  },
+  "templateConfig": {
+    "title": "テンプレート設定",
+    "description": "機能設定を切り替えてアプリの見た目をプレビュー",
+    "frontend": "フロントエンド",
+    "backend": "バックエンド",
+    "server": "サーバー",
+    "reset": "リセット",
+    "docs": "ドキュメント",
+    "email": "メールシステム",
+    "emailVerification": "メール認証",
+    "googleAuth": "Googleログイン",
+    "requestLogging": "リクエストログ",
+    "analytics": "アナリティクス",
+    "cookieBanner": "Cookieバナー",
+    "pushNotifications": "プッシュ通知"
   }
 }

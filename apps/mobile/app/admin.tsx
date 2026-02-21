@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions } from 'react-native'
 import { YStack, XStack, Text, H2, H4, Input, useTheme, Switch } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -6,7 +6,10 @@ import { useTranslation } from '@mvp/i18n'
 import { AppAvatar, AppButton, AppCard, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
+import { useTemplateConfigStore } from '@mvp/template-config'
 import { api } from '../src/services/api'
+
+const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
 
 interface AdminUser {
   id: string
@@ -66,6 +69,55 @@ function formatDuration(seconds: number): string {
 function formatShortDate(iso: string): string {
   const d = new Date(iso)
   return `${d.getDate()}/${d.getMonth() + 1}`
+}
+
+function ScreensBarChart({ data }: { data: Array<{ screenName: string; views: number }> }) {
+  const theme = useTheme()
+  const { width: screenWidth } = useWindowDimensions()
+
+  if (!data || data.length === 0) {
+    return <Text color="$mutedText" fontSize="$2">No data yet</Text>
+  }
+
+  const maxViews = Math.max(...data.map((d) => d.views), 1)
+  const chartWidth = Math.min(screenWidth - 80, 400)
+  const rowHeight = 28
+  const chartHeight = data.length * rowHeight
+  const labelWidth = 100
+  const barAreaWidth = chartWidth - labelWidth - 50
+
+  return (
+    <Svg width="100%" height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
+      {data.map((d, i) => {
+        const barWidth = Math.max((d.views / maxViews) * barAreaWidth, 4)
+        const y = i * rowHeight
+        return (
+          <React.Fragment key={d.screenName}>
+            <SvgText x={0} y={y + 18} fontSize={11} fill={theme.color.val}>
+              {d.screenName.length > 14 ? d.screenName.slice(0, 13) + '…' : d.screenName}
+            </SvgText>
+            <Rect
+              x={labelWidth}
+              y={y + 5}
+              width={barWidth}
+              height={16}
+              rx={4}
+              fill={theme.accent.val}
+              opacity={0.8}
+            />
+            <SvgText
+              x={labelWidth + barWidth + 6}
+              y={y + 18}
+              fontSize={11}
+              fill={theme.mutedText.val}
+            >
+              {d.views}
+            </SvgText>
+          </React.Fragment>
+        )
+      })}
+    </Svg>
+  )
 }
 
 function SimpleBarChart({ data }: { data: Array<{ day: string; events: number; uniqueUsers: number }> }) {
@@ -270,6 +322,23 @@ export default function AdminScreen() {
               </Text>
             </XStack>
           </ScalePress>
+          {Platform.OS === 'web' && isTemplateConfigEnabled && (
+            <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
+              <XStack
+                backgroundColor="$subtleBackground"
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+                gap="$1.5"
+                alignItems="center"
+              >
+                <Ionicons name="construct-outline" size={16} color={theme.accent.val} />
+                <Text color="$color" fontWeight="600" fontSize="$3">
+                  {t('templateConfig.title')}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
         </XStack>
 
         {/* Users Tab — Stats + Search */}
@@ -389,14 +458,7 @@ export default function AdminScreen() {
                     <Text fontWeight="600" color="$color" fontSize="$3" marginBottom="$2">
                       {t('admin.popularScreens')}
                     </Text>
-                    <YStack gap="$1">
-                      {analyticsData.popularScreens.map((s, i) => (
-                        <XStack key={s.screenName} justifyContent="space-between" paddingVertical="$1">
-                          <Text color="$color" fontSize="$2">{i + 1}. {s.screenName}</Text>
-                          <Text color="$mutedText" fontSize="$2">{s.views}</Text>
-                        </XStack>
-                      ))}
-                    </YStack>
+                    <ScreensBarChart data={analyticsData.popularScreens} />
                   </AppCard>
                 )}
               </YStack>
