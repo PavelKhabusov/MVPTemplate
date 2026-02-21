@@ -1,5 +1,5 @@
-import { Platform } from 'react-native'
-import { YStack, Text, useTheme } from 'tamagui'
+import { Platform, TouchableOpacity } from 'react-native'
+import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
   useAnimatedStyle,
@@ -16,12 +16,18 @@ const AVATAR_SIZE = 100
 
 export { HEADER_EXPANDED, HEADER_COLLAPSED }
 
+interface HeaderAction {
+  label: string
+  onPress: () => void
+}
+
 interface CollapsibleHeaderProps {
   scrollY: SharedValue<number>
   avatarUri?: string | null
   avatarName?: string
   userName: string
   userStatus?: string
+  rightAction?: HeaderAction
 }
 
 export function CollapsibleHeader({
@@ -30,6 +36,7 @@ export function CollapsibleHeader({
   avatarName,
   userName,
   userStatus,
+  rightAction,
 }: CollapsibleHeaderProps) {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -150,6 +157,28 @@ export function CollapsibleHeader({
         headerStyle,
       ]}
     >
+      {/* Right action button — always visible */}
+      {rightAction && (
+        <TouchableOpacity
+          onPress={rightAction.onPress}
+          activeOpacity={0.7}
+          style={{
+            position: 'absolute',
+            top: safeTop + (HEADER_COLLAPSED - 34) / 2,
+            right: 16,
+            zIndex: 20,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 16,
+            backgroundColor: theme.subtleBackground.val,
+          }}
+        >
+          <Text fontSize={15} fontWeight="600" color="$accent">
+            {rightAction.label}
+          </Text>
+        </TouchableOpacity>
+      )}
+
       {/* Avatar */}
       <Animated.View style={avatarStyle}>
         <AppAvatar uri={avatarUri} name={avatarName} size={AVATAR_SIZE} />

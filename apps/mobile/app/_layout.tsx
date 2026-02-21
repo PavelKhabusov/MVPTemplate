@@ -50,7 +50,14 @@ function RootNavigator() {
       <Stack.Screen name="sign-in" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="sign-up" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title'), headerBackTitle: t('common.back') }} />
-      <Stack.Screen name="edit-profile" options={{ title: t('profile.editProfile'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen
+        name="edit-profile"
+        options={{
+          title: t('profile.editProfile'),
+          headerBackVisible: false,
+          presentation: 'modal',
+        }}
+      />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="+not-found" />

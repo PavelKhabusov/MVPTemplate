@@ -13,7 +13,8 @@
     "search": "Search",
     "noResults": "No results found",
     "empty": "Nothing here yet",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "edit": "Edit"
   },
   "auth": {
     "signIn": "Sign In",

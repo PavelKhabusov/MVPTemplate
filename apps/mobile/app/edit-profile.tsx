@@ -1,16 +1,17 @@
-import { useState } from 'react'
-import { Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { useState, useCallback, useLayoutEffect } from 'react'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { YStack, Text, Input, useTheme } from 'tamagui'
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
-import { AppButton, SettingsGroup, PhoneInput, LocationInput } from '@mvp/ui'
+import { SettingsGroup, PhoneInput, LocationInput } from '@mvp/ui'
 import { api } from '../src/services/api'
 import { useLocationSearch } from '../src/hooks/useLocationSearch'
 
 export default function EditProfileScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
+  const navigation = useNavigation()
   const user = useAuthStore((s) => s.user)
   const setUser = useAuthStore((s) => s.setUser)
 
@@ -23,7 +24,7 @@ export default function EditProfileScreen() {
 
   const { results: locationResults, isLoading: locationLoading } = useLocationSearch(locationQuery)
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     const trimmedName = name.trim()
     if (!trimmedName) return
 
@@ -52,7 +53,25 @@ export default function EditProfileScreen() {
     } finally {
       setSaving(false)
     }
-  }
+  }, [name, bio, phone, location, user, setUser, t])
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+          <Text fontSize={17} color="$accent">{t('common.cancel')}</Text>
+        </TouchableOpacity>
+      ),
+      headerRight: () =>
+        saving ? (
+          <ActivityIndicator size="small" color={theme.accent.val} />
+        ) : (
+          <TouchableOpacity onPress={handleSave} activeOpacity={0.7}>
+            <Text fontSize={17} fontWeight="600" color="$accent">{t('common.done')}</Text>
+          </TouchableOpacity>
+        ),
+    })
+  }, [navigation, handleSave, saving, t, theme])
 
   const inputStyle = {
     backgroundColor: '$subtleBackground' as const,
@@ -133,10 +152,6 @@ export default function EditProfileScreen() {
           </YStack>
         </YStack>
       </SettingsGroup>
-
-        <AppButton onPress={handleSave} loading={saving}>
-          {t('common.save')}
-        </AppButton>
       </ScrollView>
     </KeyboardAvoidingView>
   )

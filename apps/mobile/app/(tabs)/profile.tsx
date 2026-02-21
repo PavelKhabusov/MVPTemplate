@@ -203,6 +203,7 @@ function AuthenticatedProfileView({
         avatarName={user?.name}
         userName={user?.name ?? 'Guest'}
         userStatus={user?.email}
+        rightAction={{ label: t('common.edit'), onPress: () => router.push('/edit-profile') }}
       />
 
       <Animated.ScrollView
@@ -227,11 +228,6 @@ function AuthenticatedProfileView({
         {/* Account */}
         <StaggerGroup index={groupIndex++}>
           <SettingsGroup header={t('profile.title')}>
-            <SettingsGroupItem
-              icon="pencil-outline"
-              label={t('profile.editProfile')}
-              onPress={() => router.push('/edit-profile')}
-            />
             {user?.phone ? (
               <SettingsGroupItem
                 icon="call-outline"

@@ -13,7 +13,8 @@
     "search": "検索",
     "noResults": "結果が見つかりません",
     "empty": "まだ何もありません",
-    "viewAll": "すべて表示"
+    "viewAll": "すべて表示",
+    "edit": "編集"
   },
   "auth": {
     "signIn": "ログイン",
