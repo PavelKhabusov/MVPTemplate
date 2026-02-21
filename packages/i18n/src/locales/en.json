@@ -281,5 +281,11 @@
     "contentDocker": "## Docker Deployment\n\n### Development\n\nStart PostgreSQL + Redis:\n\n```\npwsh scripts/docker-start.ps1\n```\n\nOr:\n\n```\ndocker compose -f apps/backend/docker/docker-compose.yml up -d\n```\n\n### Production\n\nBuild and run the backend:\n\n```\ncd apps/backend\ndocker build -f docker/Dockerfile -t mvp-backend .\ndocker run -p 3000:3000 --env-file .env mvp-backend\n```\n\n### Docker Compose (Full Stack)\n\nThe `docker-compose.yml` includes:\n- **PostgreSQL 16** on port 5432\n- **Redis 7** on port 6379\n\nData is persisted in Docker volumes.",
     "contentAddScreens": "## Adding New Screens\n\n### Mobile Screen\n\n1. Create `apps/mobile/app/my-screen.tsx`\n2. Export a default component\n3. Navigate with `router.push('/my-screen')`\n\n### Tab Screen\n\n1. Create `apps/mobile/app/(tabs)/my-tab.tsx`\n2. Add `Tabs.Screen` in `(tabs)/_layout.tsx`\n3. Add sidebar item in `_layout.tsx` WebRootLayout\n\n### Backend Module\n\n1. Create `apps/backend/src/modules/my-module/`\n2. Add schema in `src/database/schema/`\n3. Create routes, service, repository\n4. Register in `src/app.ts`\n5. Run `npm run db:push -w apps/backend`",
     "contentStyling": "## Styling Guide\n\n### Tamagui Basics\n\nAll components use Tamagui's styled system:\n\n```tsx\n<YStack padding=\"$4\" gap=\"$3\" backgroundColor=\"$background\">\n  <Text color=\"$color\" fontSize=\"$4\">Hello</Text>\n</YStack>\n```\n\n### Theme Tokens\n\nDefined in `packages/ui/tamagui.config.ts`.\n\n| Prefix | Example | Description |\n|--------|---------|-------------|\n| `$` + number | `$4` | Spacing/sizing scale |\n| `$` + name | `$background` | Theme color tokens |\n| `$` + radius | `$3` | Border radius scale |\n\n### Custom Components\n\nAdd to `packages/ui/src/components/`:\n\n1. Create `MyComponent.tsx`\n2. Export from `components/index.ts`\n3. Available as `import { MyComponent } from '@mvp/ui'`\n\n### Animations\n\nAvailable wrappers:\n- `FadeIn` — opacity fade on mount\n- `SlideIn` — slide from direction\n- `ScalePress` — press scale effect\n- `AnimatedListItem` — staggered list items"
+  },
+  "cookies": {
+    "message": "We use cookies and local storage to improve your experience and analyze usage.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "decline": "Decline"
   }
 }

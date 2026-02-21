@@ -15,6 +15,8 @@ This application is a mobile and web platform that provides:
 - Data storage and synchronization
 - Access to documentation and resources
 
+Our web platform uses cookies and local storage to remember your preferences and improve functionality. For details, see our Privacy Policy.
+
 ## 3. User Accounts
 
 - You must provide accurate information when creating an account
@@ -69,6 +71,8 @@ If you have questions about these Terms of Service, please contact us at:
 - Push-уведомления
 - Хранение и синхронизацию данных
 - Доступ к документации и ресурсам
+
+Наша веб-платформа использует файлы cookie и локальное хранилище для запоминания ваших настроек и улучшения функциональности. Подробности см. в Политике конфиденциальности.
 
 ## 3. Учётные записи
 
@@ -125,6 +129,8 @@ Esta aplicación es una plataforma móvil y web que proporciona:
 - Almacenamiento y sincronización de datos
 - Acceso a documentación y recursos
 
+Nuestra plataforma web utiliza cookies y almacenamiento local para recordar tus preferencias y mejorar la funcionalidad. Para más detalles, consulta nuestra Política de Privacidad.
+
 ## 3. Cuentas de usuario
 
 - Debe proporcionar información precisa al crear una cuenta
@@ -179,6 +185,8 @@ Si tiene preguntas sobre estos Términos de Servicio, contáctenos en:
 - プッシュ通知
 - データの保存と同期
 - ドキュメントおよびリソースへのアクセス
+
+当ウェブプラットフォームでは、お客様の設定を記憶し機能を向上させるためにCookieとローカルストレージを使用しています。詳細はプライバシーポリシーをご覧ください。
 
 ## 3. ユーザーアカウント
 

@@ -45,7 +45,16 @@ You have the right to:
 - Export your data
 - Opt out of analytics
 
-## 6. Contact Us
+## 6. Cookies and Local Storage
+
+Our web platform uses cookies and local storage to:
+- **Preferences** — remember your theme, language, and cookie consent choice
+- **Authentication** — maintain your login session
+- **Analytics** — collect anonymous usage data (if you consent)
+
+You can control cookies through our cookie consent banner or your browser settings. Disabling cookies may affect certain functionality such as staying logged in or remembering your preferences.
+
+## 7. Contact Us
 
 If you have questions about this Privacy Policy, please contact us at:
 - Email: privacy@example.com
@@ -97,7 +106,16 @@ If you have questions about this Privacy Policy, please contact us at:
 - Экспортировать свои данные
 - Отказаться от аналитики
 
-## 6. Свяжитесь с нами
+## 6. Файлы cookie и локальное хранилище
+
+Наша веб-платформа использует файлы cookie и локальное хранилище для:
+- **Настройки** — запоминание темы, языка и выбора согласия на cookies
+- **Аутентификация** — поддержание сессии авторизации
+- **Аналитика** — сбор анонимных данных об использовании (при вашем согласии)
+
+Вы можете управлять cookies через наш баннер согласия или настройки браузера. Отключение cookies может повлиять на некоторые функции, такие как сохранение авторизации или запоминание ваших предпочтений.
+
+## 7. Свяжитесь с нами
 
 Если у вас есть вопросы, пишите нам:
 - Email: privacy@example.com
@@ -149,7 +167,16 @@ Tienes derecho a:
 - Exportar tus datos
 - Optar por no participar en analíticas
 
-## 6. Contáctanos
+## 6. Cookies y almacenamiento local
+
+Nuestra plataforma web utiliza cookies y almacenamiento local para:
+- **Preferencias** — recordar tu tema, idioma y elección de consentimiento de cookies
+- **Autenticación** — mantener tu sesión iniciada
+- **Analíticas** — recopilar datos de uso anónimos (si das tu consentimiento)
+
+Puedes controlar las cookies a través de nuestro banner de consentimiento o la configuración de tu navegador. Deshabilitar las cookies puede afectar ciertas funcionalidades como mantener la sesión iniciada o recordar tus preferencias.
+
+## 7. Contáctanos
 
 Si tienes preguntas sobre esta Política de Privacidad, contáctanos en:
 - Email: privacy@example.com
@@ -201,7 +228,16 @@ Si tienes preguntas sobre esta Política de Privacidad, contáctanos en:
 - データのエクスポート
 - アナリティクスのオプトアウト
 
-## 6. お問い合わせ
+## 6. Cookieとローカルストレージ
+
+当ウェブプラットフォームでは、以下の目的でCookieとローカルストレージを使用しています：
+- **設定** — テーマ、言語、Cookie同意の選択を記憶
+- **認証** — ログインセッションの維持
+- **アナリティクス** — 匿名の利用データの収集（同意された場合）
+
+Cookieは当サイトの同意バナーまたはブラウザの設定で管理できます。Cookieを無効にすると、ログイン状態の維持や設定の記憶などの機能に影響する場合があります。
+
+## 7. お問い合わせ
 
 このプライバシーポリシーに関するご質問は、以下までご連絡ください：
 - Email: privacy@example.com

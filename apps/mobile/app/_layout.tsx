@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
-import { TamaguiProvider, Theme, XStack, YStack, Text, useTheme } from 'tamagui'
+import { TamaguiProvider, XStack, YStack, Text, useTheme } from 'tamagui'
+import { forceUpdateThemes } from '@tamagui/web'
 import { Ionicons } from '@expo/vector-icons'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar, useIsMobileWeb } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -193,6 +194,7 @@ function WebRootLayout() {
       <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
         <Slot />
       </YStack>
+      <CookieBanner />
     </XStack>
   )
 }
@@ -257,6 +259,15 @@ export default function RootLayout() {
     authApi.initialize()
   }, [])
 
+  // Force all Tamagui theme consumers to re-render when the resolved theme changes.
+  // TamaguiProvider's internal Theme updates CSS variables, but components using
+  // useTheme().val in inline styles may not pick up changes without this.
+  useLayoutEffect(() => {
+    if (Platform.OS === 'web') {
+      forceUpdateThemes()
+    }
+  }, [resolvedTheme])
+
   const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 
   useEffect(() => {
@@ -271,19 +282,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
-          <Theme name={resolvedTheme}>
-            <PortalProvider>
-              <AuthProvider
-                authApi={authApi}
-                onAuthSuccess={() => router.replace('/')}
-                onNavigateToSignIn={() => router.replace('/sign-in')}
-                onNavigateToForgotPassword={() => router.push('/forgot-password')}
-              >
-                <PageSEO />
-                <RootNavigator />
-              </AuthProvider>
-            </PortalProvider>
-          </Theme>
+          <PortalProvider>
+            <AuthProvider
+              authApi={authApi}
+              onAuthSuccess={() => router.replace('/')}
+              onNavigateToSignIn={() => router.replace('/sign-in')}
+              onNavigateToForgotPassword={() => router.push('/forgot-password')}
+            >
+              <PageSEO />
+              <RootNavigator />
+            </AuthProvider>
+          </PortalProvider>
         </TamaguiProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

@@ -281,5 +281,11 @@
     "contentDocker": "## Dockerデプロイ\n\n### 開発\n\n```\npwsh scripts/docker-start.ps1\n```\n\n### 本番\n\n```\ndocker build -f docker/Dockerfile -t mvp-backend .\ndocker run -p 3000:3000 --env-file .env mvp-backend\n```\n\nDocker Compose: PostgreSQL 16 + Redis 7",
     "contentAddScreens": "## 画面の追加\n\n### モバイル画面\n\n1. `apps/mobile/app/my-screen.tsx`を作成\n2. デフォルトコンポーネントをエクスポート\n3. `router.push('/my-screen')`でナビゲート\n\n### バックエンドモジュール\n\n1. `src/modules/`にディレクトリ作成\n2. スキーマ、ルート、サービスを追加\n3. `src/app.ts`に登録\n4. `npm run db:push`を実行",
     "contentStyling": "## スタイルガイド\n\n### Tamagui基本\n\n```tsx\n<YStack padding=\"$4\" gap=\"$3\" backgroundColor=\"$background\">\n  <Text color=\"$color\" fontSize=\"$4\">こんにちは</Text>\n</YStack>\n```\n\n### カスタムコンポーネント\n\n`packages/ui/src/components/`に追加。\n\n### アニメーション\n\n- `FadeIn` — フェードイン\n- `SlideIn` — スライドイン\n- `ScalePress` — プレスエフェクト\n- `AnimatedListItem` — リストアニメーション"
+  },
+  "cookies": {
+    "message": "当サイトではCookieとローカルストレージを使用して、体験の向上と利用状況の分析を行っています。",
+    "learnMore": "詳しく見る",
+    "accept": "同意する",
+    "decline": "拒否する"
   }
 }

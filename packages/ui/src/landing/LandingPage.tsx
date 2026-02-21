@@ -8,6 +8,7 @@ import { LandingTerminal } from './LandingTerminal'
 import { LandingShowcase } from './LandingShowcase'
 import { LandingCTA } from './LandingCTA'
 import { LandingFooter } from './LandingFooter'
+import { CookieBanner } from '../components/CookieBanner'
 
 export function LandingPage() {
   if (Platform.OS !== 'web') return null
@@ -27,6 +28,7 @@ export function LandingPage() {
         <LandingCTA onNavigate={navigate} />
         <LandingFooter onNavigate={navigate} />
       </ScrollView>
+      <CookieBanner />
     </YStack>
   )
 }

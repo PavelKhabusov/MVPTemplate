@@ -281,5 +281,11 @@
     "contentDocker": "## Despliegue con Docker\n\n### Desarrollo\n\n```\npwsh scripts/docker-start.ps1\n```\n\n### Producción\n\n```\ndocker build -f docker/Dockerfile -t mvp-backend .\ndocker run -p 3000:3000 --env-file .env mvp-backend\n```\n\nDocker Compose incluye PostgreSQL 16 y Redis 7.",
     "contentAddScreens": "## Agregar pantallas\n\n### Pantalla móvil\n\n1. Crear `apps/mobile/app/mi-pantalla.tsx`\n2. Exportar componente por defecto\n3. Navegar: `router.push('/mi-pantalla')`\n\n### Módulo backend\n\n1. Crear directorio en `src/modules/`\n2. Agregar esquema, rutas, servicio\n3. Registrar en `src/app.ts`\n4. Ejecutar `npm run db:push`",
     "contentStyling": "## Guía de estilos\n\n### Tamagui\n\n```tsx\n<YStack padding=\"$4\" gap=\"$3\" backgroundColor=\"$background\">\n  <Text color=\"$color\" fontSize=\"$4\">Hola</Text>\n</YStack>\n```\n\n### Componentes personalizados\n\nAgregar en `packages/ui/src/components/`.\n\n### Animaciones disponibles\n\n- `FadeIn` — aparición suave\n- `SlideIn` — deslizamiento\n- `ScalePress` — efecto de presión\n- `AnimatedListItem` — animación de lista"
+  },
+  "cookies": {
+    "message": "Usamos cookies y almacenamiento local para mejorar tu experiencia y analizar el uso.",
+    "learnMore": "Más información",
+    "accept": "Aceptar",
+    "decline": "Rechazar"
   }
 }

@@ -281,5 +281,11 @@
     "contentDocker": "## Docker-деплой\n\n### Разработка\n\nЗапуск PostgreSQL + Redis:\n\n```\npwsh scripts/docker-start.ps1\n```\n\nИли:\n\n```\ndocker compose -f apps/backend/docker/docker-compose.yml up -d\n```\n\n### Продакшен\n\nСборка и запуск бэкенда:\n\n```\ncd apps/backend\ndocker build -f docker/Dockerfile -t mvp-backend .\ndocker run -p 3000:3000 --env-file .env mvp-backend\n```\n\n### Docker Compose\n\n`docker-compose.yml` включает:\n- **PostgreSQL 16** на порте 5432\n- **Redis 7** на порте 6379\n\nДанные сохраняются в Docker-томах.",
     "contentAddScreens": "## Добавление экранов\n\n### Мобильный экран\n\n1. Создайте `apps/mobile/app/my-screen.tsx`\n2. Экспортируйте компонент по умолчанию\n3. Навигация: `router.push('/my-screen')`\n\n### Экран-вкладка\n\n1. Создайте `apps/mobile/app/(tabs)/my-tab.tsx`\n2. Добавьте `Tabs.Screen` в `(tabs)/_layout.tsx`\n3. Добавьте элемент сайдбара в `_layout.tsx` WebRootLayout\n\n### Модуль бэкенда\n\n1. Создайте `apps/backend/src/modules/my-module/`\n2. Добавьте схему в `src/database/schema/`\n3. Создайте роуты, сервис, репозиторий\n4. Зарегистрируйте в `src/app.ts`\n5. Запустите `npm run db:push -w apps/backend`",
     "contentStyling": "## Руководство по стилям\n\n### Основы Tamagui\n\nВсе компоненты используют стилевую систему Tamagui:\n\n```tsx\n<YStack padding=\"$4\" gap=\"$3\" backgroundColor=\"$background\">\n  <Text color=\"$color\" fontSize=\"$4\">Привет</Text>\n</YStack>\n```\n\n### Токены тем\n\nОпределены в `packages/ui/tamagui.config.ts`.\n\n| Префикс | Пример | Описание |\n|---------|--------|----------|\n| `$` + число | `$4` | Шкала отступов/размеров |\n| `$` + имя | `$background` | Цветовые токены темы |\n| `$` + радиус | `$3` | Шкала скругления |\n\n### Свои компоненты\n\nДобавляйте в `packages/ui/src/components/`:\n\n1. Создайте `MyComponent.tsx`\n2. Экспортируйте из `components/index.ts`\n3. Доступен как `import { MyComponent } from '@mvp/ui'`\n\n### Анимации\n\nДоступные обёртки:\n- `FadeIn` — плавное появление\n- `SlideIn` — выезд с указанного направления\n- `ScalePress` — эффект нажатия\n- `AnimatedListItem` — анимация элементов списка"
+  },
+  "cookies": {
+    "message": "Мы используем файлы cookie и локальное хранилище для улучшения работы и анализа использования.",
+    "learnMore": "Подробнее",
+    "accept": "Принять",
+    "decline": "Отклонить"
   }
 }
