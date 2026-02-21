@@ -64,7 +64,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="settings"
         options={{
           title: t('settings.title'),
           tabBarIcon: ({ color, focused }) => (
@@ -77,6 +77,12 @@ export default function TabsLayout() {
               animation="wiggle"
             />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

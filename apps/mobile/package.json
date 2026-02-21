@@ -15,6 +15,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
     "@mvp/analytics": "*",
+    "@mvp/auth": "*",
     "@mvp/i18n": "*",
     "@mvp/lib": "*",
     "@mvp/store": "*",

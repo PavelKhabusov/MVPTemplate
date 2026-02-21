@@ -27,7 +27,7 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from 'react-native-reanimated'
-import { authApi } from '../../src/features/auth/auth.service'
+import { authApi } from '../../src/services/auth'
 
 const THEME_LABELS: Record<ThemeMode, string> = {
   system: 'settings.themeSystem',

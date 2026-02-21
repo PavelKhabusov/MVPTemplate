@@ -4,7 +4,7 @@ import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
 import { Ionicons } from '@expo/vector-icons'
 import { TouchableOpacity, ActivityIndicator } from 'react-native'
-import { authApi } from './auth.service'
+import { authApi } from '../../services/auth'
 
 export function EmailVerificationBanner() {
   const { t } = useTranslation()

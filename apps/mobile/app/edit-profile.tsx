@@ -7,8 +7,8 @@ import { useAuthStore, useThemeStore } from '@mvp/store'
 import { AppAvatar, SettingsGroup, SettingsGroupItem, ScalePress, PhoneInput, LocationInput } from '@mvp/ui'
 import * as ImagePicker from 'expo-image-picker'
 import { api, getAccessToken } from '../src/services/api'
-import { useLocationSearch } from '../src/hooks/useLocationSearch'
-import { authApi } from '../src/features/auth/auth.service'
+import { useLocationSearch } from '@mvp/lib'
+import { authApi } from '../src/services/auth'
 
 let DateTimePicker: any = null
 if (Platform.OS !== 'web') {

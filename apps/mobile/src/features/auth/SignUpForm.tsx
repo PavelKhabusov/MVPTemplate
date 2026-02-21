@@ -3,7 +3,7 @@ import { YStack } from 'tamagui'
 import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
-import { authApi } from './auth.service'
+import { authApi } from '../../services/auth'
 
 function getErrorMessage(err: any, t: (key: string) => string): string {
   if (!err?.response) return t('auth.errorNetwork')

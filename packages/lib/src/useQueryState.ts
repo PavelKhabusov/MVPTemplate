@@ -1,4 +1,4 @@
-type QueryResult<T> = {
+export type QueryResult<T> = {
   data: T | undefined
   isLoading: boolean
   isError: boolean
@@ -6,7 +6,7 @@ type QueryResult<T> = {
   refetch: () => void
 }
 
-type QueryState<T> =
+export type QueryState<T> =
   | { status: 'loading' }
   | { status: 'error'; message: string; onRetry: () => void }
   | { status: 'empty'; message?: string }

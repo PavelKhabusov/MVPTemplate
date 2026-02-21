@@ -1,5 +1,5 @@
 {
-  "name": "@mvp/i18n",
+  "name": "@mvp/auth",
   "version": "0.0.0",
   "private": true,
   "main": "src/index.ts",
@@ -8,13 +8,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
   },
-  "dependencies": {
-    "i18next": "^25.0.0",
-    "react-i18next": "^16.0.0"
-  },
+  "dependencies": {},
   "peerDependencies": {
-    "react": "*",
-    "expo-localization": "*",
+    "@mvp/lib": "*",
     "@mvp/store": "*"
   }
 }

@@ -3,7 +3,7 @@ import { YStack, Text } from 'tamagui'
 import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
-import { authApi } from './auth.service'
+import { authApi } from '../../services/auth'
 
 interface ResetPasswordFormProps {
   token: string

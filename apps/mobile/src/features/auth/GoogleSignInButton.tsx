@@ -6,7 +6,7 @@ import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import * as Google from 'expo-auth-session/providers/google'
 import * as WebBrowser from 'expo-web-browser'
-import { authApi } from './auth.service'
+import { authApi } from '../../services/auth'
 
 WebBrowser.maybeCompleteAuthSession()
 

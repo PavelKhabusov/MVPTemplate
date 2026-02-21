@@ -6,7 +6,7 @@ import { useTranslation } from '@mvp/i18n'
 import { AppButton, FadeIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { authApi } from '../src/features/auth/auth.service'
+import { authApi } from '../src/services/auth'
 
 export default function VerifyEmailScreen() {
   const { t } = useTranslation()
