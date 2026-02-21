@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { MotiView, AnimatePresence } from 'moti'
-import { useTranslation } from '@mvp/i18n'
+import { useTranslation, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import { ScalePress } from '@mvp/ui'
 import { DOC_GROUPS } from './docData'
 import type { DocGroup } from './docData'
@@ -40,19 +40,29 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
     }
   }
 
+  const matchesAnyLang = useCallback(
+    (key: string, query: string) => {
+      for (const lng of SUPPORTED_LANGUAGES) {
+        if (t(key, { lng }).toLowerCase().includes(query)) return true
+      }
+      return false
+    },
+    [t],
+  )
+
   const filteredGroups = useMemo(() => {
     if (!searchQuery.trim()) return DOC_GROUPS
     const q = searchQuery.toLowerCase()
     return DOC_GROUPS.map((group) => {
-      const matchingPages = group.pages.filter((page) =>
-        t(page.titleKey).toLowerCase().includes(q)
+      const matchingPages = group.pages.filter(
+        (page) => matchesAnyLang(page.titleKey, q) || matchesAnyLang(page.contentKey, q),
       )
-      if (matchingPages.length > 0 || t(group.titleKey).toLowerCase().includes(q)) {
+      if (matchingPages.length > 0 || matchesAnyLang(group.titleKey, q)) {
         return { ...group, pages: matchingPages.length > 0 ? matchingPages : group.pages }
       }
       return null
     }).filter(Boolean) as DocGroup[]
-  }, [searchQuery, t])
+  }, [searchQuery, matchesAnyLang])
 
   const isSearchActive = searchQuery.trim().length > 0
 
@@ -95,19 +105,16 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
             borderRadius="$3"
             borderWidth={1}
             borderColor="$borderColor"
-            paddingHorizontal="$2.5"
+            width={38}
             height={38}
             alignItems="center"
-            gap="$1.5"
+            justifyContent="center"
           >
             <Ionicons
               name={allExpanded ? 'contract-outline' : 'expand-outline'}
-              size={16}
+              size={18}
               color={theme.mutedText.val}
             />
-            <Text fontSize="$1" color="$mutedText" numberOfLines={1}>
-              {allExpanded ? t('docs.collapseAll') : t('docs.expandAll')}
-            </Text>
           </XStack>
         </ScalePress>
       </XStack>
