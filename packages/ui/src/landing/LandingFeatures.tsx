@@ -52,7 +52,7 @@ export function LandingFeatures() {
               key={feature.title}
               from="bottom"
               delay={i * 80}
-              style={{ display: 'flex' } as any}
+              style={{ display: 'flex', height: '100%' } as any}
             >
               <YStack
                 backgroundColor="$cardBackground"
