@@ -71,6 +71,7 @@ function RootNavigator() {
       />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="landing" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   )
@@ -81,6 +82,11 @@ function WebRootLayout() {
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin'
+
+  // Landing page renders full-width without sidebar
+  if (pathname === '/landing') {
+    return <Slot />
+  }
 
   const navItems = [
     { href: '/', label: t('tabs.home'), icon: 'home-outline' as const, iconFilled: 'home' as const, animation: 'bounce' as const },
