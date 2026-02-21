@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, Theme, XStack, useTheme } from 'tamagui'
+import { ThemeProvider, type Theme as NavTheme } from '@react-navigation/native'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -27,6 +28,32 @@ LogBox.ignoreLogs([
 
 // Prevent splash screen from hiding before fonts load
 SplashScreen.preventAutoHideAsync()
+
+const lightNavTheme: NavTheme = {
+  dark: false,
+  colors: {
+    primary: '#0891B2',
+    background: '#FAFAFA',
+    card: '#FFFFFF',
+    text: '#0A0A0A',
+    border: '#E5E5E5',
+    notification: '#0891B2',
+  },
+  fonts: { regular: { fontFamily: 'Inter', fontWeight: '400' }, medium: { fontFamily: 'Inter', fontWeight: '500' }, bold: { fontFamily: 'InterBold', fontWeight: '700' }, heavy: { fontFamily: 'InterBold', fontWeight: '800' } },
+}
+
+const darkNavTheme: NavTheme = {
+  dark: true,
+  colors: {
+    primary: '#38E8FF',
+    background: '#09090B',
+    card: '#18181B',
+    text: '#FAFAFA',
+    border: '#27272A',
+    notification: '#38E8FF',
+  },
+  fonts: lightNavTheme.fonts,
+}
 
 function RootNavigator() {
   const theme = useTheme()
@@ -154,16 +181,20 @@ export default function RootLayout() {
 
   if (!ready) return null
 
+  const navTheme = resolvedTheme === 'dark' ? darkNavTheme : lightNavTheme
+
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
-          <Theme name={resolvedTheme}>
-            <PortalProvider>
-              <RootNavigator />
-            </PortalProvider>
-          </Theme>
-        </TamaguiProvider>
+        <ThemeProvider value={navTheme}>
+          <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
+            <Theme name={resolvedTheme}>
+              <PortalProvider>
+                <RootNavigator />
+              </PortalProvider>
+            </Theme>
+          </TamaguiProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   )
