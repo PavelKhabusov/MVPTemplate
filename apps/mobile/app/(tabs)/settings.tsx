@@ -147,6 +147,11 @@ function UnauthenticatedSettingsView() {
             onPress={() => router.push('/privacy')}
           />
           <SettingsGroupItem
+            icon="document-text-outline"
+            label={t('settings.terms')}
+            onPress={() => router.push('/terms')}
+          />
+          <SettingsGroupItem
             icon="book-outline"
             label={t('docs.title')}
             onPress={() => router.push('/docs')}
