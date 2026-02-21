@@ -59,7 +59,7 @@ export default function DocsLayout() {
           name="[page]"
           options={{
             headerShown: true,
-            headerBackTitle: t('docs.title'),
+            headerBackTitle: '',
           }}
         />
       </Stack>
