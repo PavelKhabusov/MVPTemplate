@@ -60,6 +60,7 @@ export default function DocsLayout() {
           options={{
             headerShown: true,
             headerBackTitle: '',
+            headerBackTitleVisible: false,
           }}
         />
       </Stack>
