@@ -10,6 +10,9 @@ export * from './feedback'
 // Navigation (web)
 export * from './navigation'
 
+// Landing (web)
+export * from './landing'
+
 // SEO (web)
 export { SEO } from './SEO'
 
