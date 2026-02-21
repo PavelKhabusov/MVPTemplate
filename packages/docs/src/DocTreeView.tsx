@@ -1,8 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Platform } from 'react-native'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
-import { MotiView, AnimatePresence } from 'moti'
 import { useTranslation, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import { ScalePress } from '@mvp/ui'
 import { DOC_GROUPS } from './docData'
@@ -201,36 +199,14 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
                 </ScalePress>
 
                 {/* Pages */}
-                {Platform.OS === 'web' ? (
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <MotiView
-                        from={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' as any }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ type: 'timing', duration: 200 }}
-                        style={{ overflow: 'hidden' }}
-                      >
-                        <PageList
-                          pages={group.pages}
-                          selectedPageId={selectedPageId}
-                          onPageSelect={onPageSelect}
-                          theme={theme}
-                          t={t}
-                        />
-                      </MotiView>
-                    )}
-                  </AnimatePresence>
-                ) : (
-                  isExpanded && (
-                    <PageList
-                      pages={group.pages}
-                      selectedPageId={selectedPageId}
-                      onPageSelect={onPageSelect}
-                      theme={theme}
-                      t={t}
-                    />
-                  )
+                {isExpanded && (
+                  <PageList
+                    pages={group.pages}
+                    selectedPageId={selectedPageId}
+                    onPageSelect={onPageSelect}
+                    theme={theme}
+                    t={t}
+                  />
                 )}
               </YStack>
             )
