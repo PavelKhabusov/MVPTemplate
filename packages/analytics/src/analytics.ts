@@ -3,7 +3,7 @@
  * Dual-sends to PostHog (when configured) AND own backend (via event buffer).
  */
 
-const isDev = typeof __DEV__ !== 'undefined' && __DEV__
+const isDev = process.env.NODE_ENV !== 'production'
 
 let posthogClient: any = null
 
