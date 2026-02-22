@@ -179,6 +179,129 @@ function SimpleBarChart({ data }: { data: Array<{ day: string; events: number; u
   )
 }
 
+function PaymentsAdminTab() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const [stats, setStats] = useState<{
+    totalRevenue: Array<{ total: number; currency: string }>
+    activeSubscriptions: number
+    recentPayments: Array<{
+      id: string
+      userId: string
+      amount: number
+      currency: string
+      status: string
+      type: string
+      provider: string
+      description: string | null
+      createdAt: string
+    }>
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api
+      .get('/payments/admin/stats')
+      .then((res) => setStats(res.data.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const formatPrice = (amount: number, currency: string) => {
+    const value = amount / 100
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: currency.toUpperCase(),
+        minimumFractionDigits: 0,
+      }).format(value)
+    } catch {
+      return `${value} ${currency.toUpperCase()}`
+    }
+  }
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+      <FadeIn>
+        <YStack gap="$3">
+          {loading ? (
+            <Text color="$mutedText" textAlign="center" paddingVertical="$6">
+              {t('common.loading')}
+            </Text>
+          ) : stats ? (
+            <>
+              <XStack gap="$3">
+                <AppCard flex={1} animated={false}>
+                  <YStack alignItems="center" gap="$1">
+                    <Text fontSize="$6" fontWeight="bold" color="$accent">
+                      {stats.totalRevenue.length > 0
+                        ? stats.totalRevenue.map((r) => formatPrice(r.total, r.currency)).join(' / ')
+                        : formatPrice(0, 'usd')}
+                    </Text>
+                    <Text fontSize="$1" color="$mutedText">{t('admin.revenue')}</Text>
+                  </YStack>
+                </AppCard>
+                <AppCard flex={1} animated={false}>
+                  <YStack alignItems="center" gap="$1">
+                    <Text fontSize="$6" fontWeight="bold" color="$accent">
+                      {stats.activeSubscriptions}
+                    </Text>
+                    <Text fontSize="$1" color="$mutedText">{t('admin.activeSubscriptions')}</Text>
+                  </YStack>
+                </AppCard>
+              </XStack>
+
+              <AppCard animated={false}>
+                <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
+                  {t('admin.recentPayments')}
+                </Text>
+                {stats.recentPayments.length === 0 ? (
+                  <Text color="$mutedText" fontSize="$2">{t('payments.noHistory')}</Text>
+                ) : (
+                  <YStack gap="$2">
+                    {stats.recentPayments.map((payment) => (
+                      <YStack
+                        key={payment.id}
+                        borderBottomWidth={1}
+                        borderBottomColor="$borderColor"
+                        paddingBottom="$2"
+                      >
+                        <XStack justifyContent="space-between" alignItems="center">
+                          <YStack flex={1}>
+                            <Text fontWeight="600" color="$color" fontSize="$3" numberOfLines={1}>
+                              {payment.description ?? payment.type}
+                            </Text>
+                            <Text color="$mutedText" fontSize="$1">
+                              {payment.provider} · {payment.status}
+                            </Text>
+                          </YStack>
+                          <YStack alignItems="flex-end">
+                            <Text fontWeight="700" fontSize="$3" color="$color">
+                              {formatPrice(payment.amount, payment.currency)}
+                            </Text>
+                            <Text color="$mutedText" fontSize="$1">
+                              {new Date(payment.createdAt).toLocaleDateString()}
+                            </Text>
+                          </YStack>
+                        </XStack>
+                      </YStack>
+                    ))}
+                  </YStack>
+                )}
+              </AppCard>
+            </>
+          ) : (
+            <Text color="$mutedText" textAlign="center" paddingVertical="$6">
+              {t('common.error')}
+            </Text>
+          )}
+        </YStack>
+      </FadeIn>
+    </ScrollView>
+  )
+}
+
 function TemplateConfigTab() {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -345,7 +468,8 @@ export default function AdminScreen() {
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
+  const paymentsEnabled = useTemplateFlag('payments', false)
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -565,6 +689,20 @@ export default function AdminScreen() {
                 >
                   <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
                     {t('admin.sendNotification')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            {paymentsEnabled && (
+              <ScalePress onPress={() => setActiveTab('payments')}>
+                <XStack
+                  backgroundColor={activeTab === 'payments' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'payments' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.payments')}
                   </Text>
                 </XStack>
               </ScalePress>
@@ -905,6 +1043,11 @@ export default function AdminScreen() {
             </YStack>
           </FadeIn>
         </ScrollView>
+      )}
+
+      {/* Payments Tab */}
+      {paymentsEnabled && activeTab === 'payments' && (
+        <PaymentsAdminTab />
       )}
 
       {/* Template Config Tab */}

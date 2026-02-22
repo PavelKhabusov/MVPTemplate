@@ -123,7 +123,11 @@
     "sendToAll": "Отправить всем",
     "notifySent": "Отправлено {{sent}} из {{total}}",
     "notifyHistory": "История отправок",
-    "noNotifications": "Уведомления ещё не отправлялись"
+    "noNotifications": "Уведомления ещё не отправлялись",
+    "payments": "Платежи",
+    "revenue": "Доход",
+    "activeSubscriptions": "Активные подписки",
+    "recentPayments": "Последние платежи"
   },
   "notifications": {
     "title": "Уведомления",
@@ -297,6 +301,33 @@
     "contentStyling": "## Руководство по стилям\n\n### Основы Tamagui\n\nВсе компоненты используют стилевую систему Tamagui:\n\n```tsx\n<YStack padding=\"$4\" gap=\"$3\" backgroundColor=\"$background\">\n  <Text color=\"$color\" fontSize=\"$4\">Привет</Text>\n</YStack>\n```\n\n### Токены тем\n\nОпределены в `packages/ui/tamagui.config.ts`.\n\n| Префикс | Пример | Описание |\n|---------|--------|----------|\n| `$` + число | `$4` | Шкала отступов/размеров |\n| `$` + имя | `$background` | Цветовые токены темы |\n| `$` + радиус | `$3` | Шкала скругления |\n\n### Свои компоненты\n\nДобавляйте в `packages/ui/src/components/`:\n\n1. Создайте `MyComponent.tsx`\n2. Экспортируйте из `components/index.ts`\n3. Доступен как `import { MyComponent } from '@mvp/ui'`\n\n### Анимации\n\nДоступные обёртки:\n- `FadeIn` — плавное появление\n- `SlideIn` — выезд с указанного направления\n- `ScalePress` — эффект нажатия\n- `AnimatedListItem` — анимация элементов списка",
     "wasHelpful": "Была ли эта страница полезной?"
   },
+  "payments": {
+    "title": "Тарифы",
+    "subtitle": "Выберите подходящий план",
+    "currentPlan": "Текущий план",
+    "subscribe": "Подписаться",
+    "buyNow": "Купить",
+    "cancelSubscription": "Отменить подписку",
+    "cancelConfirm": "Вы уверены? Подписка будет активна до конца оплаченного периода.",
+    "active": "Активна",
+    "canceled": "Отменена",
+    "past_due": "Просрочена",
+    "expired": "Истекла",
+    "free": "Бесплатно",
+    "perMonth": "/мес",
+    "perYear": "/год",
+    "features": "Что включено",
+    "noHistory": "Нет платежей",
+    "managePlan": "Управление планом",
+    "renewsOn": "Продлевается {{date}}",
+    "expiresOn": "Истекает {{date}}",
+    "one_time": "Разовый платёж",
+    "subscription": "Подписка",
+    "succeeded": "Успешно",
+    "pending": "В обработке",
+    "failed": "Ошибка",
+    "refunded": "Возврат"
+  },
   "cookies": {
     "message": "Мы используем файлы cookie и локальное хранилище для улучшения работы и анализа использования.",
     "learnMore": "Подробнее",
@@ -327,6 +358,7 @@
     "schemeEmerald": "Изумрудный",
     "schemeRose": "Розовый",
     "schemeAmber": "Янтарный",
-    "schemeViolet": "Фиолетовый"
+    "schemeViolet": "Фиолетовый",
+    "payments": "Платежи"
   }
 }

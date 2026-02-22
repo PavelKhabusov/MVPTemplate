@@ -123,7 +123,11 @@
     "sendToAll": "Enviar a todos",
     "notifySent": "Enviados {{sent}} de {{total}}",
     "notifyHistory": "Historial de envíos",
-    "noNotifications": "Aún no se han enviado notificaciones"
+    "noNotifications": "Aún no se han enviado notificaciones",
+    "payments": "Pagos",
+    "revenue": "Ingresos",
+    "activeSubscriptions": "Suscripciones Activas",
+    "recentPayments": "Pagos Recientes"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -303,6 +307,33 @@
     "accept": "Aceptar",
     "decline": "Rechazar"
   },
+  "payments": {
+    "title": "Precios",
+    "subtitle": "Elige el plan que mejor se adapte a ti",
+    "currentPlan": "Plan Actual",
+    "subscribe": "Suscribirse",
+    "buyNow": "Comprar",
+    "cancelSubscription": "Cancelar Suscripción",
+    "cancelConfirm": "¿Estás seguro? Tu suscripción permanecerá activa hasta el final del período de facturación.",
+    "active": "Activa",
+    "canceled": "Cancelada",
+    "past_due": "Vencida",
+    "expired": "Expirada",
+    "free": "Gratis",
+    "perMonth": "/mes",
+    "perYear": "/año",
+    "features": "Qué incluye",
+    "noHistory": "Sin pagos aún",
+    "managePlan": "Gestionar Plan",
+    "renewsOn": "Se renueva el {{date}}",
+    "expiresOn": "Expira el {{date}}",
+    "one_time": "Pago único",
+    "subscription": "Suscripción",
+    "succeeded": "Exitoso",
+    "pending": "Pendiente",
+    "failed": "Fallido",
+    "refunded": "Reembolsado"
+  },
   "templateConfig": {
     "title": "Configurador",
     "description": "Vista previa de la app con diferentes configuraciones",
@@ -327,6 +358,7 @@
     "schemeEmerald": "Esmeralda",
     "schemeRose": "Rosa",
     "schemeAmber": "Ámbar",
-    "schemeViolet": "Violeta"
+    "schemeViolet": "Violeta",
+    "payments": "Pagos"
   }
 }

@@ -21,6 +21,7 @@ import { analyticsRoutes } from './modules/analytics/analytics.routes'
 import { docFeedbackRoutes } from './modules/doc-feedback/doc-feedback.routes'
 import { sseRoutes } from './realtime/sse'
 import { configRoutes } from './modules/config/config.routes'
+import { paymentsRoutes } from './modules/payments/payments.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -112,6 +113,9 @@ export async function buildApp() {
   }
   await app.register(docFeedbackRoutes, { prefix: '/api/doc-feedback' })
   await app.register(configRoutes, { prefix: '/api/config' })
+  if (env.PAYMENTS_ENABLED) {
+    await app.register(paymentsRoutes, { prefix: '/api/payments' })
+  }
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

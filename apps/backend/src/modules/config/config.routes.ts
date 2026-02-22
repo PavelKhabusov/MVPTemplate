@@ -15,6 +15,7 @@ export async function configRoutes(app: FastifyInstance) {
         requestLogging: env.REQUEST_LOGGING,
         analytics: env.ANALYTICS_ENABLED,
         pushNotifications: !!env.EXPO_ACCESS_TOKEN,
+        payments: env.PAYMENTS_ENABLED,
       },
     })
   })

@@ -123,7 +123,11 @@
     "sendToAll": "全員に送信",
     "notifySent": "{{total}}件中{{sent}}件送信済み",
     "notifyHistory": "送信履歴",
-    "noNotifications": "まだ通知は送信されていません"
+    "noNotifications": "まだ通知は送信されていません",
+    "payments": "支払い",
+    "revenue": "収益",
+    "activeSubscriptions": "アクティブな購読",
+    "recentPayments": "最近の支払い"
   },
   "notifications": {
     "title": "通知",
@@ -303,6 +307,33 @@
     "accept": "同意する",
     "decline": "拒否する"
   },
+  "payments": {
+    "title": "料金プラン",
+    "subtitle": "最適なプランをお選びください",
+    "currentPlan": "現在のプラン",
+    "subscribe": "購読する",
+    "buyNow": "購入する",
+    "cancelSubscription": "購読をキャンセル",
+    "cancelConfirm": "本当にキャンセルしますか？購読は請求期間の終わりまで有効です。",
+    "active": "有効",
+    "canceled": "キャンセル済み",
+    "past_due": "期限超過",
+    "expired": "期限切れ",
+    "free": "無料",
+    "perMonth": "/月",
+    "perYear": "/年",
+    "features": "含まれるもの",
+    "noHistory": "支払い履歴なし",
+    "managePlan": "プラン管理",
+    "renewsOn": "{{date}}に更新",
+    "expiresOn": "{{date}}に期限切れ",
+    "one_time": "一回払い",
+    "subscription": "サブスクリプション",
+    "succeeded": "成功",
+    "pending": "処理中",
+    "failed": "失敗",
+    "refunded": "返金済み"
+  },
   "templateConfig": {
     "title": "テンプレート設定",
     "description": "機能設定を切り替えてアプリの見た目をプレビュー",
@@ -327,6 +358,7 @@
     "schemeEmerald": "エメラルド",
     "schemeRose": "ローズ",
     "schemeAmber": "アンバー",
-    "schemeViolet": "バイオレット"
+    "schemeViolet": "バイオレット",
+    "payments": "決済"
   }
 }

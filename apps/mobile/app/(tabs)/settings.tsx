@@ -228,6 +228,7 @@ function AuthenticatedSettingsView() {
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const paymentsEnabled = useTemplateFlag('payments', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -370,6 +371,13 @@ function AuthenticatedSettingsView() {
         {/* General */}
         <StaggerGroup index={groupIndex++}>
           <SettingsGroup header={t('settings.title')}>
+            {paymentsEnabled && (
+              <SettingsGroupItem
+                icon="card-outline"
+                label={t('payments.managePlan')}
+                onPress={() => router.push('/pricing')}
+              />
+            )}
             {pushEnabled && (
               <SettingsGroupItem
                 icon="notifications-outline"

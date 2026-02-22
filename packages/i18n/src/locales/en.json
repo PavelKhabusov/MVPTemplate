@@ -123,7 +123,11 @@
     "sendToAll": "Send to All",
     "notifySent": "Sent {{sent}} of {{total}}",
     "notifyHistory": "Send History",
-    "noNotifications": "No notifications sent yet"
+    "noNotifications": "No notifications sent yet",
+    "payments": "Payments",
+    "revenue": "Revenue",
+    "activeSubscriptions": "Active Subscriptions",
+    "recentPayments": "Recent Payments"
   },
   "notifications": {
     "title": "Notifications",
@@ -297,6 +301,33 @@
     "contentStyling": "## Styling Guide\n\n### Tamagui Basics\n\nAll components use Tamagui's styled system:\n\n```tsx\n<YStack padding=\"$4\" gap=\"$3\" backgroundColor=\"$background\">\n  <Text color=\"$color\" fontSize=\"$4\">Hello</Text>\n</YStack>\n```\n\n### Theme Tokens\n\nDefined in `packages/ui/tamagui.config.ts`.\n\n| Prefix | Example | Description |\n|--------|---------|-------------|\n| `$` + number | `$4` | Spacing/sizing scale |\n| `$` + name | `$background` | Theme color tokens |\n| `$` + radius | `$3` | Border radius scale |\n\n### Custom Components\n\nAdd to `packages/ui/src/components/`:\n\n1. Create `MyComponent.tsx`\n2. Export from `components/index.ts`\n3. Available as `import { MyComponent } from '@mvp/ui'`\n\n### Animations\n\nAvailable wrappers:\n- `FadeIn` — opacity fade on mount\n- `SlideIn` — slide from direction\n- `ScalePress` — press scale effect\n- `AnimatedListItem` — staggered list items",
     "wasHelpful": "Was this page helpful?"
   },
+  "payments": {
+    "title": "Pricing",
+    "subtitle": "Choose the plan that works for you",
+    "currentPlan": "Current Plan",
+    "subscribe": "Subscribe",
+    "buyNow": "Buy Now",
+    "cancelSubscription": "Cancel Subscription",
+    "cancelConfirm": "Are you sure? Your subscription will remain active until the end of the billing period.",
+    "active": "Active",
+    "canceled": "Canceled",
+    "past_due": "Past Due",
+    "expired": "Expired",
+    "free": "Free",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "features": "What's included",
+    "noHistory": "No payments yet",
+    "managePlan": "Manage Plan",
+    "renewsOn": "Renews on {{date}}",
+    "expiresOn": "Expires on {{date}}",
+    "one_time": "One-time payment",
+    "subscription": "Subscription",
+    "succeeded": "Succeeded",
+    "pending": "Pending",
+    "failed": "Failed",
+    "refunded": "Refunded"
+  },
   "cookies": {
     "message": "We use cookies and local storage to improve your experience and analyze usage.",
     "learnMore": "Learn more",
@@ -327,6 +358,7 @@
     "schemeEmerald": "Emerald",
     "schemeRose": "Rose",
     "schemeAmber": "Amber",
-    "schemeViolet": "Violet"
+    "schemeViolet": "Violet",
+    "payments": "Payments"
   }
 }
