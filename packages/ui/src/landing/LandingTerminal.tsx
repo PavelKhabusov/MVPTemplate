@@ -6,12 +6,13 @@ import { SlideIn } from '../animations/SlideIn'
 
 /* ── terminal command lines ── */
 const TERMINAL_LINES = [
-  { prompt: true, text: 'git clone https://github.com/PavelKhabusov/MVPTemplate.git' },
-  { prompt: true, text: 'cd MVPTemplate && pwsh scripts/setup.ps1' },
+  { prompt: true, text: 'git clone <repo-url> && cd MVPTemplate' },
+  { prompt: true, text: 'npm install' },
   { prompt: false, text: '✓ Dependencies installed' },
-  { prompt: false, text: '✓ Docker: PostgreSQL + Redis started' },
-  { prompt: false, text: '✓ JWT secrets generated' },
-  { prompt: false, text: '✓ Database schema pushed' },
+  { prompt: true, text: 'docker compose up -d' },
+  { prompt: false, text: '✓ PostgreSQL + Redis started' },
+  { prompt: true, text: 'npm run db:push' },
+  { prompt: false, text: '✓ Database schema synced' },
   { prompt: true, text: 'npm run dev' },
   { prompt: false, text: '▸ Backend  → http://localhost:3000' },
   { prompt: false, text: '▸ Mobile   → press i / a / w' },
@@ -23,17 +24,17 @@ const TREE_LINES: readonly { depth: number; name: string; comment?: string }[] =
   { depth: 1, name: 'apps/' },
   { depth: 2, name: 'mobile/', comment: 'Expo · iOS / Android / Web' },
   { depth: 3, name: 'app/', comment: 'file-based routes' },
-  { depth: 3, name: 'src/features/', comment: 'auth, search, onboarding' },
+  { depth: 3, name: 'src/', comment: 'features, services, config' },
   { depth: 2, name: 'backend/', comment: 'Fastify API' },
-  { depth: 3, name: 'src/modules/', comment: 'auth, users, admin, push, SSE' },
-  { depth: 3, name: 'src/database/', comment: 'Drizzle schema + migrations' },
+  { depth: 3, name: 'src/', comment: 'modules, database, config' },
   { depth: 3, name: 'docker/', comment: 'Dockerfile + compose' },
   { depth: 1, name: 'packages/' },
   { depth: 2, name: 'ui/', comment: 'components, animations, landing' },
-  { depth: 2, name: 'store/', comment: 'Zustand stores' },
-  { depth: 2, name: 'i18n/', comment: '4 locales' },
-  { depth: 2, name: 'lib/', comment: 'MMKV, secure storage' },
-  { depth: 2, name: 'analytics/', comment: 'PostHog abstraction' },
+  { depth: 2, name: 'auth/', comment: 'forms, providers, flows' },
+  { depth: 2, name: 'store/', comment: 'Zustand + MMKV persist' },
+  { depth: 2, name: 'i18n/', comment: 'en, ru, es, ja' },
+  { depth: 2, name: 'docs/', comment: 'markdown documentation' },
+  { depth: 2, name: 'analytics/', comment: 'PostHog + internal' },
   { depth: 1, name: 'scripts/', comment: 'setup, docker, admin' },
 ]
 
@@ -94,7 +95,7 @@ export function LandingTerminal() {
       }
       @media (max-width: 768px) {
         #terminal-title { font-size: 26px !important; }
-        .terminal-panel { min-width: 0 !important; max-width: 100% !important; }
+        .terminal-panel { min-width: 0 !important; max-width: 100% !important; width: 100% !important; }
       }
     `
     document.head.appendChild(style)
@@ -170,16 +171,16 @@ export function LandingTerminal() {
           </YStack>
         </SlideIn>
 
-        <XStack flexWrap="wrap" gap="$4" justifyContent="center">
+        <XStack flexWrap="wrap" gap="$4" justifyContent="center" style={{ alignItems: 'stretch' } as any}>
           {/* ── Terminal panel ── */}
-          <SlideIn from="left" delay={100}>
+          <SlideIn from="left" delay={100} style={{ flex: 1, minWidth: 300, maxWidth: 600 }}>
             <YStack
               className="terminal-panel"
               borderRadius="$4"
               overflow="hidden"
               borderWidth={1}
               borderColor="$borderColor"
-              style={{ minWidth: 420, flex: 1, maxWidth: 600 } as any}
+              flex={1}
             >
               {/* Title bar */}
               <XStack
@@ -199,7 +200,8 @@ export function LandingTerminal() {
               <YStack
                 padding="$4"
                 gap="$1.5"
-                style={{ backgroundColor: '#0d1117', minHeight: 280 } as any}
+                flex={1}
+                style={{ backgroundColor: '#0d1117', minHeight: 280, overflow: 'hidden' } as any}
               >
                 {TERMINAL_LINES.map((line, i) => {
                   if (i > currentLine) return null
@@ -220,7 +222,7 @@ export function LandingTerminal() {
                           <Text
                             fontSize={13}
                             color="#e6edf3"
-                            style={{ fontFamily: 'monospace', wordBreak: 'break-all' } as any}
+                            style={{ fontFamily: 'monospace', wordBreak: 'break-word', overflowWrap: 'break-word', flex: 1 } as any}
                           >
                             {text}
                             {isActive && !typingDone && (
@@ -238,7 +240,7 @@ export function LandingTerminal() {
                         <Text
                           fontSize={13}
                           color="#8b949e"
-                          style={{ fontFamily: 'monospace', paddingLeft: 16 } as any}
+                          style={{ fontFamily: 'monospace', paddingLeft: 16, wordBreak: 'break-word', overflowWrap: 'break-word' } as any}
                         >
                           {text}
                         </Text>
@@ -271,14 +273,14 @@ export function LandingTerminal() {
           </SlideIn>
 
           {/* ── Project tree panel ── */}
-          <SlideIn from="right" delay={200}>
+          <SlideIn from="right" delay={200} style={{ flex: 1, minWidth: 300, maxWidth: 600 }}>
             <YStack
               className="terminal-panel"
               borderRadius="$4"
               overflow="hidden"
               borderWidth={1}
               borderColor="$borderColor"
-              style={{ minWidth: 420, flex: 1, maxWidth: 600 } as any}
+              flex={1}
             >
               {/* Title bar */}
               <XStack
@@ -298,6 +300,7 @@ export function LandingTerminal() {
               <YStack
                 padding="$4"
                 gap="$1"
+                flex={1}
                 style={{ backgroundColor: '#0d1117', minHeight: 280 } as any}
               >
                 {TREE_LINES.map((line, i) => {
