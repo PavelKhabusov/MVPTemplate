@@ -121,7 +121,9 @@
     "notifyTitle": "Title",
     "notifyBody": "Body (optional)",
     "sendToAll": "Send to All",
-    "notifySent": "Sent {{sent}} of {{total}}"
+    "notifySent": "Sent {{sent}} of {{total}}",
+    "notifyHistory": "Send History",
+    "noNotifications": "No notifications sent yet"
   },
   "notifications": {
     "title": "Notifications",

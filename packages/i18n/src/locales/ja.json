@@ -121,7 +121,9 @@
     "notifyTitle": "タイトル",
     "notifyBody": "本文（任意）",
     "sendToAll": "全員に送信",
-    "notifySent": "{{total}}件中{{sent}}件送信済み"
+    "notifySent": "{{total}}件中{{sent}}件送信済み",
+    "notifyHistory": "送信履歴",
+    "noNotifications": "まだ通知は送信されていません"
   },
   "notifications": {
     "title": "通知",

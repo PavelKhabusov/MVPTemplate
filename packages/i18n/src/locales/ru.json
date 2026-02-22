@@ -121,7 +121,9 @@
     "notifyTitle": "Заголовок",
     "notifyBody": "Текст (необязательно)",
     "sendToAll": "Отправить всем",
-    "notifySent": "Отправлено {{sent}} из {{total}}"
+    "notifySent": "Отправлено {{sent}} из {{total}}",
+    "notifyHistory": "История отправок",
+    "noNotifications": "Уведомления ещё не отправлялись"
   },
   "notifications": {
     "title": "Уведомления",

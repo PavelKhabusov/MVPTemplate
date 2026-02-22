@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
 import { StateView, FadeIn, AnimatedListItem, AppCard, ScalePress, SettingsGroup, SettingsGroupItem } from '@mvp/ui'
+import { useTemplateFlag } from '@mvp/template-config'
 import { api } from '../../services/api'
 import { useQueryState } from '@mvp/lib'
 import { storage } from '@mvp/lib'
@@ -63,7 +64,7 @@ export function NotificationCenter() {
   })
   const queryClient = useQueryClient()
   const pushPref = usePushPreference()
-  const isNative = Platform.OS !== 'web'
+  const emailEnabled = useTemplateFlag('email', false)
 
   const markAllRead = useMutation({
     mutationFn: () => api.post('/notifications/read-all'),
@@ -76,20 +77,20 @@ export function NotificationCenter() {
         {/* Settings */}
         <FadeIn>
           <SettingsGroup header={t('notifications.settings')}>
-            {isNative && (
+            <SettingsGroupItem
+              icon="notifications-outline"
+              label={t('notifications.pushToggle')}
+              toggle
+              toggleValue={pushPref.enabled}
+              onToggleChange={pushPref.toggle}
+            />
+            {emailEnabled && (
               <SettingsGroupItem
-                icon="notifications-outline"
-                label={t('notifications.pushToggle')}
-                toggle
-                toggleValue={pushPref.enabled}
-                onToggleChange={pushPref.toggle}
+                icon="mail-outline"
+                label={t('notifications.emailToggle')}
+                value={t('common.comingSoon')}
               />
             )}
-            <SettingsGroupItem
-              icon="mail-outline"
-              label={t('notifications.emailToggle')}
-              value={t('common.comingSoon')}
-            />
           </SettingsGroup>
         </FadeIn>
 

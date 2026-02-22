@@ -121,7 +121,9 @@
     "notifyTitle": "Título",
     "notifyBody": "Cuerpo (opcional)",
     "sendToAll": "Enviar a todos",
-    "notifySent": "Enviados {{sent}} de {{total}}"
+    "notifySent": "Enviados {{sent}} de {{total}}",
+    "notifyHistory": "Historial de envíos",
+    "noNotifications": "Aún no se han enviado notificaciones"
   },
   "notifications": {
     "title": "Notificaciones",

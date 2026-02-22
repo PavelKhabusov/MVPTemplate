@@ -206,6 +206,20 @@ export default function AdminScreen() {
   const [notifyBody, setNotifyBody] = useState('')
   const [sending, setSending] = useState(false)
   const [sendResult, setSendResult] = useState<string | null>(null)
+  const [notifyHistory, setNotifyHistory] = useState<Array<{ title: string; body: string | null; createdAt: string; recipientCount: number }>>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+
+  const fetchHistory = useCallback(async () => {
+    setHistoryLoading(true)
+    try {
+      const res = await api.get('/push/history', { params: { limit: 50 } })
+      setNotifyHistory(res.data.data)
+    } catch {
+      // ignore
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [])
 
   const fetchData = useCallback(async (p = 1, q = '') => {
     try {
@@ -239,6 +253,12 @@ export default function AdminScreen() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    if (pushEnabled && activeTab === 'notify') {
+      fetchHistory()
+    }
+  }, [pushEnabled, activeTab, fetchHistory])
 
   const handleSearch = useCallback(() => {
     setPage(1)
@@ -649,6 +669,7 @@ export default function AdminScreen() {
                         setSendResult(t('admin.notifySent', { sent: data.sent, total: data.total }))
                         setNotifyTitle('')
                         setNotifyBody('')
+                        fetchHistory()
                       } catch (err: any) {
                         setSendResult(err.response?.data?.message ?? t('common.error'))
                       } finally {
@@ -665,6 +686,47 @@ export default function AdminScreen() {
                     </Text>
                   )}
                 </YStack>
+              </AppCard>
+
+              {/* Send History */}
+              <AppCard animated={false}>
+                <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
+                  {t('admin.notifyHistory')}
+                </Text>
+                {historyLoading ? (
+                  <Text color="$mutedText" fontSize="$2">{t('common.loading')}</Text>
+                ) : notifyHistory.length === 0 ? (
+                  <Text color="$mutedText" fontSize="$2">{t('admin.noNotifications')}</Text>
+                ) : (
+                  <YStack gap="$2">
+                    {notifyHistory.map((item, i) => (
+                      <YStack
+                        key={`${item.title}-${item.createdAt}-${i}`}
+                        borderBottomWidth={i < notifyHistory.length - 1 ? 1 : 0}
+                        borderBottomColor="$borderColor"
+                        paddingBottom="$2"
+                      >
+                        <XStack justifyContent="space-between" alignItems="center">
+                          <Text fontWeight="600" color="$color" fontSize="$3" flex={1} numberOfLines={1}>
+                            {item.title}
+                          </Text>
+                          <XStack alignItems="center" gap="$1" marginLeft="$2">
+                            <Ionicons name="people-outline" size={14} color={theme.mutedText.val} />
+                            <Text color="$mutedText" fontSize="$2">{item.recipientCount}</Text>
+                          </XStack>
+                        </XStack>
+                        {item.body && (
+                          <Text color="$mutedText" fontSize="$2" numberOfLines={2}>
+                            {item.body}
+                          </Text>
+                        )}
+                        <Text color="$mutedText" fontSize="$1" marginTop="$1">
+                          {new Date(item.createdAt).toLocaleString()}
+                        </Text>
+                      </YStack>
+                    ))}
+                  </YStack>
+                )}
               </AppCard>
             </YStack>
           </FadeIn>
