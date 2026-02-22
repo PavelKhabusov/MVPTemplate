@@ -12,6 +12,8 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null
  * In production, consider using a short-lived ticket instead of the JWT directly.
  */
 export function connectSSE() {
+  if (typeof EventSource === 'undefined') return // Not available on native
+
   const token = getAccessToken()
   if (!token) return
 
