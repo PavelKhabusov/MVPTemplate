@@ -1,5 +1,4 @@
-import { mutateThemes } from '@tamagui/theme'
-import { forceUpdateThemes } from '@tamagui/web'
+import { updateTheme } from '@tamagui/theme'
 
 export interface ColorSchemeValues {
   accent: string
@@ -109,30 +108,25 @@ export const DEFAULT_SCHEME_KEY = 'cyan'
 export function applyColorScheme(schemeKey: string): ColorScheme {
   const scheme = COLOR_SCHEMES.find((s) => s.key === schemeKey) ?? COLOR_SCHEMES[0]
 
-  mutateThemes({
-    themes: [
-      {
-        name: 'light',
-        theme: {
-          accent: scheme.light.accent,
-          accentGradientStart: scheme.light.accentGradientStart,
-          accentGradientEnd: scheme.light.accentGradientEnd,
-          secondary: scheme.light.secondary,
-        },
-      },
-      {
-        name: 'dark',
-        theme: {
-          accent: scheme.dark.accent,
-          accentGradientStart: scheme.dark.accentGradientStart,
-          accentGradientEnd: scheme.dark.accentGradientEnd,
-          secondary: scheme.dark.secondary,
-        },
-      },
-    ],
+  updateTheme({
+    name: 'light',
+    theme: {
+      accent: scheme.light.accent,
+      accentGradientStart: scheme.light.accentGradientStart,
+      accentGradientEnd: scheme.light.accentGradientEnd,
+      secondary: scheme.light.secondary,
+    },
   })
 
-  forceUpdateThemes()
+  updateTheme({
+    name: 'dark',
+    theme: {
+      accent: scheme.dark.accent,
+      accentGradientStart: scheme.dark.accentGradientStart,
+      accentGradientEnd: scheme.dark.accentGradientEnd,
+      secondary: scheme.dark.secondary,
+    },
+  })
 
   return scheme
 }
