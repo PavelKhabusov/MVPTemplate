@@ -76,6 +76,26 @@ function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value:
   )
 }
 
+function buildThemeOutput(schemeKey: string | null): string | null {
+  if (!schemeKey || schemeKey === DEFAULT_SCHEME_KEY) return null
+  const scheme = COLOR_SCHEMES.find((s) => s.key === schemeKey)
+  if (!scheme) return null
+
+  return [
+    '// tamagui.config.ts — light theme',
+    `accent: '${scheme.light.accent}',`,
+    `accentGradientStart: '${scheme.light.accentGradientStart}',`,
+    `accentGradientEnd: '${scheme.light.accentGradientEnd}',`,
+    `secondary: '${scheme.light.secondary}',`,
+    '',
+    '// tamagui.config.ts — dark theme',
+    `accent: '${scheme.dark.accent}',`,
+    `accentGradientStart: '${scheme.dark.accentGradientStart}',`,
+    `accentGradientEnd: '${scheme.dark.accentGradientEnd}',`,
+    `secondary: '${scheme.dark.secondary}',`,
+  ].join('\n')
+}
+
 function buildEnvOutput(overrides: Record<string, boolean>): string {
   const lines: string[] = ['# Template Configuration']
 
@@ -114,6 +134,7 @@ export function TemplateConfigSidebar() {
   const isMobile = useIsMobileWeb()
 
   const envOutput = useMemo(() => buildEnvOutput(overrides), [overrides])
+  const themeOutput = useMemo(() => buildThemeOutput(colorScheme), [colorScheme])
 
   if (Platform.OS !== 'web') return null
   if (isMobile) return null
@@ -280,6 +301,51 @@ export function TemplateConfigSidebar() {
             />
           ))}
         </YStack>
+
+        {/* Theme Output */}
+        {themeOutput && (
+          <YStack paddingHorizontal="$3" gap="$2" marginBottom="$3">
+            <XStack alignItems="center" justifyContent="space-between">
+              <Text fontSize={11} fontWeight="700" color="$mutedText" textTransform="uppercase" letterSpacing={1}>
+                tamagui.config.ts
+              </Text>
+              <Pressable onPress={() => {
+                if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                  navigator.clipboard.writeText(themeOutput)
+                }
+              }}>
+                <XStack
+                  alignItems="center"
+                  gap="$1"
+                  paddingHorizontal="$2"
+                  paddingVertical="$1"
+                  borderRadius="$2"
+                  hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+                >
+                  <Ionicons name="copy-outline" size={12} color={theme.mutedText.val} />
+                  <Text fontSize={11} color="$mutedText">
+                    {t('templateConfig.copy')}
+                  </Text>
+                </XStack>
+              </Pressable>
+            </XStack>
+            <YStack
+              backgroundColor="$subtleBackground"
+              borderRadius="$2"
+              borderWidth={1}
+              borderColor="$borderColor"
+              padding="$2"
+            >
+              <Text
+                fontSize={11}
+                color="$color"
+                style={{ fontFamily: 'monospace', whiteSpace: 'pre', userSelect: 'all' } as any}
+              >
+                {themeOutput}
+              </Text>
+            </YStack>
+          </YStack>
+        )}
 
         {/* .env Output */}
         <YStack paddingHorizontal="$3" gap="$2">
