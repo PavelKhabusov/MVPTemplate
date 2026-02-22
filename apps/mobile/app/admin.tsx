@@ -14,7 +14,6 @@ import {
   DEFAULT_SCHEME_KEY,
   applyColorScheme,
 } from '@mvp/template-config'
-import { useCookieConsentStore } from '@mvp/store'
 import { api } from '../src/services/api'
 
 const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
@@ -189,7 +188,6 @@ function TemplateConfigTab() {
   const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
   const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
-  const resetConsent = useCookieConsentStore((s) => s.resetConsent)
 
   const frontendFlags = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend')
   const backendFlags = TEMPLATE_FLAGS.filter((f) => f.scope !== 'frontend')
@@ -270,27 +268,10 @@ function TemplateConfigTab() {
                         {t(flag.labelKey)}
                       </Text>
                     </XStack>
-                    <XStack alignItems="center" gap="$2">
-                      {flag.key === 'cookieBanner' && value && (
-                        <ScalePress onPress={resetConsent}>
-                          <XStack
-                            paddingHorizontal="$2"
-                            paddingVertical="$1"
-                            borderRadius="$2"
-                            borderWidth={1}
-                            borderColor="$borderColor"
-                          >
-                            <Text fontSize="$1" color="$mutedText" fontWeight="600">
-                              {t('templateConfig.showBanner')}
-                            </Text>
-                          </XStack>
-                        </ScalePress>
-                      )}
-                      <AppSwitch
-                        checked={value}
-                        onCheckedChange={() => setFlag(flag.key, !value)}
-                      />
-                    </XStack>
+                    <AppSwitch
+                      checked={value}
+                      onCheckedChange={() => setFlag(flag.key, !value)}
+                    />
                   </XStack>
                 )
               })}
