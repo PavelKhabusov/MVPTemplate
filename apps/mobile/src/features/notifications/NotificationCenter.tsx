@@ -2,6 +2,7 @@ import { ScrollView } from 'react-native'
 import { YStack, Text, XStack, H2 } from 'tamagui'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@mvp/i18n'
+import { useAuthStore } from '@mvp/store'
 import { StateView, FadeIn, AnimatedListItem, AppCard, ScalePress } from '@mvp/ui'
 import { api } from '../../services/api'
 import { useQueryState } from '@mvp/lib'
@@ -16,12 +17,14 @@ interface Notification {
 }
 
 function useNotifications() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   return useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
       const { data } = await api.get('/notifications')
       return data.data as Notification[]
     },
+    enabled: isAuthenticated,
   })
 }
 
