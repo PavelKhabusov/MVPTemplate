@@ -18,6 +18,7 @@ import { notificationsRoutes } from './modules/notifications/notifications.route
 import { searchRoutes } from './modules/search/search.routes'
 import { adminRoutes } from './modules/admin/admin.routes'
 import { analyticsRoutes } from './modules/analytics/analytics.routes'
+import { docFeedbackRoutes } from './modules/doc-feedback/doc-feedback.routes'
 import { sseRoutes } from './realtime/sse'
 
 export async function buildApp() {
@@ -105,7 +106,10 @@ export async function buildApp() {
   await app.register(notificationsRoutes, { prefix: '/api/notifications' })
   await app.register(searchRoutes, { prefix: '/api/search' })
   await app.register(adminRoutes, { prefix: '/api/admin' })
-  await app.register(analyticsRoutes, { prefix: '/api/analytics' })
+  if (env.ANALYTICS_ENABLED) {
+    await app.register(analyticsRoutes, { prefix: '/api/analytics' })
+  }
+  await app.register(docFeedbackRoutes, { prefix: '/api/doc-feedback' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Platform, ScrollView } from 'react-native'
+import { Platform, Pressable, ScrollView } from 'react-native'
 import { Stack, Slot, usePathname, router } from 'expo-router'
 import { XStack, YStack, useTheme } from 'tamagui'
+import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from '@mvp/i18n'
 import { DocTreeView } from '@mvp/docs'
 
@@ -42,11 +43,25 @@ export default function DocsLayout() {
     return (
       <Stack
         screenOptions={{
-          headerShown: false,
+          headerStyle: { backgroundColor: theme.background.val },
+          headerTintColor: theme.accent.val,
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: theme.background.val },
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} hitSlop={8} style={{ padding: 4 }}>
+              <Ionicons name="chevron-back" size={24} color={theme.accent.val} />
+            </Pressable>
+          ),
         }}
       >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="[page]" />
+        <Stack.Screen
+          name="index"
+          options={{ title: t('docs.title') }}
+        />
+        <Stack.Screen
+          name="[page]"
+          options={{ headerShown: true }}
+        />
       </Stack>
     )
   }

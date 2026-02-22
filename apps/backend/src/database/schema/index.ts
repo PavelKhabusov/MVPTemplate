@@ -21,3 +21,6 @@ export type { EmailVerificationToken, NewEmailVerificationToken } from './email-
 
 export { passwordResetTokens } from './password-reset-tokens'
 export type { PasswordResetToken, NewPasswordResetToken } from './password-reset-tokens'
+
+export { docFeedback } from './doc-feedback'
+export type { DocFeedback, NewDocFeedback } from './doc-feedback'

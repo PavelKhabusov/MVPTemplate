@@ -1,4 +1,5 @@
-import { XStack, YStack, Text, Switch, useTheme } from 'tamagui'
+import { XStack, YStack, Text, useTheme } from 'tamagui'
+import { AppSwitch } from './AppSwitch'
 import { Ionicons } from '@expo/vector-icons'
 import { ScalePress } from '../animations/ScalePress'
 
@@ -51,14 +52,10 @@ export function SettingsGroupItem({
       </Text>
 
       {toggle ? (
-        <Switch
-          size="$3"
-          checked={toggleValue}
-          onCheckedChange={onToggleChange}
-          backgroundColor={toggleValue ? theme.accent.val : '$borderColor'}
-        >
-          <Switch.Thumb backgroundColor="white" />
-        </Switch>
+        <AppSwitch
+          checked={!!toggleValue}
+          onCheckedChange={(val) => onToggleChange?.(val)}
+        />
       ) : (
         <>
           {value && (

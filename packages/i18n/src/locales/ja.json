@@ -112,7 +112,10 @@
     "avgSession": "平均セッション",
     "dailyActivity": "日次アクティビティ (30日)",
     "popularScreens": "人気の画面",
-    "noData": "アナリティクスデータなし"
+    "noData": "アナリティクスデータなし",
+    "docFeedback": "フィードバック",
+    "noFeedback": "フィードバックはまだありません",
+    "helpful": "役立つ"
   },
   "notifications": {
     "title": "通知",
@@ -248,6 +251,7 @@
     "collapseAll": "すべて折りたたむ",
     "noResults": "ページが見つかりません",
     "selectPage": "サイドバーからページを選択してください",
+    "wasHelpful": "このページは役に立ちましたか？",
     "groupGettingStarted": "はじめに",
     "groupConfiguration": "設定",
     "groupFeatures": "機能",
@@ -287,5 +291,25 @@
     "learnMore": "詳しく見る",
     "accept": "同意する",
     "decline": "拒否する"
+  },
+  "templateConfig": {
+    "title": "テンプレート設定",
+    "description": "機能設定を切り替えてアプリの見た目をプレビュー",
+    "frontend": "フロントエンド",
+    "backend": "バックエンド",
+    "server": "サーバー",
+    "reset": "リセット",
+    "copy": "コピー",
+    "docs": "ドキュメント",
+    "email": "メールシステム",
+    "emailVerification": "メール認証",
+    "googleAuth": "Googleログイン",
+    "requestLogging": "リクエストログ",
+    "analytics": "内部アナリティクス",
+    "posthog": "PostHog",
+    "cookieBanner": "Cookieバナー",
+    "pushNotifications": "プッシュ通知",
+    "showBanner": "表示",
+    "docFeedback": "ドキュメントフィードバック"
   }
 }

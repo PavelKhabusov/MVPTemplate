@@ -13,5 +13,5 @@ export default function LandingScreen() {
 
   if (Platform.OS !== 'web') return null
 
-  return <LandingPage />
+  return <LandingPage logo={require('../assets/icon.png')} />
 }

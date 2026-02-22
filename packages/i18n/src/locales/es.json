@@ -112,7 +112,10 @@
     "avgSession": "Sesión prom.",
     "dailyActivity": "Actividad diaria (30d)",
     "popularScreens": "Pantallas populares",
-    "noData": "Sin datos de analíticas"
+    "noData": "Sin datos de analíticas",
+    "docFeedback": "Comentarios",
+    "noFeedback": "Aún no hay comentarios",
+    "helpful": "útil"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -248,6 +251,7 @@
     "collapseAll": "Contraer todo",
     "noResults": "No se encontraron páginas",
     "selectPage": "Selecciona una página del menú lateral",
+    "wasHelpful": "¿Fue útil esta página?",
     "groupGettingStarted": "Primeros pasos",
     "groupConfiguration": "Configuración",
     "groupFeatures": "Características",
@@ -287,5 +291,25 @@
     "learnMore": "Más información",
     "accept": "Aceptar",
     "decline": "Rechazar"
+  },
+  "templateConfig": {
+    "title": "Configurador",
+    "description": "Vista previa de la app con diferentes configuraciones",
+    "frontend": "Frontend",
+    "backend": "Backend",
+    "server": "Servidor",
+    "reset": "Restablecer",
+    "copy": "Copiar",
+    "docs": "Documentación",
+    "email": "Sistema de email",
+    "emailVerification": "Verificación de email",
+    "googleAuth": "Inicio con Google",
+    "requestLogging": "Registro de peticiones",
+    "analytics": "Analíticas internas",
+    "posthog": "PostHog",
+    "cookieBanner": "Banner de cookies",
+    "pushNotifications": "Notificaciones push",
+    "showBanner": "Mostrar",
+    "docFeedback": "Comentarios de documentación"
   }
 }

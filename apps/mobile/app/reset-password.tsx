@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from 'react-native'
 import { YStack, Text, H1, useTheme } from 'tamagui'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -5,13 +6,19 @@ import { useTranslation } from '@mvp/i18n'
 import { FadeIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAuthStore } from '@mvp/store'
 import { ResetPasswordForm } from '@mvp/auth'
 
 export default function ResetPasswordScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const { token } = useLocalSearchParams<{ token: string }>()
+
+  useEffect(() => {
+    if (isAuthenticated) router.replace('/settings')
+  }, [isAuthenticated])
 
   return (
     <KeyboardAvoidingView

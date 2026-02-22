@@ -10,6 +10,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
+import { TemplateConfigSidebar } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -122,7 +123,7 @@ function RootNavigator() {
           headerShadowVisible: false,
         }}
       />
-      <Stack.Screen name="docs" options={{ title: t('docs.title'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="docs" options={{ headerShown: false }} />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="terms" options={{ title: t('settings.terms'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
@@ -190,14 +191,19 @@ function WebRootLayout() {
         currentPath={pathname}
         onNavigate={(href) => router.push(href as any)}
         footer={(collapsed) => <ThemeToggle collapsed={collapsed} />}
+        logo={require('../assets/icon.png')}
+        title="MVP Template"
       />
       <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
         <Slot />
       </YStack>
       <CookieBanner />
+      {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
     </XStack>
   )
 }
+
+const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
 
 export default function RootLayout() {
   const resolvedTheme = useThemeStore((s) => s.resolvedTheme)

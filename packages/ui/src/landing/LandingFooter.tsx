@@ -1,14 +1,15 @@
 import { useEffect } from 'react'
-import { Platform } from 'react-native'
+import { Image, Platform } from 'react-native'
 import { YStack, XStack, Text, Separator, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { ScalePress } from '../animations/ScalePress'
 
 interface LandingFooterProps {
   onNavigate: (href: string) => void
+  logo?: any
 }
 
-export function LandingFooter({ onNavigate }: LandingFooterProps) {
+export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
   const { t } = useTranslation()
   const theme = useTheme()
 
@@ -42,19 +43,23 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
           {/* Brand */}
           <YStack className="footer-brand" gap="$3" style={{ minWidth: 240, flex: 1 } as any}>
             <XStack alignItems="center" gap="$2">
-              <YStack
-                width={28}
-                height={28}
-                borderRadius={7}
-                alignItems="center"
-                justifyContent="center"
-                style={{
-                  background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
-                } as any}
-              >
-                <Text color="white" fontWeight="bold" fontSize={14}>M</Text>
-              </YStack>
-              <Text fontWeight="bold" fontSize="$4" color="$color">MVPTemplate</Text>
+              {logo ? (
+                <Image source={logo} style={{ width: 28, height: 28, borderRadius: 7 }} />
+              ) : (
+                <YStack
+                  width={28}
+                  height={28}
+                  borderRadius={7}
+                  alignItems="center"
+                  justifyContent="center"
+                  style={{
+                    background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
+                  } as any}
+                >
+                  <Text color="white" fontWeight="bold" fontSize={14}>M</Text>
+                </YStack>
+              )}
+              <Text fontWeight="bold" fontSize="$4" color="$color">MVP Template</Text>
             </XStack>
             <Text fontSize="$3" color="$mutedText" lineHeight={22} maxWidth={280}>
               {t('landing.footerDesc')}
@@ -79,7 +84,6 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
             </Text>
             <FooterLink label={t('landing.footerDocs')} onPress={() => onNavigate('/docs')} />
             <FooterLink label={t('landing.footerGitHub')} onPress={() => window.open('https://github.com/PavelKhabusov/MVPTemplate', '_blank')} />
-            <FooterLink label={t('landing.footerCommunity')} onPress={() => {}} />
           </YStack>
 
           {/* Legal */}
@@ -88,7 +92,7 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
               {t('landing.footerLegal')}
             </Text>
             <FooterLink label={t('settings.privacy')} onPress={() => onNavigate('/privacy')} />
-            <FooterLink label={t('settings.terms')} onPress={() => {}} />
+            <FooterLink label={t('settings.terms')} onPress={() => onNavigate('/terms')} />
           </YStack>
         </XStack>
 
@@ -96,7 +100,7 @@ export function LandingFooter({ onNavigate }: LandingFooterProps) {
 
         {/* Copyright */}
         <Text fontSize="$2" color="$mutedText" textAlign="center">
-          &copy; {new Date().getFullYear()} MVPTemplate. {t('landing.footerRights')}
+          &copy; {new Date().getFullYear()} MVP Template. {t('landing.footerRights')}
         </Text>
       </YStack>
     </YStack>

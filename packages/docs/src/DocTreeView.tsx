@@ -7,6 +7,52 @@ import { ScalePress } from '@mvp/ui'
 import { DOC_GROUPS } from './docData'
 import type { DocGroup } from './docData'
 
+interface PageListProps {
+  pages: DocGroup['pages']
+  selectedPageId?: string | null
+  onPageSelect?: (pageId: string) => void
+  theme: ReturnType<typeof useTheme>
+  t: (key: string) => string
+}
+
+function PageList({ pages, selectedPageId, onPageSelect, theme, t }: PageListProps) {
+  return (
+    <YStack paddingLeft="$4" gap="$0.5">
+      {pages.map((page) => {
+        const isSelected = selectedPageId === page.id
+        return (
+          <XStack
+            key={page.id}
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            borderRadius="$2"
+            alignItems="center"
+            gap="$2"
+            backgroundColor={isSelected ? '$subtleBackground' : 'transparent'}
+            hoverStyle={{ backgroundColor: '$backgroundHover' }}
+            pressStyle={{ opacity: 0.7 }}
+            cursor="pointer"
+            onPress={() => onPageSelect?.(page.id)}
+          >
+            <Ionicons
+              name={isSelected ? 'document' : 'document-outline'}
+              size={14}
+              color={isSelected ? theme.accent.val : theme.mutedText.val}
+            />
+            <Text
+              fontSize="$2"
+              color={isSelected ? '$accent' : '$mutedText'}
+              fontWeight={isSelected ? '600' : '400'}
+            >
+              {t(page.titleKey)}
+            </Text>
+          </XStack>
+        )
+      })}
+    </YStack>
+  )
+}
+
 interface DocTreeViewProps {
   onPageSelect?: (pageId: string) => void
   selectedPageId?: string | null
@@ -131,26 +177,27 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
             return (
               <YStack key={group.id}>
                 {/* Group Header */}
-                <ScalePress onPress={() => toggleGroup(group.id)}>
-                  <XStack
-                    paddingVertical="$2.5"
-                    paddingHorizontal="$3"
-                    borderRadius="$3"
-                    alignItems="center"
-                    gap="$2.5"
-                    hoverStyle={{ backgroundColor: '$backgroundHover' }}
-                  >
-                    <Ionicons name={group.icon} size={18} color={theme.accent.val} />
-                    <Text flex={1} fontWeight="600" fontSize="$3" color="$color">
-                      {t(group.titleKey)}
-                    </Text>
-                    <Ionicons
-                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                      size={16}
-                      color={theme.mutedText.val}
-                    />
-                  </XStack>
-                </ScalePress>
+                <XStack
+                  paddingVertical="$2.5"
+                  paddingHorizontal="$3"
+                  borderRadius="$3"
+                  alignItems="center"
+                  gap="$2.5"
+                  hoverStyle={{ backgroundColor: '$backgroundHover' }}
+                  pressStyle={{ opacity: 0.7 }}
+                  cursor="pointer"
+                  onPress={() => toggleGroup(group.id)}
+                >
+                  <Ionicons name={group.icon} size={18} color={theme.accent.val} />
+                  <Text flex={1} fontWeight="600" fontSize="$3" color="$color">
+                    {t(group.titleKey)}
+                  </Text>
+                  <Ionicons
+                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={16}
+                    color={theme.mutedText.val}
+                  />
+                </XStack>
 
                 {/* Pages */}
                 <AnimatePresence>
@@ -162,40 +209,13 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
                       transition={{ type: 'timing', duration: 200 }}
                       style={{ overflow: 'hidden' }}
                     >
-                      <YStack paddingLeft="$4" gap="$0.5">
-                        {group.pages.map((page) => {
-                          const isSelected = selectedPageId === page.id
-                          return (
-                            <ScalePress
-                              key={page.id}
-                              onPress={() => onPageSelect?.(page.id)}
-                            >
-                              <XStack
-                                paddingVertical="$2"
-                                paddingHorizontal="$3"
-                                borderRadius="$2"
-                                alignItems="center"
-                                gap="$2"
-                                backgroundColor={isSelected ? '$subtleBackground' : 'transparent'}
-                                hoverStyle={{ backgroundColor: '$backgroundHover' }}
-                              >
-                                <Ionicons
-                                  name={isSelected ? 'document' : 'document-outline'}
-                                  size={14}
-                                  color={isSelected ? theme.accent.val : theme.mutedText.val}
-                                />
-                                <Text
-                                  fontSize="$2"
-                                  color={isSelected ? '$accent' : '$mutedText'}
-                                  fontWeight={isSelected ? '600' : '400'}
-                                >
-                                  {t(page.titleKey)}
-                                </Text>
-                              </XStack>
-                            </ScalePress>
-                          )
-                        })}
-                      </YStack>
+                      <PageList
+                        pages={group.pages}
+                        selectedPageId={selectedPageId}
+                        onPageSelect={onPageSelect}
+                        theme={theme}
+                        t={t}
+                      />
                     </MotiView>
                   )}
                 </AnimatePresence>

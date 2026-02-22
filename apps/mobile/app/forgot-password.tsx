@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from 'react-native'
 import { YStack, Text, H1, useTheme } from 'tamagui'
 import { Link, router } from 'expo-router'
@@ -5,12 +6,18 @@ import { useTranslation } from '@mvp/i18n'
 import { FadeIn, SlideIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAuthStore } from '@mvp/store'
 import { ForgotPasswordForm } from '@mvp/auth'
 
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  useEffect(() => {
+    if (isAuthenticated) router.replace('/settings')
+  }, [isAuthenticated])
 
   return (
     <KeyboardAvoidingView

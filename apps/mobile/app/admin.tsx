@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions } from 'react-native'
-import { YStack, XStack, Text, H2, H4, Input, useTheme, Switch } from 'tamagui'
+import { YStack, XStack, Text, H2, H4, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { AppAvatar, AppButton, AppCard, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
+import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
+import { useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { api } from '../src/services/api'
+
+const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
 
 interface AdminUser {
   id: string
@@ -39,6 +42,13 @@ interface AnalyticsDashboard {
   avgSessionTime: number
 }
 
+interface DocFeedbackStat {
+  pageId: string
+  likes: number
+  dislikes: number
+  total: number
+}
+
 const FEATURE_LABELS: Record<string, string> = {
   beta_access: 'Beta Access',
   premium: 'Premium',
@@ -66,6 +76,55 @@ function formatDuration(seconds: number): string {
 function formatShortDate(iso: string): string {
   const d = new Date(iso)
   return `${d.getDate()}/${d.getMonth() + 1}`
+}
+
+function ScreensBarChart({ data }: { data: Array<{ screenName: string; views: number }> }) {
+  const theme = useTheme()
+  const { width: screenWidth } = useWindowDimensions()
+
+  if (!data || data.length === 0) {
+    return <Text color="$mutedText" fontSize="$2">No data yet</Text>
+  }
+
+  const maxViews = Math.max(...data.map((d) => d.views), 1)
+  const chartWidth = Math.min(screenWidth - 80, 400)
+  const rowHeight = 28
+  const chartHeight = data.length * rowHeight
+  const labelWidth = 100
+  const barAreaWidth = chartWidth - labelWidth - 50
+
+  return (
+    <Svg width="100%" height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
+      {data.map((d, i) => {
+        const barWidth = Math.max((d.views / maxViews) * barAreaWidth, 4)
+        const y = i * rowHeight
+        return (
+          <React.Fragment key={d.screenName}>
+            <SvgText x={0} y={y + 18} fontSize={11} fill={theme.color.val}>
+              {d.screenName.length > 14 ? d.screenName.slice(0, 13) + '…' : d.screenName}
+            </SvgText>
+            <Rect
+              x={labelWidth}
+              y={y + 5}
+              width={barWidth}
+              height={16}
+              rx={4}
+              fill={theme.accent.val}
+              opacity={0.8}
+            />
+            <SvgText
+              x={labelWidth + barWidth + 6}
+              y={y + 18}
+              fontSize={11}
+              fill={theme.mutedText.val}
+            >
+              {d.views}
+            </SvgText>
+          </React.Fragment>
+        )
+      })}
+    </Svg>
+  )
 }
 
 function SimpleBarChart({ data }: { data: Array<{ day: string; events: number; uniqueUsers: number }> }) {
@@ -117,11 +176,20 @@ export default function AdminScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users'>('analytics')
+  const analyticsEnabled = useTemplateFlag('analytics', true)
+  const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback'>(analyticsEnabled ? 'analytics' : 'users')
+
+  useEffect(() => {
+    if (!analyticsEnabled && activeTab === 'analytics') {
+      setActiveTab('users')
+    }
+  }, [analyticsEnabled, activeTab])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
   const [analyticsData, setAnalyticsData] = useState<AnalyticsDashboard | null>(null)
+  const [feedbackStats, setFeedbackStats] = useState<DocFeedbackStat[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -136,23 +204,29 @@ export default function AdminScreen() {
       setLoading(true)
       const params: Record<string, string | number> = { page: p, limit: 20 }
       if (q) params.search = q
-      const [usersRes, statsRes, configRes, analyticsRes] = await Promise.all([
+      const [usersRes, statsRes, configRes, analyticsRes, feedbackRes] = await Promise.all([
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
-        api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null),
+        analyticsEnabled
+          ? api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null)
+          : Promise.resolve(null),
+        docFeedbackEnabled
+          ? api.get('/doc-feedback/admin/stats').catch(() => null)
+          : Promise.resolve(null),
       ])
       setUsers(usersRes.data.data)
       setTotalPages(usersRes.data.pagination?.totalPages ?? 1)
       setStats(statsRes.data.data)
       setConfig(configRes.data.data)
       if (analyticsRes) setAnalyticsData(analyticsRes.data.data)
+      if (feedbackRes) setFeedbackStats(feedbackRes.data.data)
     } catch (err: any) {
       Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, analyticsEnabled, docFeedbackEnabled])
 
   useEffect(() => {
     fetchData()
@@ -246,18 +320,20 @@ export default function AdminScreen() {
       <YStack padding="$4" paddingTop={Platform.OS === 'web' ? '$4' : 16} gap="$3">
         {/* Tab Switcher */}
         <XStack gap="$2">
-          <ScalePress onPress={() => setActiveTab('analytics')}>
-            <XStack
-              backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              borderRadius="$3"
-            >
-              <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                {t('admin.analytics')}
-              </Text>
-            </XStack>
-          </ScalePress>
+          {analyticsEnabled && (
+            <ScalePress onPress={() => setActiveTab('analytics')}>
+              <XStack
+                backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+              >
+                <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.analytics')}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
           <ScalePress onPress={() => setActiveTab('users')}>
             <XStack
               backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
@@ -270,6 +346,37 @@ export default function AdminScreen() {
               </Text>
             </XStack>
           </ScalePress>
+          {docFeedbackEnabled && (
+            <ScalePress onPress={() => setActiveTab('feedback')}>
+              <XStack
+                backgroundColor={activeTab === 'feedback' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+              >
+                <Text color={activeTab === 'feedback' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.docFeedback')}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
+          {Platform.OS === 'web' && isTemplateConfigEnabled && (
+            <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
+              <XStack
+                backgroundColor="$subtleBackground"
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+                gap="$1.5"
+                alignItems="center"
+              >
+                <Ionicons name="construct-outline" size={16} color={theme.accent.val} />
+                <Text color="$color" fontWeight="600" fontSize="$3">
+                  {t('templateConfig.title')}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
         </XStack>
 
         {/* Users Tab — Stats + Search */}
@@ -332,7 +439,7 @@ export default function AdminScreen() {
       </YStack>
 
       {/* Analytics Tab */}
-      {activeTab === 'analytics' && (
+      {analyticsEnabled && activeTab === 'analytics' && (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
           {analyticsData ? (
             <FadeIn>
@@ -389,14 +496,7 @@ export default function AdminScreen() {
                     <Text fontWeight="600" color="$color" fontSize="$3" marginBottom="$2">
                       {t('admin.popularScreens')}
                     </Text>
-                    <YStack gap="$1">
-                      {analyticsData.popularScreens.map((s, i) => (
-                        <XStack key={s.screenName} justifyContent="space-between" paddingVertical="$1">
-                          <Text color="$color" fontSize="$2">{i + 1}. {s.screenName}</Text>
-                          <Text color="$mutedText" fontSize="$2">{s.views}</Text>
-                        </XStack>
-                      ))}
-                    </YStack>
+                    <ScreensBarChart data={analyticsData.popularScreens} />
                   </AppCard>
                 )}
               </YStack>
@@ -426,6 +526,53 @@ export default function AdminScreen() {
             ) : null
           }
         />
+      )}
+
+      {/* Doc Feedback Tab */}
+      {docFeedbackEnabled && activeTab === 'feedback' && (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+          {feedbackStats && feedbackStats.length > 0 ? (
+            <FadeIn>
+              <YStack gap="$3">
+                {feedbackStats.map((item) => {
+                  const total = item.likes + item.dislikes
+                  const pct = total > 0 ? Math.round((item.likes / total) * 100) : 0
+                  return (
+                    <AppCard key={item.pageId} animated={false}>
+                      <XStack alignItems="center" justifyContent="space-between">
+                        <YStack flex={1} gap="$1">
+                          <Text fontWeight="600" color="$color" fontSize="$3">
+                            {item.pageId}
+                          </Text>
+                          <XStack gap="$3" alignItems="center">
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons name="thumbs-up" size={14} color={theme.accent.val} />
+                              <Text fontSize="$2" color="$accent">{item.likes}</Text>
+                            </XStack>
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons name="thumbs-down" size={14} color="#EF4444" />
+                              <Text fontSize="$2" color="#EF4444">{item.dislikes}</Text>
+                            </XStack>
+                          </XStack>
+                        </YStack>
+                        <YStack alignItems="center">
+                          <Text fontSize="$6" fontWeight="bold" color={pct >= 50 ? '$accent' : '#EF4444'}>
+                            {pct}%
+                          </Text>
+                          <Text fontSize="$1" color="$mutedText">{t('admin.helpful')}</Text>
+                        </YStack>
+                      </XStack>
+                    </AppCard>
+                  )
+                })}
+              </YStack>
+            </FadeIn>
+          ) : (
+            <YStack alignItems="center" padding="$6">
+              <Text color="$mutedText">{loading ? t('common.loading') : t('admin.noFeedback')}</Text>
+            </YStack>
+          )}
+        </ScrollView>
       )}
 
       {/* Edit User Modal */}
@@ -495,14 +642,10 @@ export default function AdminScreen() {
                 <Text color="$color" fontSize="$3">
                   {FEATURE_LABELS[feature] ?? feature}
                 </Text>
-                <Switch
-                  size="$3"
+                <AppSwitch
                   checked={editFeatures.includes(feature)}
                   onCheckedChange={() => toggleFeature(feature)}
-                  backgroundColor={editFeatures.includes(feature) ? '$accent' : '$borderColor'}
-                >
-                  <Switch.Thumb {...{ animation: 'quick' } as any} />
-                </Switch>
+                />
               </XStack>
             ))}
           </YStack>

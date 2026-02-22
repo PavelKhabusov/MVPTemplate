@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from 'react-native'
 import { YStack, XStack, Text, H1, Separator, useTheme } from 'tamagui'
 import { Link, router } from 'expo-router'
@@ -5,13 +6,21 @@ import { useTranslation } from '@mvp/i18n'
 import { FadeIn, SlideIn } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAuthStore } from '@mvp/store'
 import { SignInForm } from '@mvp/auth'
+import { useTemplateFlag } from '@mvp/template-config'
 import { GoogleSignInButton, isGoogleAuthEnabled } from '../src/features/auth/GoogleSignInButton'
 
 export default function SignInScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const googleAuthVisible = useTemplateFlag('googleAuth', isGoogleAuthEnabled)
+
+  useEffect(() => {
+    if (isAuthenticated) router.replace('/settings')
+  }, [isAuthenticated])
 
   return (
     <KeyboardAvoidingView
@@ -36,7 +45,7 @@ export default function SignInScreen() {
 
           <SignInForm />
 
-          {isGoogleAuthEnabled && (
+          {googleAuthVisible && (
             <SlideIn from="bottom" delay={300}>
               <YStack width="100%" maxWidth={400} gap="$3">
                 <XStack alignItems="center" gap="$3">
@@ -49,7 +58,7 @@ export default function SignInScreen() {
             </SlideIn>
           )}
 
-          <SlideIn from="bottom" delay={isGoogleAuthEnabled ? 400 : 300}>
+          <SlideIn from="bottom" delay={googleAuthVisible ? 400 : 300}>
             <Text color="$mutedText" textAlign="center">
               {t('auth.noAccount')}{' '}
               <Link href="/sign-up">

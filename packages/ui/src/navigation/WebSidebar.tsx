@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Platform, StyleSheet } from 'react-native'
+import { Image, Platform, StyleSheet } from 'react-native'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { MotiView } from 'moti'
@@ -28,6 +28,8 @@ interface WebSidebarProps {
   currentPath: string
   onNavigate: (href: string) => void
   footer?: React.ReactNode | ((collapsed: boolean) => React.ReactNode)
+  logo?: any // Image source (require() or { uri })
+  title?: string
 }
 
 export function useIsMobileWeb() {
@@ -48,7 +50,7 @@ export function useIsMobileWeb() {
   return isMobile
 }
 
-export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSidebarProps) {
+export function WebSidebar({ items, currentPath, onNavigate, footer, logo, title = 'MVP Template' }: WebSidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const theme = useTheme()
   const isMobile = useIsMobileWeb()
@@ -129,24 +131,31 @@ export function WebSidebar({ items, currentPath, onNavigate, footer }: WebSideba
           marginBottom="$2"
           alignItems="center"
           gap="$3"
+          cursor="pointer"
+          hoverStyle={{ opacity: 0.8 }}
+          onPress={() => onNavigate('/landing')}
         >
-          <YStack
-            width={36}
-            height={36}
-            borderRadius={10}
-            alignItems="center"
-            justifyContent="center"
-            style={{
-              background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
-            }}
-          >
-            <Text color="white" fontWeight="bold" fontSize="$4">
-              M
-            </Text>
-          </YStack>
+          {logo ? (
+            <Image source={logo} style={{ width: 36, height: 36, borderRadius: 10 }} />
+          ) : (
+            <YStack
+              width={36}
+              height={36}
+              borderRadius={10}
+              alignItems="center"
+              justifyContent="center"
+              style={{
+                background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
+              }}
+            >
+              <Text color="white" fontWeight="bold" fontSize="$4">
+                M
+              </Text>
+            </YStack>
+          )}
           {!collapsed && (
             <Text fontWeight="bold" fontSize="$4" color="$color" numberOfLines={1}>
-              MVP App
+              {title}
             </Text>
           )}
         </XStack>
