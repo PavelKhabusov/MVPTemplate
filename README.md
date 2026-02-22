@@ -11,7 +11,7 @@ Production-ready monorepo template for cross-platform apps (iOS, Android, Web) w
 | **Animations** | Reanimated v4 + Moti |
 | **State** | Zustand v5 + MMKV + TanStack Query v5 |
 | **i18n** | i18next (EN/RU/ES/JA) |
-| **Backend** | Fastify v5 + Drizzle ORM + PostgreSQL 16 + Redis 7 |
+| **Backend** | Fastify v5 + Drizzle ORM v0.38 + PostgreSQL 16 + Redis 7 |
 | **Auth** | JWT (access 15min + refresh 30d) |
 | **Monorepo** | npm workspaces + Turborepo |
 
@@ -95,7 +95,9 @@ MVPTemplate/
 │   │   └── src/features/       # auth, settings, search, onboarding
 │   │
 │   └── backend/                # Fastify API
-│       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, ...
+│       ├── src/modules/        # auth, users, admin, push, notifications,
+│       │                       # payments, analytics, search, config,
+│       │                       # doc-feedback, email
 │       ├── src/database/       # Drizzle schema + migrations
 │       └── docker/             # Dockerfile + docker-compose
 │
@@ -118,6 +120,8 @@ MVPTemplate/
 
 Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 
+### Auth
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `POST` | `/auth/register` | — | Create account |
@@ -130,23 +134,41 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/auth/request-password-reset` | — | Request password reset |
 | `POST` | `/auth/reset-password` | — | Reset password with token |
 | `POST` | `/auth/resend-verification` | Yes | Resend verification email |
-| `PATCH` | `/users/profile` | Yes | Update profile (name, bio, phone, location) |
-| `GET` | `/users/settings` | Yes | Get settings |
-| `PUT` | `/users/settings` | Yes | Update settings |
-| `GET` | `/search?q=...` | Yes | Full-text search |
-| `GET` | `/notifications` | Yes | List notifications |
-| `PATCH` | `/notifications/:id/read` | Yes | Mark as read |
+
+### Users
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/users/profile` | Yes | Get current user profile |
+| `PATCH` | `/users/profile` | Yes | Update profile (name, bio, phone, location, birthday) |
+| `POST` | `/users/avatar` | Yes | Upload avatar (JPEG/PNG/WebP, max 5 MB) |
+| `DELETE` | `/users/avatar` | Yes | Remove avatar |
+| `GET` | `/users/settings` | Yes | Get user settings |
+| `PATCH` | `/users/settings` | Yes | Update user settings |
+
+### Search & Notifications
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/search?q=...` | Yes | Full-text search (rate limited: 20 req/min) |
+| `GET` | `/notifications` | Yes | List notifications (paginated) |
+| `PATCH` | `/notifications/:id/read` | Yes | Mark notification as read |
+| `POST` | `/notifications/read-all` | Yes | Mark all as read |
+| `GET` | `/sse/events` | Yes | SSE real-time stream |
+
+### Push Notifications
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
 | `POST` | `/push/register` | Yes | Register push token |
 | `DELETE` | `/push/unregister` | Yes | Remove push token |
-| `POST` | `/push/send` | Admin | Send notification to all/specific users |
+| `POST` | `/push/send` | Admin | Send notification to users |
 | `GET` | `/push/history` | Admin | Notification send history |
-| `POST` | `/notifications/read-all` | Yes | Mark all notifications as read |
-| `GET` | `/sse/events` | Yes | SSE stream |
-| `GET` | `/admin/users` | Admin | List users |
-| `GET` | `/admin/users/:id` | Admin | User details |
-| `PATCH` | `/admin/users/:id` | Admin | Update role/features |
-| `GET` | `/admin/stats` | Admin | User statistics |
-| `GET` | `/admin/config` | Admin | Available roles/features |
+
+### Payments
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
 | `GET` | `/payments/plans` | — | List active plans |
 | `POST` | `/payments/checkout` | Yes | Create checkout session |
 | `GET` | `/payments/subscription` | Yes | Current subscription |
@@ -155,20 +177,47 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/payments/webhook/stripe` | — | Stripe webhook |
 | `POST` | `/payments/webhook/yookassa` | — | YooKassa webhook |
 | `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
+| `GET` | `/payments/admin/plans` | Admin | List all plans (active + inactive) |
 | `POST` | `/payments/admin/plans` | Admin | Create a plan |
+| `PATCH` | `/payments/admin/plans/:id` | Admin | Update a plan |
+| `DELETE` | `/payments/admin/plans/:id` | Admin | Deactivate a plan |
+
+### Analytics & Feedback
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/analytics/events` | Yes | Ingest analytics events |
+| `GET` | `/analytics/dashboard` | Admin | Aggregated metrics (users, sessions, screens) |
+| `GET` | `/analytics/retention` | Admin | Cohort retention data |
+| `POST` | `/doc-feedback` | Yes | Submit doc page feedback |
+| `GET` | `/doc-feedback/:pageId` | Yes | Get user vote + page stats |
+| `GET` | `/doc-feedback/admin/stats` | Admin | All doc feedback stats |
+
+### Admin & Config
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/config/flags` | — | Public feature flags |
+| `GET` | `/admin/users` | Admin | List users |
+| `GET` | `/admin/users/:id` | Admin | User details |
+| `PATCH` | `/admin/users/:id` | Admin | Update role/features |
+| `GET` | `/admin/stats` | Admin | User statistics |
+| `GET` | `/admin/config` | Admin | Available roles/features |
 | `GET` | `/health` | — | Health check |
 
 ## Database Schema
 
 | Table | Key Fields |
 |-------|------------|
-| `users` | email, name, bio, phone, location, role, features (JSONB), email_verified |
+| `users` | email, name, avatar_url, bio, phone, location, birthday, role, features (JSONB), email_verified |
 | `refresh_tokens` | user_id, token_hash, expires_at |
 | `email_verification_tokens` | user_id, token_hash, expires_at, verified_at |
 | `password_reset_tokens` | user_id, token_hash, expires_at, used_at |
 | `push_tokens` | user_id, token, platform |
 | `notifications` | user_id, title, body, type, data (JSONB), is_read |
 | `user_settings` | user_id, settings (JSONB) |
+| `analytics_events` | user_id, event, properties (JSONB), screen, created_at |
+| `doc_feedback` | user_id, page_id, helpful (boolean) |
 | `plans` | name, price_amount, currency, interval, features (JSONB), provider, provider_price_id |
 | `subscriptions` | user_id, plan_id, status, provider, provider_subscription_id, current_period_start/end |
 | `payments` | user_id, amount, currency, status, type, provider, provider_payment_id |
@@ -192,7 +241,9 @@ PORT=3000
 HOST=0.0.0.0
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:8081
-GOOGLE_CLIENT_ID=                                # optional — enables Google sign-in
+ANALYTICS_ENABLED=true                               # internal analytics ingestion
+REQUEST_LOGGING=false                                 # log all HTTP requests
+GOOGLE_CLIENT_ID=                                     # optional — enables Google sign-in
 ```
 
 ### Mobile (`apps/mobile/.env`)
@@ -343,6 +394,7 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
    PAYMENTS_ENABLED=true
    YOOKASSA_SHOP_ID=your-shop-id
    YOOKASSA_SECRET_KEY=your-secret-key
+   YOOKASSA_WEBHOOK_SECRET=your-webhook-secret
    ```
    > Get keys from [YooKassa Dashboard](https://yookassa.ru/my). Set webhook URL to `https://your-domain.com/api/payments/webhook/yookassa`.
 
@@ -355,8 +407,8 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
 - **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe and YooKassa into a unified API
 - **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa) → webhook confirms payment
 - **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa)
-- **Admin panel**: Payments tab shows revenue stats, active subscriptions count, and recent payments
-- **User-facing**: pricing page at `/pricing`, subscription management in Settings → Manage Plan
+- **Admin panel**: Payments tab — create/edit/deactivate plans, revenue stats, active subscriptions, recent payments
+- **User-facing**: pricing page at `/pricing` with billing interval toggle, subscription management in Settings
 
 ### Payment Environment Variables
 
@@ -367,22 +419,24 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
 | `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret |
 | `YOOKASSA_SHOP_ID` | — | YooKassa shop ID |
 | `YOOKASSA_SECRET_KEY` | — | YooKassa secret key |
+| `YOOKASSA_WEBHOOK_SECRET` | — | YooKassa webhook signing secret |
 
 ## Features
 
 - **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in
-- **Admin Panel**: role/feature management, user stats, protected by middleware
-- **Profile**: name, bio, phone, location — inline editing
+- **Admin Panel**: role/feature management, user stats, plan CRUD, payment stats, doc feedback, notifications
+- **Profile**: name, bio, phone, location, birthday, avatar upload (JPEG/PNG/WebP, 5 MB)
 - **Navigation**: animated tab bar (mobile), collapsible sidebar with gradient indicator (web)
 - **Animations**: bounce, rotate, pop, wiggle, bell tab icons + FadeIn, SlideIn, ScalePress
 - **Themes**: light/dark with Tamagui, persisted in MMKV
 - **i18n**: 4 languages, auto-detection, manual switching
-- **Search**: PostgreSQL full-text with GIN index, debounced
-- **Push**: expo-notifications + expo-server-sdk
-- **SSE**: real-time events with auto-reconnect
-- **Analytics**: PostHog abstraction with feature flags
+- **Search**: PostgreSQL full-text with GIN index, debounced, rate limited
+- **Push**: expo-notifications + expo-server-sdk, SSE real-time events
+- **Analytics**: internal events ingestion + admin dashboard (active users, registrations, screens, retention cohorts), optional PostHog
+- **Documentation**: in-app docs engine with feedback system (helpful/not helpful)
+- **Config**: public `/config/flags` endpoint, frontend feature flag system with `useTemplateFlag`
 - **SEO**: meta tags, OG/Twitter cards, sitemap
-- **Payments**: Stripe + YooKassa, subscriptions & one-time, admin stats
+- **Payments**: Stripe + YooKassa, subscriptions & one-time, admin plan management, pricing page
 - **Security**: Helmet, CORS, Zod validation, rate limiting, no PII leaks
 
 ## Deployment
