@@ -121,7 +121,11 @@ export class YooKassaProvider implements PaymentProvider {
     // Cancellation is handled by updating our DB and stopping recurring charges.
   }
 
-  async getSubscription(_providerSubscriptionId: string) {
+  async getSubscription(_providerSubscriptionId: string): Promise<{
+    status: string
+    currentPeriodEnd: Date
+    cancelAtPeriodEnd: boolean
+  }> {
     // YooKassa subscriptions are managed locally in our database.
     throw new Error('YooKassa subscriptions are managed locally')
   }

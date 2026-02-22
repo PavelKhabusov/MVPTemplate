@@ -95,10 +95,10 @@ export class StripeProvider implements PaymentProvider {
       case 'invoice.paid': {
         const invoice = event.data.object as Stripe.Invoice
         const period = invoice.lines.data[0]?.period
+        const subId = invoice.parent?.subscription_details?.subscription
         return {
           type: 'subscription.renewed',
-          providerSubscriptionId: invoice.subscription as string,
-          providerPaymentId: invoice.payment_intent as string,
+          providerSubscriptionId: typeof subId === 'string' ? subId : subId?.id,
           amount: invoice.amount_paid,
           currency: invoice.currency,
           currentPeriodStart: period ? new Date(period.start * 1000) : undefined,
@@ -109,13 +109,14 @@ export class StripeProvider implements PaymentProvider {
 
       case 'customer.subscription.updated': {
         const sub = event.data.object as Stripe.Subscription
+        const item = sub.items.data[0]
         return {
           type: 'subscription.updated',
           providerSubscriptionId: sub.id,
           status: sub.status,
           cancelAtPeriodEnd: sub.cancel_at_period_end,
-          currentPeriodStart: new Date(sub.current_period_start * 1000),
-          currentPeriodEnd: new Date(sub.current_period_end * 1000),
+          currentPeriodStart: item ? new Date(item.current_period_start * 1000) : undefined,
+          currentPeriodEnd: item ? new Date(item.current_period_end * 1000) : undefined,
           userId: sub.metadata?.userId,
           planId: sub.metadata?.planId,
           rawEvent: event,
@@ -148,10 +149,13 @@ export class StripeProvider implements PaymentProvider {
   }
 
   async getSubscription(providerSubscriptionId: string) {
-    const sub = await this.stripe.subscriptions.retrieve(providerSubscriptionId)
+    const sub = await this.stripe.subscriptions.retrieve(providerSubscriptionId, {
+      expand: ['items'],
+    })
+    const item = sub.items.data[0]
     return {
       status: sub.status,
-      currentPeriodEnd: new Date(sub.current_period_end * 1000),
+      currentPeriodEnd: item ? new Date(item.current_period_end * 1000) : new Date(),
       cancelAtPeriodEnd: sub.cancel_at_period_end,
     }
   }

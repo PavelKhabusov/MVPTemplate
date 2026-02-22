@@ -94,7 +94,7 @@ MVPTemplate/
 │   │   └── src/features/       # auth, settings, search, onboarding
 │   │
 │   └── backend/                # Fastify API
-│       ├── src/modules/        # auth, users, admin, notifications, push, search, settings
+│       ├── src/modules/        # auth, users, admin, notifications, push, search, payments
 │       ├── src/database/       # Drizzle schema + migrations
 │       └── docker/             # Dockerfile + docker-compose
 │
@@ -103,6 +103,7 @@ MVPTemplate/
 │   ├── store/                  # Zustand stores
 │   ├── i18n/                   # 4 locales
 │   ├── lib/                    # MMKV, secure storage
+│   ├── payments/               # Payment types, hooks, components
 │   └── analytics/              # PostHog abstraction
 │
 └── scripts/                    # PowerShell setup scripts
@@ -141,6 +142,15 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `PATCH` | `/admin/users/:id` | Admin | Update role/features |
 | `GET` | `/admin/stats` | Admin | User statistics |
 | `GET` | `/admin/config` | Admin | Available roles/features |
+| `GET` | `/payments/plans` | — | List active plans |
+| `POST` | `/payments/checkout` | Yes | Create checkout session |
+| `GET` | `/payments/subscription` | Yes | Current subscription |
+| `POST` | `/payments/cancel` | Yes | Cancel subscription |
+| `GET` | `/payments/history` | Yes | Payment history (paginated) |
+| `POST` | `/payments/webhook/stripe` | — | Stripe webhook |
+| `POST` | `/payments/webhook/yookassa` | — | YooKassa webhook |
+| `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
+| `POST` | `/payments/admin/plans` | Admin | Create a plan |
 | `GET` | `/health` | — | Health check |
 
 ## Database Schema
@@ -154,6 +164,9 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `push_tokens` | user_id, token, platform |
 | `notifications` | user_id, title, body, type, data (JSONB), is_read |
 | `user_settings` | user_id, settings (JSONB) |
+| `plans` | name, price_amount, currency, interval, features (JSONB), provider, provider_price_id |
+| `subscriptions` | user_id, plan_id, status, provider, provider_subscription_id, current_period_start/end |
+| `payments` | user_id, amount, currency, status, type, provider, provider_payment_id |
 
 Roles: `user` (default) | `moderator` | `admin`
 
@@ -303,6 +316,53 @@ Push notifications are disabled by default. Enabling requires an Expo access tok
 - SSE (real-time events) works only on web; native uses push notifications
 - `EXPO_ACCESS_TOKEN` is optional for development but recommended for production
 
+## Payments (Optional)
+
+Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two providers: **Stripe** (international) and **YooKassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
+
+### Setup
+
+1. Set `PAYMENTS_ENABLED=true` in `apps/backend/.env`
+2. Configure at least one provider:
+
+   **Stripe:**
+   ```env
+   PAYMENTS_ENABLED=true
+   STRIPE_SECRET_KEY=sk_test_xxx
+   STRIPE_WEBHOOK_SECRET=whsec_xxx
+   ```
+   > Get keys from [Stripe Dashboard](https://dashboard.stripe.com/apikeys). For webhooks, use `stripe listen --forward-to localhost:3000/api/payments/webhook/stripe` during development.
+
+   **YooKassa:**
+   ```env
+   PAYMENTS_ENABLED=true
+   YOOKASSA_SHOP_ID=your-shop-id
+   YOOKASSA_SECRET_KEY=your-secret-key
+   ```
+   > Get keys from [YooKassa Dashboard](https://yookassa.ru/my). Set webhook URL to `https://your-domain.com/api/payments/webhook/yookassa`.
+
+3. Run `npm run db:push -w apps/backend` to create the `plans`, `subscriptions`, and `payments` tables
+4. Restart the backend — the `payments` feature flag activates automatically
+5. Create plans via the admin panel or `POST /api/payments/admin/plans`
+
+### How It Works
+
+- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe and YooKassa into a unified API
+- **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa) → webhook confirms payment
+- **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa)
+- **Admin panel**: Payments tab shows revenue stats, active subscriptions count, and recent payments
+- **User-facing**: pricing page at `/pricing`, subscription management in Settings → Manage Plan
+
+### Payment Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PAYMENTS_ENABLED` | `false` | Enable/disable payments module |
+| `STRIPE_SECRET_KEY` | — | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret |
+| `YOOKASSA_SHOP_ID` | — | YooKassa shop ID |
+| `YOOKASSA_SECRET_KEY` | — | YooKassa secret key |
+
 ## Features
 
 - **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in
@@ -317,6 +377,7 @@ Push notifications are disabled by default. Enabling requires an Expo access tok
 - **SSE**: real-time events with auto-reconnect
 - **Analytics**: PostHog abstraction with feature flags
 - **SEO**: meta tags, OG/Twitter cards, sitemap
+- **Payments**: Stripe + YooKassa, subscriptions & one-time, admin stats
 - **Security**: Helmet, CORS, Zod validation, rate limiting, no PII leaks
 
 ## Deployment
