@@ -132,7 +132,9 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `PATCH` | `/notifications/:id/read` | Yes | Mark as read |
 | `POST` | `/push/register` | Yes | Register push token |
 | `DELETE` | `/push/unregister` | Yes | Remove push token |
-| `POST` | `/push/send` | Yes | Send notification |
+| `POST` | `/push/send` | Admin | Send notification to all/specific users |
+| `GET` | `/push/history` | Admin | Notification send history |
+| `POST` | `/notifications/read-all` | Yes | Mark all notifications as read |
 | `GET` | `/sse/events` | Yes | SSE stream |
 | `GET` | `/admin/users` | Admin | List users |
 | `GET` | `/admin/users/:id` | Admin | User details |
@@ -263,6 +265,43 @@ Email functionality is disabled by default (`EMAIL_ENABLED=false`). When disable
 - **Password reset** flow (forgot password → email link → new password)
 - **Welcome email** after successful verification
 - Templates in 4 languages (EN/RU/ES/JA), inline-styled for email clients
+
+## Push Notifications (Optional)
+
+Push notifications are disabled by default. Enabling requires an Expo access token.
+
+### Setup
+
+1. Create an account at [expo.dev](https://expo.dev) (or sign in)
+2. Go to **Settings** → **Access tokens** → **Create Token**
+3. Set `EXPO_ACCESS_TOKEN` in `apps/backend/.env`:
+
+   ```env
+   EXPO_ACCESS_TOKEN=your-expo-access-token
+   ```
+
+4. Restart the backend — the `pushNotifications` feature flag activates automatically
+
+### How It Works
+
+- **Device registration**: on login, the app calls `registerForPushNotifications()` which requests permissions and sends the Expo push token to `POST /api/push/register`
+- **Sending**: admin panel → Notify tab → enter title/body → Send to All. Calls `POST /api/push/send` which creates notification records, sends push via Expo, and emits SSE events
+- **Receiving**: notifications appear in the system tray (native) and in the in-app Notification Center (Settings → Notifications)
+- **Real-time**: SSE connection auto-refreshes the notification list when new notifications arrive (web only; native uses push)
+- **User settings**: users can toggle push notifications on/off in Settings → Notifications. Disabling calls `DELETE /api/push/unregister` to remove device tokens
+
+### Push Notification Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EXPO_ACCESS_TOKEN` | — | Expo access token (enables push feature) |
+
+### Limitations
+
+- Push notifications require a **physical device** (not simulator/emulator)
+- Expo Go has limited push support — use a **dev build** for full functionality
+- SSE (real-time events) works only on web; native uses push notifications
+- `EXPO_ACCESS_TOKEN` is optional for development but recommended for production
 
 ## Features
 
