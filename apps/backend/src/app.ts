@@ -20,6 +20,7 @@ import { adminRoutes } from './modules/admin/admin.routes'
 import { analyticsRoutes } from './modules/analytics/analytics.routes'
 import { docFeedbackRoutes } from './modules/doc-feedback/doc-feedback.routes'
 import { sseRoutes } from './realtime/sse'
+import { configRoutes } from './modules/config/config.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -110,6 +111,7 @@ export async function buildApp() {
     await app.register(analyticsRoutes, { prefix: '/api/analytics' })
   }
   await app.register(docFeedbackRoutes, { prefix: '/api/doc-feedback' })
+  await app.register(configRoutes, { prefix: '/api/config' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

@@ -21,7 +21,7 @@ import { getPageById } from '@mvp/docs'
 import { queryClient } from '../src/services/query-client'
 import { AuthProvider } from '@mvp/auth'
 import { authApi } from '../src/services/auth'
-import { getAccessToken } from '../src/services/api'
+import { api, getAccessToken } from '../src/services/api'
 import { registerForPushNotifications } from '../src/services/push'
 import { connectSSE, disconnectSSE } from '../src/services/sse'
 
@@ -271,6 +271,22 @@ export default function RootLayout() {
 
   useEffect(() => {
     authApi.initialize()
+  }, [])
+
+  // Sync backend feature flags to frontend on startup
+  const setFlag = useTemplateConfigStore((s) => s.setFlag)
+
+  useEffect(() => {
+    api.get('/config/flags').then((res) => {
+      const flags = res.data?.data
+      if (flags && typeof flags === 'object') {
+        for (const [key, value] of Object.entries(flags)) {
+          if (typeof value === 'boolean') {
+            setFlag(key, value)
+          }
+        }
+      }
+    }).catch(() => {})
   }, [])
 
   // Register push notifications and connect SSE when authenticated
