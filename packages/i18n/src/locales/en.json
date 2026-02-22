@@ -127,7 +127,16 @@
     "payments": "Payments",
     "revenue": "Revenue",
     "activeSubscriptions": "Active Subscriptions",
-    "recentPayments": "Recent Payments"
+    "recentPayments": "Recent Payments",
+    "createPlan": "Create Plan",
+    "planCreated": "Plan created successfully",
+    "planName": "Plan name",
+    "planDescription": "Description (optional)",
+    "planPrice": "Price (e.g. 9.99)",
+    "planInterval": "Billing interval",
+    "planProvider": "Payment provider",
+    "planProviderPriceId": "Provider Price ID (optional)",
+    "planFeaturesPlaceholder": "Features (one per line)"
   },
   "notifications": {
     "title": "Notifications",

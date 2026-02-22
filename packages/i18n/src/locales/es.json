@@ -127,7 +127,16 @@
     "payments": "Pagos",
     "revenue": "Ingresos",
     "activeSubscriptions": "Suscripciones Activas",
-    "recentPayments": "Pagos Recientes"
+    "recentPayments": "Pagos Recientes",
+    "createPlan": "Crear Plan",
+    "planCreated": "Plan creado exitosamente",
+    "planName": "Nombre del plan",
+    "planDescription": "Descripción (opcional)",
+    "planPrice": "Precio (ej. 9.99)",
+    "planInterval": "Intervalo de facturación",
+    "planProvider": "Proveedor de pago",
+    "planProviderPriceId": "ID del precio del proveedor (opcional)",
+    "planFeaturesPlaceholder": "Características (una por línea)"
   },
   "notifications": {
     "title": "Notificaciones",

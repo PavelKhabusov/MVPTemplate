@@ -127,7 +127,16 @@
     "payments": "支払い",
     "revenue": "収益",
     "activeSubscriptions": "アクティブな購読",
-    "recentPayments": "最近の支払い"
+    "recentPayments": "最近の支払い",
+    "createPlan": "プランを作成",
+    "planCreated": "プランが正常に作成されました",
+    "planName": "プラン名",
+    "planDescription": "説明（任意）",
+    "planPrice": "価格（例: 9.99）",
+    "planInterval": "請求間隔",
+    "planProvider": "決済プロバイダー",
+    "planProviderPriceId": "プロバイダー価格ID（任意）",
+    "planFeaturesPlaceholder": "機能（1行に1つ）"
   },
   "notifications": {
     "title": "通知",

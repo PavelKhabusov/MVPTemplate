@@ -200,13 +200,64 @@ function PaymentsAdminTab() {
   } | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  // Create plan form state
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [planName, setPlanName] = useState('')
+  const [planDescription, setPlanDescription] = useState('')
+  const [planPrice, setPlanPrice] = useState('')
+  const [planCurrency, setPlanCurrency] = useState('usd')
+  const [planInterval, setPlanInterval] = useState<'month' | 'year' | 'one_time'>('month')
+  const [planProvider, setPlanProvider] = useState<'stripe' | 'yookassa'>('stripe')
+  const [planProviderPriceId, setPlanProviderPriceId] = useState('')
+  const [planFeatures, setPlanFeatures] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  const fetchStats = useCallback(() => {
+    setLoading(true)
     api
       .get('/payments/admin/stats')
       .then((res) => setStats(res.data.data))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
+
+  const handleCreatePlan = async () => {
+    if (!planName.trim()) return
+    setCreating(true)
+    try {
+      const priceAmount = Math.round(parseFloat(planPrice || '0') * 100)
+      await api.post('/payments/admin/plans', {
+        name: planName.trim(),
+        description: planDescription.trim() || undefined,
+        priceAmount,
+        currency: planCurrency.trim().toLowerCase() || 'usd',
+        interval: planInterval,
+        provider: planProvider,
+        providerPriceId: planProviderPriceId.trim() || undefined,
+        features: planFeatures
+          .split('\n')
+          .map((f) => f.trim())
+          .filter(Boolean),
+      })
+      // Reset form
+      setPlanName('')
+      setPlanDescription('')
+      setPlanPrice('')
+      setPlanProviderPriceId('')
+      setPlanFeatures('')
+      setShowCreateForm(false)
+      fetchStats()
+      Alert.alert(t('admin.planCreated'))
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
+    } finally {
+      setCreating(false)
+    }
+  }
 
   const formatPrice = (amount: number, currency: string) => {
     const value = amount / 100
@@ -220,6 +271,12 @@ function PaymentsAdminTab() {
       return `${value} ${currency.toUpperCase()}`
     }
   }
+
+  const INTERVALS: Array<{ value: 'month' | 'year' | 'one_time'; label: string }> = [
+    { value: 'month', label: t('payments.perMonth') },
+    { value: 'year', label: t('payments.perYear') },
+    { value: 'one_time', label: t('payments.one_time') },
+  ]
 
   return (
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
@@ -251,6 +308,175 @@ function PaymentsAdminTab() {
                   </YStack>
                 </AppCard>
               </XStack>
+
+              {/* Create Plan */}
+              <AppCard animated={false}>
+                <ScalePress onPress={() => setShowCreateForm((v) => !v)}>
+                  <XStack alignItems="center" justifyContent="space-between">
+                    <Text fontWeight="600" color="$color" fontSize="$4">
+                      {t('admin.createPlan')}
+                    </Text>
+                    <Ionicons
+                      name={showCreateForm ? 'chevron-up' : 'add-circle-outline'}
+                      size={22}
+                      color={theme.accent.val}
+                    />
+                  </XStack>
+                </ScalePress>
+
+                {showCreateForm && (
+                  <YStack gap="$3" marginTop="$3">
+                    <Input
+                      value={planName}
+                      onChangeText={setPlanName}
+                      placeholder={t('admin.planName')}
+                      placeholderTextColor={theme.mutedText.val as any}
+                      backgroundColor="$subtleBackground"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      borderRadius="$3"
+                      paddingHorizontal="$3"
+                      height={42}
+                      fontSize="$3"
+                      color="$color"
+                    />
+                    <Input
+                      value={planDescription}
+                      onChangeText={setPlanDescription}
+                      placeholder={t('admin.planDescription')}
+                      placeholderTextColor={theme.mutedText.val as any}
+                      backgroundColor="$subtleBackground"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      borderRadius="$3"
+                      paddingHorizontal="$3"
+                      height={42}
+                      fontSize="$3"
+                      color="$color"
+                    />
+                    <XStack gap="$2">
+                      <Input
+                        flex={1}
+                        value={planPrice}
+                        onChangeText={setPlanPrice}
+                        placeholder={t('admin.planPrice')}
+                        placeholderTextColor={theme.mutedText.val as any}
+                        backgroundColor="$subtleBackground"
+                        borderWidth={1}
+                        borderColor="$borderColor"
+                        borderRadius="$3"
+                        paddingHorizontal="$3"
+                        height={42}
+                        fontSize="$3"
+                        color="$color"
+                        keyboardType="decimal-pad"
+                      />
+                      <Input
+                        width={80}
+                        value={planCurrency}
+                        onChangeText={setPlanCurrency}
+                        placeholder="usd"
+                        placeholderTextColor={theme.mutedText.val as any}
+                        backgroundColor="$subtleBackground"
+                        borderWidth={1}
+                        borderColor="$borderColor"
+                        borderRadius="$3"
+                        paddingHorizontal="$3"
+                        height={42}
+                        fontSize="$3"
+                        color="$color"
+                      />
+                    </XStack>
+
+                    {/* Interval selector */}
+                    <YStack gap="$1.5">
+                      <Text fontSize="$2" color="$mutedText">{t('admin.planInterval')}</Text>
+                      <XStack gap="$2" flexWrap="wrap">
+                        {INTERVALS.map((opt) => (
+                          <ScalePress key={opt.value} onPress={() => setPlanInterval(opt.value)}>
+                            <XStack
+                              backgroundColor={planInterval === opt.value ? '$accent' : '$subtleBackground'}
+                              paddingHorizontal="$3"
+                              paddingVertical="$2"
+                              borderRadius="$3"
+                              borderWidth={1}
+                              borderColor={planInterval === opt.value ? '$accent' : '$borderColor'}
+                            >
+                              <Text
+                                color={planInterval === opt.value ? 'white' : '$color'}
+                                fontWeight="600"
+                                fontSize="$2"
+                              >
+                                {opt.label}
+                              </Text>
+                            </XStack>
+                          </ScalePress>
+                        ))}
+                      </XStack>
+                    </YStack>
+
+                    {/* Provider selector */}
+                    <YStack gap="$1.5">
+                      <Text fontSize="$2" color="$mutedText">{t('admin.planProvider')}</Text>
+                      <XStack gap="$2">
+                        {(['stripe', 'yookassa'] as const).map((p) => (
+                          <ScalePress key={p} onPress={() => setPlanProvider(p)}>
+                            <XStack
+                              backgroundColor={planProvider === p ? '$accent' : '$subtleBackground'}
+                              paddingHorizontal="$3"
+                              paddingVertical="$2"
+                              borderRadius="$3"
+                              borderWidth={1}
+                              borderColor={planProvider === p ? '$accent' : '$borderColor'}
+                            >
+                              <Text
+                                color={planProvider === p ? 'white' : '$color'}
+                                fontWeight="600"
+                                fontSize="$2"
+                              >
+                                {p === 'stripe' ? 'Stripe' : 'YooKassa'}
+                              </Text>
+                            </XStack>
+                          </ScalePress>
+                        ))}
+                      </XStack>
+                    </YStack>
+
+                    <Input
+                      value={planProviderPriceId}
+                      onChangeText={setPlanProviderPriceId}
+                      placeholder={t('admin.planProviderPriceId')}
+                      placeholderTextColor={theme.mutedText.val as any}
+                      backgroundColor="$subtleBackground"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      borderRadius="$3"
+                      paddingHorizontal="$3"
+                      height={42}
+                      fontSize="$3"
+                      color="$color"
+                    />
+                    <Input
+                      value={planFeatures}
+                      onChangeText={setPlanFeatures}
+                      placeholder={t('admin.planFeaturesPlaceholder')}
+                      placeholderTextColor={theme.mutedText.val as any}
+                      backgroundColor="$subtleBackground"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      borderRadius="$3"
+                      paddingHorizontal="$3"
+                      height={80}
+                      fontSize="$3"
+                      color="$color"
+                      multiline
+                    />
+                    <AppButton onPress={handleCreatePlan} disabled={creating || !planName.trim()}>
+                      {creating ? t('common.loading') : t('admin.createPlan')}
+                    </AppButton>
+                  </YStack>
+                )}
+              </AppCard>
 
               <AppCard animated={false}>
                 <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">

@@ -127,7 +127,16 @@
     "payments": "Платежи",
     "revenue": "Доход",
     "activeSubscriptions": "Активные подписки",
-    "recentPayments": "Последние платежи"
+    "recentPayments": "Последние платежи",
+    "createPlan": "Создать тариф",
+    "planCreated": "Тариф успешно создан",
+    "planName": "Название тарифа",
+    "planDescription": "Описание (необязательно)",
+    "planPrice": "Цена (напр. 9.99)",
+    "planInterval": "Период оплаты",
+    "planProvider": "Платёжный провайдер",
+    "planProviderPriceId": "ID цены провайдера (необязательно)",
+    "planFeaturesPlaceholder": "Возможности (по одной на строку)"
   },
   "notifications": {
     "title": "Уведомления",
