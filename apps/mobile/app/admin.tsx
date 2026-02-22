@@ -347,62 +347,63 @@ export default function AdminScreen() {
     <YStack flex={1} backgroundColor="$background">
       <YStack padding="$4" paddingTop={Platform.OS === 'web' ? '$4' : 16} gap="$3">
         {/* Tab Switcher */}
-        <XStack gap="$2">
-          {analyticsEnabled && (
-            <ScalePress onPress={() => setActiveTab('analytics')}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <XStack gap="$2">
+            {analyticsEnabled && (
+              <ScalePress onPress={() => setActiveTab('analytics')}>
+                <XStack
+                  backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.analytics')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            <ScalePress onPress={() => setActiveTab('users')}>
               <XStack
-                backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
+                backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
                 paddingHorizontal="$3"
                 paddingVertical="$2"
                 borderRadius="$3"
               >
-                <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.analytics')}
+                <Text color={activeTab === 'users' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.users')}
                 </Text>
               </XStack>
             </ScalePress>
-          )}
-          <ScalePress onPress={() => setActiveTab('users')}>
-            <XStack
-              backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              borderRadius="$3"
-            >
-              <Text color={activeTab === 'users' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                {t('admin.users')}
-              </Text>
-            </XStack>
-          </ScalePress>
-          {docFeedbackEnabled && (
-            <ScalePress onPress={() => setActiveTab('feedback')}>
-              <XStack
-                backgroundColor={activeTab === 'feedback' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-              >
-                <Text color={activeTab === 'feedback' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.docFeedback')}
-                </Text>
-              </XStack>
-            </ScalePress>
-          )}
-          {pushEnabled && (
-            <ScalePress onPress={() => setActiveTab('notify')}>
-              <XStack
-                backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-              >
-                <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.sendNotification')}
-                </Text>
-              </XStack>
-            </ScalePress>
-          )}
-          {Platform.OS === 'web' && isTemplateConfigEnabled && (
+            {docFeedbackEnabled && (
+              <ScalePress onPress={() => setActiveTab('feedback')}>
+                <XStack
+                  backgroundColor={activeTab === 'feedback' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'feedback' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.docFeedback')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            {pushEnabled && (
+              <ScalePress onPress={() => setActiveTab('notify')}>
+                <XStack
+                  backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.sendNotification')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            {Platform.OS === 'web' && isTemplateConfigEnabled && (
             <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
               <XStack
                 backgroundColor="$subtleBackground"
@@ -419,7 +420,8 @@ export default function AdminScreen() {
               </XStack>
             </ScalePress>
           )}
-        </XStack>
+          </XStack>
+        </ScrollView>
 
         {/* Users Tab — Stats + Search */}
         {activeTab === 'users' && (
