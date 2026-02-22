@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, XStack, YStack, Text, useTheme } from 'tamagui'
-import { forceUpdateThemes } from '@tamagui/web'
 import { Ionicons } from '@expo/vector-icons'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -10,7 +9,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
-import { TemplateConfigSidebar } from '@mvp/template-config'
+import { TemplateConfigSidebar, applyColorScheme, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -22,7 +21,9 @@ import { getPageById } from '@mvp/docs'
 import { queryClient } from '../src/services/query-client'
 import { AuthProvider } from '@mvp/auth'
 import { authApi } from '../src/services/auth'
-import { getAccessToken } from '../src/services/api'
+import { api, getAccessToken } from '../src/services/api'
+import { registerForPushNotifications } from '../src/services/push'
+import { connectSSE, disconnectSSE } from '../src/services/sse'
 
 // Moti's declarative API writes shared values during render by design — disable strict mode
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false })
@@ -88,6 +89,7 @@ function PageSEO() {
 
 function RootNavigator() {
   const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
+  const theme = useTheme()
   const { t } = useTranslation()
   const pathname = usePathname()
 
@@ -103,7 +105,7 @@ function RootNavigator() {
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.tint,
+        headerTintColor: theme.accent.val,
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
       }}
@@ -127,6 +129,7 @@ function RootNavigator() {
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="terms" options={{ title: t('settings.terms'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="pricing" options={{ title: t('payments.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="landing" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
@@ -174,7 +177,14 @@ function WebRootLayout() {
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
-    return <Slot />
+    return (
+      <XStack flex={1} style={{ height: '100vh' } as any}>
+        <YStack flex={1} style={{ overflow: 'auto' } as any}>
+          <Slot />
+        </YStack>
+        {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
+      </XStack>
+    )
   }
 
   const navItems = [
@@ -265,14 +275,44 @@ export default function RootLayout() {
     authApi.initialize()
   }, [])
 
-  // Force all Tamagui theme consumers to re-render when the resolved theme changes.
-  // TamaguiProvider's internal Theme updates CSS variables, but components using
-  // useTheme().val in inline styles may not pick up changes without this.
+  // Sync backend feature flags to frontend on startup
+  const setFlag = useTemplateConfigStore((s) => s.setFlag)
+
+  useEffect(() => {
+    api.get('/config/flags').then((res) => {
+      const flags = res.data?.data
+      if (flags && typeof flags === 'object') {
+        for (const [key, value] of Object.entries(flags)) {
+          if (typeof value === 'boolean') {
+            setFlag(key, value)
+          }
+        }
+      }
+    }).catch(() => {})
+  }, [])
+
+  // Register push notifications and connect SSE when authenticated
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (pushEnabled) {
+        registerForPushNotifications().catch(() => {})
+      }
+      connectSSE()
+    }
+    return () => disconnectSSE()
+  }, [isAuthenticated, pushEnabled])
+
+  // Apply persisted color scheme and force theme update when theme or color scheme changes.
+  const templateColorScheme = useTemplateConfigStore((s) => s.colorScheme)
+
   useLayoutEffect(() => {
     if (Platform.OS === 'web') {
-      forceUpdateThemes()
+      applyColorScheme(templateColorScheme ?? DEFAULT_SCHEME_KEY)
     }
-  }, [resolvedTheme])
+  }, [resolvedTheme, templateColorScheme])
 
   const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 

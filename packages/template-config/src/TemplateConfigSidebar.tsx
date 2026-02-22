@@ -9,6 +9,7 @@ import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
+import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
 
 function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value: boolean; onToggle: () => void; action?: { label: string; onPress: () => void } }) {
   const theme = useTheme()
@@ -75,6 +76,26 @@ function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value:
   )
 }
 
+function buildThemeOutput(schemeKey: string | null): string | null {
+  if (!schemeKey || schemeKey === DEFAULT_SCHEME_KEY) return null
+  const scheme = COLOR_SCHEMES.find((s) => s.key === schemeKey)
+  if (!scheme) return null
+
+  return [
+    '// tamagui.config.ts — light theme',
+    `accent: '${scheme.light.accent}',`,
+    `accentGradientStart: '${scheme.light.accentGradientStart}',`,
+    `accentGradientEnd: '${scheme.light.accentGradientEnd}',`,
+    `secondary: '${scheme.light.secondary}',`,
+    '',
+    '// tamagui.config.ts — dark theme',
+    `accent: '${scheme.dark.accent}',`,
+    `accentGradientStart: '${scheme.dark.accentGradientStart}',`,
+    `accentGradientEnd: '${scheme.dark.accentGradientEnd}',`,
+    `secondary: '${scheme.dark.secondary}',`,
+  ].join('\n')
+}
+
 function buildEnvOutput(overrides: Record<string, boolean>): string {
   const lines: string[] = ['# Template Configuration']
 
@@ -106,11 +127,14 @@ export function TemplateConfigSidebar() {
   const setSidebarOpen = useTemplateConfigStore((s) => s.setSidebarOpen)
   const overrides = useTemplateConfigStore((s) => s.overrides)
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
+  const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
+  const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
 
   const envOutput = useMemo(() => buildEnvOutput(overrides), [overrides])
+  const themeOutput = useMemo(() => buildThemeOutput(colorScheme), [colorScheme])
 
   if (Platform.OS !== 'web') return null
   if (isMobile) return null
@@ -122,7 +146,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null
 
   const handleCopy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -176,6 +200,50 @@ export function TemplateConfigSidebar() {
         <Text fontSize="$1" color="$mutedText" paddingHorizontal="$3" marginBottom="$3" lineHeight={16}>
           {t('templateConfig.description')}
         </Text>
+
+        {/* Color Scheme */}
+        <Text
+          fontSize={11}
+          fontWeight="700"
+          color="$mutedText"
+          textTransform="uppercase"
+          letterSpacing={1}
+          paddingHorizontal="$3"
+          marginBottom="$2"
+        >
+          {t('templateConfig.colorScheme')}
+        </Text>
+        <XStack paddingHorizontal="$3" gap="$2.5" marginBottom="$3" flexWrap="wrap">
+          {COLOR_SCHEMES.map((scheme) => {
+            const isSelected = (colorScheme ?? DEFAULT_SCHEME_KEY) === scheme.key
+            return (
+              <Pressable
+                key={scheme.key}
+                onPress={() => {
+                  setColorScheme(scheme.key)
+                  applyColorScheme(scheme.key)
+                }}
+              >
+                <YStack
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  borderWidth={2}
+                  borderColor={isSelected ? '$color' : 'transparent'}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <YStack
+                    width={24}
+                    height={24}
+                    borderRadius={12}
+                    style={{ backgroundColor: scheme.swatch } as any}
+                  />
+                </YStack>
+              </Pressable>
+            )
+          })}
+        </XStack>
 
         {/* Frontend Flags */}
         <Text
@@ -234,6 +302,51 @@ export function TemplateConfigSidebar() {
           ))}
         </YStack>
 
+        {/* Theme Output */}
+        {themeOutput && (
+          <YStack paddingHorizontal="$3" gap="$2" marginBottom="$3">
+            <XStack alignItems="center" justifyContent="space-between">
+              <Text fontSize={11} fontWeight="700" color="$mutedText" textTransform="uppercase" letterSpacing={1}>
+                tamagui.config.ts
+              </Text>
+              <Pressable onPress={() => {
+                if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                  navigator.clipboard.writeText(themeOutput)
+                }
+              }}>
+                <XStack
+                  alignItems="center"
+                  gap="$1"
+                  paddingHorizontal="$2"
+                  paddingVertical="$1"
+                  borderRadius="$2"
+                  hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+                >
+                  <Ionicons name="copy-outline" size={12} color={theme.mutedText.val} />
+                  <Text fontSize={11} color="$mutedText">
+                    {t('templateConfig.copy')}
+                  </Text>
+                </XStack>
+              </Pressable>
+            </XStack>
+            <YStack
+              backgroundColor="$subtleBackground"
+              borderRadius="$2"
+              borderWidth={1}
+              borderColor="$borderColor"
+              padding="$2"
+            >
+              <Text
+                fontSize={11}
+                color="$color"
+                style={{ fontFamily: 'monospace', whiteSpace: 'pre', userSelect: 'all' } as any}
+              >
+                {themeOutput}
+              </Text>
+            </YStack>
+          </YStack>
+        )}
+
         {/* .env Output */}
         <YStack paddingHorizontal="$3" gap="$2">
           <XStack alignItems="center" justifyContent="space-between">
@@ -276,7 +389,7 @@ export function TemplateConfigSidebar() {
         {/* Reset Button */}
         {hasOverrides && (
           <YStack paddingHorizontal="$3" marginTop="$3">
-            <Pressable onPress={resetAll}>
+            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY) }}>
               <XStack
                 alignItems="center"
                 justifyContent="center"

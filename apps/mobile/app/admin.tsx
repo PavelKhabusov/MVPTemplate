@@ -6,7 +6,14 @@ import { useTranslation } from '@mvp/i18n'
 import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
-import { useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
+import {
+  useTemplateConfigStore,
+  useTemplateFlag,
+  TEMPLATE_FLAGS,
+  COLOR_SCHEMES,
+  DEFAULT_SCHEME_KEY,
+  applyColorScheme,
+} from '@mvp/template-config'
 import { api } from '../src/services/api'
 
 const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
@@ -172,19 +179,597 @@ function SimpleBarChart({ data }: { data: Array<{ day: string; events: number; u
   )
 }
 
+interface AdminPlan {
+  id: string
+  name: string
+  description: string | null
+  priceAmount: number
+  currency: string
+  interval: string
+  features: string[]
+  provider: string
+  providerPriceId: string | null
+  isActive: boolean
+  sortOrder: number
+}
+
+function PaymentsAdminTab() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const [stats, setStats] = useState<{
+    totalRevenue: Array<{ total: number; currency: string }>
+    activeSubscriptions: number
+    recentPayments: Array<{
+      id: string
+      userId: string
+      amount: number
+      currency: string
+      status: string
+      type: string
+      provider: string
+      description: string | null
+      createdAt: string
+    }>
+  } | null>(null)
+  const [adminPlans, setAdminPlans] = useState<AdminPlan[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Create plan form state
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [planName, setPlanName] = useState('')
+  const [planDescription, setPlanDescription] = useState('')
+  const [planPrice, setPlanPrice] = useState('')
+  const [planCurrency, setPlanCurrency] = useState('usd')
+  const [planInterval, setPlanInterval] = useState<'month' | 'year' | 'one_time'>('month')
+  const [planProvider, setPlanProvider] = useState<'stripe' | 'yookassa'>('stripe')
+  const [planProviderPriceId, setPlanProviderPriceId] = useState('')
+  const [planFeatures, setPlanFeatures] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  // Edit plan state
+  const [editingPlan, setEditingPlan] = useState<AdminPlan | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editPrice, setEditPrice] = useState('')
+  const [editFeatures, setEditFeatures] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [statsRes, plansRes] = await Promise.all([
+        api.get('/payments/admin/stats'),
+        api.get('/payments/admin/plans'),
+      ])
+      setStats(statsRes.data.data)
+      setAdminPlans(plansRes.data.data ?? [])
+    } catch {}
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const handleCreatePlan = async () => {
+    if (!planName.trim()) return
+    setCreating(true)
+    try {
+      const priceAmount = Math.round(parseFloat(planPrice || '0') * 100)
+      await api.post('/payments/admin/plans', {
+        name: planName.trim(),
+        description: planDescription.trim() || undefined,
+        priceAmount,
+        currency: planCurrency.trim().toLowerCase() || 'usd',
+        interval: planInterval,
+        provider: planProvider,
+        providerPriceId: planProviderPriceId.trim() || undefined,
+        features: planFeatures
+          .split('\n')
+          .map((f) => f.trim())
+          .filter(Boolean),
+      })
+      setPlanName('')
+      setPlanDescription('')
+      setPlanPrice('')
+      setPlanProviderPriceId('')
+      setPlanFeatures('')
+      setShowCreateForm(false)
+      fetchData()
+      Alert.alert(t('admin.planCreated'))
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const openEditPlan = (plan: AdminPlan) => {
+    setEditingPlan(plan)
+    setEditName(plan.name)
+    setEditDescription(plan.description ?? '')
+    setEditPrice(String(plan.priceAmount / 100))
+    setEditFeatures(plan.features.join('\n'))
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingPlan) return
+    setSavingEdit(true)
+    try {
+      await api.patch(`/payments/admin/plans/${editingPlan.id}`, {
+        name: editName.trim(),
+        description: editDescription.trim() || undefined,
+        priceAmount: Math.round(parseFloat(editPrice || '0') * 100),
+        features: editFeatures.split('\n').map((f) => f.trim()).filter(Boolean),
+      })
+      setEditingPlan(null)
+      fetchData()
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  const handleToggleActive = async (plan: AdminPlan) => {
+    try {
+      await api.patch(`/payments/admin/plans/${plan.id}`, { isActive: !plan.isActive })
+      fetchData()
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
+    }
+  }
+
+  const performDeletePlan = async (plan: AdminPlan) => {
+    try {
+      await api.delete(`/payments/admin/plans/${plan.id}`)
+      setAdminPlans((prev) => prev.filter((p) => p.id !== plan.id))
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
+    }
+  }
+
+  const handleDeletePlan = (plan: AdminPlan) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm(t('admin.deletePlanConfirm'))) {
+        performDeletePlan(plan)
+      }
+    } else {
+      Alert.alert(t('admin.deletePlan'), t('admin.deletePlanConfirm'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => performDeletePlan(plan),
+        },
+      ])
+    }
+  }
+
+  const formatPrice = (amount: number, currency: string) => {
+    const value = amount / 100
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: currency.toUpperCase(),
+        minimumFractionDigits: 0,
+      }).format(value)
+    } catch {
+      return `${value} ${currency.toUpperCase()}`
+    }
+  }
+
+  const INTERVALS: Array<{ value: 'month' | 'year' | 'one_time'; label: string }> = [
+    { value: 'month', label: t('payments.perMonth') },
+    { value: 'year', label: t('payments.perYear') },
+    { value: 'one_time', label: t('payments.one_time') },
+  ]
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+      <FadeIn>
+        <YStack gap="$3">
+          {loading ? (
+            <Text color="$mutedText" textAlign="center" paddingVertical="$6">
+              {t('common.loading')}
+            </Text>
+          ) : stats ? (
+            <>
+              <XStack gap="$3">
+                <AppCard flex={1} animated={false}>
+                  <YStack alignItems="center" gap="$1">
+                    <Text fontSize="$6" fontWeight="bold" color="$accent">
+                      {stats.totalRevenue.length > 0
+                        ? stats.totalRevenue.map((r) => formatPrice(r.total, r.currency)).join(' / ')
+                        : formatPrice(0, 'usd')}
+                    </Text>
+                    <Text fontSize="$1" color="$mutedText">{t('admin.revenue')}</Text>
+                  </YStack>
+                </AppCard>
+                <AppCard flex={1} animated={false}>
+                  <YStack alignItems="center" gap="$1">
+                    <Text fontSize="$6" fontWeight="bold" color="$accent">
+                      {stats.activeSubscriptions}
+                    </Text>
+                    <Text fontSize="$1" color="$mutedText">{t('admin.activeSubscriptions')}</Text>
+                  </YStack>
+                </AppCard>
+              </XStack>
+
+              {/* Existing Plans */}
+              <AppCard animated={false}>
+                <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+                  {t('admin.existingPlans')}
+                </Text>
+                {adminPlans.length === 0 ? (
+                  <Text color="$mutedText" fontSize="$2">{t('payments.noPlans')}</Text>
+                ) : (
+                  <YStack gap="$3">
+                    {adminPlans.map((plan) => (
+                      <YStack
+                        key={plan.id}
+                        borderWidth={1}
+                        borderColor={plan.isActive ? '$borderColor' : '$borderColor'}
+                        borderRadius="$3"
+                        padding="$3"
+                        gap="$2"
+                        opacity={plan.isActive ? 1 : 0.5}
+                      >
+                        <XStack justifyContent="space-between" alignItems="center">
+                          <YStack flex={1} gap="$1">
+                            <XStack alignItems="center" gap="$2">
+                              <Text fontWeight="700" color="$color" fontSize="$4">{plan.name}</Text>
+                              {!plan.isActive && (
+                                <XStack backgroundColor="$subtleBackground" paddingHorizontal="$1.5" paddingVertical={2} borderRadius="$1">
+                                  <Text fontSize={10} color="$mutedText" fontWeight="600">{t('admin.inactive')}</Text>
+                                </XStack>
+                              )}
+                            </XStack>
+                            <Text color="$accent" fontWeight="700" fontSize="$3">
+                              {formatPrice(plan.priceAmount, plan.currency)}
+                              <Text color="$mutedText" fontWeight="400" fontSize="$2">
+                                {' '}{plan.interval !== 'one_time' ? `/${plan.interval}` : ''}
+                              </Text>
+                            </Text>
+                            <Text color="$mutedText" fontSize="$1">
+                              {plan.provider} {plan.providerPriceId ? `· ${plan.providerPriceId}` : ''}
+                            </Text>
+                          </YStack>
+                          <XStack gap="$2" alignItems="center">
+                            <AppSwitch checked={plan.isActive} onCheckedChange={() => handleToggleActive(plan)} />
+                          </XStack>
+                        </XStack>
+                        {plan.features.length > 0 && (
+                          <XStack flexWrap="wrap" gap="$1">
+                            {plan.features.map((f) => (
+                              <XStack key={f} backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1" borderRadius="$2">
+                                <Text fontSize="$1" color="$mutedText">{f}</Text>
+                              </XStack>
+                            ))}
+                          </XStack>
+                        )}
+                        <XStack gap="$2">
+                          <ScalePress onPress={() => openEditPlan(plan)}>
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons name="create-outline" size={14} color={theme.accent.val} />
+                              <Text fontSize="$2" color="$accent">{t('admin.editPlan')}</Text>
+                            </XStack>
+                          </ScalePress>
+                          <ScalePress onPress={() => handleDeletePlan(plan)}>
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons name="trash-outline" size={14} color="#EF4444" />
+                              <Text fontSize="$2" color="#EF4444">{t('admin.deletePlan')}</Text>
+                            </XStack>
+                          </ScalePress>
+                        </XStack>
+
+                        {/* Inline edit form */}
+                        {editingPlan?.id === plan.id && (
+                          <YStack gap="$2" marginTop="$2" borderTopWidth={1} borderTopColor="$borderColor" paddingTop="$2">
+                            <Input value={editName} onChangeText={setEditName} placeholder={t('admin.planName')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={38} fontSize="$2" color="$color" />
+                            <Input value={editDescription} onChangeText={setEditDescription} placeholder={t('admin.planDescription')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={38} fontSize="$2" color="$color" />
+                            <Input value={editPrice} onChangeText={setEditPrice} placeholder={t('admin.planPrice')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={38} fontSize="$2" color="$color" keyboardType="decimal-pad" />
+                            <Input value={editFeatures} onChangeText={setEditFeatures} placeholder={t('admin.planFeaturesPlaceholder')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={60} fontSize="$2" color="$color" multiline />
+                            <XStack gap="$2">
+                              <AppButton size="sm" onPress={handleSaveEdit} disabled={savingEdit} flex={1}>
+                                {savingEdit ? t('common.loading') : t('admin.saveChanges')}
+                              </AppButton>
+                              <AppButton size="sm" variant="outline" onPress={() => setEditingPlan(null)} flex={1}>
+                                {t('common.cancel')}
+                              </AppButton>
+                            </XStack>
+                          </YStack>
+                        )}
+                      </YStack>
+                    ))}
+                  </YStack>
+                )}
+              </AppCard>
+
+              {/* Create Plan */}
+              <AppCard animated={false}>
+                <ScalePress onPress={() => setShowCreateForm((v) => !v)}>
+                  <XStack alignItems="center" justifyContent="space-between">
+                    <Text fontWeight="600" color="$color" fontSize="$4">
+                      {t('admin.createPlan')}
+                    </Text>
+                    <Ionicons
+                      name={showCreateForm ? 'chevron-up' : 'add-circle-outline'}
+                      size={22}
+                      color={theme.accent.val}
+                    />
+                  </XStack>
+                </ScalePress>
+
+                {showCreateForm && (
+                  <YStack gap="$3" marginTop="$3">
+                    <Input value={planName} onChangeText={setPlanName} placeholder={t('admin.planName')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={42} fontSize="$3" color="$color" />
+                    <Input value={planDescription} onChangeText={setPlanDescription} placeholder={t('admin.planDescription')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={42} fontSize="$3" color="$color" />
+                    <XStack gap="$2">
+                      <Input flex={1} value={planPrice} onChangeText={setPlanPrice} placeholder={t('admin.planPrice')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={42} fontSize="$3" color="$color" keyboardType="decimal-pad" />
+                      <Input width={80} value={planCurrency} onChangeText={setPlanCurrency} placeholder="usd" placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={42} fontSize="$3" color="$color" />
+                    </XStack>
+                    <YStack gap="$1.5">
+                      <Text fontSize="$2" color="$mutedText">{t('admin.planInterval')}</Text>
+                      <XStack gap="$2" flexWrap="wrap">
+                        {INTERVALS.map((opt) => (
+                          <ScalePress key={opt.value} onPress={() => setPlanInterval(opt.value)}>
+                            <XStack backgroundColor={planInterval === opt.value ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" borderWidth={1} borderColor={planInterval === opt.value ? '$accent' : '$borderColor'}>
+                              <Text color={planInterval === opt.value ? 'white' : '$color'} fontWeight="600" fontSize="$2">{opt.label}</Text>
+                            </XStack>
+                          </ScalePress>
+                        ))}
+                      </XStack>
+                    </YStack>
+                    <YStack gap="$1.5">
+                      <Text fontSize="$2" color="$mutedText">{t('admin.planProvider')}</Text>
+                      <XStack gap="$2">
+                        {(['stripe', 'yookassa'] as const).map((p) => (
+                          <ScalePress key={p} onPress={() => setPlanProvider(p)}>
+                            <XStack backgroundColor={planProvider === p ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" borderWidth={1} borderColor={planProvider === p ? '$accent' : '$borderColor'}>
+                              <Text color={planProvider === p ? 'white' : '$color'} fontWeight="600" fontSize="$2">{p === 'stripe' ? 'Stripe' : 'YooKassa'}</Text>
+                            </XStack>
+                          </ScalePress>
+                        ))}
+                      </XStack>
+                    </YStack>
+                    <Input value={planProviderPriceId} onChangeText={setPlanProviderPriceId} placeholder={t('admin.planProviderPriceId')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={42} fontSize="$3" color="$color" />
+                    <Input value={planFeatures} onChangeText={setPlanFeatures} placeholder={t('admin.planFeaturesPlaceholder')} placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={80} fontSize="$3" color="$color" multiline />
+                    <AppButton onPress={handleCreatePlan} disabled={creating || !planName.trim()}>
+                      {creating ? t('common.loading') : t('admin.createPlan')}
+                    </AppButton>
+                  </YStack>
+                )}
+              </AppCard>
+
+              <AppCard animated={false}>
+                <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
+                  {t('admin.recentPayments')}
+                </Text>
+                {stats.recentPayments.length === 0 ? (
+                  <Text color="$mutedText" fontSize="$2">{t('payments.noHistory')}</Text>
+                ) : (
+                  <YStack gap="$2">
+                    {stats.recentPayments.map((payment) => (
+                      <YStack
+                        key={payment.id}
+                        borderBottomWidth={1}
+                        borderBottomColor="$borderColor"
+                        paddingBottom="$2"
+                      >
+                        <XStack justifyContent="space-between" alignItems="center">
+                          <YStack flex={1}>
+                            <Text fontWeight="600" color="$color" fontSize="$3" numberOfLines={1}>
+                              {payment.description ?? payment.type}
+                            </Text>
+                            <Text color="$mutedText" fontSize="$1">
+                              {payment.provider} · {payment.status}
+                            </Text>
+                          </YStack>
+                          <YStack alignItems="flex-end">
+                            <Text fontWeight="700" fontSize="$3" color="$color">
+                              {formatPrice(payment.amount, payment.currency)}
+                            </Text>
+                            <Text color="$mutedText" fontSize="$1">
+                              {new Date(payment.createdAt).toLocaleDateString()}
+                            </Text>
+                          </YStack>
+                        </XStack>
+                      </YStack>
+                    ))}
+                  </YStack>
+                )}
+              </AppCard>
+            </>
+          ) : (
+            <Text color="$mutedText" textAlign="center" paddingVertical="$6">
+              {t('common.error')}
+            </Text>
+          )}
+        </YStack>
+      </FadeIn>
+    </ScrollView>
+  )
+}
+
+function TemplateConfigTab() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const overrides = useTemplateConfigStore((s) => s.overrides)
+  const setFlag = useTemplateConfigStore((s) => s.setFlag)
+  const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
+  const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
+  const resetAll = useTemplateConfigStore((s) => s.resetAll)
+
+  const frontendFlags = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend')
+  const backendFlags = TEMPLATE_FLAGS.filter((f) => f.scope !== 'frontend')
+
+  const getFlagValue = (key: string, defaultValue: boolean) =>
+    overrides[key] !== undefined ? overrides[key] : defaultValue
+
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+      <FadeIn>
+        <YStack gap="$3">
+          <Text color="$mutedText" fontSize="$2" lineHeight={18}>
+            {t('templateConfig.description')}
+          </Text>
+
+          {/* Color Scheme */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('templateConfig.colorScheme')}
+            </Text>
+            <XStack gap="$3" flexWrap="wrap">
+              {COLOR_SCHEMES.map((scheme) => {
+                const isSelected = (colorScheme ?? DEFAULT_SCHEME_KEY) === scheme.key
+                return (
+                  <ScalePress
+                    key={scheme.key}
+                    onPress={() => {
+                      setColorScheme(scheme.key)
+                      applyColorScheme(scheme.key)
+                    }}
+                  >
+                    <YStack alignItems="center" gap="$1.5">
+                      <YStack
+                        width={44}
+                        height={44}
+                        borderRadius={22}
+                        borderWidth={3}
+                        borderColor={isSelected ? '$color' : 'transparent'}
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <YStack
+                          width={34}
+                          height={34}
+                          borderRadius={17}
+                          style={{ backgroundColor: scheme.swatch } as any}
+                        />
+                      </YStack>
+                      <Text fontSize="$1" color={isSelected ? '$color' : '$mutedText'} fontWeight={isSelected ? '600' : '400'}>
+                        {t(scheme.labelKey)}
+                      </Text>
+                    </YStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </AppCard>
+
+          {/* Frontend Flags */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
+              {t('templateConfig.frontend')}
+            </Text>
+            <YStack gap="$2">
+              {frontendFlags.map((flag) => {
+                const value = getFlagValue(flag.key, flag.defaultValue)
+                return (
+                  <XStack key={flag.key} alignItems="center" justifyContent="space-between">
+                    <XStack alignItems="center" gap="$2" flex={1}>
+                      <Ionicons
+                        name={flag.icon}
+                        size={18}
+                        color={value ? theme.accent.val : theme.mutedText.val}
+                      />
+                      <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                        {t(flag.labelKey)}
+                      </Text>
+                    </XStack>
+                    <AppSwitch
+                      checked={value}
+                      onCheckedChange={() => setFlag(flag.key, !value)}
+                    />
+                  </XStack>
+                )
+              })}
+            </YStack>
+          </AppCard>
+
+          {/* Backend Flags */}
+          <AppCard animated={false}>
+            <XStack alignItems="center" gap="$2" marginBottom="$2">
+              <Text fontWeight="600" color="$color" fontSize="$4">
+                {t('templateConfig.backend')}
+              </Text>
+              <XStack
+                backgroundColor="$subtleBackground"
+                paddingHorizontal="$1.5"
+                paddingVertical={2}
+                borderRadius="$1"
+              >
+                <Text fontSize={10} color="$mutedText" fontWeight="600">
+                  .env
+                </Text>
+              </XStack>
+            </XStack>
+            <YStack gap="$2">
+              {backendFlags.map((flag) => {
+                const value = getFlagValue(flag.key, flag.defaultValue)
+                return (
+                  <XStack key={flag.key} alignItems="center" justifyContent="space-between">
+                    <XStack alignItems="center" gap="$2" flex={1}>
+                      <Ionicons
+                        name={flag.icon}
+                        size={18}
+                        color={value ? theme.accent.val : theme.mutedText.val}
+                      />
+                      <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                        {t(flag.labelKey)}
+                      </Text>
+                    </XStack>
+                    <AppSwitch
+                      checked={value}
+                      onCheckedChange={() => setFlag(flag.key, !value)}
+                    />
+                  </XStack>
+                )
+              })}
+            </YStack>
+          </AppCard>
+
+          {/* Reset Button */}
+          {hasOverrides && (
+            <AppButton
+              variant="outline"
+              onPress={() => {
+                resetAll()
+                applyColorScheme(DEFAULT_SCHEME_KEY)
+              }}
+            >
+              {t('templateConfig.reset')}
+            </AppButton>
+          )}
+        </YStack>
+      </FadeIn>
+    </ScrollView>
+  )
+}
+
 export default function AdminScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback'>(analyticsEnabled ? 'analytics' : 'users')
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const paymentsEnabled = useTemplateFlag('payments', false)
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
       setActiveTab('users')
     }
-  }, [analyticsEnabled, activeTab])
+    if (!pushEnabled && activeTab === 'notify') {
+      setActiveTab('users')
+    }
+  }, [analyticsEnabled, pushEnabled, activeTab])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
@@ -198,6 +783,24 @@ export default function AdminScreen() {
   const [editFeatures, setEditFeatures] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [notifyTitle, setNotifyTitle] = useState('')
+  const [notifyBody, setNotifyBody] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sendResult, setSendResult] = useState<string | null>(null)
+  const [notifyHistory, setNotifyHistory] = useState<Array<{ title: string; body: string | null; createdAt: string; recipientCount: number }>>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+
+  const fetchHistory = useCallback(async () => {
+    setHistoryLoading(true)
+    try {
+      const res = await api.get('/push/history', { params: { limit: 50 } })
+      setNotifyHistory(res.data.data)
+    } catch {
+      // ignore
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [])
 
   const fetchData = useCallback(async (p = 1, q = '') => {
     try {
@@ -231,6 +834,12 @@ export default function AdminScreen() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    if (pushEnabled && activeTab === 'notify') {
+      fetchHistory()
+    }
+  }, [pushEnabled, activeTab, fetchHistory])
 
   const handleSearch = useCallback(() => {
     setPage(1)
@@ -319,65 +928,101 @@ export default function AdminScreen() {
     <YStack flex={1} backgroundColor="$background">
       <YStack padding="$4" paddingTop={Platform.OS === 'web' ? '$4' : 16} gap="$3">
         {/* Tab Switcher */}
-        <XStack gap="$2">
-          {analyticsEnabled && (
-            <ScalePress onPress={() => setActiveTab('analytics')}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <XStack gap="$2">
+            {analyticsEnabled && (
+              <ScalePress onPress={() => setActiveTab('analytics')}>
+                <XStack
+                  backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.analytics')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            <ScalePress onPress={() => setActiveTab('users')}>
               <XStack
-                backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
+                backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
                 paddingHorizontal="$3"
                 paddingVertical="$2"
                 borderRadius="$3"
               >
-                <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.analytics')}
+                <Text color={activeTab === 'users' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.users')}
                 </Text>
               </XStack>
             </ScalePress>
-          )}
-          <ScalePress onPress={() => setActiveTab('users')}>
-            <XStack
-              backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              borderRadius="$3"
-            >
-              <Text color={activeTab === 'users' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                {t('admin.users')}
-              </Text>
-            </XStack>
-          </ScalePress>
-          {docFeedbackEnabled && (
-            <ScalePress onPress={() => setActiveTab('feedback')}>
-              <XStack
-                backgroundColor={activeTab === 'feedback' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-              >
-                <Text color={activeTab === 'feedback' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.docFeedback')}
-                </Text>
-              </XStack>
-            </ScalePress>
-          )}
-          {Platform.OS === 'web' && isTemplateConfigEnabled && (
-            <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
-              <XStack
-                backgroundColor="$subtleBackground"
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-                gap="$1.5"
-                alignItems="center"
-              >
-                <Ionicons name="construct-outline" size={16} color={theme.accent.val} />
-                <Text color="$color" fontWeight="600" fontSize="$3">
-                  {t('templateConfig.title')}
-                </Text>
-              </XStack>
-            </ScalePress>
-          )}
-        </XStack>
+            {docFeedbackEnabled && (
+              <ScalePress onPress={() => setActiveTab('feedback')}>
+                <XStack
+                  backgroundColor={activeTab === 'feedback' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'feedback' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.docFeedback')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            {pushEnabled && (
+              <ScalePress onPress={() => setActiveTab('notify')}>
+                <XStack
+                  backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.sendNotification')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            {paymentsEnabled && (
+              <ScalePress onPress={() => setActiveTab('payments')}>
+                <XStack
+                  backgroundColor={activeTab === 'payments' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                >
+                  <Text color={activeTab === 'payments' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('admin.payments')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+            {isTemplateConfigEnabled && (
+              <ScalePress onPress={() => {
+                if (Platform.OS === 'web') {
+                  useTemplateConfigStore.getState().setSidebarOpen(true)
+                } else {
+                  setActiveTab('config')
+                }
+              }}>
+                <XStack
+                  backgroundColor={activeTab === 'config' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                  gap="$1.5"
+                  alignItems="center"
+                >
+                  <Ionicons name="construct-outline" size={16} color={activeTab === 'config' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'config' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('templateConfig.title')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
+          </XStack>
+        </ScrollView>
 
         {/* Users Tab — Stats + Search */}
         {activeTab === 'users' && (
@@ -573,6 +1218,132 @@ export default function AdminScreen() {
             </YStack>
           )}
         </ScrollView>
+      )}
+
+      {/* Notify Tab */}
+      {pushEnabled && activeTab === 'notify' && (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+          <FadeIn>
+            <YStack gap="$3">
+              <AppCard animated={false}>
+                <YStack gap="$3">
+                  <Text fontWeight="600" color="$color" fontSize="$4">
+                    {t('admin.sendNotification')}
+                  </Text>
+                  <Input
+                    value={notifyTitle}
+                    onChangeText={setNotifyTitle}
+                    placeholder={t('admin.notifyTitle')}
+                    placeholderTextColor={theme.mutedText.val as any}
+                    backgroundColor="$subtleBackground"
+                    borderWidth={1}
+                    borderColor="$borderColor"
+                    borderRadius="$3"
+                    paddingHorizontal="$3"
+                    height={42}
+                    fontSize="$3"
+                    color="$color"
+                  />
+                  <Input
+                    value={notifyBody}
+                    onChangeText={setNotifyBody}
+                    placeholder={t('admin.notifyBody')}
+                    placeholderTextColor={theme.mutedText.val as any}
+                    backgroundColor="$subtleBackground"
+                    borderWidth={1}
+                    borderColor="$borderColor"
+                    borderRadius="$3"
+                    paddingHorizontal="$3"
+                    height={42}
+                    fontSize="$3"
+                    color="$color"
+                  />
+                  <AppButton
+                    onPress={async () => {
+                      if (!notifyTitle.trim()) return
+                      setSending(true)
+                      setSendResult(null)
+                      try {
+                        const res = await api.post('/push/send', {
+                          title: notifyTitle.trim(),
+                          body: notifyBody.trim() || undefined,
+                        })
+                        const data = res.data.data
+                        setSendResult(t('admin.notifySent', { sent: data.sent, total: data.total }))
+                        setNotifyTitle('')
+                        setNotifyBody('')
+                        fetchHistory()
+                      } catch (err: any) {
+                        setSendResult(err.response?.data?.message ?? t('common.error'))
+                      } finally {
+                        setSending(false)
+                      }
+                    }}
+                    disabled={sending || !notifyTitle.trim()}
+                  >
+                    {sending ? t('common.loading') : t('admin.sendToAll')}
+                  </AppButton>
+                  {sendResult && (
+                    <Text color="$mutedText" fontSize="$2" textAlign="center">
+                      {sendResult}
+                    </Text>
+                  )}
+                </YStack>
+              </AppCard>
+
+              {/* Send History */}
+              <AppCard animated={false}>
+                <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
+                  {t('admin.notifyHistory')}
+                </Text>
+                {historyLoading ? (
+                  <Text color="$mutedText" fontSize="$2">{t('common.loading')}</Text>
+                ) : notifyHistory.length === 0 ? (
+                  <Text color="$mutedText" fontSize="$2">{t('admin.noNotifications')}</Text>
+                ) : (
+                  <YStack gap="$2">
+                    {notifyHistory.map((item, i) => (
+                      <YStack
+                        key={`${item.title}-${item.createdAt}-${i}`}
+                        borderBottomWidth={i < notifyHistory.length - 1 ? 1 : 0}
+                        borderBottomColor="$borderColor"
+                        paddingBottom="$2"
+                      >
+                        <XStack justifyContent="space-between" alignItems="center">
+                          <Text fontWeight="600" color="$color" fontSize="$3" flex={1} numberOfLines={1}>
+                            {item.title}
+                          </Text>
+                          <XStack alignItems="center" gap="$1" marginLeft="$2">
+                            <Ionicons name="people-outline" size={14} color={theme.mutedText.val} />
+                            <Text color="$mutedText" fontSize="$2">{item.recipientCount}</Text>
+                          </XStack>
+                        </XStack>
+                        {item.body && (
+                          <Text color="$mutedText" fontSize="$2" numberOfLines={2}>
+                            {item.body}
+                          </Text>
+                        )}
+                        <Text color="$mutedText" fontSize="$1" marginTop="$1">
+                          {item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'}
+                        </Text>
+                      </YStack>
+                    ))}
+                  </YStack>
+                )}
+              </AppCard>
+            </YStack>
+          </FadeIn>
+        </ScrollView>
+      )}
+
+      {/* Payments Tab */}
+      {paymentsEnabled && activeTab === 'payments' && (
+        <PaymentsAdminTab />
+      )}
+
+      {/* Template Config Tab */}
+      {isTemplateConfigEnabled && activeTab === 'config' && (
+        <TemplateConfigTab />
       )}
 
       {/* Edit User Modal */}

@@ -12,9 +12,9 @@ const GREETINGS = [
 ]
 
 const API_ROUTES = [
-  { method: 'GET', color: '#7ee787', path: '/api/users' },
   { method: 'POST', color: '#f0883e', path: '/api/auth/login' },
-  { method: 'POST', color: '#f0883e', path: '/api/mail/send' },
+  { method: 'GET', color: '#7ee787', path: '/api/users' },
+  { method: 'POST', color: '#f0883e', path: '/api/payments/checkout' },
   { method: 'WS', color: '#d2a8ff', path: '/api/events/sse' },
 ]
 
@@ -287,6 +287,43 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
+              {/* ── Payments ── */}
+              <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.28s' } as any}>
+                <BentoCard theme={theme} fullHeight>
+                  <YStack justifyContent="center" alignItems="center" height={120} gap="$2.5">
+                    <YStack
+                      width={64} height={64} borderRadius={32}
+                      alignItems="center" justifyContent="center"
+                      style={{ background: `linear-gradient(135deg, ${gs}25, ${ge}25)` } as any}
+                    >
+                      <Ionicons name="card" size={32} color={acc} />
+                    </YStack>
+                    <XStack gap="$2">
+                      <YStack
+                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
+                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
+                      >
+                        <Text fontSize={11} color="$mutedText">Stripe</Text>
+                      </YStack>
+                      <YStack
+                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
+                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
+                      >
+                        <Text fontSize={11} color="$mutedText">YooKassa</Text>
+                      </YStack>
+                    </XStack>
+                  </YStack>
+                  <YStack gap="$1">
+                    <Text fontWeight="bold" fontSize="$5" color="$color">
+                      {t('landing.featurePayments' as any)}
+                    </Text>
+                    <Text fontSize="$3" color="$mutedText" lineHeight={22}>
+                      {t('landing.featurePaymentsDesc' as any)}
+                    </Text>
+                  </YStack>
+                </BentoCard>
+              </View>
+
               {/* ── Backend API ── */}
               <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.3s' } as any}>
                 <BentoCard theme={theme} fullHeight>
@@ -320,20 +357,11 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Analytics (full width) ── */}
-              <View style={{ gridColumn: '1 / -1', animation: 'bentoFadeUp 0.5s ease-out both 0.35s' } as any}>
-                <YStack
-                  backgroundColor="$cardBackground"
-                  borderRadius="$4"
-                  borderWidth={1}
-                  borderColor="$borderColor"
-                  padding="$5"
-                  className="bento-card"
-                  hoverStyle={{ borderColor: '$accent' } as any}
-                  style={{ overflow: 'hidden' } as any}
-                >
+              {/* ── Analytics (wide) ── */}
+              <View style={{ gridColumn: 'span 2', animation: 'bentoFadeUp 0.5s ease-out both 0.35s' } as any}>
+                <BentoCard theme={theme}>
                   <XStack flexWrap="wrap" gap="$5" alignItems="center">
-                    <YStack gap="$1" style={{ flex: 1, minWidth: 200 } as any}>
+                    <YStack gap="$1" style={{ flex: 1, minWidth: 160 } as any}>
                       <Text fontWeight="bold" fontSize="$5" color="$color">
                         {t('landing.featureAnalytics' as any)}
                       </Text>
@@ -342,7 +370,7 @@ export function LandingFeatures() {
                       </Text>
                     </YStack>
                     {/* Animated bar chart */}
-                    <XStack gap={6} alignItems="flex-end" height={80} style={{ flex: 1, minWidth: 200, justifyContent: 'center' } as any}>
+                    <XStack gap={6} alignItems="flex-end" height={80} style={{ flex: 1, minWidth: 160, justifyContent: 'center' } as any}>
                       {BAR_HEIGHTS.map((h, i) => (
                         <View
                           key={i}
@@ -357,17 +385,21 @@ export function LandingFeatures() {
                       ))}
                     </XStack>
                   </XStack>
-                </YStack>
+                </BentoCard>
               </View>
             </>
           ) : (
             <>
+              {/* Row 1: span2 + 1 */}
               <View style={{ gridColumn: 'span 2', height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
+              {/* Row 2: 1+1+1 */}
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
-              <View style={{ gridColumn: '1 / -1', height: 120, opacity: 0 } as any} />
+              {/* Row 3: 1 + span2 */}
+              <View style={{ height: 280, opacity: 0 } as any} />
+              <View style={{ gridColumn: 'span 2', height: 280, opacity: 0 } as any} />
             </>
           )}
         </View>

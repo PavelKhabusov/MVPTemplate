@@ -12,7 +12,8 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "clean": "turbo clean && rm -rf node_modules"
+    "clean": "turbo clean && rm -rf node_modules",
+    "gitpush": "git push origin HEAD"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",

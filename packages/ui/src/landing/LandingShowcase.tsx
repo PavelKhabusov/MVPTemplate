@@ -11,8 +11,9 @@ const CHECKLIST = [
   { key: 'showcaseItem3', icon: 'sparkles-outline' },
   { key: 'showcaseItem4', icon: 'lock-closed-outline' },
   { key: 'showcaseItem5', icon: 'globe-outline' },
-  { key: 'showcaseItem6', icon: 'terminal-outline' },
-  { key: 'showcaseItem7', icon: 'rocket-outline' },
+  { key: 'showcaseItem6', icon: 'card-outline' },
+  { key: 'showcaseItem7', icon: 'terminal-outline' },
+  { key: 'showcaseItem8', icon: 'rocket-outline' },
 ] as const
 
 const CORE_STACK = [
@@ -20,7 +21,7 @@ const CORE_STACK = [
 ]
 
 const INTEGRATIONS = [
-  'Fastify v5', 'Drizzle ORM', 'PostgreSQL', 'Redis', 'Nodemailer', 'TanStack Query', 'PostHog',
+  'Fastify v5', 'Drizzle ORM', 'PostgreSQL', 'Redis', 'Stripe', 'Nodemailer', 'TanStack Query', 'PostHog',
 ]
 
 const ALL_TECH = [...CORE_STACK, ...INTEGRATIONS]

@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { Platform, RefreshControl, ScrollView } from 'react-native'
+import { useState, useCallback, useEffect } from 'react'
+import { Platform, RefreshControl, ScrollView, Modal } from 'react-native'
 import { YStack, XStack, Text, H2, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
@@ -29,6 +29,7 @@ import Animated, {
   useAnimatedScrollHandler,
 } from 'react-native-reanimated'
 import { authApi } from '../../src/services/auth'
+import { NotificationCenter } from '../../src/features/notifications/NotificationCenter'
 
 const THEME_LABELS: Record<ThemeMode, string> = {
   system: 'settings.themeSystem',
@@ -52,12 +53,56 @@ export default function SettingsScreen() {
   return <UnauthenticatedSettingsView />
 }
 
+function NotificationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const theme = useTheme()
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && visible) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = prev }
+    }
+  }, [visible])
+
+  if (!visible) return null
+
+  if (Platform.OS === 'web') {
+    return (
+      <YStack
+        // @ts-ignore — fixed position for web overlay
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: theme.background.val, overflow: 'auto' }}
+      >
+        <XStack justifyContent="flex-end" padding="$3">
+          <ScalePress onPress={onClose}>
+            <Ionicons name="close" size={24} color={theme.color.val} />
+          </ScalePress>
+        </XStack>
+        <NotificationCenter />
+      </YStack>
+    )
+  }
+
+  return (
+    <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <YStack flex={1} backgroundColor="$background">
+        <XStack justifyContent="flex-end" padding="$3" paddingTop={60}>
+          <ScalePress onPress={onClose}>
+            <Ionicons name="close" size={24} color={theme.color.val} />
+          </ScalePress>
+        </XStack>
+        <NotificationCenter />
+      </YStack>
+    </Modal>
+  )
+}
+
 function UnauthenticatedSettingsView() {
   const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
   const theme = useTheme()
   const { mode, setMode } = useThemeStore()
   const docsEnabled = useTemplateFlag('docs', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
 
@@ -138,11 +183,13 @@ function UnauthenticatedSettingsView() {
       {/* General */}
       <SlideIn from="bottom" delay={200}>
         <SettingsGroup header={t('settings.title')}>
-          <SettingsGroupItem
-            icon="notifications-outline"
-            label={t('settings.notifications')}
-            onPress={() => {}}
-          />
+          {pushEnabled && (
+            <SettingsGroupItem
+              icon="notifications-outline"
+              label={t('settings.notifications')}
+              onPress={() => router.push('/sign-in')}
+            />
+          )}
           <SettingsGroupItem
             icon="shield-outline"
             label={t('settings.privacy')}
@@ -180,7 +227,10 @@ function AuthenticatedSettingsView() {
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const paymentsEnabled = useTemplateFlag('payments', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
 
   const scrollY = useSharedValue(0)
@@ -321,11 +371,20 @@ function AuthenticatedSettingsView() {
         {/* General */}
         <StaggerGroup index={groupIndex++}>
           <SettingsGroup header={t('settings.title')}>
-            <SettingsGroupItem
-              icon="notifications-outline"
-              label={t('settings.notifications')}
-              onPress={() => {}}
-            />
+            {paymentsEnabled && (
+              <SettingsGroupItem
+                icon="card-outline"
+                label={t('payments.managePlan')}
+                onPress={() => router.push('/pricing')}
+              />
+            )}
+            {pushEnabled && (
+              <SettingsGroupItem
+                icon="notifications-outline"
+                label={t('settings.notifications')}
+                onPress={() => setShowNotifications(true)}
+              />
+            )}
             <SettingsGroupItem
               icon="shield-outline"
               label={t('settings.privacy')}
@@ -350,6 +409,8 @@ function AuthenticatedSettingsView() {
             />
           </SettingsGroup>
         </StaggerGroup>
+
+        {pushEnabled && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
 
         {/* Admin */}
         {userRole === 'admin' && (
@@ -389,7 +450,9 @@ function WebSettingsView() {
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -520,11 +583,13 @@ function WebSettingsView() {
         {/* General */}
         <StaggerGroup index={isAuthenticated ? 2 : 1}>
           <SettingsGroup header={t('settings.title')}>
-            <SettingsGroupItem
-              icon="notifications-outline"
-              label={t('settings.notifications')}
-              onPress={() => {}}
-            />
+            {pushEnabled && (
+              <SettingsGroupItem
+                icon="notifications-outline"
+                label={t('settings.notifications')}
+                onPress={() => isAuthenticated ? setShowNotifications(true) : router.push('/sign-in')}
+              />
+            )}
             <SettingsGroupItem
               icon="shield-outline"
               label={t('settings.privacy')}
@@ -549,6 +614,8 @@ function WebSettingsView() {
             />
           </SettingsGroup>
         </StaggerGroup>
+
+        {pushEnabled && isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
 
         {/* Admin */}
         {userRole === 'admin' && (

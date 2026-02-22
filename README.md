@@ -87,22 +87,28 @@ MVPTemplate/
 │   │   ├── app/                # File-based routes
 │   │   │   ├── _layout.tsx     # Root layout + web sidebar
 │   │   │   ├── (tabs)/         # Tab bar (mobile) / Slot (web)
-│   │   │   ├── settings.tsx    # Settings
 │   │   │   ├── admin.tsx       # Admin panel
+│   │   │   ├── pricing.tsx     # Payment plans
+│   │   │   ├── docs/           # In-app documentation
 │   │   │   ├── sign-in.tsx     # Auth screens
 │   │   │   └── sign-up.tsx
 │   │   └── src/features/       # auth, settings, search, onboarding
 │   │
 │   └── backend/                # Fastify API
-│       ├── src/modules/        # auth, users, admin, notifications, push, search, settings
+│       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, ...
 │       ├── src/database/       # Drizzle schema + migrations
 │       └── docker/             # Dockerfile + docker-compose
 │
 ├── packages/
-│   ├── ui/                     # Components, animations, navigation
+│   ├── ui/                     # Components, animations, landing page
+│   ├── auth/                   # Auth forms, providers, flows
 │   ├── store/                  # Zustand stores
-│   ├── i18n/                   # 4 locales
+│   ├── i18n/                   # 4 locales (EN/RU/ES/JA)
 │   ├── lib/                    # MMKV, secure storage
+│   ├── payments/               # Payment types, hooks, components
+│   ├── docs/                   # In-app documentation engine
+│   ├── template-config/        # Feature flags, color schemes
+│   ├── config/                 # Shared configuration
 │   └── analytics/              # PostHog abstraction
 │
 └── scripts/                    # PowerShell setup scripts
@@ -132,13 +138,24 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `PATCH` | `/notifications/:id/read` | Yes | Mark as read |
 | `POST` | `/push/register` | Yes | Register push token |
 | `DELETE` | `/push/unregister` | Yes | Remove push token |
-| `POST` | `/push/send` | Yes | Send notification |
+| `POST` | `/push/send` | Admin | Send notification to all/specific users |
+| `GET` | `/push/history` | Admin | Notification send history |
+| `POST` | `/notifications/read-all` | Yes | Mark all notifications as read |
 | `GET` | `/sse/events` | Yes | SSE stream |
 | `GET` | `/admin/users` | Admin | List users |
 | `GET` | `/admin/users/:id` | Admin | User details |
 | `PATCH` | `/admin/users/:id` | Admin | Update role/features |
 | `GET` | `/admin/stats` | Admin | User statistics |
 | `GET` | `/admin/config` | Admin | Available roles/features |
+| `GET` | `/payments/plans` | — | List active plans |
+| `POST` | `/payments/checkout` | Yes | Create checkout session |
+| `GET` | `/payments/subscription` | Yes | Current subscription |
+| `POST` | `/payments/cancel` | Yes | Cancel subscription |
+| `GET` | `/payments/history` | Yes | Payment history (paginated) |
+| `POST` | `/payments/webhook/stripe` | — | Stripe webhook |
+| `POST` | `/payments/webhook/yookassa` | — | YooKassa webhook |
+| `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
+| `POST` | `/payments/admin/plans` | Admin | Create a plan |
 | `GET` | `/health` | — | Health check |
 
 ## Database Schema
@@ -152,6 +169,9 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `push_tokens` | user_id, token, platform |
 | `notifications` | user_id, title, body, type, data (JSONB), is_read |
 | `user_settings` | user_id, settings (JSONB) |
+| `plans` | name, price_amount, currency, interval, features (JSONB), provider, provider_price_id |
+| `subscriptions` | user_id, plan_id, status, provider, provider_subscription_id, current_period_start/end |
+| `payments` | user_id, amount, currency, status, type, provider, provider_payment_id |
 
 Roles: `user` (default) | `moderator` | `admin`
 
@@ -264,6 +284,90 @@ Email functionality is disabled by default (`EMAIL_ENABLED=false`). When disable
 - **Welcome email** after successful verification
 - Templates in 4 languages (EN/RU/ES/JA), inline-styled for email clients
 
+## Push Notifications (Optional)
+
+Push notifications are disabled by default. Enabling requires an Expo access token.
+
+### Setup
+
+1. Create an account at [expo.dev](https://expo.dev) (or sign in)
+2. Go to **Settings** → **Access tokens** → **Create Token**
+3. Set `EXPO_ACCESS_TOKEN` in `apps/backend/.env`:
+
+   ```env
+   EXPO_ACCESS_TOKEN=your-expo-access-token
+   ```
+
+4. Restart the backend — the `pushNotifications` feature flag activates automatically
+
+### How It Works
+
+- **Device registration**: on login, the app calls `registerForPushNotifications()` which requests permissions and sends the Expo push token to `POST /api/push/register`
+- **Sending**: admin panel → Notify tab → enter title/body → Send to All. Calls `POST /api/push/send` which creates notification records, sends push via Expo, and emits SSE events
+- **Receiving**: notifications appear in the system tray (native) and in the in-app Notification Center (Settings → Notifications)
+- **Real-time**: SSE connection auto-refreshes the notification list when new notifications arrive (web only; native uses push)
+- **User settings**: users can toggle push notifications on/off in Settings → Notifications. Disabling calls `DELETE /api/push/unregister` to remove device tokens
+
+### Push Notification Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EXPO_ACCESS_TOKEN` | — | Expo access token (enables push feature) |
+
+### Limitations
+
+- Push notifications require a **physical device** (not simulator/emulator)
+- Expo Go has limited push support — use a **dev build** for full functionality
+- SSE (real-time events) works only on web; native uses push notifications
+- `EXPO_ACCESS_TOKEN` is optional for development but recommended for production
+
+## Payments (Optional)
+
+Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two providers: **Stripe** (international) and **YooKassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
+
+### Setup
+
+1. Set `PAYMENTS_ENABLED=true` in `apps/backend/.env`
+2. Configure at least one provider:
+
+   **Stripe:**
+   ```env
+   PAYMENTS_ENABLED=true
+   STRIPE_SECRET_KEY=sk_test_xxx
+   STRIPE_WEBHOOK_SECRET=whsec_xxx
+   ```
+   > Get keys from [Stripe Dashboard](https://dashboard.stripe.com/apikeys). For webhooks, use `stripe listen --forward-to localhost:3000/api/payments/webhook/stripe` during development.
+
+   **YooKassa:**
+   ```env
+   PAYMENTS_ENABLED=true
+   YOOKASSA_SHOP_ID=your-shop-id
+   YOOKASSA_SECRET_KEY=your-secret-key
+   ```
+   > Get keys from [YooKassa Dashboard](https://yookassa.ru/my). Set webhook URL to `https://your-domain.com/api/payments/webhook/yookassa`.
+
+3. Run `npm run db:push -w apps/backend` to create the `plans`, `subscriptions`, and `payments` tables
+4. Restart the backend — the `payments` feature flag activates automatically
+5. Create plans via the admin panel or `POST /api/payments/admin/plans`
+
+### How It Works
+
+- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe and YooKassa into a unified API
+- **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa) → webhook confirms payment
+- **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa)
+- **Admin panel**: Payments tab shows revenue stats, active subscriptions count, and recent payments
+- **User-facing**: pricing page at `/pricing`, subscription management in Settings → Manage Plan
+
+### Payment Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PAYMENTS_ENABLED` | `false` | Enable/disable payments module |
+| `STRIPE_SECRET_KEY` | — | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret |
+| `YOOKASSA_SHOP_ID` | — | YooKassa shop ID |
+| `YOOKASSA_SECRET_KEY` | — | YooKassa secret key |
+
 ## Features
 
 - **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in
@@ -278,6 +382,7 @@ Email functionality is disabled by default (`EMAIL_ENABLED=false`). When disable
 - **SSE**: real-time events with auto-reconnect
 - **Analytics**: PostHog abstraction with feature flags
 - **SEO**: meta tags, OG/Twitter cards, sitemap
+- **Payments**: Stripe + YooKassa, subscriptions & one-time, admin stats
 - **Security**: Helmet, CORS, Zod validation, rate limiting, no PII leaks
 
 ## Deployment

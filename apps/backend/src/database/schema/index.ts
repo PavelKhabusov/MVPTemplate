@@ -24,3 +24,12 @@ export type { PasswordResetToken, NewPasswordResetToken } from './password-reset
 
 export { docFeedback } from './doc-feedback'
 export type { DocFeedback, NewDocFeedback } from './doc-feedback'
+
+export { plans } from './plans'
+export type { Plan, NewPlan } from './plans'
+
+export { subscriptions } from './subscriptions'
+export type { Subscription, NewSubscription } from './subscriptions'
+
+export { payments } from './payments'
+export type { Payment, NewPayment } from './payments'

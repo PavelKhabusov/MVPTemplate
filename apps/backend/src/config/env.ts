@@ -36,6 +36,14 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().default('noreply@example.com'),
   APP_URL: z.string().default('http://localhost:8081'),
+
+  // Payments
+  PAYMENTS_ENABLED: envBoolean,
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  YOOKASSA_SHOP_ID: z.string().optional(),
+  YOOKASSA_SECRET_KEY: z.string().optional(),
+  YOOKASSA_WEBHOOK_SECRET: z.string().optional(),
 })
 
 function loadEnv() {
