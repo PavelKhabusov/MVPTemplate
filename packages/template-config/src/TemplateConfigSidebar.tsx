@@ -9,6 +9,7 @@ import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
+import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
 
 function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value: boolean; onToggle: () => void; action?: { label: string; onPress: () => void } }) {
   const theme = useTheme()
@@ -106,6 +107,8 @@ export function TemplateConfigSidebar() {
   const setSidebarOpen = useTemplateConfigStore((s) => s.setSidebarOpen)
   const overrides = useTemplateConfigStore((s) => s.overrides)
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
+  const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
+  const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
@@ -122,7 +125,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null
 
   const handleCopy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -176,6 +179,50 @@ export function TemplateConfigSidebar() {
         <Text fontSize="$1" color="$mutedText" paddingHorizontal="$3" marginBottom="$3" lineHeight={16}>
           {t('templateConfig.description')}
         </Text>
+
+        {/* Color Scheme */}
+        <Text
+          fontSize={11}
+          fontWeight="700"
+          color="$mutedText"
+          textTransform="uppercase"
+          letterSpacing={1}
+          paddingHorizontal="$3"
+          marginBottom="$2"
+        >
+          {t('templateConfig.colorScheme')}
+        </Text>
+        <XStack paddingHorizontal="$3" gap="$2.5" marginBottom="$3" flexWrap="wrap">
+          {COLOR_SCHEMES.map((scheme) => {
+            const isSelected = (colorScheme ?? DEFAULT_SCHEME_KEY) === scheme.key
+            return (
+              <Pressable
+                key={scheme.key}
+                onPress={() => {
+                  setColorScheme(scheme.key)
+                  applyColorScheme(scheme.key)
+                }}
+              >
+                <YStack
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  borderWidth={2}
+                  borderColor={isSelected ? '$color' : 'transparent'}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <YStack
+                    width={24}
+                    height={24}
+                    borderRadius={12}
+                    style={{ backgroundColor: scheme.swatch } as any}
+                  />
+                </YStack>
+              </Pressable>
+            )
+          })}
+        </XStack>
 
         {/* Frontend Flags */}
         <Text
@@ -276,7 +323,7 @@ export function TemplateConfigSidebar() {
         {/* Reset Button */}
         {hasOverrides && (
           <YStack paddingHorizontal="$3" marginTop="$3">
-            <Pressable onPress={resetAll}>
+            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY) }}>
               <XStack
                 alignItems="center"
                 justifyContent="center"

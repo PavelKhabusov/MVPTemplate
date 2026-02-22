@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, XStack, YStack, Text, useTheme } from 'tamagui'
-import { forceUpdateThemes } from '@tamagui/web'
 import { Ionicons } from '@expo/vector-icons'
 import { PortalProvider } from '@tamagui/portal'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -10,7 +9,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
-import { TemplateConfigSidebar } from '@mvp/template-config'
+import { TemplateConfigSidebar, applyColorScheme, DEFAULT_SCHEME_KEY, useTemplateConfigStore } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -265,14 +264,14 @@ export default function RootLayout() {
     authApi.initialize()
   }, [])
 
-  // Force all Tamagui theme consumers to re-render when the resolved theme changes.
-  // TamaguiProvider's internal Theme updates CSS variables, but components using
-  // useTheme().val in inline styles may not pick up changes without this.
+  // Apply persisted color scheme and force theme update when theme or color scheme changes.
+  const templateColorScheme = useTemplateConfigStore((s) => s.colorScheme)
+
   useLayoutEffect(() => {
     if (Platform.OS === 'web') {
-      forceUpdateThemes()
+      applyColorScheme(templateColorScheme ?? DEFAULT_SCHEME_KEY)
     }
-  }, [resolvedTheme])
+  }, [resolvedTheme, templateColorScheme])
 
   const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 

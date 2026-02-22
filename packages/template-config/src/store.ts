@@ -5,8 +5,10 @@ import { mmkvStorage } from '@mvp/lib'
 interface TemplateConfigState {
   sidebarOpen: boolean
   overrides: Record<string, boolean>
+  colorScheme: string | null
   setSidebarOpen: (open: boolean) => void
   setFlag: (key: string, value: boolean) => void
+  setColorScheme: (key: string) => void
   resetAll: () => void
 }
 
@@ -15,17 +17,19 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
     (set) => ({
       sidebarOpen: false,
       overrides: {},
+      colorScheme: null,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setFlag: (key, value) =>
         set((state) => ({
           overrides: { ...state.overrides, [key]: value },
         })),
-      resetAll: () => set({ overrides: {} }),
+      setColorScheme: (key) => set({ colorScheme: key }),
+      resetAll: () => set({ overrides: {}, colorScheme: null }),
     }),
     {
       name: 'template-config',
       storage: createJSONStorage(() => mmkvStorage),
-      partialize: (state) => ({ overrides: state.overrides }),
+      partialize: (state) => ({ overrides: state.overrides, colorScheme: state.colorScheme }),
     },
   ),
 )

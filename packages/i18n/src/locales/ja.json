@@ -310,6 +310,12 @@
     "cookieBanner": "Cookieバナー",
     "pushNotifications": "プッシュ通知",
     "showBanner": "表示",
-    "docFeedback": "ドキュメントフィードバック"
+    "docFeedback": "ドキュメントフィードバック",
+    "colorScheme": "カラースキーム",
+    "schemeCyan": "シアン",
+    "schemeEmerald": "エメラルド",
+    "schemeRose": "ローズ",
+    "schemeAmber": "アンバー",
+    "schemeViolet": "バイオレット"
   }
 }

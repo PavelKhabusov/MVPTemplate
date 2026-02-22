@@ -310,6 +310,12 @@
     "cookieBanner": "Banner de cookies",
     "pushNotifications": "Notificaciones push",
     "showBanner": "Mostrar",
-    "docFeedback": "Comentarios de documentación"
+    "docFeedback": "Comentarios de documentación",
+    "colorScheme": "Paleta de colores",
+    "schemeCyan": "Cian",
+    "schemeEmerald": "Esmeralda",
+    "schemeRose": "Rosa",
+    "schemeAmber": "Ámbar",
+    "schemeViolet": "Violeta"
   }
 }

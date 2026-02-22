@@ -310,6 +310,12 @@
     "cookieBanner": "Cookie Banner",
     "pushNotifications": "Push Notifications",
     "showBanner": "Show",
-    "docFeedback": "Doc Feedback"
+    "docFeedback": "Doc Feedback",
+    "colorScheme": "Color Scheme",
+    "schemeCyan": "Cyan",
+    "schemeEmerald": "Emerald",
+    "schemeRose": "Rose",
+    "schemeAmber": "Amber",
+    "schemeViolet": "Violet"
   }
 }

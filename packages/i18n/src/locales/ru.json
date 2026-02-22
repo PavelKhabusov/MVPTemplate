@@ -310,6 +310,12 @@
     "cookieBanner": "Баннер cookie",
     "pushNotifications": "Push-уведомления",
     "showBanner": "Показать",
-    "docFeedback": "Отзывы о документации"
+    "docFeedback": "Отзывы о документации",
+    "colorScheme": "Цветовая схема",
+    "schemeCyan": "Голубой",
+    "schemeEmerald": "Изумрудный",
+    "schemeRose": "Розовый",
+    "schemeAmber": "Янтарный",
+    "schemeViolet": "Фиолетовый"
   }
 }
