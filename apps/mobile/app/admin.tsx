@@ -6,7 +6,15 @@ import { useTranslation } from '@mvp/i18n'
 import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
-import { useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
+import {
+  useTemplateConfigStore,
+  useTemplateFlag,
+  TEMPLATE_FLAGS,
+  COLOR_SCHEMES,
+  DEFAULT_SCHEME_KEY,
+  applyColorScheme,
+} from '@mvp/template-config'
+import { useCookieConsentStore } from '@mvp/store'
 import { api } from '../src/services/api'
 
 const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
@@ -172,6 +180,183 @@ function SimpleBarChart({ data }: { data: Array<{ day: string; events: number; u
   )
 }
 
+function TemplateConfigTab() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const overrides = useTemplateConfigStore((s) => s.overrides)
+  const setFlag = useTemplateConfigStore((s) => s.setFlag)
+  const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
+  const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
+  const resetAll = useTemplateConfigStore((s) => s.resetAll)
+  const resetConsent = useCookieConsentStore((s) => s.resetConsent)
+
+  const frontendFlags = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend')
+  const backendFlags = TEMPLATE_FLAGS.filter((f) => f.scope !== 'frontend')
+
+  const getFlagValue = (key: string, defaultValue: boolean) =>
+    overrides[key] !== undefined ? overrides[key] : defaultValue
+
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+      <FadeIn>
+        <YStack gap="$3">
+          <Text color="$mutedText" fontSize="$2" lineHeight={18}>
+            {t('templateConfig.description')}
+          </Text>
+
+          {/* Color Scheme */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('templateConfig.colorScheme')}
+            </Text>
+            <XStack gap="$3" flexWrap="wrap">
+              {COLOR_SCHEMES.map((scheme) => {
+                const isSelected = (colorScheme ?? DEFAULT_SCHEME_KEY) === scheme.key
+                return (
+                  <ScalePress
+                    key={scheme.key}
+                    onPress={() => {
+                      setColorScheme(scheme.key)
+                      applyColorScheme(scheme.key)
+                    }}
+                  >
+                    <YStack alignItems="center" gap="$1.5">
+                      <YStack
+                        width={44}
+                        height={44}
+                        borderRadius={22}
+                        borderWidth={3}
+                        borderColor={isSelected ? '$color' : 'transparent'}
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <YStack
+                          width={34}
+                          height={34}
+                          borderRadius={17}
+                          style={{ backgroundColor: scheme.swatch } as any}
+                        />
+                      </YStack>
+                      <Text fontSize="$1" color={isSelected ? '$color' : '$mutedText'} fontWeight={isSelected ? '600' : '400'}>
+                        {t(scheme.labelKey)}
+                      </Text>
+                    </YStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </AppCard>
+
+          {/* Frontend Flags */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
+              {t('templateConfig.frontend')}
+            </Text>
+            <YStack gap="$2">
+              {frontendFlags.map((flag) => {
+                const value = getFlagValue(flag.key, flag.defaultValue)
+                return (
+                  <XStack key={flag.key} alignItems="center" justifyContent="space-between">
+                    <XStack alignItems="center" gap="$2" flex={1}>
+                      <Ionicons
+                        name={flag.icon}
+                        size={18}
+                        color={value ? theme.accent.val : theme.mutedText.val}
+                      />
+                      <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                        {t(flag.labelKey)}
+                      </Text>
+                    </XStack>
+                    <XStack alignItems="center" gap="$2">
+                      {flag.key === 'cookieBanner' && value && (
+                        <ScalePress onPress={resetConsent}>
+                          <XStack
+                            paddingHorizontal="$2"
+                            paddingVertical="$1"
+                            borderRadius="$2"
+                            borderWidth={1}
+                            borderColor="$borderColor"
+                          >
+                            <Text fontSize="$1" color="$mutedText" fontWeight="600">
+                              {t('templateConfig.showBanner')}
+                            </Text>
+                          </XStack>
+                        </ScalePress>
+                      )}
+                      <AppSwitch
+                        checked={value}
+                        onCheckedChange={() => setFlag(flag.key, !value)}
+                      />
+                    </XStack>
+                  </XStack>
+                )
+              })}
+            </YStack>
+          </AppCard>
+
+          {/* Backend Flags */}
+          <AppCard animated={false}>
+            <XStack alignItems="center" gap="$2" marginBottom="$2">
+              <Text fontWeight="600" color="$color" fontSize="$4">
+                {t('templateConfig.backend')}
+              </Text>
+              <XStack
+                backgroundColor="$subtleBackground"
+                paddingHorizontal="$1.5"
+                paddingVertical={2}
+                borderRadius="$1"
+              >
+                <Text fontSize={10} color="$mutedText" fontWeight="600">
+                  .env
+                </Text>
+              </XStack>
+            </XStack>
+            <YStack gap="$2">
+              {backendFlags.map((flag) => {
+                const value = getFlagValue(flag.key, flag.defaultValue)
+                return (
+                  <XStack key={flag.key} alignItems="center" justifyContent="space-between">
+                    <XStack alignItems="center" gap="$2" flex={1}>
+                      <Ionicons
+                        name={flag.icon}
+                        size={18}
+                        color={value ? theme.accent.val : theme.mutedText.val}
+                      />
+                      <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                        {t(flag.labelKey)}
+                      </Text>
+                    </XStack>
+                    <AppSwitch
+                      checked={value}
+                      onCheckedChange={() => setFlag(flag.key, !value)}
+                    />
+                  </XStack>
+                )
+              })}
+            </YStack>
+          </AppCard>
+
+          {/* Reset Button */}
+          {hasOverrides && (
+            <AppButton
+              variant="outline"
+              onPress={() => {
+                resetAll()
+                applyColorScheme(DEFAULT_SCHEME_KEY)
+              }}
+            >
+              {t('templateConfig.reset')}
+            </AppButton>
+          )}
+        </YStack>
+      </FadeIn>
+    </ScrollView>
+  )
+}
+
 export default function AdminScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -179,7 +364,7 @@ export default function AdminScreen() {
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify'>(analyticsEnabled ? 'analytics' : 'users')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -403,23 +588,29 @@ export default function AdminScreen() {
                 </XStack>
               </ScalePress>
             )}
-            {Platform.OS === 'web' && isTemplateConfigEnabled && (
-            <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
-              <XStack
-                backgroundColor="$subtleBackground"
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-                gap="$1.5"
-                alignItems="center"
-              >
-                <Ionicons name="construct-outline" size={16} color={theme.accent.val} />
-                <Text color="$color" fontWeight="600" fontSize="$3">
-                  {t('templateConfig.title')}
-                </Text>
-              </XStack>
-            </ScalePress>
-          )}
+            {isTemplateConfigEnabled && (
+              <ScalePress onPress={() => {
+                if (Platform.OS === 'web') {
+                  useTemplateConfigStore.getState().setSidebarOpen(true)
+                } else {
+                  setActiveTab('config')
+                }
+              }}>
+                <XStack
+                  backgroundColor={activeTab === 'config' ? '$accent' : '$subtleBackground'}
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                  gap="$1.5"
+                  alignItems="center"
+                >
+                  <Ionicons name="construct-outline" size={16} color={activeTab === 'config' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'config' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                    {t('templateConfig.title')}
+                  </Text>
+                </XStack>
+              </ScalePress>
+            )}
           </XStack>
         </ScrollView>
 
@@ -733,6 +924,11 @@ export default function AdminScreen() {
             </YStack>
           </FadeIn>
         </ScrollView>
+      )}
+
+      {/* Template Config Tab */}
+      {isTemplateConfigEnabled && activeTab === 'config' && (
+        <TemplateConfigTab />
       )}
 
       {/* Edit User Modal */}
