@@ -3,7 +3,7 @@ import { paymentsRepository } from './payments.repository'
 import { getPaymentProvider, getEnabledProviders } from './providers/provider-factory'
 import type { WebhookEvent } from './providers/payment-provider'
 import type { z } from 'zod'
-import type { createPlanSchema } from './payments.schema'
+import type { createPlanSchema, updatePlanSchema } from './payments.schema'
 
 export const paymentsService = {
   async getPlans() {
@@ -173,6 +173,22 @@ export const paymentsService = {
 
   async createPlan(input: z.infer<typeof createPlanSchema>) {
     return paymentsRepository.createPlan(input)
+  },
+
+  async getAllPlans() {
+    return paymentsRepository.getAllPlans()
+  },
+
+  async updatePlan(planId: string, input: z.infer<typeof updatePlanSchema>) {
+    const plan = await paymentsRepository.getPlanById(planId)
+    if (!plan) throw AppError.notFound('Plan not found')
+    return paymentsRepository.updatePlan(planId, input)
+  },
+
+  async deactivatePlan(planId: string) {
+    const plan = await paymentsRepository.getPlanById(planId)
+    if (!plan) throw AppError.notFound('Plan not found')
+    return paymentsRepository.deactivatePlan(planId)
   },
 
   async getAdminStats(days: number) {

@@ -136,7 +136,12 @@
     "planInterval": "Intervalo de facturación",
     "planProvider": "Proveedor de pago",
     "planProviderPriceId": "ID del precio del proveedor (opcional)",
-    "planFeaturesPlaceholder": "Características (una por línea)"
+    "planFeaturesPlaceholder": "Características (una por línea)",
+    "existingPlans": "Planes",
+    "editPlan": "Editar",
+    "deletePlan": "Eliminar plan",
+    "deletePlanConfirm": "¿Estás seguro de que quieres eliminar este plan? Esta acción no se puede deshacer.",
+    "inactive": "Inactivo"
   },
   "notifications": {
     "title": "Notificaciones",

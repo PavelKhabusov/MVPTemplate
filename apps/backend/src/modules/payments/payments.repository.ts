@@ -30,6 +30,28 @@ export const paymentsRepository = {
     return result[0]
   },
 
+  async getAllPlans() {
+    return db.select().from(plans).orderBy(plans.sortOrder, plans.createdAt)
+  },
+
+  async updatePlan(id: string, data: Partial<typeof plans.$inferInsert>) {
+    const result = await db
+      .update(plans)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(plans.id, id))
+      .returning()
+    return result[0] ?? null
+  },
+
+  async deactivatePlan(id: string) {
+    const result = await db
+      .update(plans)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(plans.id, id))
+      .returning()
+    return result[0] ?? null
+  },
+
   // --- Subscriptions ---
   async getActiveSubscription(userId: string) {
     const result = await db

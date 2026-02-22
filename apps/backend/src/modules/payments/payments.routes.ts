@@ -8,6 +8,7 @@ import {
   checkoutSchema,
   paginationSchema,
   createPlanSchema,
+  updatePlanSchema,
 } from './payments.schema'
 
 export async function paymentsRoutes(app: FastifyInstance) {
@@ -91,6 +92,11 @@ export async function paymentsRoutes(app: FastifyInstance) {
     return sendSuccess(reply, stats)
   })
 
+  app.get('/admin/plans', { preHandler: [authenticate, requireAdmin] }, async (_request, reply) => {
+    const plans = await paymentsService.getAllPlans()
+    return sendSuccess(reply, plans)
+  })
+
   app.post(
     '/admin/plans',
     { preHandler: [authenticate, requireAdmin] },
@@ -98,6 +104,27 @@ export async function paymentsRoutes(app: FastifyInstance) {
       const input = createPlanSchema.parse(request.body)
       const plan = await paymentsService.createPlan(input)
       return sendSuccess(reply, plan, 201)
+    },
+  )
+
+  app.patch(
+    '/admin/plans/:id',
+    { preHandler: [authenticate, requireAdmin] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const input = updatePlanSchema.parse(request.body)
+      const plan = await paymentsService.updatePlan(id, input)
+      return sendSuccess(reply, plan)
+    },
+  )
+
+  app.delete(
+    '/admin/plans/:id',
+    { preHandler: [authenticate, requireAdmin] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      await paymentsService.deactivatePlan(id)
+      return sendSuccess(reply, { message: 'Plan deactivated' })
     },
   )
 }

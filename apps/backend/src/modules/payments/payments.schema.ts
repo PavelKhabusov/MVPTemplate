@@ -26,3 +26,15 @@ export const createPlanSchema = z.object({
   provider: z.enum(['stripe', 'yookassa']),
   sortOrder: z.number().int().optional().default(0),
 })
+
+export const updatePlanSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  description: z.string().max(1000).optional(),
+  priceAmount: z.number().int().min(0).optional(),
+  currency: z.string().min(3).max(10).optional(),
+  interval: z.enum(['month', 'year', 'one_time']).optional(),
+  features: z.array(z.string()).optional(),
+  providerPriceId: z.string().optional(),
+  isActive: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+})

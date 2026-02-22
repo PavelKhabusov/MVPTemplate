@@ -136,7 +136,12 @@
     "planInterval": "請求間隔",
     "planProvider": "決済プロバイダー",
     "planProviderPriceId": "プロバイダー価格ID（任意）",
-    "planFeaturesPlaceholder": "機能（1行に1つ）"
+    "planFeaturesPlaceholder": "機能（1行に1つ）",
+    "existingPlans": "プラン",
+    "editPlan": "編集",
+    "deletePlan": "プランを削除",
+    "deletePlanConfirm": "このプランを削除してもよろしいですか？この操作は元に戻せません。",
+    "inactive": "無効"
   },
   "notifications": {
     "title": "通知",

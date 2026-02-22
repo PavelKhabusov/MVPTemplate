@@ -136,7 +136,12 @@
     "planInterval": "Период оплаты",
     "planProvider": "Платёжный провайдер",
     "planProviderPriceId": "ID цены провайдера (необязательно)",
-    "planFeaturesPlaceholder": "Возможности (по одной на строку)"
+    "planFeaturesPlaceholder": "Возможности (по одной на строку)",
+    "existingPlans": "Тарифы",
+    "editPlan": "Редактировать",
+    "deletePlan": "Удалить тариф",
+    "deletePlanConfirm": "Вы уверены, что хотите удалить этот тариф? Это действие нельзя отменить.",
+    "inactive": "Неактивен"
   },
   "notifications": {
     "title": "Уведомления",
