@@ -14,7 +14,8 @@
     "noResults": "No se encontraron resultados",
     "empty": "Nada aquí todavía",
     "viewAll": "Ver todo",
-    "edit": "Editar"
+    "edit": "Editar",
+    "comingSoon": "Próximamente"
   },
   "auth": {
     "signIn": "Iniciar sesión",
@@ -125,7 +126,10 @@
   "notifications": {
     "title": "Notificaciones",
     "empty": "Aún no hay notificaciones",
-    "markAllRead": "Marcar todo como leído"
+    "markAllRead": "Marcar todo como leído",
+    "settings": "Ajustes",
+    "pushToggle": "Notificaciones push",
+    "emailToggle": "Notificaciones por email"
   },
   "onboarding": {
     "skip": "Omitir",

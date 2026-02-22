@@ -14,7 +14,8 @@
     "noResults": "Ничего не найдено",
     "empty": "Пока здесь пусто",
     "viewAll": "Смотреть все",
-    "edit": "Изм."
+    "edit": "Изм.",
+    "comingSoon": "Скоро"
   },
   "auth": {
     "signIn": "Войти",
@@ -125,7 +126,10 @@
   "notifications": {
     "title": "Уведомления",
     "empty": "Пока нет уведомлений",
-    "markAllRead": "Отметить все как прочитанные"
+    "markAllRead": "Отметить все как прочитанные",
+    "settings": "Настройки",
+    "pushToggle": "Push-уведомления",
+    "emailToggle": "Email-уведомления"
   },
   "onboarding": {
     "skip": "Пропустить",

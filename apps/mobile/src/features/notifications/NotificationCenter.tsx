@@ -1,11 +1,14 @@
-import { ScrollView } from 'react-native'
+import { useState, useCallback } from 'react'
+import { ScrollView, Platform } from 'react-native'
 import { YStack, Text, XStack, H2 } from 'tamagui'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
-import { StateView, FadeIn, AnimatedListItem, AppCard, ScalePress } from '@mvp/ui'
+import { StateView, FadeIn, AnimatedListItem, AppCard, ScalePress, SettingsGroup, SettingsGroupItem } from '@mvp/ui'
 import { api } from '../../services/api'
 import { useQueryState } from '@mvp/lib'
+import { storage } from '@mvp/lib'
+import { registerForPushNotifications } from '../../services/push'
 
 interface Notification {
   id: string
@@ -14,6 +17,29 @@ interface Notification {
   type: string
   isRead: boolean
   createdAt: string
+}
+
+const PUSH_PREF_KEY = 'push_notifications_enabled'
+
+function usePushPreference() {
+  const [enabled, setEnabled] = useState(() => {
+    return storage.getString(PUSH_PREF_KEY) !== 'false'
+  })
+
+  const toggle = useCallback(async (value: boolean) => {
+    setEnabled(value)
+    storage.set(PUSH_PREF_KEY, value ? 'true' : 'false')
+
+    if (value) {
+      await registerForPushNotifications().catch(() => {})
+    } else {
+      try {
+        await api.delete('/push/unregister')
+      } catch {}
+    }
+  }, [])
+
+  return { enabled, toggle }
 }
 
 function useNotifications() {
@@ -36,19 +62,38 @@ export function NotificationCenter() {
     emptyMessage: t('notifications.empty'),
   })
   const queryClient = useQueryClient()
+  const pushPref = usePushPreference()
+  const isNative = Platform.OS !== 'web'
 
   const markAllRead = useMutation({
     mutationFn: () => api.post('/notifications/read-all'),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   })
 
-  if (state.status !== 'success') {
-    return <StateView state={state} />
-  }
-
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
       <YStack padding="$4" gap="$3">
+        {/* Settings */}
+        <FadeIn>
+          <SettingsGroup header={t('notifications.settings')}>
+            {isNative && (
+              <SettingsGroupItem
+                icon="notifications-outline"
+                label={t('notifications.pushToggle')}
+                toggle
+                toggleValue={pushPref.enabled}
+                onToggleChange={pushPref.toggle}
+              />
+            )}
+            <SettingsGroupItem
+              icon="mail-outline"
+              label={t('notifications.emailToggle')}
+              value={t('common.comingSoon')}
+            />
+          </SettingsGroup>
+        </FadeIn>
+
+        {/* Header */}
         <XStack justifyContent="space-between" alignItems="center">
           <FadeIn>
             <H2>{t('notifications.title')}</H2>
@@ -60,27 +105,31 @@ export function NotificationCenter() {
           </ScalePress>
         </XStack>
 
-        {state.data.map((notification, index) => (
-          <AnimatedListItem key={notification.id} index={index}>
-            <AppCard
-              opacity={notification.isRead ? 0.6 : 1}
-              borderLeftWidth={3}
-              borderLeftColor={notification.isRead ? '$borderColor' : '$primary'}
-            >
-              <Text fontWeight="600" fontSize="$3">
-                {notification.title}
-              </Text>
-              {notification.body && (
-                <Text color="$mutedText" fontSize="$2" marginTop="$1">
-                  {notification.body}
+        {state.status !== 'success' ? (
+          <StateView state={state} />
+        ) : (
+          state.data.map((notification, index) => (
+            <AnimatedListItem key={notification.id} index={index}>
+              <AppCard
+                opacity={notification.isRead ? 0.6 : 1}
+                borderLeftWidth={3}
+                borderLeftColor={notification.isRead ? '$borderColor' : '$primary'}
+              >
+                <Text fontWeight="600" fontSize="$3">
+                  {notification.title}
                 </Text>
-              )}
-              <Text color="$mutedText" fontSize="$1" marginTop="$2">
-                {new Date(notification.createdAt).toLocaleDateString()}
-              </Text>
-            </AppCard>
-          </AnimatedListItem>
-        ))}
+                {notification.body && (
+                  <Text color="$mutedText" fontSize="$2" marginTop="$1">
+                    {notification.body}
+                  </Text>
+                )}
+                <Text color="$mutedText" fontSize="$1" marginTop="$2">
+                  {new Date(notification.createdAt).toLocaleDateString()}
+                </Text>
+              </AppCard>
+            </AnimatedListItem>
+          ))
+        )}
       </YStack>
     </ScrollView>
   )

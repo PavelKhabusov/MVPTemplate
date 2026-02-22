@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Platform, RefreshControl, ScrollView, Modal } from 'react-native'
 import { YStack, XStack, Text, H2, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -55,13 +55,22 @@ export default function SettingsScreen() {
 
 function NotificationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const theme = useTheme()
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && visible) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = prev }
+    }
+  }, [visible])
+
   if (!visible) return null
 
   if (Platform.OS === 'web') {
     return (
       <YStack
         // @ts-ignore — fixed position for web overlay
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: theme.background.val }}
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: theme.background.val, overflow: 'auto' }}
       >
         <XStack justifyContent="flex-end" padding="$3">
           <ScalePress onPress={onClose}>

@@ -14,7 +14,8 @@
     "noResults": "No results found",
     "empty": "Nothing here yet",
     "viewAll": "View All",
-    "edit": "Edit"
+    "edit": "Edit",
+    "comingSoon": "Coming Soon"
   },
   "auth": {
     "signIn": "Sign In",
@@ -125,7 +126,10 @@
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",
-    "markAllRead": "Mark all as read"
+    "markAllRead": "Mark all as read",
+    "settings": "Settings",
+    "pushToggle": "Push Notifications",
+    "emailToggle": "Email Notifications"
   },
   "onboarding": {
     "skip": "Skip",

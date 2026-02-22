@@ -14,7 +14,8 @@
     "noResults": "結果が見つかりません",
     "empty": "まだ何もありません",
     "viewAll": "すべて表示",
-    "edit": "編集"
+    "edit": "編集",
+    "comingSoon": "近日公開"
   },
   "auth": {
     "signIn": "ログイン",
@@ -125,7 +126,10 @@
   "notifications": {
     "title": "通知",
     "empty": "通知はまだありません",
-    "markAllRead": "すべて既読にする"
+    "markAllRead": "すべて既読にする",
+    "settings": "設定",
+    "pushToggle": "プッシュ通知",
+    "emailToggle": "メール通知"
   },
   "onboarding": {
     "skip": "スキップ",
