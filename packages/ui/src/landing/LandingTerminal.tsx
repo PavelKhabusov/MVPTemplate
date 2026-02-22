@@ -171,16 +171,16 @@ export function LandingTerminal() {
           </YStack>
         </SlideIn>
 
-        <XStack flexWrap="wrap" gap="$4" justifyContent="center" style={{ alignItems: 'stretch' } as any}>
+        <XStack flexWrap="wrap" gap="$4" justifyContent="center">
           {/* ── Terminal panel ── */}
-          <SlideIn from="left" delay={100} style={{ flex: 1, minWidth: 300, maxWidth: 600 }}>
+          <SlideIn from="left" delay={100}>
             <YStack
               className="terminal-panel"
               borderRadius="$4"
               overflow="hidden"
               borderWidth={1}
               borderColor="$borderColor"
-              flex={1}
+              style={{ minWidth: 300, flex: 1, maxWidth: 600 } as any}
             >
               {/* Title bar */}
               <XStack
@@ -200,8 +200,7 @@ export function LandingTerminal() {
               <YStack
                 padding="$4"
                 gap="$1.5"
-                flex={1}
-                style={{ backgroundColor: '#0d1117', minHeight: 280, overflow: 'hidden' } as any}
+                style={{ backgroundColor: '#0d1117', minHeight: 280 } as any}
               >
                 {TERMINAL_LINES.map((line, i) => {
                   if (i > currentLine) return null
@@ -273,14 +272,14 @@ export function LandingTerminal() {
           </SlideIn>
 
           {/* ── Project tree panel ── */}
-          <SlideIn from="right" delay={200} style={{ flex: 1, minWidth: 300, maxWidth: 600 }}>
+          <SlideIn from="right" delay={200}>
             <YStack
               className="terminal-panel"
               borderRadius="$4"
               overflow="hidden"
               borderWidth={1}
               borderColor="$borderColor"
-              flex={1}
+              style={{ minWidth: 300, flex: 1, maxWidth: 600 } as any}
             >
               {/* Title bar */}
               <XStack
@@ -300,7 +299,6 @@ export function LandingTerminal() {
               <YStack
                 padding="$4"
                 gap="$1"
-                flex={1}
                 style={{ backgroundColor: '#0d1117', minHeight: 280 } as any}
               >
                 {TREE_LINES.map((line, i) => {
