@@ -55,8 +55,9 @@ export default function SettingsScreen() {
 
 function NotificationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const theme = useTheme()
+  if (!visible) return null
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <YStack flex={1} backgroundColor="$background">
         <XStack justifyContent="flex-end" padding="$3" paddingTop={Platform.OS === 'ios' ? 60 : '$3'}>
           <ScalePress onPress={onClose}>
