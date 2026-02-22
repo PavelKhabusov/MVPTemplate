@@ -236,7 +236,8 @@
     "footerRights": "All rights reserved.",
     "goToApp": "アプリを開く",
     "navFeatures": "機能",
-    "navShowcase": "ショーケース"
+    "navShowcase": "ショーケース",
+    "navPricing": "料金"
   },
   "interactive": {
     "notes": "メモ",
@@ -337,7 +338,10 @@
     "succeeded": "成功",
     "pending": "処理中",
     "failed": "失敗",
-    "refunded": "返金済み"
+    "refunded": "返金済み",
+    "successTitle": "お支払い完了!",
+    "successMessage": "ご購入ありがとうございます。サブスクリプションが有効になりました。",
+    "noPlans": "現在利用可能なプランはありません。後ほどご確認ください!"
   },
   "templateConfig": {
     "title": "テンプレート設定",

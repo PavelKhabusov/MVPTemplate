@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Platform, ScrollView, Linking, Alert } from 'react-native'
+import { Platform, ScrollView, Linking, Alert, TouchableOpacity } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
@@ -18,6 +18,19 @@ export default function PricingScreen() {
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
   const [canceling, setCanceling] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+
+  // Check for ?success=true URL param (after checkout redirect)
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('success') === 'true') {
+        setShowSuccess(true)
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname)
+      }
+    }
+  }, [])
 
   const fetchData = useCallback(async () => {
     try {
@@ -93,10 +106,40 @@ export default function PricingScreen() {
       }}
     >
       <FadeIn>
-        <YStack gap="$3">
-          <Text color="$mutedText" fontSize="$3" textAlign="center">
-            {t('payments.subtitle')}
-          </Text>
+        <YStack gap="$4">
+          {/* Header */}
+          <YStack alignItems="center" gap="$2" paddingTop="$4">
+            <Text fontWeight="bold" fontSize={28} color="$color" textAlign="center">
+              {t('payments.title')}
+            </Text>
+            <Text color="$mutedText" fontSize="$3" textAlign="center" maxWidth={400}>
+              {t('payments.subtitle')}
+            </Text>
+          </YStack>
+
+          {/* Success banner */}
+          {showSuccess && (
+            <XStack
+              backgroundColor="#059669"
+              borderRadius="$4"
+              padding="$4"
+              gap="$3"
+              alignItems="center"
+            >
+              <Ionicons name="checkmark-circle" size={24} color="white" />
+              <YStack flex={1} gap="$1">
+                <Text fontWeight="700" color="white" fontSize="$4">
+                  {t('payments.successTitle')}
+                </Text>
+                <Text color="white" fontSize="$2" opacity={0.9}>
+                  {t('payments.successMessage')}
+                </Text>
+              </YStack>
+              <TouchableOpacity onPress={() => setShowSuccess(false)}>
+                <Ionicons name="close" size={20} color="white" />
+              </TouchableOpacity>
+            </XStack>
+          )}
 
           {/* Current subscription */}
           {subscription && (
@@ -132,9 +175,12 @@ export default function PricingScreen() {
               {t('common.loading')}
             </Text>
           ) : plans.length === 0 ? (
-            <Text color="$mutedText" textAlign="center" paddingVertical="$6">
-              {t('payments.noHistory')}
-            </Text>
+            <YStack alignItems="center" gap="$3" paddingVertical="$8">
+              <Ionicons name="pricetags-outline" size={48} color={theme.mutedText.val} />
+              <Text color="$mutedText" textAlign="center" fontSize="$4">
+                {t('payments.noPlans')}
+              </Text>
+            </YStack>
           ) : (
             plans.map((plan) => (
               <PricingCard

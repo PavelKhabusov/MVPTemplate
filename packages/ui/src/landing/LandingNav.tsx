@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from '@mvp/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS, type SupportedLanguage } from '@mvp/i18n'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
+import { useTemplateFlag } from '@mvp/template-config'
 import { MotiView, AnimatePresence } from 'moti'
 import { AppAvatar } from '../components/AppAvatar'
 import { ScalePress } from '../animations/ScalePress'
@@ -23,6 +24,7 @@ export function LandingNav({ onNavigate, logo }: LandingNavProps) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const paymentsEnabled = useTemplateFlag('payments', false)
 
   // Inject responsive CSS
   useEffect(() => {
@@ -119,6 +121,15 @@ export function LandingNav({ onNavigate, logo }: LandingNavProps) {
           >
             {t('landing.navShowcase')}
           </Text>
+          {paymentsEnabled && (
+            <Text
+              color="$mutedText" fontSize="$3" cursor="pointer"
+              hoverStyle={{ color: '$color' } as any}
+              onPress={() => onNavigate('/pricing')}
+            >
+              {t('landing.navPricing')}
+            </Text>
+          )}
 
           <ScalePress onPress={cycleTheme}>
             <YStack width={36} height={36} borderRadius={18} alignItems="center" justifyContent="center" backgroundColor="$subtleBackground">
@@ -216,6 +227,11 @@ export function LandingNav({ onNavigate, logo }: LandingNavProps) {
           <Text color="$mutedText" fontSize="$3" onPress={() => { document.getElementById('showcase')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false) }}>
             {t('landing.navShowcase')}
           </Text>
+          {paymentsEnabled && (
+            <Text color="$mutedText" fontSize="$3" onPress={() => { onNavigate('/pricing'); setMobileMenuOpen(false) }}>
+              {t('landing.navPricing')}
+            </Text>
+          )}
 
           <XStack gap="$2" flexWrap="wrap">
             {SUPPORTED_LANGUAGES.map((lang) => (

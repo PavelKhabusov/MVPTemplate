@@ -236,7 +236,8 @@
     "footerRights": "Todos los derechos reservados.",
     "goToApp": "Abrir app",
     "navFeatures": "Características",
-    "navShowcase": "Demos"
+    "navShowcase": "Demos",
+    "navPricing": "Precios"
   },
   "interactive": {
     "notes": "Notas",
@@ -337,7 +338,10 @@
     "succeeded": "Exitoso",
     "pending": "Pendiente",
     "failed": "Fallido",
-    "refunded": "Reembolsado"
+    "refunded": "Reembolsado",
+    "successTitle": "Pago exitoso!",
+    "successMessage": "Gracias por tu compra. Tu suscripción está activa.",
+    "noPlans": "No hay planes disponibles aún. Vuelve más tarde!"
   },
   "templateConfig": {
     "title": "Configurador",

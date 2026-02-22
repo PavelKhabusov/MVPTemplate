@@ -236,7 +236,8 @@
     "footerRights": "All rights reserved.",
     "goToApp": "Open App",
     "navFeatures": "Features",
-    "navShowcase": "Showcase"
+    "navShowcase": "Showcase",
+    "navPricing": "Pricing"
   },
   "interactive": {
     "notes": "Notes",
@@ -331,7 +332,10 @@
     "succeeded": "Succeeded",
     "pending": "Pending",
     "failed": "Failed",
-    "refunded": "Refunded"
+    "refunded": "Refunded",
+    "successTitle": "Payment Successful!",
+    "successMessage": "Thank you for your purchase. Your subscription is now active.",
+    "noPlans": "No plans available yet. Check back later!"
   },
   "cookies": {
     "message": "We use cookies and local storage to improve your experience and analyze usage.",
