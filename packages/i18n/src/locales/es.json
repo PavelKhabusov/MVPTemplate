@@ -115,7 +115,12 @@
     "noData": "Sin datos de analíticas",
     "docFeedback": "Comentarios",
     "noFeedback": "Aún no hay comentarios",
-    "helpful": "útil"
+    "helpful": "útil",
+    "sendNotification": "Notificar",
+    "notifyTitle": "Título",
+    "notifyBody": "Cuerpo (opcional)",
+    "sendToAll": "Enviar a todos",
+    "notifySent": "Enviados {{sent}} de {{total}}"
   },
   "notifications": {
     "title": "Notificaciones",

@@ -115,7 +115,12 @@
     "noData": "No analytics data yet",
     "docFeedback": "Feedback",
     "noFeedback": "No feedback yet",
-    "helpful": "helpful"
+    "helpful": "helpful",
+    "sendNotification": "Notify",
+    "notifyTitle": "Title",
+    "notifyBody": "Body (optional)",
+    "sendToAll": "Send to All",
+    "notifySent": "Sent {{sent}} of {{total}}"
   },
   "notifications": {
     "title": "Notifications",

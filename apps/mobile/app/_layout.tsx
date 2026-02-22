@@ -22,6 +22,8 @@ import { queryClient } from '../src/services/query-client'
 import { AuthProvider } from '@mvp/auth'
 import { authApi } from '../src/services/auth'
 import { getAccessToken } from '../src/services/api'
+import { registerForPushNotifications } from '../src/services/push'
+import { connectSSE, disconnectSSE } from '../src/services/sse'
 
 // Moti's declarative API writes shared values during render by design — disable strict mode
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false })
@@ -270,6 +272,17 @@ export default function RootLayout() {
   useEffect(() => {
     authApi.initialize()
   }, [])
+
+  // Register push notifications and connect SSE when authenticated
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      registerForPushNotifications().catch(() => {})
+      connectSSE()
+    }
+    return () => disconnectSSE()
+  }, [isAuthenticated])
 
   // Apply persisted color scheme and force theme update when theme or color scheme changes.
   const templateColorScheme = useTemplateConfigStore((s) => s.colorScheme)

@@ -115,7 +115,12 @@
     "noData": "アナリティクスデータなし",
     "docFeedback": "フィードバック",
     "noFeedback": "フィードバックはまだありません",
-    "helpful": "役立つ"
+    "helpful": "役立つ",
+    "sendNotification": "通知",
+    "notifyTitle": "タイトル",
+    "notifyBody": "本文（任意）",
+    "sendToAll": "全員に送信",
+    "notifySent": "{{total}}件中{{sent}}件送信済み"
   },
   "notifications": {
     "title": "通知",

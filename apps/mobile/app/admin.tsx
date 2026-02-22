@@ -178,7 +178,7 @@ export default function AdminScreen() {
   const insets = useSafeAreaInsets()
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback'>(analyticsEnabled ? 'analytics' : 'users')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -198,6 +198,10 @@ export default function AdminScreen() {
   const [editFeatures, setEditFeatures] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [notifyTitle, setNotifyTitle] = useState('')
+  const [notifyBody, setNotifyBody] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sendResult, setSendResult] = useState<string | null>(null)
 
   const fetchData = useCallback(async (p = 1, q = '') => {
     try {
@@ -360,6 +364,18 @@ export default function AdminScreen() {
               </XStack>
             </ScalePress>
           )}
+          <ScalePress onPress={() => setActiveTab('notify')}>
+            <XStack
+              backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'}
+              paddingHorizontal="$3"
+              paddingVertical="$2"
+              borderRadius="$3"
+            >
+              <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                {t('admin.sendNotification')}
+              </Text>
+            </XStack>
+          </ScalePress>
           {Platform.OS === 'web' && isTemplateConfigEnabled && (
             <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
               <XStack
@@ -572,6 +588,80 @@ export default function AdminScreen() {
               <Text color="$mutedText">{loading ? t('common.loading') : t('admin.noFeedback')}</Text>
             </YStack>
           )}
+        </ScrollView>
+      )}
+
+      {/* Notify Tab */}
+      {activeTab === 'notify' && (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+          <FadeIn>
+            <YStack gap="$3">
+              <AppCard animated={false}>
+                <YStack gap="$3">
+                  <Text fontWeight="600" color="$color" fontSize="$4">
+                    {t('admin.sendNotification')}
+                  </Text>
+                  <Input
+                    value={notifyTitle}
+                    onChangeText={setNotifyTitle}
+                    placeholder={t('admin.notifyTitle')}
+                    placeholderTextColor={theme.mutedText.val as any}
+                    backgroundColor="$subtleBackground"
+                    borderWidth={1}
+                    borderColor="$borderColor"
+                    borderRadius="$3"
+                    paddingHorizontal="$3"
+                    height={42}
+                    fontSize="$3"
+                    color="$color"
+                  />
+                  <Input
+                    value={notifyBody}
+                    onChangeText={setNotifyBody}
+                    placeholder={t('admin.notifyBody')}
+                    placeholderTextColor={theme.mutedText.val as any}
+                    backgroundColor="$subtleBackground"
+                    borderWidth={1}
+                    borderColor="$borderColor"
+                    borderRadius="$3"
+                    paddingHorizontal="$3"
+                    height={42}
+                    fontSize="$3"
+                    color="$color"
+                  />
+                  <AppButton
+                    onPress={async () => {
+                      if (!notifyTitle.trim()) return
+                      setSending(true)
+                      setSendResult(null)
+                      try {
+                        const res = await api.post('/push/send', {
+                          title: notifyTitle.trim(),
+                          body: notifyBody.trim() || undefined,
+                        })
+                        const data = res.data.data
+                        setSendResult(t('admin.notifySent', { sent: data.sent, total: data.total }))
+                        setNotifyTitle('')
+                        setNotifyBody('')
+                      } catch (err: any) {
+                        setSendResult(err.response?.data?.message ?? t('common.error'))
+                      } finally {
+                        setSending(false)
+                      }
+                    }}
+                    disabled={sending || !notifyTitle.trim()}
+                  >
+                    {sending ? t('common.loading') : t('admin.sendToAll')}
+                  </AppButton>
+                  {sendResult && (
+                    <Text color="$mutedText" fontSize="$2" textAlign="center">
+                      {sendResult}
+                    </Text>
+                  )}
+                </YStack>
+              </AppCard>
+            </YStack>
+          </FadeIn>
         </ScrollView>
       )}
 

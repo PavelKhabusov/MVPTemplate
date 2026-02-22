@@ -115,7 +115,12 @@
     "noData": "Нет данных аналитики",
     "docFeedback": "Отзывы",
     "noFeedback": "Отзывов пока нет",
-    "helpful": "полезно"
+    "helpful": "полезно",
+    "sendNotification": "Уведомить",
+    "notifyTitle": "Заголовок",
+    "notifyBody": "Текст (необязательно)",
+    "sendToAll": "Отправить всем",
+    "notifySent": "Отправлено {{sent}} из {{total}}"
   },
   "notifications": {
     "title": "Уведомления",
