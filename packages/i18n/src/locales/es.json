@@ -355,7 +355,8 @@
     "refunded": "Reembolsado",
     "successTitle": "Pago exitoso!",
     "successMessage": "Gracias por tu compra. Tu suscripción está activa.",
-    "noPlans": "No hay planes disponibles aún. Vuelve más tarde!"
+    "noPlans": "No hay planes disponibles aún. Vuelve más tarde!",
+    "popular": "Más Popular"
   },
   "templateConfig": {
     "title": "Configurador",

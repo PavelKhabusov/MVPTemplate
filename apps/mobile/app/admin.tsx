@@ -321,22 +321,30 @@ function PaymentsAdminTab() {
     }
   }
 
+  const performDeletePlan = async (plan: AdminPlan) => {
+    try {
+      await api.delete(`/payments/admin/plans/${plan.id}`)
+      setAdminPlans((prev) => prev.filter((p) => p.id !== plan.id))
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
+    }
+  }
+
   const handleDeletePlan = (plan: AdminPlan) => {
-    Alert.alert(t('admin.deletePlan'), t('admin.deletePlanConfirm'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await api.delete(`/payments/admin/plans/${plan.id}`)
-            fetchData()
-          } catch (err: any) {
-            Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
-          }
+    if (Platform.OS === 'web') {
+      if (window.confirm(t('admin.deletePlanConfirm'))) {
+        performDeletePlan(plan)
+      }
+    } else {
+      Alert.alert(t('admin.deletePlan'), t('admin.deletePlanConfirm'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => performDeletePlan(plan),
         },
-      },
-    ])
+      ])
+    }
   }
 
   const formatPrice = (amount: number, currency: string) => {

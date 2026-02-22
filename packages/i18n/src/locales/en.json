@@ -349,7 +349,8 @@
     "refunded": "Refunded",
     "successTitle": "Payment Successful!",
     "successMessage": "Thank you for your purchase. Your subscription is now active.",
-    "noPlans": "No plans available yet. Check back later!"
+    "noPlans": "No plans available yet. Check back later!",
+    "popular": "Most Popular"
   },
   "cookies": {
     "message": "We use cookies and local storage to improve your experience and analyze usage.",
