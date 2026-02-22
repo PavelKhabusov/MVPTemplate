@@ -914,7 +914,7 @@ export default function AdminScreen() {
                           </Text>
                         )}
                         <Text color="$mutedText" fontSize="$1" marginTop="$1">
-                          {new Date(item.createdAt.replace(' ', 'T')).toLocaleString()}
+                          {item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'}
                         </Text>
                       </YStack>
                     ))}

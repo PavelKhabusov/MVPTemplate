@@ -71,7 +71,7 @@ export async function pushRoutes(app: FastifyInstance) {
         title: notifications.title,
         body: notifications.body,
         type: notifications.type,
-        createdAt: sql<string>`MIN(${notifications.createdAt})`.as('created_at'),
+        createdAt: sql<string>`to_char(MIN(${notifications.createdAt}) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`.as('created_at'),
         recipientCount: count(notifications.id).as('recipient_count'),
       })
       .from(notifications)
