@@ -95,14 +95,16 @@ export function NotificationCenter() {
         </FadeIn>
 
         {/* Header */}
-        <XStack justifyContent="space-between" alignItems="center">
+        <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$2">
           <FadeIn>
             <H2>{t('notifications.title')}</H2>
           </FadeIn>
           <ScalePress onPress={() => markAllRead.mutate()}>
-            <Text color="$primary" fontSize="$2" fontWeight="600">
-              {t('notifications.markAllRead')}
-            </Text>
+            <XStack alignItems="center" gap="$1.5">
+              <Text color="$primary" fontSize="$2" fontWeight="600">
+                {t('notifications.markAllRead')}
+              </Text>
+            </XStack>
           </ScalePress>
         </XStack>
 
