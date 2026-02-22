@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 import { Platform, ScrollView, Text, View, type TextStyle, type ViewStyle } from 'react-native'
 import { Renderer } from 'react-native-marked'
 
@@ -116,6 +116,66 @@ export class DocsRenderer extends Renderer {
       >
         {text}
       </Text>
+    )
+  }
+
+  table(
+    header: ReactNode[][],
+    rows: ReactNode[][][],
+    tableStyle?: ViewStyle,
+    rowStyle?: ViewStyle,
+    cellStyle?: ViewStyle,
+  ): React.ReactNode {
+    const colCount = header.length
+    const minColWidth = 160
+    const colWidth = Math.max(minColWidth, 200)
+
+    const cellBase: ViewStyle = {
+      width: colWidth,
+      padding: 10,
+      borderRightWidth: 1,
+      borderRightColor: (tableStyle?.borderColor as string) ?? '#ccc',
+      ...cellStyle,
+    }
+
+    const rowBase: ViewStyle = {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: (tableStyle?.borderColor as string) ?? '#ccc',
+      ...rowStyle,
+    }
+
+    const noWrap: any = Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : {}
+
+    return (
+      <ScrollView horizontal key={this.getKey()} showsHorizontalScrollIndicator>
+        <View style={{
+          borderWidth: tableStyle?.borderWidth ?? 1,
+          borderColor: (tableStyle?.borderColor as string) ?? '#ccc',
+          borderRadius: 6,
+          overflow: 'hidden',
+          minWidth: colCount * colWidth,
+        }}>
+          {/* Header */}
+          <View style={{ ...rowBase, backgroundColor: 'rgba(128,128,128,0.1)' }}>
+            {header.map((col, i) => (
+              <View key={i} style={{ ...cellBase, borderRightWidth: i < colCount - 1 ? 1 : 0 }}>
+                <View style={noWrap}>{col}</View>
+              </View>
+            ))}
+          </View>
+          {/* Rows */}
+          {rows.map((row, ri) => (
+            <View key={ri} style={{ ...rowBase, borderBottomWidth: ri < rows.length - 1 ? 1 : 0 }}>
+              {row.map((cell, ci) => (
+                <View key={ci} style={{ ...cellBase, borderRightWidth: ci < colCount - 1 ? 1 : 0 }}>
+                  <View style={noWrap}>{cell}</View>
+                </View>
+              ))}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     )
   }
 }
