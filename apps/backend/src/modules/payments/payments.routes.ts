@@ -42,45 +42,46 @@ export async function paymentsRoutes(app: FastifyInstance) {
     return sendPaginated(reply, data, { page, limit, total })
   })
 
-  // --- Webhooks (no auth — verified by provider signature) ---
+  // --- Webhooks (isolated plugin scope so raw body parser doesn't affect other routes) ---
 
-  // Register raw content type parser for webhook routes
-  app.addContentTypeParser(
-    'application/json',
-    { parseAs: 'string' },
-    (_req, body, done) => {
-      done(null, body)
-    },
-  )
+  await app.register(async function webhookRoutes(webhook) {
+    webhook.addContentTypeParser(
+      'application/json',
+      { parseAs: 'string' },
+      (_req, body, done) => {
+        done(null, body)
+      },
+    )
 
-  app.post('/webhook/stripe', async (request, reply) => {
-    try {
-      const provider = getPaymentProvider('stripe')
-      const event = await provider.parseWebhook(
-        request.body as string,
-        request.headers as Record<string, string>,
-      )
-      await paymentsService.handleWebhookEvent(event)
-      return reply.status(200).send({ received: true })
-    } catch (err: any) {
-      request.log.error(err, 'Stripe webhook error')
-      return reply.status(400).send({ error: err.message })
-    }
-  })
+    webhook.post('/webhook/stripe', async (request, reply) => {
+      try {
+        const provider = getPaymentProvider('stripe')
+        const event = await provider.parseWebhook(
+          request.body as string,
+          request.headers as Record<string, string>,
+        )
+        await paymentsService.handleWebhookEvent(event)
+        return reply.status(200).send({ received: true })
+      } catch (err: any) {
+        request.log.error(err, 'Stripe webhook error')
+        return reply.status(400).send({ error: err.message })
+      }
+    })
 
-  app.post('/webhook/yookassa', async (request, reply) => {
-    try {
-      const provider = getPaymentProvider('yookassa')
-      const event = await provider.parseWebhook(
-        request.body as string,
-        request.headers as Record<string, string>,
-      )
-      await paymentsService.handleWebhookEvent(event)
-      return reply.status(200).send({ received: true })
-    } catch (err: any) {
-      request.log.error(err, 'YooKassa webhook error')
-      return reply.status(400).send({ error: err.message })
-    }
+    webhook.post('/webhook/yookassa', async (request, reply) => {
+      try {
+        const provider = getPaymentProvider('yookassa')
+        const event = await provider.parseWebhook(
+          request.body as string,
+          request.headers as Record<string, string>,
+        )
+        await paymentsService.handleWebhookEvent(event)
+        return reply.status(200).send({ received: true })
+      } catch (err: any) {
+        request.log.error(err, 'YooKassa webhook error')
+        return reply.status(400).send({ error: err.message })
+      }
+    })
   })
 
   // --- Admin ---
