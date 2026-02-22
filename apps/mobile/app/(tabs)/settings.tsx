@@ -56,10 +56,27 @@ export default function SettingsScreen() {
 function NotificationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const theme = useTheme()
   if (!visible) return null
+
+  if (Platform.OS === 'web') {
+    return (
+      <YStack
+        // @ts-ignore — fixed position for web overlay
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: theme.background.val }}
+      >
+        <XStack justifyContent="flex-end" padding="$3">
+          <ScalePress onPress={onClose}>
+            <Ionicons name="close" size={24} color={theme.color.val} />
+          </ScalePress>
+        </XStack>
+        <NotificationCenter />
+      </YStack>
+    )
+  }
+
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <YStack flex={1} backgroundColor="$background">
-        <XStack justifyContent="flex-end" padding="$3" paddingTop={Platform.OS === 'ios' ? 60 : '$3'}>
+        <XStack justifyContent="flex-end" padding="$3" paddingTop={60}>
           <ScalePress onPress={onClose}>
             <Ionicons name="close" size={24} color={theme.color.val} />
           </ScalePress>
@@ -76,6 +93,7 @@ function UnauthenticatedSettingsView() {
   const theme = useTheme()
   const { mode, setMode } = useThemeStore()
   const docsEnabled = useTemplateFlag('docs', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
 
@@ -156,11 +174,13 @@ function UnauthenticatedSettingsView() {
       {/* General */}
       <SlideIn from="bottom" delay={200}>
         <SettingsGroup header={t('settings.title')}>
-          <SettingsGroupItem
-            icon="notifications-outline"
-            label={t('settings.notifications')}
-            onPress={() => router.push('/sign-in')}
-          />
+          {pushEnabled && (
+            <SettingsGroupItem
+              icon="notifications-outline"
+              label={t('settings.notifications')}
+              onPress={() => router.push('/sign-in')}
+            />
+          )}
           <SettingsGroupItem
             icon="shield-outline"
             label={t('settings.privacy')}
@@ -198,6 +218,7 @@ function AuthenticatedSettingsView() {
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -340,11 +361,13 @@ function AuthenticatedSettingsView() {
         {/* General */}
         <StaggerGroup index={groupIndex++}>
           <SettingsGroup header={t('settings.title')}>
-            <SettingsGroupItem
-              icon="notifications-outline"
-              label={t('settings.notifications')}
-              onPress={() => setShowNotifications(true)}
-            />
+            {pushEnabled && (
+              <SettingsGroupItem
+                icon="notifications-outline"
+                label={t('settings.notifications')}
+                onPress={() => setShowNotifications(true)}
+              />
+            )}
             <SettingsGroupItem
               icon="shield-outline"
               label={t('settings.privacy')}
@@ -370,7 +393,7 @@ function AuthenticatedSettingsView() {
           </SettingsGroup>
         </StaggerGroup>
 
-        <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
+        {pushEnabled && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
 
         {/* Admin */}
         {userRole === 'admin' && (
@@ -410,6 +433,7 @@ function WebSettingsView() {
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
 
@@ -542,11 +566,13 @@ function WebSettingsView() {
         {/* General */}
         <StaggerGroup index={isAuthenticated ? 2 : 1}>
           <SettingsGroup header={t('settings.title')}>
-            <SettingsGroupItem
-              icon="notifications-outline"
-              label={t('settings.notifications')}
-              onPress={() => isAuthenticated ? setShowNotifications(true) : router.push('/sign-in')}
-            />
+            {pushEnabled && (
+              <SettingsGroupItem
+                icon="notifications-outline"
+                label={t('settings.notifications')}
+                onPress={() => isAuthenticated ? setShowNotifications(true) : router.push('/sign-in')}
+              />
+            )}
             <SettingsGroupItem
               icon="shield-outline"
               label={t('settings.privacy')}
@@ -572,7 +598,7 @@ function WebSettingsView() {
           </SettingsGroup>
         </StaggerGroup>
 
-        {isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
+        {pushEnabled && isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
 
         {/* Admin */}
         {userRole === 'admin' && (

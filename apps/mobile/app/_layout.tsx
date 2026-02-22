@@ -9,7 +9,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
-import { TemplateConfigSidebar, applyColorScheme, DEFAULT_SCHEME_KEY, useTemplateConfigStore } from '@mvp/template-config'
+import { TemplateConfigSidebar, applyColorScheme, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -275,14 +275,17 @@ export default function RootLayout() {
 
   // Register push notifications and connect SSE when authenticated
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
 
   useEffect(() => {
     if (isAuthenticated) {
-      registerForPushNotifications().catch(() => {})
+      if (pushEnabled) {
+        registerForPushNotifications().catch(() => {})
+      }
       connectSSE()
     }
     return () => disconnectSSE()
-  }, [isAuthenticated])
+  }, [isAuthenticated, pushEnabled])
 
   // Apply persisted color scheme and force theme update when theme or color scheme changes.
   const templateColorScheme = useTemplateConfigStore((s) => s.colorScheme)

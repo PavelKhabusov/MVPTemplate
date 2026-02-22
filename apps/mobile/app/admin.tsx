@@ -178,13 +178,17 @@ export default function AdminScreen() {
   const insets = useSafeAreaInsets()
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
   const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
       setActiveTab('users')
     }
-  }, [analyticsEnabled, activeTab])
+    if (!pushEnabled && activeTab === 'notify') {
+      setActiveTab('users')
+    }
+  }, [analyticsEnabled, pushEnabled, activeTab])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
@@ -364,18 +368,20 @@ export default function AdminScreen() {
               </XStack>
             </ScalePress>
           )}
-          <ScalePress onPress={() => setActiveTab('notify')}>
-            <XStack
-              backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'}
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              borderRadius="$3"
-            >
-              <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                {t('admin.sendNotification')}
-              </Text>
-            </XStack>
-          </ScalePress>
+          {pushEnabled && (
+            <ScalePress onPress={() => setActiveTab('notify')}>
+              <XStack
+                backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+              >
+                <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.sendNotification')}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
           {Platform.OS === 'web' && isTemplateConfigEnabled && (
             <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
               <XStack
@@ -592,7 +598,7 @@ export default function AdminScreen() {
       )}
 
       {/* Notify Tab */}
-      {activeTab === 'notify' && (
+      {pushEnabled && activeTab === 'notify' && (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
           <FadeIn>
             <YStack gap="$3">
