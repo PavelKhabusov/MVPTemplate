@@ -173,7 +173,14 @@ function WebRootLayout() {
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
-    return <Slot />
+    return (
+      <XStack flex={1} style={{ height: '100vh' } as any}>
+        <YStack flex={1} style={{ overflow: 'auto' } as any}>
+          <Slot />
+        </YStack>
+        {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
+      </XStack>
+    )
   }
 
   const navItems = [
