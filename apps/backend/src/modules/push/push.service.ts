@@ -2,7 +2,7 @@ import Expo, { ExpoPushMessage } from 'expo-server-sdk'
 import { eq, inArray } from 'drizzle-orm'
 import { db } from '../../config/database'
 import { env } from '../../config/env'
-import { pushTokens, notifications } from '../../database/schema/index'
+import { pushTokens, notifications, users } from '../../database/schema/index'
 import { sendSSE } from '../../realtime/sse'
 
 const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN || undefined })
@@ -68,19 +68,19 @@ async function sendPushToUser(userId: string, payload: NotificationPayload) {
   }
 }
 
-/** Send notification to multiple users (or all users with push tokens) */
+/** Send notification to multiple users (or all users) */
 export async function sendToUsers(userIds: string[] | null, payload: NotificationPayload) {
   let targetUserIds: string[]
 
   if (userIds && userIds.length > 0) {
     targetUserIds = userIds
   } else {
-    // Get all unique user IDs with registered push tokens
+    // Send to ALL users — push delivery happens only for those with tokens
     const rows = await db
-      .selectDistinct({ userId: pushTokens.userId })
-      .from(pushTokens)
+      .select({ id: users.id })
+      .from(users)
 
-    targetUserIds = rows.map((r) => r.userId)
+    targetUserIds = rows.map((r) => r.id)
   }
 
   const results = await Promise.allSettled(
