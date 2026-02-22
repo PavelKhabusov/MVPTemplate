@@ -89,6 +89,7 @@ function PageSEO() {
 
 function RootNavigator() {
   const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
+  const theme = useTheme()
   const { t } = useTranslation()
   const pathname = usePathname()
 
@@ -104,7 +105,7 @@ function RootNavigator() {
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.tint,
+        headerTintColor: theme.accent.val,
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
       }}
