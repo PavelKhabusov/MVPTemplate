@@ -87,23 +87,28 @@ MVPTemplate/
 │   │   ├── app/                # File-based routes
 │   │   │   ├── _layout.tsx     # Root layout + web sidebar
 │   │   │   ├── (tabs)/         # Tab bar (mobile) / Slot (web)
-│   │   │   ├── settings.tsx    # Settings
 │   │   │   ├── admin.tsx       # Admin panel
+│   │   │   ├── pricing.tsx     # Payment plans
+│   │   │   ├── docs/           # In-app documentation
 │   │   │   ├── sign-in.tsx     # Auth screens
 │   │   │   └── sign-up.tsx
 │   │   └── src/features/       # auth, settings, search, onboarding
 │   │
 │   └── backend/                # Fastify API
-│       ├── src/modules/        # auth, users, admin, notifications, push, search, payments
+│       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, ...
 │       ├── src/database/       # Drizzle schema + migrations
 │       └── docker/             # Dockerfile + docker-compose
 │
 ├── packages/
-│   ├── ui/                     # Components, animations, navigation
+│   ├── ui/                     # Components, animations, landing page
+│   ├── auth/                   # Auth forms, providers, flows
 │   ├── store/                  # Zustand stores
-│   ├── i18n/                   # 4 locales
+│   ├── i18n/                   # 4 locales (EN/RU/ES/JA)
 │   ├── lib/                    # MMKV, secure storage
 │   ├── payments/               # Payment types, hooks, components
+│   ├── docs/                   # In-app documentation engine
+│   ├── template-config/        # Feature flags, color schemes
+│   ├── config/                 # Shared configuration
 │   └── analytics/              # PostHog abstraction
 │
 └── scripts/                    # PowerShell setup scripts

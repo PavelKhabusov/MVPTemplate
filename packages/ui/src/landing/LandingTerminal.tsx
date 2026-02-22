@@ -31,9 +31,11 @@ const TREE_LINES: readonly { depth: number; name: string; comment?: string }[] =
   { depth: 1, name: 'packages/' },
   { depth: 2, name: 'ui/', comment: 'components, animations, landing' },
   { depth: 2, name: 'auth/', comment: 'forms, providers, flows' },
+  { depth: 2, name: 'payments/', comment: 'Stripe, YooKassa' },
   { depth: 2, name: 'store/', comment: 'Zustand + MMKV persist' },
   { depth: 2, name: 'i18n/', comment: 'en, ru, es, ja' },
-  { depth: 2, name: 'docs/', comment: 'markdown documentation' },
+  { depth: 2, name: 'docs/', comment: 'in-app documentation' },
+  { depth: 2, name: 'template-config/', comment: 'feature flags, themes' },
   { depth: 2, name: 'analytics/', comment: 'PostHog + internal' },
   { depth: 1, name: 'scripts/', comment: 'setup, docker, admin' },
 ]
