@@ -200,7 +200,7 @@ export function LandingTerminal() {
               <YStack
                 padding="$4"
                 gap="$1.5"
-                style={{ backgroundColor: '#0d1117', minHeight: 280 } as any}
+                style={{ backgroundColor: '#0d1117', minHeight: 280, height: '100%' } as any}
               >
                 {TERMINAL_LINES.map((line, i) => {
                   if (i > currentLine) return null
@@ -299,7 +299,7 @@ export function LandingTerminal() {
               <YStack
                 padding="$4"
                 gap="$1"
-                style={{ backgroundColor: '#0d1117', minHeight: 280 } as any}
+                style={{ backgroundColor: '#0d1117', minHeight: 280, height: '100%' } as any}
               >
                 {TREE_LINES.map((line, i) => {
                   if (i >= visibleTreeLines) return null

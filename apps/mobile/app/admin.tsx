@@ -42,6 +42,13 @@ interface AnalyticsDashboard {
   avgSessionTime: number
 }
 
+interface DocFeedbackStat {
+  pageId: string
+  likes: number
+  dislikes: number
+  total: number
+}
+
 const FEATURE_LABELS: Record<string, string> = {
   beta_access: 'Beta Access',
   premium: 'Premium',
@@ -170,7 +177,8 @@ export default function AdminScreen() {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const analyticsEnabled = useTemplateFlag('analytics', true)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users'>(analyticsEnabled ? 'analytics' : 'users')
+  const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -181,6 +189,7 @@ export default function AdminScreen() {
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
   const [analyticsData, setAnalyticsData] = useState<AnalyticsDashboard | null>(null)
+  const [feedbackStats, setFeedbackStats] = useState<DocFeedbackStat[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -195,12 +204,15 @@ export default function AdminScreen() {
       setLoading(true)
       const params: Record<string, string | number> = { page: p, limit: 20 }
       if (q) params.search = q
-      const [usersRes, statsRes, configRes, analyticsRes] = await Promise.all([
+      const [usersRes, statsRes, configRes, analyticsRes, feedbackRes] = await Promise.all([
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
         analyticsEnabled
           ? api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null)
+          : Promise.resolve(null),
+        docFeedbackEnabled
+          ? api.get('/doc-feedback/admin/stats').catch(() => null)
           : Promise.resolve(null),
       ])
       setUsers(usersRes.data.data)
@@ -208,12 +220,13 @@ export default function AdminScreen() {
       setStats(statsRes.data.data)
       setConfig(configRes.data.data)
       if (analyticsRes) setAnalyticsData(analyticsRes.data.data)
+      if (feedbackRes) setFeedbackStats(feedbackRes.data.data)
     } catch (err: any) {
       Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
     } finally {
       setLoading(false)
     }
-  }, [t, analyticsEnabled])
+  }, [t, analyticsEnabled, docFeedbackEnabled])
 
   useEffect(() => {
     fetchData()
@@ -333,6 +346,20 @@ export default function AdminScreen() {
               </Text>
             </XStack>
           </ScalePress>
+          {docFeedbackEnabled && (
+            <ScalePress onPress={() => setActiveTab('feedback')}>
+              <XStack
+                backgroundColor={activeTab === 'feedback' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+              >
+                <Text color={activeTab === 'feedback' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.docFeedback')}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
           {Platform.OS === 'web' && isTemplateConfigEnabled && (
             <ScalePress onPress={() => useTemplateConfigStore.getState().setSidebarOpen(true)}>
               <XStack
@@ -499,6 +526,53 @@ export default function AdminScreen() {
             ) : null
           }
         />
+      )}
+
+      {/* Doc Feedback Tab */}
+      {docFeedbackEnabled && activeTab === 'feedback' && (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+          {feedbackStats && feedbackStats.length > 0 ? (
+            <FadeIn>
+              <YStack gap="$3">
+                {feedbackStats.map((item) => {
+                  const total = item.likes + item.dislikes
+                  const pct = total > 0 ? Math.round((item.likes / total) * 100) : 0
+                  return (
+                    <AppCard key={item.pageId} animated={false}>
+                      <XStack alignItems="center" justifyContent="space-between">
+                        <YStack flex={1} gap="$1">
+                          <Text fontWeight="600" color="$color" fontSize="$3">
+                            {item.pageId}
+                          </Text>
+                          <XStack gap="$3" alignItems="center">
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons name="thumbs-up" size={14} color={theme.accent.val} />
+                              <Text fontSize="$2" color="$accent">{item.likes}</Text>
+                            </XStack>
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons name="thumbs-down" size={14} color="#EF4444" />
+                              <Text fontSize="$2" color="#EF4444">{item.dislikes}</Text>
+                            </XStack>
+                          </XStack>
+                        </YStack>
+                        <YStack alignItems="center">
+                          <Text fontSize="$6" fontWeight="bold" color={pct >= 50 ? '$accent' : '#EF4444'}>
+                            {pct}%
+                          </Text>
+                          <Text fontSize="$1" color="$mutedText">{t('admin.helpful')}</Text>
+                        </YStack>
+                      </XStack>
+                    </AppCard>
+                  )
+                })}
+              </YStack>
+            </FadeIn>
+          ) : (
+            <YStack alignItems="center" padding="$6">
+              <Text color="$mutedText">{loading ? t('common.loading') : t('admin.noFeedback')}</Text>
+            </YStack>
+          )}
+        </ScrollView>
       )}
 
       {/* Edit User Modal */}
