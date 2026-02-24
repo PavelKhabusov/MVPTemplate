@@ -24,6 +24,7 @@ import { configRoutes } from './modules/config/config.routes'
 import { paymentsRoutes } from './modules/payments/payments.routes'
 import { StorageService } from './modules/storage/storage.service'
 import { storageRoutes } from './modules/storage/storage.routes'
+import { proxyRoutes } from './modules/proxy/proxy.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -124,6 +125,7 @@ export async function buildApp() {
   }
 
   await app.register(storageRoutes, { prefix: '/api/admin/storage' })
+  await app.register(proxyRoutes, { prefix: '/api/admin/proxies' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

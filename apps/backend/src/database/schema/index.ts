@@ -33,3 +33,6 @@ export type { Subscription, NewSubscription } from './subscriptions'
 
 export { payments } from './payments'
 export type { Payment, NewPayment } from './payments'
+
+export { proxies } from './proxies'
+export type { ProxyRecord, NewProxy } from './proxies'

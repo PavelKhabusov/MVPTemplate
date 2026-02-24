@@ -56,7 +56,12 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
   GEMINI_CONCURRENT_LIMIT: z.coerce.number().default(3),
 
-  // Proxy
+  // AI / OpenAI
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+  OPENAI_MAX_TOKENS: z.coerce.number().default(4096),
+
+  // Proxy (legacy env vars — proxy is now managed via DB)
   PROXY_ENABLED: envBoolean,
   PROXY_URL: z.string().optional(),
 

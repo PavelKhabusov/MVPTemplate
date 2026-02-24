@@ -14,11 +14,13 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
+    "@mvp/ai": "*",
     "@mvp/analytics": "*",
     "@mvp/auth": "*",
     "@mvp/docs": "*",
     "@mvp/i18n": "*",
     "@mvp/lib": "*",
+    "@mvp/proxy": "*",
     "@mvp/store": "*",
     "@mvp/ui": "*",
     "@react-native-async-storage/async-storage": "^2.2.0",

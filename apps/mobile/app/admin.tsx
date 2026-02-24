@@ -607,7 +607,6 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
   frontend: { icon: 'color-palette-outline', labelKey: 'admin.apiFrontend' },
   ai: { icon: 'sparkles-outline', labelKey: 'admin.apiAI', mainToggle: 'GEMINI_API_KEY' },
-  proxy: { icon: 'globe-outline', labelKey: 'admin.apiProxy', mainToggle: 'PROXY_ENABLED' },
 }
 
 const PAYMENT_PROVIDERS = [
@@ -720,14 +719,21 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
   )
 }
 
-const GEMINI_MODELS = [
-  { value: 'gemini-2.5-flash', labelKey: 'admin.geminiModelFlash' },
-  { value: 'gemini-2.5-pro', labelKey: 'admin.geminiModelPro' },
-  { value: 'gemini-3-pro-image-preview', labelKey: 'admin.geminiModel3ProImage' },
-  { value: 'gemini-2.0-flash', labelKey: 'admin.geminiModelLegacy' },
+const AI_PROVIDERS_UI = [
+  { key: 'gemini' as const, label: 'Google Gemini', color: '#4285F4', apiKeyEnv: 'GEMINI_API_KEY', modelEnv: 'GEMINI_MODEL', limitEnv: 'GEMINI_CONCURRENT_LIMIT', limitLabel: 'admin.geminiConcurrentLimit', limitDesc: 'admin.geminiConcurrentLimitDesc', limitDefault: '3', limitMax: 10, hintKey: 'admin.hintGemini', hintUrl: 'https://aistudio.google.com/apikey', models: [
+    { value: 'gemini-2.5-flash', labelKey: 'admin.geminiModelFlash' },
+    { value: 'gemini-2.5-pro', labelKey: 'admin.geminiModelPro' },
+    { value: 'gemini-3-pro-image-preview', labelKey: 'admin.geminiModel3ProImage' },
+    { value: 'gemini-2.0-flash', labelKey: 'admin.geminiModelLegacy' },
+  ]},
+  { key: 'openai' as const, label: 'OpenAI', color: '#10A37F', apiKeyEnv: 'OPENAI_API_KEY', modelEnv: 'OPENAI_MODEL', limitEnv: 'OPENAI_MAX_TOKENS', limitLabel: 'admin.openaiMaxTokens', limitDesc: 'admin.openaiMaxTokensDesc', limitDefault: '4096', limitMax: 128000, hintKey: 'admin.hintOpenai', hintUrl: 'https://platform.openai.com/api-keys', models: [
+    { value: 'gpt-4o', labelKey: 'admin.openaiModel4o' },
+    { value: 'gpt-4o-mini', labelKey: 'admin.openaiModel4oMini' },
+    { value: 'o3-mini', labelKey: 'admin.openaiModelO3Mini' },
+  ]},
 ] as const
 
-function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
+function AIEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
   keys: Record<string, EnvEntry>
   isGroupOn: boolean
   onToggle: (checked: boolean) => void
@@ -735,8 +741,11 @@ function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
 }) {
   const { t } = useTranslation()
   const theme = useTheme()
-  const currentModel = keys['GEMINI_MODEL']?.value || 'gemini-2.5-flash'
-  const currentLimit = keys['GEMINI_CONCURRENT_LIMIT']?.value || '3'
+  const [activeProvider, setActiveProvider] = useState<'gemini' | 'openai'>('gemini')
+
+  const provider = AI_PROVIDERS_UI.find((p) => p.key === activeProvider)!
+  const currentModel = keys[provider.modelEnv]?.value || provider.models[0].value
+  const currentLimit = keys[provider.limitEnv]?.value || provider.limitDefault
   const [limitValue, setLimitValue] = useState(currentLimit)
   const [limitDirty, setLimitDirty] = useState(false)
 
@@ -747,9 +756,17 @@ function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
   }
 
   const handleLimitSave = () => {
-    const num = Math.max(1, Math.min(10, parseInt(limitValue) || 3))
-    onUpdate('GEMINI_CONCURRENT_LIMIT', String(num))
+    const num = Math.max(1, Math.min(provider.limitMax, parseInt(limitValue) || parseInt(provider.limitDefault)))
+    onUpdate(provider.limitEnv, String(num))
     setLimitValue(String(num))
+    setLimitDirty(false)
+  }
+
+  // Reset limit input when switching providers
+  const handleProviderSwitch = (key: 'gemini' | 'openai') => {
+    setActiveProvider(key)
+    const p = AI_PROVIDERS_UI.find((pp) => pp.key === key)!
+    setLimitValue(keys[p.limitEnv]?.value || p.limitDefault)
     setLimitDirty(false)
   }
 
@@ -767,17 +784,46 @@ function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
 
       {isGroupOn && (
         <YStack gap="$3">
+          {/* Provider tabs */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <XStack gap="$2">
+              {AI_PROVIDERS_UI.map((p) => {
+                const isActive = activeProvider === p.key
+                return (
+                  <ScalePress key={p.key} onPress={() => handleProviderSwitch(p.key)}>
+                    <XStack
+                      backgroundColor={isActive ? p.color : '$subtleBackground'}
+                      paddingHorizontal="$3"
+                      paddingVertical="$2"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={isActive ? p.color : '$borderColor'}
+                      gap="$1.5"
+                      alignItems="center"
+                    >
+                      <YStack width={8} height={8} borderRadius={4} backgroundColor={isActive ? 'white' : p.color} />
+                      <Text color={isActive ? 'white' : '$color'} fontWeight="700" fontSize="$2">
+                        {p.label}
+                      </Text>
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </ScrollView>
+
+          {/* API key */}
           <EnvStringField
-            envKey="GEMINI_API_KEY"
-            label={t('admin.envLabel_GEMINI_API_KEY', { defaultValue: 'Gemini API Key' })}
-            value={keys['GEMINI_API_KEY']?.value ?? null}
+            envKey={provider.apiKeyEnv}
+            label={t(`admin.envLabel_${provider.apiKeyEnv}`, { defaultValue: `${provider.label} API Key` })}
+            value={keys[provider.apiKeyEnv]?.value ?? null}
             isSecret
             onSave={onUpdate}
           />
 
-          <ScalePress onPress={() => Linking.openURL('https://aistudio.google.com/apikey')}>
+          <ScalePress onPress={() => Linking.openURL(provider.hintUrl)}>
             <Text fontSize="$2" color="$accent">
-              {t('admin.geminiApiKeyHint')}
+              {t(provider.hintKey)}
             </Text>
           </ScalePress>
 
@@ -786,10 +832,10 @@ function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             <Text fontSize="$2" color="$mutedText" fontWeight="600">
               {t('admin.geminiModel')}
             </Text>
-            {GEMINI_MODELS.map((model) => {
+            {provider.models.map((model) => {
               const isActive = currentModel === model.value
               return (
-                <ScalePress key={model.value} onPress={() => onUpdate('GEMINI_MODEL', model.value)}>
+                <ScalePress key={model.value} onPress={() => onUpdate(provider.modelEnv, model.value)}>
                   <XStack
                     padding="$2.5"
                     borderRadius="$3"
@@ -799,23 +845,11 @@ function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
                     alignItems="center"
                     gap="$2"
                   >
-                    <YStack
-                      width={18}
-                      height={18}
-                      borderRadius={9}
-                      borderWidth={2}
-                      borderColor={isActive ? '$accent' : '$mutedText'}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      {isActive && (
-                        <YStack width={10} height={10} borderRadius={5} backgroundColor="$accent" />
-                      )}
+                    <YStack width={18} height={18} borderRadius={9} borderWidth={2} borderColor={isActive ? '$accent' : '$mutedText'} alignItems="center" justifyContent="center">
+                      {isActive && <YStack width={10} height={10} borderRadius={5} backgroundColor="$accent" />}
                     </YStack>
                     <YStack flex={1}>
-                      <Text fontSize="$3" color="$color" fontWeight={isActive ? '600' : '400'}>
-                        {t(model.labelKey)}
-                      </Text>
+                      <Text fontSize="$3" color="$color" fontWeight={isActive ? '600' : '400'}>{t(model.labelKey)}</Text>
                       <Text fontSize="$1" color="$mutedText">{model.value}</Text>
                     </YStack>
                   </XStack>
@@ -824,34 +858,15 @@ function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             })}
           </YStack>
 
-          {/* Concurrent limit */}
+          {/* Limit input */}
           <YStack gap="$1.5">
-            <Text fontSize="$2" color="$mutedText" fontWeight="600">
-              {t('admin.geminiConcurrentLimit')}
-            </Text>
-            <Text fontSize="$1" color="$mutedText">
-              {t('admin.geminiConcurrentLimitDesc')}
-            </Text>
+            <Text fontSize="$2" color="$mutedText" fontWeight="600">{t(provider.limitLabel)}</Text>
+            <Text fontSize="$1" color="$mutedText">{t(provider.limitDesc)}</Text>
             <XStack gap="$2" alignItems="center">
-              <Input
-                flex={1}
-                size="$3"
-                value={limitValue}
-                onChangeText={handleLimitChange}
-                keyboardType="number-pad"
-                placeholder="3"
-                backgroundColor="$subtleBackground"
-                borderColor="$borderColor"
-                color="$color"
-              />
+              <Input flex={1} size="$3" value={limitValue} onChangeText={handleLimitChange} keyboardType="number-pad" placeholder={provider.limitDefault} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
               {limitDirty && (
                 <ScalePress onPress={handleLimitSave}>
-                  <XStack
-                    backgroundColor="$accent"
-                    paddingHorizontal="$2.5"
-                    paddingVertical="$1.5"
-                    borderRadius="$2"
-                  >
+                  <XStack backgroundColor="$accent" paddingHorizontal="$2.5" paddingVertical="$1.5" borderRadius="$2">
                     <Ionicons name="checkmark" size={18} color="white" />
                   </XStack>
                 </ScalePress>
@@ -1028,7 +1043,7 @@ function ApiSettingsTab() {
 
     if (group === 'ai') {
       return (
-        <GeminiEnvCard
+        <AIEnvCard
           key={group}
           keys={keys}
           isGroupOn={isGroupOn}
@@ -1212,6 +1227,426 @@ interface StorageConfig {
   s3SecretKey: string
   s3Region: string
   s3PublicUrl: string
+}
+
+interface ProxyItemUI {
+  id: string
+  name: string
+  host: string
+  protocol: string
+  httpPort: number | null
+  socks5Port: number | null
+  username: string | null
+  password: string | null
+  isActive: boolean
+  priority: number
+  lastCheckedAt: string | null
+  lastCheckStatus: string | null
+  lastCheckMessage: string | null
+}
+
+function ProxyAdminTab() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const toast = useToast()
+  const insets = useSafeAreaInsets()
+  const { width: screenWidth } = useWindowDimensions()
+  const isWide = screenWidth > 768
+
+  const [proxies, setProxies] = useState<ProxyItemUI[]>([])
+  const [loading, setLoading] = useState(true)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [editingProxy, setEditingProxy] = useState<ProxyItemUI | null>(null)
+  const [testingId, setTestingId] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+
+  // Form state
+  const [formName, setFormName] = useState('')
+  const [formHost, setFormHost] = useState('')
+  const [formProtocol, setFormProtocol] = useState<'http' | 'socks5'>('http')
+  const [formHttpPort, setFormHttpPort] = useState('')
+  const [formSocks5Port, setFormSocks5Port] = useState('')
+  const [formUsername, setFormUsername] = useState('')
+  const [formPassword, setFormPassword] = useState('')
+  const [formPriority, setFormPriority] = useState('0')
+  const [formActive, setFormActive] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  const fetchProxies = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res = await api.get('/admin/proxies')
+      setProxies(res.data.data)
+    } catch {
+      // silent
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchProxies() }, [fetchProxies])
+
+  const openCreate = () => {
+    setEditingProxy(null)
+    setFormName('')
+    setFormHost('')
+    setFormProtocol('http')
+    setFormHttpPort('')
+    setFormSocks5Port('')
+    setFormUsername('')
+    setFormPassword('')
+    setFormPriority('0')
+    setFormActive(true)
+    setShowPassword(false)
+    setModalVisible(true)
+  }
+
+  const openEdit = (proxy: ProxyItemUI) => {
+    setEditingProxy(proxy)
+    setFormName(proxy.name)
+    setFormHost(proxy.host)
+    setFormProtocol(proxy.protocol as 'http' | 'socks5')
+    setFormHttpPort(proxy.httpPort?.toString() || '')
+    setFormSocks5Port(proxy.socks5Port?.toString() || '')
+    setFormUsername(proxy.username || '')
+    setFormPassword('')
+    setFormPriority(proxy.priority.toString())
+    setFormActive(proxy.isActive)
+    setShowPassword(false)
+    setModalVisible(true)
+  }
+
+  const handleSave = async () => {
+    if (!formName.trim() || !formHost.trim()) {
+      toast.error(t('admin.proxyName') + ' & ' + t('admin.proxyHost') + ' required')
+      return
+    }
+    setSaving(true)
+    try {
+      const data: any = {
+        name: formName,
+        host: formHost,
+        protocol: formProtocol,
+        httpPort: formHttpPort ? parseInt(formHttpPort) : undefined,
+        socks5Port: formSocks5Port ? parseInt(formSocks5Port) : undefined,
+        username: formUsername || undefined,
+        password: formPassword || undefined,
+        isActive: formActive,
+        priority: parseInt(formPriority) || 0,
+      }
+      if (editingProxy && !formPassword) delete data.password
+      if (editingProxy) {
+        await api.put(`/admin/proxies/${editingProxy.id}`, data)
+        toast.success(t('admin.proxyUpdated'))
+      } else {
+        await api.post('/admin/proxies', data)
+        toast.success(t('admin.proxyCreated'))
+      }
+      setModalVisible(false)
+      fetchProxies()
+    } catch {
+      toast.error(t('admin.envSaveError'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (Platform.OS === 'web') {
+      if (!confirm(t('admin.deleteProxyConfirm'))) return
+    }
+    try {
+      await api.delete(`/admin/proxies/${id}`)
+      toast.success(t('admin.proxyDeleted'))
+      fetchProxies()
+    } catch {
+      toast.error(t('admin.envSaveError'))
+    }
+  }
+
+  const handleToggle = async (id: string, isActive: boolean) => {
+    try {
+      await api.patch(`/admin/proxies/${id}/toggle`, { isActive })
+      toast.success(t('admin.proxyToggled'))
+      fetchProxies()
+    } catch {
+      toast.error(t('admin.envSaveError'))
+    }
+  }
+
+  const handleTest = async (id: string, type: 'test' | 'test-tcp' | 'diagnose') => {
+    setTestingId(id)
+    try {
+      const endpoint = type === 'diagnose' ? 'diagnose' : type
+      const method = type === 'diagnose' ? 'get' : 'post'
+      const res = await api[method](`/admin/proxies/${id}/${endpoint}`)
+      const result = res.data.data
+      if (type === 'diagnose') {
+        const d = result.diagnostics
+        let msg = ''
+        if (d.containerInfo) msg += d.containerInfo + '\n'
+        if (d.dnsResolution) msg += d.dnsResolution + '\n'
+        if (d.tcpConnect) msg += d.tcpConnect
+        toast.success(msg || 'Diagnostics complete')
+      } else if (result.success) {
+        toast.success(result.message)
+      } else {
+        toast.error(result.message)
+      }
+      fetchProxies()
+    } catch {
+      toast.error(t('admin.envSaveError'))
+    } finally {
+      setTestingId(null)
+    }
+  }
+
+  const getStatusColor = (status: string | null) => {
+    if (status === 'success') return '#22c55e'
+    if (status === 'failed') return '#ef4444'
+    return '#eab308'
+  }
+
+  const activeCount = proxies.filter((p) => p.isActive).length
+  const workingCount = proxies.filter((p) => p.isActive && p.lastCheckStatus === 'success').length
+
+  if (loading) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" padding="$4">
+        <Text color="$mutedText">{t('common.loading')}</Text>
+      </YStack>
+    )
+  }
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+      <FadeIn>
+        <YStack gap="$3">
+          <Text color="$mutedText" fontSize="$2" lineHeight={18}>
+            {t('admin.proxyDesc')}
+          </Text>
+
+          {/* Stats */}
+          <XStack gap="$2">
+            <AppCard flex={1} animated={false}>
+              <YStack alignItems="center" gap="$1">
+                <Text fontSize="$6" fontWeight="bold" color="$accent">{proxies.length}</Text>
+                <Text fontSize="$1" color="$mutedText">{t('admin.proxyTotal')}</Text>
+              </YStack>
+            </AppCard>
+            <AppCard flex={1} animated={false}>
+              <YStack alignItems="center" gap="$1">
+                <Text fontSize="$6" fontWeight="bold" color="$accent">{activeCount}</Text>
+                <Text fontSize="$1" color="$mutedText">{t('admin.proxyActive')}</Text>
+              </YStack>
+            </AppCard>
+            <AppCard flex={1} animated={false}>
+              <YStack alignItems="center" gap="$1">
+                <Text fontSize="$6" fontWeight="bold" color="$accent">{workingCount}</Text>
+                <Text fontSize="$1" color="$mutedText">{t('admin.proxyWorking')}</Text>
+              </YStack>
+            </AppCard>
+          </XStack>
+
+          {/* Add button */}
+          <AppButton onPress={openCreate}>
+            {t('admin.addProxy')}
+          </AppButton>
+
+          <Text fontSize="$1" color="$mutedText">{t('admin.proxyHttpOnly')}</Text>
+
+          {/* Proxy list */}
+          {proxies.length === 0 ? (
+            <AppCard animated={false}>
+              <YStack alignItems="center" padding="$4" gap="$2">
+                <Ionicons name="globe-outline" size={40} color={theme.mutedText.val} />
+                <Text color="$mutedText">{t('admin.proxyEmpty')}</Text>
+              </YStack>
+            </AppCard>
+          ) : (
+            proxies.map((proxy) => (
+              <AppCard key={proxy.id} animated={false}>
+                <YStack gap="$2">
+                  {/* Header: name + status + toggle */}
+                  <XStack alignItems="center" justifyContent="space-between">
+                    <XStack alignItems="center" gap="$2" flex={1}>
+                      <YStack width={10} height={10} borderRadius={5} backgroundColor={getStatusColor(proxy.lastCheckStatus)} />
+                      <Text fontWeight="600" color="$color" fontSize="$3" numberOfLines={1} flex={1}>
+                        {proxy.name}
+                      </Text>
+                    </XStack>
+                    <AppSwitch
+                      checked={proxy.isActive}
+                      onCheckedChange={(checked) => handleToggle(proxy.id, checked)}
+                    />
+                  </XStack>
+
+                  {/* Host + protocol */}
+                  <XStack alignItems="center" gap="$2">
+                    <Text fontSize="$2" color="$mutedText" fontFamily="$mono">
+                      {proxy.host}:{proxy.protocol === 'socks5' ? (proxy.socks5Port || 1080) : (proxy.httpPort || 8080)}
+                    </Text>
+                    <Text
+                      fontSize="$1"
+                      fontWeight="700"
+                      color={proxy.protocol === 'socks5' ? '#eab308' : '#22c55e'}
+                    >
+                      {proxy.protocol.toUpperCase()}
+                    </Text>
+                    {proxy.username && (
+                      <Text fontSize="$1" color="$mutedText">@{proxy.username}</Text>
+                    )}
+                    <Text fontSize="$1" color="$mutedText">P:{proxy.priority}</Text>
+                  </XStack>
+
+                  {/* Status message */}
+                  {proxy.lastCheckMessage && (
+                    <Text fontSize="$1" color={proxy.lastCheckStatus === 'success' ? '#22c55e' : proxy.lastCheckStatus === 'failed' ? '#ef4444' : '$mutedText'} numberOfLines={2}>
+                      {proxy.lastCheckMessage}
+                    </Text>
+                  )}
+
+                  {/* Actions */}
+                  <XStack gap="$2" flexWrap="wrap">
+                    <ScalePress onPress={() => handleTest(proxy.id, 'test')} disabled={testingId === proxy.id}>
+                      <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center" opacity={testingId === proxy.id ? 0.5 : 1}>
+                        <Ionicons name="flask-outline" size={14} color={theme.accent.val} />
+                        <Text fontSize="$1" color="$color">{t('admin.proxyTestFull')}</Text>
+                      </XStack>
+                    </ScalePress>
+                    <ScalePress onPress={() => handleTest(proxy.id, 'test-tcp')} disabled={testingId === proxy.id}>
+                      <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center" opacity={testingId === proxy.id ? 0.5 : 1}>
+                        <Ionicons name="flash-outline" size={14} color={theme.accent.val} />
+                        <Text fontSize="$1" color="$color">{t('admin.proxyTestTcp')}</Text>
+                      </XStack>
+                    </ScalePress>
+                    <ScalePress onPress={() => handleTest(proxy.id, 'diagnose')} disabled={testingId === proxy.id}>
+                      <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center" opacity={testingId === proxy.id ? 0.5 : 1}>
+                        <Ionicons name="pulse-outline" size={14} color={theme.accent.val} />
+                        <Text fontSize="$1" color="$color">{t('admin.proxyDiagnose')}</Text>
+                      </XStack>
+                    </ScalePress>
+                    <ScalePress onPress={() => openEdit(proxy)}>
+                      <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center">
+                        <Ionicons name="pencil-outline" size={14} color={theme.accent.val} />
+                        <Text fontSize="$1" color="$color">{t('admin.editProxy')}</Text>
+                      </XStack>
+                    </ScalePress>
+                    <ScalePress onPress={() => handleDelete(proxy.id)}>
+                      <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center">
+                        <Ionicons name="trash-outline" size={14} color="#ef4444" />
+                        <Text fontSize="$1" color="#ef4444">{t('admin.deleteProxy')}</Text>
+                      </XStack>
+                    </ScalePress>
+                  </XStack>
+                </YStack>
+              </AppCard>
+            ))
+          )}
+        </YStack>
+      </FadeIn>
+
+      {/* Create/Edit Modal */}
+      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
+        <YStack flex={1} backgroundColor="$background" padding="$4">
+          <XStack alignItems="center" justifyContent="space-between" marginBottom="$4">
+            <H4 color="$color">{editingProxy ? t('admin.editProxy') : t('admin.addProxy')}</H4>
+            <ScalePress onPress={() => setModalVisible(false)}>
+              <Ionicons name="close" size={24} color={theme.color.val} />
+            </ScalePress>
+          </XStack>
+
+          <ScrollView>
+            <YStack gap="$3">
+              <YStack gap="$1.5">
+                <Text fontSize="$2" color="$mutedText">{t('admin.proxyName')}</Text>
+                <Input size="$3" value={formName} onChangeText={setFormName} placeholder="My Proxy" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
+              </YStack>
+
+              <YStack gap="$1.5">
+                <Text fontSize="$2" color="$mutedText">{t('admin.proxyHost')}</Text>
+                <Input size="$3" value={formHost} onChangeText={setFormHost} placeholder="102.129.221.156" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
+              </YStack>
+
+              {/* Protocol picker */}
+              <YStack gap="$1.5">
+                <Text fontSize="$2" color="$mutedText">{t('admin.proxyProtocol')}</Text>
+                <XStack gap="$2">
+                  {(['http', 'socks5'] as const).map((proto) => (
+                    <ScalePress key={proto} onPress={() => setFormProtocol(proto)}>
+                      <XStack
+                        paddingHorizontal="$3"
+                        paddingVertical="$2"
+                        borderRadius="$3"
+                        borderWidth={1.5}
+                        borderColor={formProtocol === proto ? '$accent' : '$borderColor'}
+                        backgroundColor={formProtocol === proto ? '$accentBackground' : '$subtleBackground'}
+                      >
+                        <Text color={formProtocol === proto ? '$accent' : '$color'} fontWeight="600" fontSize="$2">
+                          {proto.toUpperCase()}
+                        </Text>
+                      </XStack>
+                    </ScalePress>
+                  ))}
+                </XStack>
+              </YStack>
+
+              {formProtocol === 'http' && (
+                <YStack gap="$1.5">
+                  <Text fontSize="$2" color="$mutedText">{t('admin.proxyHttpPort')}</Text>
+                  <Input size="$3" value={formHttpPort} onChangeText={setFormHttpPort} placeholder="8080" keyboardType="number-pad" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
+                </YStack>
+              )}
+              {formProtocol === 'socks5' && (
+                <YStack gap="$1.5">
+                  <Text fontSize="$2" color="$mutedText">{t('admin.proxySocks5Port')}</Text>
+                  <Input size="$3" value={formSocks5Port} onChangeText={setFormSocks5Port} placeholder="1080" keyboardType="number-pad" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
+                </YStack>
+              )}
+
+              <YStack gap="$1.5">
+                <Text fontSize="$2" color="$mutedText">{t('admin.proxyUsername')}</Text>
+                <Input size="$3" value={formUsername} onChangeText={setFormUsername} placeholder={t('admin.proxyUsername')} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
+              </YStack>
+
+              <YStack gap="$1.5">
+                <Text fontSize="$2" color="$mutedText">{t('admin.proxyPassword')}</Text>
+                <XStack gap="$2" alignItems="center">
+                  <Input flex={1} size="$3" value={formPassword} onChangeText={setFormPassword} placeholder={editingProxy ? '(leave empty to keep)' : ''} secureTextEntry={!showPassword} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
+                  <ScalePress onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={theme.mutedText.val} />
+                  </ScalePress>
+                </XStack>
+              </YStack>
+
+              <YStack gap="$1.5">
+                <Text fontSize="$2" color="$mutedText">{t('admin.proxyPriority')}</Text>
+                <Input size="$3" value={formPriority} onChangeText={setFormPriority} placeholder="0" keyboardType="number-pad" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
+                <Text fontSize="$1" color="$mutedText">{t('admin.proxyPriorityDesc')}</Text>
+              </YStack>
+
+              <XStack alignItems="center" justifyContent="space-between">
+                <YStack flex={1}>
+                  <Text fontSize="$3" color="$color">{t('admin.proxyIsActive')}</Text>
+                  <Text fontSize="$1" color="$mutedText">{t('admin.proxyIsActiveDesc')}</Text>
+                </YStack>
+                <AppSwitch checked={formActive} onCheckedChange={setFormActive} />
+              </XStack>
+
+              <XStack gap="$2" marginTop="$2">
+                <AppButton flex={1} onPress={handleSave} disabled={saving}>
+                  {saving ? t('common.loading') : t('admin.proxySave')}
+                </AppButton>
+                <AppButton flex={1} variant="outline" onPress={() => setModalVisible(false)}>
+                  {t('admin.proxyCancel')}
+                </AppButton>
+              </XStack>
+            </YStack>
+          </ScrollView>
+        </YStack>
+      </Modal>
+    </ScrollView>
+  )
 }
 
 function StorageAdminTab() {
@@ -1984,7 +2419,7 @@ export default function AdminScreen() {
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'storage' | 'api' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -2230,6 +2665,21 @@ export default function AdminScreen() {
                 <Ionicons name="cloud-outline" size={16} color={activeTab === 'storage' ? 'white' : theme.accent.val} />
                 <Text color={activeTab === 'storage' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
                   {t('admin.storage')}
+                </Text>
+              </XStack>
+            </ScalePress>
+            <ScalePress onPress={() => setActiveTab('proxy')}>
+              <XStack
+                backgroundColor={activeTab === 'proxy' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+                gap="$1.5"
+                alignItems="center"
+              >
+                <Ionicons name="globe-outline" size={16} color={activeTab === 'proxy' ? 'white' : theme.accent.val} />
+                <Text color={activeTab === 'proxy' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.proxyTab')}
                 </Text>
               </XStack>
             </ScalePress>
@@ -2595,6 +3045,10 @@ export default function AdminScreen() {
       {/* Storage Tab */}
       {activeTab === 'storage' && (
         <StorageAdminTab />
+      )}
+
+      {activeTab === 'proxy' && (
+        <ProxyAdminTab />
       )}
 
       {/* API Settings Tab */}

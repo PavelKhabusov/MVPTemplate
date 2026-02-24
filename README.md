@@ -95,7 +95,7 @@ MVPTemplate/
 │   │   └── src/features/       # auth, settings, search, onboarding
 │   │
 │   └── backend/                # Fastify API
-│       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, ...
+│       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, proxy, ...
 │       ├── src/database/       # Drizzle schema + migrations
 │       └── docker/             # Dockerfile + docker-compose
 │
@@ -109,7 +109,9 @@ MVPTemplate/
 │   ├── docs/                   # In-app documentation engine
 │   ├── template-config/        # Feature flags, color schemes
 │   ├── config/                 # Shared configuration
-│   └── analytics/              # PostHog abstraction
+│   ├── analytics/              # PostHog abstraction
+│   ├── ai/                     # AI provider types + config (Gemini, OpenAI)
+│   └── proxy/                  # Proxy management types
 │
 └── scripts/                    # PowerShell setup scripts
 ```
@@ -157,6 +159,15 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/payments/webhook/robokassa` | — | Robokassa webhook |
 | `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
 | `POST` | `/payments/admin/plans` | Admin | Create a plan |
+| `GET` | `/admin/proxies` | Admin | List all proxies |
+| `GET` | `/admin/proxies/:id` | Admin | Get proxy details |
+| `POST` | `/admin/proxies` | Admin | Create proxy |
+| `PUT` | `/admin/proxies/:id` | Admin | Update proxy |
+| `DELETE` | `/admin/proxies/:id` | Admin | Delete proxy |
+| `PATCH` | `/admin/proxies/:id/toggle` | Admin | Toggle proxy active state |
+| `POST` | `/admin/proxies/:id/test` | Admin | Full HTTPS proxy test |
+| `POST` | `/admin/proxies/:id/test-tcp` | Admin | TCP connectivity test |
+| `GET` | `/admin/proxies/:id/diagnose` | Admin | Network diagnostics |
 | `GET` | `/health` | — | Health check |
 
 ## Database Schema
@@ -173,6 +184,7 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `plans` | name, price_amount, currency, interval, features (JSONB), provider, provider_price_id |
 | `subscriptions` | user_id, plan_id, status, provider, provider_subscription_id, current_period_start/end |
 | `payments` | user_id, amount, currency, status, type, provider, provider_payment_id |
+| `proxies` | name, host, protocol, http_port, socks5_port, username, password, is_active, priority, last_check_status |
 
 Roles: `user` (default) | `moderator` | `admin`
 
@@ -194,6 +206,10 @@ HOST=0.0.0.0
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:8081
 GOOGLE_CLIENT_ID=                                # optional — enables Google sign-in
+GEMINI_API_KEY=                                  # optional — Gemini AI provider
+GEMINI_MODEL=gemini-2.5-flash
+OPENAI_API_KEY=                                  # optional — OpenAI provider
+OPENAI_MODEL=gpt-4o-mini
 ```
 
 ### Mobile (`apps/mobile/.env`)
@@ -383,10 +399,37 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports three prov
 | `ROBOKASSA_PASSWORD2` | — | Robokassa password #2 (webhook verification) |
 | `ROBOKASSA_TEST_MODE` | `true` | Enable Robokassa test mode |
 
+## AI Providers (Optional)
+
+Supports **Google Gemini** and **OpenAI** with tab switching in the admin panel. Configure API keys via Admin → API Settings → AI Providers.
+
+### AI Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GEMINI_API_KEY` | — | Google Gemini API key |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model (flash, pro, 3-pro-image, 2.0-flash) |
+| `GEMINI_CONCURRENT_LIMIT` | `5` | Max concurrent AI requests |
+| `OPENAI_API_KEY` | — | OpenAI API key |
+| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model (gpt-4o, gpt-4o-mini, o3-mini) |
+| `OPENAI_MAX_TOKENS` | `4096` | Max tokens per response |
+
+## Proxy Management (Optional)
+
+Full CRUD proxy management with testing, status tracking, and priority-based selection. Proxies are stored in the database (not `.env`) and managed via Admin → Proxies tab.
+
+### Features
+
+- **Add/edit/delete** proxies with name, host, protocol (HTTP/SOCKS5), ports, authentication
+- **Priority-based** selection (lower value = higher priority)
+- **Three test methods**: full HTTPS test (curl), TCP connectivity test, network diagnostics (DNS + TCP)
+- **Status tracking**: last check time, status (success/failed/pending), error messages
+- **Toggle active state** per proxy
+
 ## Features
 
 - **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in
-- **Admin Panel**: role/feature management, user stats, protected by middleware
+- **Admin Panel**: role/feature management, user stats, proxy management, AI providers, protected by middleware
 - **Profile**: name, bio, phone, location — inline editing
 - **Navigation**: animated tab bar (mobile), collapsible sidebar with gradient indicator (web)
 - **Animations**: bounce, rotate, pop, wiggle, bell tab icons + FadeIn, SlideIn, ScalePress
@@ -398,6 +441,8 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports three prov
 - **Analytics**: PostHog abstraction with feature flags
 - **SEO**: meta tags, OG/Twitter cards, sitemap
 - **Payments**: Stripe + YooKassa + Robokassa, subscriptions & one-time, admin stats
+- **AI Providers**: Gemini + OpenAI with tab switching, model selection
+- **Proxy Management**: CRUD with testing (HTTPS, TCP, diagnostics), priority, status tracking
 - **Security**: Helmet, CORS, Zod validation, rate limiting, no PII leaks
 
 ## Deployment

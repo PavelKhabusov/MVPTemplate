@@ -44,12 +44,8 @@ const ENV_GROUPS = {
     types: { STORAGE_TYPE: 'string', S3_ENDPOINT: 'string', S3_BUCKET: 'string', S3_ACCESS_KEY: 'secret', S3_SECRET_KEY: 'secret', S3_REGION: 'string', S3_PUBLIC_URL: 'string' } as Record<string, string>,
   },
   ai: {
-    keys: ['GEMINI_API_KEY', 'GEMINI_MODEL', 'GEMINI_CONCURRENT_LIMIT'],
-    types: { GEMINI_API_KEY: 'secret', GEMINI_MODEL: 'string', GEMINI_CONCURRENT_LIMIT: 'string' } as Record<string, string>,
-  },
-  proxy: {
-    keys: ['PROXY_ENABLED', 'PROXY_URL'],
-    types: { PROXY_ENABLED: 'boolean', PROXY_URL: 'string' } as Record<string, string>,
+    keys: ['GEMINI_API_KEY', 'GEMINI_MODEL', 'GEMINI_CONCURRENT_LIMIT', 'OPENAI_API_KEY', 'OPENAI_MODEL', 'OPENAI_MAX_TOKENS'],
+    types: { GEMINI_API_KEY: 'secret', GEMINI_MODEL: 'string', GEMINI_CONCURRENT_LIMIT: 'string', OPENAI_API_KEY: 'secret', OPENAI_MODEL: 'string', OPENAI_MAX_TOKENS: 'string' } as Record<string, string>,
   },
 } as const
 
