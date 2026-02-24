@@ -222,7 +222,7 @@ function PaymentsAdminTab() {
   const [planPrice, setPlanPrice] = useState('')
   const [planCurrency, setPlanCurrency] = useState('usd')
   const [planInterval, setPlanInterval] = useState<'month' | 'year' | 'one_time'>('month')
-  const [planProvider, setPlanProvider] = useState<'stripe' | 'yookassa'>('stripe')
+  const [planProvider, setPlanProvider] = useState<'stripe' | 'yookassa' | 'robokassa'>('stripe')
   const [planProviderPriceId, setPlanProviderPriceId] = useState('')
   const [planFeatures, setPlanFeatures] = useState('')
   const [creating, setCreating] = useState(false)
@@ -525,10 +525,10 @@ function PaymentsAdminTab() {
                     <YStack gap="$1.5">
                       <Text fontSize="$2" color="$mutedText">{t('admin.planProvider')}</Text>
                       <XStack gap="$2">
-                        {(['stripe', 'yookassa'] as const).map((p) => (
+                        {(['stripe', 'yookassa', 'robokassa'] as const).map((p) => (
                           <ScalePress key={p} onPress={() => setPlanProvider(p)}>
                             <XStack backgroundColor={planProvider === p ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" borderWidth={1} borderColor={planProvider === p ? '$accent' : '$borderColor'}>
-                              <Text color={planProvider === p ? 'white' : '$color'} fontWeight="600" fontSize="$2">{p === 'stripe' ? 'Stripe' : 'YooKassa'}</Text>
+                              <Text color={planProvider === p ? 'white' : '$color'} fontWeight="600" fontSize="$2">{{ stripe: 'Stripe', yookassa: 'YooKassa', robokassa: 'Robokassa' }[p]}</Text>
                             </XStack>
                           </ScalePress>
                         ))}

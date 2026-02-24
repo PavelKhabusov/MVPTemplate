@@ -154,6 +154,7 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `GET` | `/payments/history` | Yes | Payment history (paginated) |
 | `POST` | `/payments/webhook/stripe` | — | Stripe webhook |
 | `POST` | `/payments/webhook/yookassa` | — | YooKassa webhook |
+| `POST` | `/payments/webhook/robokassa` | — | Robokassa webhook |
 | `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
 | `POST` | `/payments/admin/plans` | Admin | Create a plan |
 | `GET` | `/health` | — | Health check |
@@ -323,7 +324,7 @@ Push notifications are disabled by default. Enabling requires an Expo access tok
 
 ## Payments (Optional)
 
-Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two providers: **Stripe** (international) and **YooKassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
+Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports three providers: **Stripe** (international), **YooKassa** (Russia), and **Robokassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
 
 ### Setup
 
@@ -346,15 +347,25 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
    ```
    > Get keys from [YooKassa Dashboard](https://yookassa.ru/my). Set webhook URL to `https://your-domain.com/api/payments/webhook/yookassa`.
 
+   **Robokassa:**
+   ```env
+   PAYMENTS_ENABLED=true
+   ROBOKASSA_MERCHANT_LOGIN=your-merchant-login
+   ROBOKASSA_PASSWORD1=your-password1
+   ROBOKASSA_PASSWORD2=your-password2
+   ROBOKASSA_TEST_MODE=true
+   ```
+   > Get credentials from [Robokassa Dashboard](https://partner.robokassa.ru/). Set Result URL to `https://your-domain.com/api/payments/webhook/robokassa`.
+
 3. Run `npm run db:push -w apps/backend` to create the `plans`, `subscriptions`, and `payments` tables
 4. Restart the backend — the `payments` feature flag activates automatically
 5. Create plans via the admin panel or `POST /api/payments/admin/plans`
 
 ### How It Works
 
-- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe and YooKassa into a unified API
-- **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa) → webhook confirms payment
-- **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa)
+- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe, YooKassa, and Robokassa into a unified API
+- **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa / Robokassa) → webhook confirms payment
+- **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa, Robokassa)
 - **Admin panel**: Payments tab shows revenue stats, active subscriptions count, and recent payments
 - **User-facing**: pricing page at `/pricing`, subscription management in Settings → Manage Plan
 
@@ -367,6 +378,10 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
 | `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret |
 | `YOOKASSA_SHOP_ID` | — | YooKassa shop ID |
 | `YOOKASSA_SECRET_KEY` | — | YooKassa secret key |
+| `ROBOKASSA_MERCHANT_LOGIN` | — | Robokassa merchant login |
+| `ROBOKASSA_PASSWORD1` | — | Robokassa password #1 (checkout signature) |
+| `ROBOKASSA_PASSWORD2` | — | Robokassa password #2 (webhook verification) |
+| `ROBOKASSA_TEST_MODE` | `true` | Enable Robokassa test mode |
 
 ## Features
 
@@ -382,7 +397,7 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
 - **SSE**: real-time events with auto-reconnect
 - **Analytics**: PostHog abstraction with feature flags
 - **SEO**: meta tags, OG/Twitter cards, sitemap
-- **Payments**: Stripe + YooKassa, subscriptions & one-time, admin stats
+- **Payments**: Stripe + YooKassa + Robokassa, subscriptions & one-time, admin stats
 - **Security**: Helmet, CORS, Zod validation, rate limiting, no PII leaks
 
 ## Deployment

@@ -19,7 +19,7 @@ export const paymentsService = {
     const plan = await paymentsRepository.getPlanById(input.planId)
     if (!plan || !plan.isActive) throw AppError.notFound('Plan not found')
 
-    const provider = getPaymentProvider(plan.provider as 'stripe' | 'yookassa')
+    const provider = getPaymentProvider(plan.provider as 'stripe' | 'yookassa' | 'robokassa')
 
     const result = await provider.createCheckoutSession({
       userId,
@@ -79,6 +79,14 @@ export const paymentsService = {
               currentPeriodEnd: event.currentPeriodEnd ?? periodEnd,
               cancelAtPeriodEnd: false,
             })
+
+            // Also mark the payment as succeeded (needed for providers like Robokassa
+            // that emit a single webhook for both payment and subscription)
+            if (event.providerPaymentId) {
+              await paymentsRepository.updatePaymentByProviderId(event.providerPaymentId, {
+                status: 'succeeded',
+              })
+            }
           }
         }
         break
@@ -154,7 +162,7 @@ export const paymentsService = {
 
     if (sub.subscription.providerSubscriptionId) {
       try {
-        const provider = getPaymentProvider(sub.subscription.provider as 'stripe' | 'yookassa')
+        const provider = getPaymentProvider(sub.subscription.provider as 'stripe' | 'yookassa' | 'robokassa')
         await provider.cancelSubscription({
           providerSubscriptionId: sub.subscription.providerSubscriptionId,
         })

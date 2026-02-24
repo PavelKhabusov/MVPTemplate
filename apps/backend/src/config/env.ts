@@ -44,6 +44,12 @@ const envSchema = z.object({
   YOOKASSA_SHOP_ID: z.string().optional(),
   YOOKASSA_SECRET_KEY: z.string().optional(),
   YOOKASSA_WEBHOOK_SECRET: z.string().optional(),
+
+  // Robokassa
+  ROBOKASSA_MERCHANT_LOGIN: z.string().optional(),
+  ROBOKASSA_PASSWORD1: z.string().optional(),
+  ROBOKASSA_PASSWORD2: z.string().optional(),
+  ROBOKASSA_TEST_MODE: envBoolean.default(true),
 })
 
 function loadEnv() {

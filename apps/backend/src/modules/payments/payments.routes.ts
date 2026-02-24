@@ -83,6 +83,32 @@ export async function paymentsRoutes(app: FastifyInstance) {
         return reply.status(400).send({ error: err.message })
       }
     })
+
+    webhook.addContentTypeParser(
+      'application/x-www-form-urlencoded',
+      { parseAs: 'string' },
+      (_req, body, done) => {
+        done(null, body)
+      },
+    )
+
+    webhook.post('/webhook/robokassa', async (request, reply) => {
+      try {
+        const provider = getPaymentProvider('robokassa')
+        const event = await provider.parseWebhook(
+          request.body as string,
+          request.headers as Record<string, string>,
+        )
+        await paymentsService.handleWebhookEvent(event)
+        // Robokassa requires "OK{InvId}" as the response
+        const params = new URLSearchParams(request.body as string)
+        const invId = params.get('InvId') ?? ''
+        return reply.status(200).type('text/plain').send(`OK${invId}`)
+      } catch (err: any) {
+        request.log.error(err, 'Robokassa webhook error')
+        return reply.status(400).send({ error: err.message })
+      }
+    })
   })
 
   // --- Admin ---
