@@ -606,6 +606,108 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
 }
 
+const PAYMENT_PROVIDERS = [
+  { key: 'stripe', label: 'Stripe', color: '#635BFF', keys: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'] },
+  { key: 'yookassa', label: 'YooKassa', color: '#0077FF', keys: ['YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YOOKASSA_WEBHOOK_SECRET'] },
+  { key: 'robokassa', label: 'Robokassa', color: '#E5392B', keys: ['ROBOKASSA_MERCHANT_LOGIN', 'ROBOKASSA_PASSWORD1', 'ROBOKASSA_PASSWORD2'] },
+] as const
+
+function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
+  keys: Record<string, EnvEntry>
+  isGroupOn: boolean
+  onToggle: (checked: boolean) => void
+  onUpdate: (key: string, value: string | boolean | null) => void
+}) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const [activeProvider, setActiveProvider] = useState<typeof PAYMENT_PROVIDERS[number]['key']>('stripe')
+
+  const testModeEntry = keys['ROBOKASSA_TEST_MODE']
+  const activeProviderData = PAYMENT_PROVIDERS.find((p) => p.key === activeProvider)!
+  const providerKeys = activeProviderData.keys
+    .filter((k) => k in keys)
+    .map((k) => [k, keys[k]] as [string, EnvEntry])
+
+  return (
+    <AppCard animated={false}>
+      <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
+        <XStack alignItems="center" gap="$2" flex={1}>
+          <Ionicons name="card-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <Text fontWeight="600" color="$color" fontSize="$4">
+            {t('admin.apiPayments')}
+          </Text>
+        </XStack>
+        <AppSwitch checked={isGroupOn} onCheckedChange={onToggle} />
+      </XStack>
+
+      {isGroupOn && (
+        <YStack gap="$3">
+          {/* Provider tabs */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <XStack gap="$2">
+              {PAYMENT_PROVIDERS.map((provider) => {
+                const isActive = activeProvider === provider.key
+                return (
+                  <ScalePress key={provider.key} onPress={() => setActiveProvider(provider.key)}>
+                    <XStack
+                      backgroundColor={isActive ? provider.color : '$subtleBackground'}
+                      paddingHorizontal="$3"
+                      paddingVertical="$2"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={isActive ? provider.color : '$borderColor'}
+                      gap="$1.5"
+                      alignItems="center"
+                    >
+                      <YStack
+                        width={8}
+                        height={8}
+                        borderRadius={4}
+                        backgroundColor={isActive ? 'white' : provider.color}
+                      />
+                      <Text
+                        color={isActive ? 'white' : '$color'}
+                        fontWeight="700"
+                        fontSize="$2"
+                      >
+                        {provider.label}
+                      </Text>
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </ScrollView>
+
+          {/* Provider env fields */}
+          {providerKeys.map(([key, entry]) => (
+            <EnvStringField
+              key={key}
+              envKey={key}
+              value={entry.value}
+              isSecret={entry.type === 'secret'}
+              onSave={onUpdate}
+            />
+          ))}
+
+          {/* Robokassa test mode toggle — show when robokassa is active */}
+          {activeProvider === 'robokassa' && testModeEntry && (
+            <XStack alignItems="center" justifyContent="space-between">
+              <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                ROBOKASSA_TEST_MODE
+              </Text>
+              <AppSwitch
+                checked={testModeEntry.value === 'true'}
+                onCheckedChange={(checked) => onUpdate('ROBOKASSA_TEST_MODE', String(checked))}
+              />
+            </XStack>
+          )}
+        </YStack>
+      )}
+    </AppCard>
+  )
+}
+
 function ApiSettingsTab() {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -677,6 +779,19 @@ function ApiSettingsTab() {
                 // Secret: toggling off comments it out, toggling on uncomments
                 handleUpdate(mainKey, checked ? '__TOGGLE_ON__' : null)
               }
+            }
+
+            // Payments: use dedicated card with provider tabs
+            if (group === 'payments') {
+              return (
+                <PaymentsEnvCard
+                  key={group}
+                  keys={keys}
+                  isGroupOn={isGroupOn}
+                  onToggle={handleMainToggle}
+                  onUpdate={handleUpdate}
+                />
+              )
             }
 
             // Sub-keys: everything except the main toggle
