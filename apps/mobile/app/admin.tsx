@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions, Linking } from 'react-native'
+import React, { useState, useEffect, useCallback, type ReactNode } from 'react'
+import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions, Linking, Pressable } from 'react-native'
 import { YStack, XStack, Text, H2, H4, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
@@ -86,6 +86,107 @@ function formatDuration(seconds: number): string {
 function formatShortDate(iso: string): string {
   const d = new Date(iso)
   return `${d.getDate()}/${d.getMonth() + 1}`
+}
+
+/* ─── Reusable Admin Modal ─────────────────────────────────────────── */
+function AdminModal({
+  visible,
+  onClose,
+  title,
+  maxWidth = 520,
+  children,
+}: {
+  visible: boolean
+  onClose: () => void
+  title: string
+  maxWidth?: number
+  children: ReactNode
+}) {
+  const theme = useTheme()
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+  const insets = useSafeAreaInsets()
+  const isWide = screenWidth > 600
+
+  if (Platform.OS !== 'web') {
+    return (
+      <Modal
+        visible={visible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={onClose}
+      >
+        <YStack
+          flex={1}
+          backgroundColor="$background"
+          padding="$4"
+          paddingTop={Platform.OS === 'ios' ? 60 : '$4'}
+        >
+          <XStack alignItems="center" justifyContent="space-between" marginBottom="$4">
+            <H4 color="$color" fontFamily="$body">{title}</H4>
+            <ScalePress onPress={onClose}>
+              <Ionicons name="close" size={24} color={theme.color.val} />
+            </ScalePress>
+          </XStack>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {children}
+          </ScrollView>
+        </YStack>
+      </Modal>
+    )
+  }
+
+  if (!visible) return null
+
+  return (
+    <YStack
+      position="absolute"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      zIndex={10000}
+      alignItems="center"
+      justifyContent="center"
+    >
+      {/* Backdrop */}
+      <Pressable
+        onPress={onClose}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
+      />
+      {/* Content */}
+      <YStack
+        backgroundColor="$background"
+        borderRadius="$4"
+        width={isWide ? Math.min(maxWidth, screenWidth - 48) : screenWidth - 32}
+        maxHeight={screenHeight - insets.top - insets.bottom - 48}
+        shadowColor="$shadowColor"
+        shadowOffset={{ width: 0, height: 8 }}
+        shadowOpacity={0.15}
+        shadowRadius={24}
+        elevation={8}
+        overflow="hidden"
+      >
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          padding="$4"
+          paddingBottom="$3"
+          borderBottomWidth={1}
+          borderBottomColor="$borderColor"
+        >
+          <H4 color="$color" fontFamily="$body">{title}</H4>
+          <ScalePress onPress={onClose}>
+            <Ionicons name="close" size={24} color={theme.color.val} />
+          </ScalePress>
+        </XStack>
+        <ScrollView style={{ maxHeight: screenHeight - insets.top - insets.bottom - 140 }} showsVerticalScrollIndicator={false}>
+          <YStack padding="$4">
+            {children}
+          </YStack>
+        </ScrollView>
+      </YStack>
+    </YStack>
+  )
 }
 
 function ScreensBarChart({ data }: { data: Array<{ screenName: string; views: number }> }) {
@@ -1547,104 +1648,112 @@ function ProxyAdminTab() {
       </FadeIn>
 
       {/* Create/Edit Modal */}
-      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
-        <YStack flex={1} backgroundColor="$background" padding="$4">
-          <XStack alignItems="center" justifyContent="space-between" marginBottom="$4">
-            <H4 color="$color">{editingProxy ? t('admin.editProxy') : t('admin.addProxy')}</H4>
-            <ScalePress onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={24} color={theme.color.val} />
-            </ScalePress>
+      <AdminModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title={editingProxy ? t('admin.editProxy') : t('admin.addProxy')}
+        maxWidth={560}
+      >
+        <YStack gap="$3">
+          {/* Row 1: Name + Host (2 columns on wide) */}
+          <XStack gap="$3" flexWrap="wrap">
+            <YStack gap="$1.5" flex={1} minWidth={200}>
+              <Text fontSize="$2" fontFamily="$body" color="$mutedText">{t('admin.proxyName')}</Text>
+              <Input size="$3" value={formName} onChangeText={setFormName} placeholder="My Proxy" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" fontFamily="$body" />
+            </YStack>
+            <YStack gap="$1.5" flex={1} minWidth={200}>
+              <Text fontSize="$2" fontFamily="$body" color="$mutedText">{t('admin.proxyHost')}</Text>
+              <Input size="$3" value={formHost} onChangeText={setFormHost} placeholder="102.129.221.156" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" fontFamily="$body" />
+            </YStack>
           </XStack>
 
-          <ScrollView>
-            <YStack gap="$3">
-              <YStack gap="$1.5">
-                <Text fontSize="$2" color="$mutedText">{t('admin.proxyName')}</Text>
-                <Input size="$3" value={formName} onChangeText={setFormName} placeholder="My Proxy" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
-              </YStack>
-
-              <YStack gap="$1.5">
-                <Text fontSize="$2" color="$mutedText">{t('admin.proxyHost')}</Text>
-                <Input size="$3" value={formHost} onChangeText={setFormHost} placeholder="102.129.221.156" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
-              </YStack>
-
-              {/* Protocol picker */}
-              <YStack gap="$1.5">
-                <Text fontSize="$2" color="$mutedText">{t('admin.proxyProtocol')}</Text>
-                <XStack gap="$2">
-                  {(['http', 'socks5'] as const).map((proto) => (
-                    <ScalePress key={proto} onPress={() => setFormProtocol(proto)}>
-                      <XStack
-                        paddingHorizontal="$3"
-                        paddingVertical="$2"
-                        borderRadius="$3"
-                        borderWidth={1.5}
-                        borderColor={formProtocol === proto ? '$accent' : '$borderColor'}
-                        backgroundColor={formProtocol === proto ? '$accentBackground' : '$subtleBackground'}
-                      >
-                        <Text color={formProtocol === proto ? '$accent' : '$color'} fontWeight="600" fontSize="$2">
-                          {proto.toUpperCase()}
-                        </Text>
-                      </XStack>
-                    </ScalePress>
-                  ))}
-                </XStack>
-              </YStack>
-
-              {formProtocol === 'http' && (
-                <YStack gap="$1.5">
-                  <Text fontSize="$2" color="$mutedText">{t('admin.proxyHttpPort')}</Text>
-                  <Input size="$3" value={formHttpPort} onChangeText={setFormHttpPort} placeholder="8080" keyboardType="number-pad" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
-                </YStack>
-              )}
-              {formProtocol === 'socks5' && (
-                <YStack gap="$1.5">
-                  <Text fontSize="$2" color="$mutedText">{t('admin.proxySocks5Port')}</Text>
-                  <Input size="$3" value={formSocks5Port} onChangeText={setFormSocks5Port} placeholder="1080" keyboardType="number-pad" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
-                </YStack>
-              )}
-
-              <YStack gap="$1.5">
-                <Text fontSize="$2" color="$mutedText">{t('admin.proxyUsername')}</Text>
-                <Input size="$3" value={formUsername} onChangeText={setFormUsername} placeholder={t('admin.proxyUsername')} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
-              </YStack>
-
-              <YStack gap="$1.5">
-                <Text fontSize="$2" color="$mutedText">{t('admin.proxyPassword')}</Text>
-                <XStack gap="$2" alignItems="center">
-                  <Input flex={1} size="$3" value={formPassword} onChangeText={setFormPassword} placeholder={editingProxy ? '(leave empty to keep)' : ''} secureTextEntry={!showPassword} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
-                  <ScalePress onPress={() => setShowPassword(!showPassword)}>
-                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={theme.mutedText.val} />
+          {/* Row 2: Protocol + Port (2 columns on wide) */}
+          <XStack gap="$3" flexWrap="wrap" alignItems="flex-end">
+            <YStack gap="$1.5" flex={1} minWidth={160}>
+              <Text fontSize="$2" fontFamily="$body" color="$mutedText">{t('admin.proxyProtocol')}</Text>
+              <XStack gap="$2">
+                {(['http', 'socks5'] as const).map((proto) => (
+                  <ScalePress key={proto} onPress={() => setFormProtocol(proto)}>
+                    <XStack
+                      paddingHorizontal="$3"
+                      paddingVertical="$2"
+                      borderRadius="$3"
+                      borderWidth={1.5}
+                      borderColor={formProtocol === proto ? '$accent' : '$borderColor'}
+                      backgroundColor={formProtocol === proto ? '$accentBackground' : '$subtleBackground'}
+                    >
+                      <Text color={formProtocol === proto ? '$accent' : '$color'} fontWeight="600" fontSize="$2" fontFamily="$body">
+                        {proto.toUpperCase()}
+                      </Text>
+                    </XStack>
                   </ScalePress>
-                </XStack>
-              </YStack>
+                ))}
+              </XStack>
+            </YStack>
+            <YStack gap="$1.5" flex={1} minWidth={160}>
+              <Text fontSize="$2" fontFamily="$body" color="$mutedText">
+                {formProtocol === 'http' ? t('admin.proxyHttpPort') : t('admin.proxySocks5Port')}
+              </Text>
+              <Input
+                size="$3"
+                value={formProtocol === 'http' ? formHttpPort : formSocks5Port}
+                onChangeText={formProtocol === 'http' ? setFormHttpPort : setFormSocks5Port}
+                placeholder={formProtocol === 'http' ? '8080' : '1080'}
+                keyboardType="number-pad"
+                backgroundColor="$subtleBackground"
+                borderColor="$borderColor"
+                color="$color"
+                fontFamily="$body"
+              />
+            </YStack>
+          </XStack>
 
-              <YStack gap="$1.5">
-                <Text fontSize="$2" color="$mutedText">{t('admin.proxyPriority')}</Text>
-                <Input size="$3" value={formPriority} onChangeText={setFormPriority} placeholder="0" keyboardType="number-pad" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" />
-                <Text fontSize="$1" color="$mutedText">{t('admin.proxyPriorityDesc')}</Text>
-              </YStack>
+          {/* Row 3: Username + Password (2 columns on wide) */}
+          <XStack gap="$3" flexWrap="wrap">
+            <YStack gap="$1.5" flex={1} minWidth={200}>
+              <Text fontSize="$2" fontFamily="$body" color="$mutedText">{t('admin.proxyUsername')}</Text>
+              <Input size="$3" value={formUsername} onChangeText={setFormUsername} placeholder={t('admin.proxyUsername')} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" fontFamily="$body" />
+            </YStack>
+            <YStack gap="$1.5" flex={1} minWidth={200}>
+              <Text fontSize="$2" fontFamily="$body" color="$mutedText">{t('admin.proxyPassword')}</Text>
+              <XStack gap="$2" alignItems="center">
+                <Input flex={1} size="$3" value={formPassword} onChangeText={setFormPassword} placeholder={editingProxy ? '(leave empty to keep)' : ''} secureTextEntry={!showPassword} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" fontFamily="$body" />
+                <ScalePress onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={theme.mutedText.val} />
+                </ScalePress>
+              </XStack>
+            </YStack>
+          </XStack>
 
-              <XStack alignItems="center" justifyContent="space-between">
+          {/* Row 4: Priority + Active toggle (2 columns on wide) */}
+          <XStack gap="$3" flexWrap="wrap" alignItems="flex-end">
+            <YStack gap="$1.5" flex={1} minWidth={160}>
+              <Text fontSize="$2" fontFamily="$body" color="$mutedText">{t('admin.proxyPriority')}</Text>
+              <Input size="$3" value={formPriority} onChangeText={setFormPriority} placeholder="0" keyboardType="number-pad" backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" fontFamily="$body" />
+              <Text fontSize="$1" fontFamily="$body" color="$mutedText">{t('admin.proxyPriorityDesc')}</Text>
+            </YStack>
+            <YStack flex={1} minWidth={160} justifyContent="center">
+              <XStack alignItems="center" justifyContent="space-between" paddingVertical="$2">
                 <YStack flex={1}>
-                  <Text fontSize="$3" color="$color">{t('admin.proxyIsActive')}</Text>
-                  <Text fontSize="$1" color="$mutedText">{t('admin.proxyIsActiveDesc')}</Text>
+                  <Text fontSize="$3" fontFamily="$body" color="$color">{t('admin.proxyIsActive')}</Text>
+                  <Text fontSize="$1" fontFamily="$body" color="$mutedText">{t('admin.proxyIsActiveDesc')}</Text>
                 </YStack>
                 <AppSwitch checked={formActive} onCheckedChange={setFormActive} />
               </XStack>
-
-              <XStack gap="$2" marginTop="$2">
-                <AppButton flex={1} onPress={handleSave} disabled={saving}>
-                  {saving ? t('common.loading') : t('admin.proxySave')}
-                </AppButton>
-                <AppButton flex={1} variant="outline" onPress={() => setModalVisible(false)}>
-                  {t('admin.proxyCancel')}
-                </AppButton>
-              </XStack>
             </YStack>
-          </ScrollView>
+          </XStack>
+
+          {/* Action buttons */}
+          <XStack gap="$3" marginTop="$3" justifyContent="flex-end">
+            <AppButton variant="outline" onPress={() => setModalVisible(false)} size="md">
+              {t('admin.proxyCancel')}
+            </AppButton>
+            <AppButton onPress={handleSave} disabled={saving} size="md">
+              {saving ? t('common.loading') : t('admin.proxySave')}
+            </AppButton>
+          </XStack>
         </YStack>
-      </Modal>
+      </AdminModal>
     </ScrollView>
   )
 }
@@ -3062,85 +3171,87 @@ export default function AdminScreen() {
       )}
 
       {/* Edit User Modal */}
-      <Modal
+      <AdminModal
         visible={!!selectedUser}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setSelectedUser(null)}
+        onClose={() => setSelectedUser(null)}
+        title={selectedUser?.name ?? ''}
+        maxWidth={480}
       >
-        <YStack
-          flex={1}
-          backgroundColor="$background"
-          padding="$4"
-          paddingTop={Platform.OS === 'ios' ? 60 : '$4'}
-        >
-          <XStack justifyContent="space-between" alignItems="center" marginBottom="$4">
-            <H4 color="$color">{selectedUser?.name}</H4>
-            <ScalePress onPress={() => setSelectedUser(null)}>
-              <Ionicons name="close" size={24} color={theme.color.val} />
-            </ScalePress>
-          </XStack>
-
-          <Text color="$mutedText" fontSize="$3" marginBottom="$4">{selectedUser?.email}</Text>
+        <YStack gap="$4">
+          <Text color="$mutedText" fontSize="$3" fontFamily="$body">{selectedUser?.email}</Text>
 
           {/* Role Selection */}
-          <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
-            {t('admin.role')}
-          </Text>
-          <XStack gap="$2" marginBottom="$5" flexWrap="wrap">
-            {(config?.roles ?? ['user', 'admin', 'moderator']).map((role) => (
-              <ScalePress key={role} onPress={() => setEditRole(role)}>
+          <YStack gap="$2">
+            <Text fontWeight="600" color="$color" fontSize="$4" fontFamily="$body">
+              {t('admin.role')}
+            </Text>
+            <XStack gap="$2" flexWrap="wrap">
+              {(config?.roles ?? ['user', 'admin', 'moderator']).map((role) => (
+                <ScalePress key={role} onPress={() => setEditRole(role)}>
+                  <XStack
+                    backgroundColor={editRole === role ? '$accent' : '$subtleBackground'}
+                    paddingHorizontal="$3"
+                    paddingVertical="$2"
+                    borderRadius="$3"
+                    borderWidth={1}
+                    borderColor={editRole === role ? '$accent' : '$borderColor'}
+                  >
+                    <Text
+                      color={editRole === role ? 'white' : '$color'}
+                      fontWeight="600"
+                      fontSize="$3"
+                      fontFamily="$body"
+                    >
+                      {t(`admin.role${role.charAt(0).toUpperCase() + role.slice(1)}`)}
+                    </Text>
+                  </XStack>
+                </ScalePress>
+              ))}
+            </XStack>
+          </YStack>
+
+          {/* Features — 2 columns on wide screens */}
+          <YStack gap="$2">
+            <Text fontWeight="600" color="$color" fontSize="$4" fontFamily="$body">
+              {t('admin.features')}
+            </Text>
+            <XStack flexWrap="wrap" gap="$2">
+              {(config?.features ?? Object.keys(FEATURE_LABELS)).map((feature) => (
                 <XStack
-                  backgroundColor={editRole === role ? '$accent' : '$subtleBackground'}
+                  key={feature}
+                  alignItems="center"
+                  justifyContent="space-between"
+                  backgroundColor="$subtleBackground"
                   paddingHorizontal="$3"
                   paddingVertical="$2"
                   borderRadius="$3"
-                  borderWidth={1}
-                  borderColor={editRole === role ? '$accent' : '$borderColor'}
+                  minWidth={200}
+                  flexBasis="48%"
+                  flexGrow={1}
                 >
-                  <Text
-                    color={editRole === role ? 'white' : '$color'}
-                    fontWeight="600"
-                    fontSize="$3"
-                  >
-                    {t(`admin.role${role.charAt(0).toUpperCase() + role.slice(1)}`)}
+                  <Text color="$color" fontSize="$3" fontFamily="$body">
+                    {FEATURE_LABELS[feature] ?? feature}
                   </Text>
+                  <AppSwitch
+                    checked={editFeatures.includes(feature)}
+                    onCheckedChange={() => toggleFeature(feature)}
+                  />
                 </XStack>
-              </ScalePress>
-            ))}
-          </XStack>
-
-          {/* Features */}
-          <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$2">
-            {t('admin.features')}
-          </Text>
-          <YStack gap="$2" marginBottom="$5">
-            {(config?.features ?? Object.keys(FEATURE_LABELS)).map((feature) => (
-              <XStack
-                key={feature}
-                alignItems="center"
-                justifyContent="space-between"
-                backgroundColor="$subtleBackground"
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-              >
-                <Text color="$color" fontSize="$3">
-                  {FEATURE_LABELS[feature] ?? feature}
-                </Text>
-                <AppSwitch
-                  checked={editFeatures.includes(feature)}
-                  onCheckedChange={() => toggleFeature(feature)}
-                />
-              </XStack>
-            ))}
+              ))}
+            </XStack>
           </YStack>
 
-          <AppButton onPress={handleSaveUser} disabled={saving}>
-            {saving ? t('common.loading') : t('admin.saveChanges')}
-          </AppButton>
+          {/* Action buttons */}
+          <XStack gap="$3" marginTop="$2" justifyContent="flex-end">
+            <AppButton variant="outline" onPress={() => setSelectedUser(null)} size="md">
+              {t('admin.proxyCancel')}
+            </AppButton>
+            <AppButton onPress={handleSaveUser} disabled={saving} size="md">
+              {saving ? t('common.loading') : t('admin.saveChanges')}
+            </AppButton>
+          </XStack>
         </YStack>
-      </Modal>
+      </AdminModal>
     </YStack>
   )
 }
