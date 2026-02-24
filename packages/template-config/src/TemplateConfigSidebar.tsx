@@ -97,9 +97,10 @@ function buildThemeOutput(schemeKey: string | null): string | null {
 }
 
 function buildEnvOutput(overrides: Record<string, boolean>): string {
-  const lines: string[] = ['# Template Configuration']
+  const lines: string[] = ['# Frontend Configuration']
+  const frontendOnly = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend' || f.scope === 'both')
 
-  for (const flag of TEMPLATE_FLAGS) {
+  for (const flag of frontendOnly) {
     if (!flag.envVar) continue
     const value = overrides[flag.key] !== undefined ? overrides[flag.key] : flag.defaultValue
 
@@ -141,7 +142,6 @@ export function TemplateConfigSidebar() {
   if (!sidebarOpen) return null
 
   const frontendFlags = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend')
-  const backendFlags = TEMPLATE_FLAGS.filter((f) => f.scope !== 'frontend')
 
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
@@ -265,39 +265,6 @@ export function TemplateConfigSidebar() {
               value={getFlagValue(flag.key, flag.defaultValue)}
               onToggle={() => setFlag(flag.key, !getFlagValue(flag.key, flag.defaultValue))}
               action={flag.key === 'cookieBanner' ? { label: t('templateConfig.showBanner'), onPress: resetConsent } : undefined}
-            />
-          ))}
-        </YStack>
-
-        {/* Backend Flags */}
-        <XStack alignItems="center" gap="$1.5" paddingHorizontal="$3" marginBottom="$1">
-          <Text
-            fontSize={11}
-            fontWeight="700"
-            color="$mutedText"
-            textTransform="uppercase"
-            letterSpacing={1}
-          >
-            {t('templateConfig.backend')}
-          </Text>
-          <XStack
-            backgroundColor="$subtleBackground"
-            paddingHorizontal="$1"
-            paddingVertical={1}
-            borderRadius="$1"
-          >
-            <Text fontSize={9} color="$mutedText" fontWeight="600">
-              .env
-            </Text>
-          </XStack>
-        </XStack>
-        <YStack marginBottom="$3">
-          {backendFlags.map((flag) => (
-            <FlagRow
-              key={flag.key}
-              flag={flag}
-              value={getFlagValue(flag.key, flag.defaultValue)}
-              onToggle={() => setFlag(flag.key, !getFlagValue(flag.key, flag.defaultValue))}
             />
           ))}
         </YStack>
