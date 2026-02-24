@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "docker": "docker compose -f apps/backend/docker/docker-compose.dev.yml up -d",
     "dev": "turbo dev --filter=mobile --filter=backend",
     "dev:mobile": "turbo dev --filter=mobile",
     "dev:backend": "turbo dev --filter=backend",
