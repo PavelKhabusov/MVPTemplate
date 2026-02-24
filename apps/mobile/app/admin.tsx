@@ -1669,7 +1669,8 @@ export default function AdminScreen() {
             {isTemplateConfigEnabled && (
               <ScalePress onPress={() => {
                 if (Platform.OS === 'web') {
-                  useTemplateConfigStore.getState().setSidebarOpen(true)
+                  const store = useTemplateConfigStore.getState()
+                  store.setSidebarOpen(!store.sidebarOpen)
                 } else {
                   setActiveTab('config')
                 }
