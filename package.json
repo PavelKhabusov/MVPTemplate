@@ -13,6 +13,8 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "clean": "turbo clean && rm -rf node_modules",
+    "generate-env": "node scripts/generate-env.mjs",
+    "setup": "npm install && node scripts/generate-env.mjs",
     "gitpush": "git push origin HEAD"
   },
   "devDependencies": {
