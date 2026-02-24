@@ -43,7 +43,7 @@ const ALL_ALLOWED_KEYS: string[] = Object.values(ENV_GROUPS).flatMap((g) => [...
 const updateEnvSchema = z.record(z.string(), z.union([z.string(), z.boolean(), z.null()]))
 
 function getEnvFilePath(): string {
-  return path.resolve(__dirname, '..', '..', '..', '.env')
+  return path.resolve(process.cwd(), '.env')
 }
 
 function parseEnvFile(filePath: string): { lines: string[]; values: Record<string, string | null> } {
