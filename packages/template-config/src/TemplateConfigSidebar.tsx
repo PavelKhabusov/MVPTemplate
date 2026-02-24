@@ -96,30 +96,6 @@ function buildThemeOutput(schemeKey: string | null): string | null {
   ].join('\n')
 }
 
-function buildEnvOutput(overrides: Record<string, boolean>): string {
-  const lines: string[] = ['# Frontend Configuration']
-  const frontendOnly = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend' || f.scope === 'both')
-
-  for (const flag of frontendOnly) {
-    if (!flag.envVar) continue
-    const value = overrides[flag.key] !== undefined ? overrides[flag.key] : flag.defaultValue
-
-    if (flag.envType === 'boolean') {
-      lines.push(`${flag.envVar}=${value}`)
-    } else {
-      if (value) {
-        lines.push(`${flag.envVar}=your-${flag.envVar.toLowerCase().replace(/_/g, '-')}`)
-      } else {
-        lines.push(`# ${flag.envVar}=`)
-      }
-    }
-  }
-
-  lines.push('')
-  lines.push('EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG=false')
-
-  return lines.join('\n')
-}
 
 export function TemplateConfigSidebar() {
   const { t } = useTranslation()
@@ -134,7 +110,6 @@ export function TemplateConfigSidebar() {
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
 
-  const envOutput = useMemo(() => buildEnvOutput(overrides), [overrides])
   const themeOutput = useMemo(() => buildThemeOutput(colorScheme), [colorScheme])
 
   if (Platform.OS !== 'web') return null
@@ -147,12 +122,6 @@ export function TemplateConfigSidebar() {
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
   const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null
-
-  const handleCopy = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(envOutput)
-    }
-  }
 
   return (
     <YStack
@@ -313,45 +282,6 @@ export function TemplateConfigSidebar() {
             </YStack>
           </YStack>
         )}
-
-        {/* .env Output */}
-        <YStack paddingHorizontal="$3" gap="$2">
-          <XStack alignItems="center" justifyContent="space-between">
-            <Text fontSize={11} fontWeight="700" color="$mutedText" textTransform="uppercase" letterSpacing={1}>
-              .env
-            </Text>
-            <Pressable onPress={handleCopy}>
-              <XStack
-                alignItems="center"
-                gap="$1"
-                paddingHorizontal="$2"
-                paddingVertical="$1"
-                borderRadius="$2"
-                hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
-              >
-                <Ionicons name="copy-outline" size={12} color={theme.mutedText.val} />
-                <Text fontSize={11} color="$mutedText">
-                  {t('templateConfig.copy')}
-                </Text>
-              </XStack>
-            </Pressable>
-          </XStack>
-          <YStack
-            backgroundColor="$subtleBackground"
-            borderRadius="$2"
-            borderWidth={1}
-            borderColor="$borderColor"
-            padding="$2"
-          >
-            <Text
-              fontSize={11}
-              color="$color"
-              style={{ fontFamily: 'monospace', whiteSpace: 'pre', userSelect: 'all' } as any}
-            >
-              {envOutput}
-            </Text>
-          </YStack>
-        </YStack>
 
         {/* Reset Button */}
         {hasOverrides && (
