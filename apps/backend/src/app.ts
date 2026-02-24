@@ -22,6 +22,8 @@ import { docFeedbackRoutes } from './modules/doc-feedback/doc-feedback.routes'
 import { sseRoutes } from './realtime/sse'
 import { configRoutes } from './modules/config/config.routes'
 import { paymentsRoutes } from './modules/payments/payments.routes'
+import { StorageService } from './modules/storage/storage.service'
+import { storageRoutes } from './modules/storage/storage.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -92,6 +94,10 @@ export async function buildApp() {
     decorateReply: false,
   })
 
+  // Storage service (local / S3)
+  const storageService = new StorageService()
+  app.decorate('storageService', storageService)
+
   // Error handler
   app.setErrorHandler(errorHandler)
 
@@ -116,6 +122,8 @@ export async function buildApp() {
   if (env.PAYMENTS_ENABLED) {
     await app.register(paymentsRoutes, { prefix: '/api/payments' })
   }
+
+  await app.register(storageRoutes, { prefix: '/api/admin/storage' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

@@ -50,6 +50,15 @@ const envSchema = z.object({
   ROBOKASSA_PASSWORD1: z.string().optional(),
   ROBOKASSA_PASSWORD2: z.string().optional(),
   ROBOKASSA_TEST_MODE: envBoolean.default(true),
+
+  // Storage
+  STORAGE_TYPE: z.enum(['local', 's3']).default('local'),
+  S3_ENDPOINT: z.string().optional(),
+  S3_BUCKET: z.string().optional(),
+  S3_ACCESS_KEY: z.string().optional(),
+  S3_SECRET_KEY: z.string().optional(),
+  S3_REGION: z.string().default('us-east-1'),
+  S3_PUBLIC_URL: z.string().optional(),
 })
 
 function loadEnv() {

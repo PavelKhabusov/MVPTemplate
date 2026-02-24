@@ -1,13 +1,12 @@
 import { FastifyInstance } from 'fastify'
 import { randomUUID } from 'crypto'
-import { mkdir, writeFile, unlink } from 'fs/promises'
+import { mkdir } from 'fs/promises'
 import { join, extname } from 'path'
 import { authenticate } from '../../common/middleware/authenticate'
 import { usersRepository } from './users.repository'
 import { updateProfileSchema, updateSettingsSchema } from './users.schema'
 import { sendSuccess } from '../../common/utils/response'
 import { AppError } from '../../common/errors/app-error'
-import { env } from '../../config/env'
 
 const UPLOADS_DIR = join(process.cwd(), 'uploads', 'avatars')
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
@@ -16,7 +15,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 export async function usersRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate)
 
-  // Ensure uploads dir exists
+  // Ensure local uploads dir exists
   await mkdir(UPLOADS_DIR, { recursive: true })
 
   // GET /api/users/profile
@@ -59,21 +58,22 @@ export async function usersRoutes(app: FastifyInstance) {
     }
     const buffer = Buffer.concat(chunks)
 
-    // Delete old avatar file if it was a local upload
+    const storage = app.storageService
+
+    // Delete old avatar
     const currentUser = await usersRepository.findById(request.userId)
-    if (currentUser?.avatarUrl?.includes('/uploads/avatars/')) {
-      const oldFilename = currentUser.avatarUrl.split('/uploads/avatars/').pop()
-      if (oldFilename) {
-        await unlink(join(UPLOADS_DIR, oldFilename)).catch(() => {})
+    if (currentUser?.avatarUrl) {
+      // Extract storage key from URL (handles both local and S3 URLs)
+      const match = currentUser.avatarUrl.match(/avatars\/[^?]+/)
+      if (match) {
+        await storage.delete(match[0])
       }
     }
 
     const ext = extname(file.filename) || '.jpg'
     const filename = `${request.userId}-${randomUUID()}${ext}`
-    await writeFile(join(UPLOADS_DIR, filename), buffer)
-
-    const host = request.headers.host ?? `${env.HOST}:${env.PORT}`
-    const avatarUrl = `${request.protocol}://${host}/uploads/avatars/${filename}`
+    const key = await storage.upload(buffer, 'avatars', filename)
+    const avatarUrl = storage.getPublicUrl(key, request)
 
     const user = await usersRepository.updateProfile(request.userId, { avatarUrl })
     if (!user) throw AppError.notFound('User not found')
@@ -84,11 +84,12 @@ export async function usersRoutes(app: FastifyInstance) {
 
   // DELETE /api/users/avatar — remove avatar
   app.delete('/avatar', async (request, reply) => {
+    const storage = app.storageService
     const currentUser = await usersRepository.findById(request.userId)
-    if (currentUser?.avatarUrl?.includes('/uploads/avatars/')) {
-      const oldFilename = currentUser.avatarUrl.split('/uploads/avatars/').pop()
-      if (oldFilename) {
-        await unlink(join(UPLOADS_DIR, oldFilename)).catch(() => {})
+    if (currentUser?.avatarUrl) {
+      const match = currentUser.avatarUrl.match(/avatars\/[^?]+/)
+      if (match) {
+        await storage.delete(match[0])
       }
     }
 
