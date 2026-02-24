@@ -1,5 +1,6 @@
 import fs from 'fs'
 import crypto from 'crypto'
+import os from 'os'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -13,6 +14,18 @@ const mobileExamplePath = path.join(root, 'apps', 'mobile', '.env.example')
 
 function randomHex(bytes) {
   return crypto.randomBytes(bytes).toString('hex')
+}
+
+function getLocalIP() {
+  const interfaces = os.networkInterfaces()
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal && !iface.address.startsWith('169.254')) {
+        return iface.address
+      }
+    }
+  }
+  return 'localhost'
 }
 
 // --- Backend .env ---
@@ -49,8 +62,16 @@ if (fs.existsSync(mobileEnvPath)) {
     process.exit(1)
   }
 
-  fs.copyFileSync(mobileExamplePath, mobileEnvPath)
-  console.log(`[ok] Created apps/mobile/.env`)
+  let mobileContent = fs.readFileSync(mobileExamplePath, 'utf-8')
+
+  const localIP = getLocalIP()
+  mobileContent = mobileContent.replace(
+    'EXPO_PUBLIC_API_URL=http://localhost:3000',
+    `EXPO_PUBLIC_API_URL=http://${localIP}:3000`,
+  )
+
+  fs.writeFileSync(mobileEnvPath, mobileContent, 'utf-8')
+  console.log(`[ok] Created apps/mobile/.env (API_URL → http://${localIP}:3000)`)
 }
 
 console.log('\nDone. Review .env files and add optional keys (Stripe, YooKassa, Robokassa, etc.)')
