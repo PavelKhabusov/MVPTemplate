@@ -213,7 +213,22 @@
     "migrationBackup": "Убедитесь, что у вас есть резервная копия перед миграцией",
     "downloadAll": "Скачать локальные",
     "downloadAllS3": "Скачать S3",
-    "downloading": "Скачивание..."
+    "downloading": "Скачивание...",
+    "apiAI": "ИИ / Gemini",
+    "apiProxy": "Прокси",
+    "envLabel_GEMINI_API_KEY": "API-ключ Gemini",
+    "envLabel_GEMINI_MODEL": "Модель",
+    "envLabel_GEMINI_CONCURRENT_LIMIT": "Лимит параллельных запросов",
+    "envLabel_PROXY_ENABLED": "Включить прокси",
+    "envLabel_PROXY_URL": "URL прокси",
+    "geminiModel": "Модель",
+    "geminiModelFlash": "Gemini 2.5 Flash",
+    "geminiModelPro": "Gemini 2.5 Pro",
+    "geminiModel3ProImage": "Gemini 3 Pro Image",
+    "geminiModelLegacy": "Gemini 2.0 Flash",
+    "geminiConcurrentLimit": "Параллельные генерации",
+    "geminiConcurrentLimitDesc": "Макс. одновременных ИИ-запросов (1–10)",
+    "geminiApiKeyHint": "Получить API-ключ в Google AI Studio →"
   },
   "notifications": {
     "title": "Уведомления",

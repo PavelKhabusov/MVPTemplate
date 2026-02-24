@@ -213,7 +213,22 @@
     "migrationBackup": "Asegúrate de tener una copia de seguridad antes de migrar",
     "downloadAll": "Descargar local",
     "downloadAllS3": "Descargar S3",
-    "downloading": "Descargando..."
+    "downloading": "Descargando...",
+    "apiAI": "IA / Gemini",
+    "apiProxy": "Proxy",
+    "envLabel_GEMINI_API_KEY": "Clave API de Gemini",
+    "envLabel_GEMINI_MODEL": "Modelo",
+    "envLabel_GEMINI_CONCURRENT_LIMIT": "Límite concurrente",
+    "envLabel_PROXY_ENABLED": "Habilitar proxy",
+    "envLabel_PROXY_URL": "URL del proxy",
+    "geminiModel": "Modelo",
+    "geminiModelFlash": "Gemini 2.5 Flash",
+    "geminiModelPro": "Gemini 2.5 Pro",
+    "geminiModel3ProImage": "Gemini 3 Pro Image",
+    "geminiModelLegacy": "Gemini 2.0 Flash",
+    "geminiConcurrentLimit": "Generaciones simultáneas",
+    "geminiConcurrentLimitDesc": "Máximo de solicitudes simultáneas de IA (1–10)",
+    "geminiApiKeyHint": "Obtener clave API en Google AI Studio →"
   },
   "notifications": {
     "title": "Notificaciones",

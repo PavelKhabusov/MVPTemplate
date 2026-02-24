@@ -213,7 +213,22 @@
     "migrationBackup": "移行前にバックアップを取ってください",
     "downloadAll": "ローカルをDL",
     "downloadAllS3": "S3をDL",
-    "downloading": "ダウンロード中..."
+    "downloading": "ダウンロード中...",
+    "apiAI": "AI / Gemini",
+    "apiProxy": "プロキシ",
+    "envLabel_GEMINI_API_KEY": "Gemini APIキー",
+    "envLabel_GEMINI_MODEL": "モデル",
+    "envLabel_GEMINI_CONCURRENT_LIMIT": "同時実行数制限",
+    "envLabel_PROXY_ENABLED": "プロキシを有効化",
+    "envLabel_PROXY_URL": "プロキシURL",
+    "geminiModel": "モデル",
+    "geminiModelFlash": "Gemini 2.5 Flash",
+    "geminiModelPro": "Gemini 2.5 Pro",
+    "geminiModel3ProImage": "Gemini 3 Pro Image",
+    "geminiModelLegacy": "Gemini 2.0 Flash",
+    "geminiConcurrentLimit": "同時生成数",
+    "geminiConcurrentLimitDesc": "最大同時AIリクエスト数（1〜10）",
+    "geminiApiKeyHint": "Google AI StudioでAPIキーを取得 →"
   },
   "notifications": {
     "title": "通知",

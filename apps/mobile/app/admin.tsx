@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions } from 'react-native'
+import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions, Linking } from 'react-native'
 import { YStack, XStack, Text, H2, H4, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
@@ -606,6 +606,8 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN' },
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
   frontend: { icon: 'color-palette-outline', labelKey: 'admin.apiFrontend' },
+  ai: { icon: 'sparkles-outline', labelKey: 'admin.apiAI', mainToggle: 'GEMINI_API_KEY' },
+  proxy: { icon: 'globe-outline', labelKey: 'admin.apiProxy', mainToggle: 'PROXY_ENABLED' },
 }
 
 const PAYMENT_PROVIDERS = [
@@ -705,6 +707,150 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               />
             </XStack>
           )}
+        </YStack>
+      )}
+    </AppCard>
+  )
+}
+
+const GEMINI_MODELS = [
+  { value: 'gemini-2.5-flash', labelKey: 'admin.geminiModelFlash' },
+  { value: 'gemini-2.5-pro', labelKey: 'admin.geminiModelPro' },
+  { value: 'gemini-3-pro-image-preview', labelKey: 'admin.geminiModel3ProImage' },
+  { value: 'gemini-2.0-flash', labelKey: 'admin.geminiModelLegacy' },
+] as const
+
+function GeminiEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
+  keys: Record<string, EnvEntry>
+  isGroupOn: boolean
+  onToggle: (checked: boolean) => void
+  onUpdate: (key: string, value: string | boolean | null) => void
+}) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const currentModel = keys['GEMINI_MODEL']?.value || 'gemini-2.5-flash'
+  const currentLimit = keys['GEMINI_CONCURRENT_LIMIT']?.value || '3'
+  const [limitValue, setLimitValue] = useState(currentLimit)
+  const [limitDirty, setLimitDirty] = useState(false)
+
+  const handleLimitChange = (text: string) => {
+    const num = text.replace(/[^0-9]/g, '')
+    setLimitValue(num)
+    setLimitDirty(num !== currentLimit)
+  }
+
+  const handleLimitSave = () => {
+    const num = Math.max(1, Math.min(10, parseInt(limitValue) || 3))
+    onUpdate('GEMINI_CONCURRENT_LIMIT', String(num))
+    setLimitValue(String(num))
+    setLimitDirty(false)
+  }
+
+  return (
+    <AppCard animated={false}>
+      <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
+        <XStack alignItems="center" gap="$2" flex={1}>
+          <Ionicons name="sparkles-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <Text fontWeight="600" color="$color" fontSize="$4">
+            {t('admin.apiAI')}
+          </Text>
+        </XStack>
+        <AppSwitch checked={isGroupOn} onCheckedChange={onToggle} />
+      </XStack>
+
+      {isGroupOn && (
+        <YStack gap="$3">
+          <EnvStringField
+            envKey="GEMINI_API_KEY"
+            label={t('admin.envLabel_GEMINI_API_KEY', { defaultValue: 'Gemini API Key' })}
+            value={keys['GEMINI_API_KEY']?.value ?? null}
+            isSecret
+            onSave={onUpdate}
+          />
+
+          <ScalePress onPress={() => Linking.openURL('https://aistudio.google.com/apikey')}>
+            <Text fontSize="$2" color="$accent">
+              {t('admin.geminiApiKeyHint')}
+            </Text>
+          </ScalePress>
+
+          {/* Model selection */}
+          <YStack gap="$2">
+            <Text fontSize="$2" color="$mutedText" fontWeight="600">
+              {t('admin.geminiModel')}
+            </Text>
+            {GEMINI_MODELS.map((model) => {
+              const isActive = currentModel === model.value
+              return (
+                <ScalePress key={model.value} onPress={() => onUpdate('GEMINI_MODEL', model.value)}>
+                  <XStack
+                    padding="$2.5"
+                    borderRadius="$3"
+                    borderWidth={1.5}
+                    borderColor={isActive ? '$accent' : '$borderColor'}
+                    backgroundColor={isActive ? '$accentBackground' : '$subtleBackground'}
+                    alignItems="center"
+                    gap="$2"
+                  >
+                    <YStack
+                      width={18}
+                      height={18}
+                      borderRadius={9}
+                      borderWidth={2}
+                      borderColor={isActive ? '$accent' : '$mutedText'}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      {isActive && (
+                        <YStack width={10} height={10} borderRadius={5} backgroundColor="$accent" />
+                      )}
+                    </YStack>
+                    <YStack flex={1}>
+                      <Text fontSize="$3" color="$color" fontWeight={isActive ? '600' : '400'}>
+                        {t(model.labelKey)}
+                      </Text>
+                      <Text fontSize="$1" color="$mutedText">{model.value}</Text>
+                    </YStack>
+                  </XStack>
+                </ScalePress>
+              )
+            })}
+          </YStack>
+
+          {/* Concurrent limit */}
+          <YStack gap="$1.5">
+            <Text fontSize="$2" color="$mutedText" fontWeight="600">
+              {t('admin.geminiConcurrentLimit')}
+            </Text>
+            <Text fontSize="$1" color="$mutedText">
+              {t('admin.geminiConcurrentLimitDesc')}
+            </Text>
+            <XStack gap="$2" alignItems="center">
+              <Input
+                flex={1}
+                size="$3"
+                value={limitValue}
+                onChangeText={handleLimitChange}
+                keyboardType="number-pad"
+                placeholder="3"
+                backgroundColor="$subtleBackground"
+                borderColor="$borderColor"
+                color="$color"
+              />
+              {limitDirty && (
+                <ScalePress onPress={handleLimitSave}>
+                  <XStack
+                    backgroundColor="$accent"
+                    paddingHorizontal="$2.5"
+                    paddingVertical="$1.5"
+                    borderRadius="$2"
+                  >
+                    <Ionicons name="checkmark" size={18} color="white" />
+                  </XStack>
+                </ScalePress>
+              )}
+            </XStack>
+          </YStack>
         </YStack>
       )}
     </AppCard>
@@ -864,6 +1010,18 @@ function ApiSettingsTab() {
     if (group === 'payments') {
       return (
         <PaymentsEnvCard
+          key={group}
+          keys={keys}
+          isGroupOn={isGroupOn}
+          onToggle={handleMainToggle}
+          onUpdate={handleUpdate}
+        />
+      )
+    }
+
+    if (group === 'ai') {
+      return (
+        <GeminiEnvCard
           key={group}
           keys={keys}
           isGroupOn={isGroupOn}

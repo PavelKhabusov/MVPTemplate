@@ -43,6 +43,14 @@ const ENV_GROUPS = {
     keys: ['STORAGE_TYPE', 'S3_ENDPOINT', 'S3_BUCKET', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'S3_REGION', 'S3_PUBLIC_URL'],
     types: { STORAGE_TYPE: 'string', S3_ENDPOINT: 'string', S3_BUCKET: 'string', S3_ACCESS_KEY: 'secret', S3_SECRET_KEY: 'secret', S3_REGION: 'string', S3_PUBLIC_URL: 'string' } as Record<string, string>,
   },
+  ai: {
+    keys: ['GEMINI_API_KEY', 'GEMINI_MODEL', 'GEMINI_CONCURRENT_LIMIT'],
+    types: { GEMINI_API_KEY: 'secret', GEMINI_MODEL: 'string', GEMINI_CONCURRENT_LIMIT: 'string' } as Record<string, string>,
+  },
+  proxy: {
+    keys: ['PROXY_ENABLED', 'PROXY_URL'],
+    types: { PROXY_ENABLED: 'boolean', PROXY_URL: 'string' } as Record<string, string>,
+  },
 } as const
 
 const ALL_ALLOWED_KEYS: string[] = Object.values(ENV_GROUPS).flatMap((g) => [...g.keys])

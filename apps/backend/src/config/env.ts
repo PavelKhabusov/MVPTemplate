@@ -51,6 +51,15 @@ const envSchema = z.object({
   ROBOKASSA_PASSWORD2: z.string().optional(),
   ROBOKASSA_TEST_MODE: envBoolean.default(true),
 
+  // AI / Gemini
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  GEMINI_CONCURRENT_LIMIT: z.coerce.number().default(3),
+
+  // Proxy
+  PROXY_ENABLED: envBoolean,
+  PROXY_URL: z.string().optional(),
+
   // Storage
   STORAGE_TYPE: z.enum(['local', 's3']).default('local'),
   S3_ENDPOINT: z.string().optional(),
