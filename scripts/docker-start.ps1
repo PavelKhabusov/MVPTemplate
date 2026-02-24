@@ -14,7 +14,7 @@ $retries = 0
 do {
     Start-Sleep -Seconds 1
     $retries++
-    docker exec $(docker ps -q -f "ancestor=postgres:16-alpine") pg_isready -U postgres 2>$null | Out-Null
+    docker exec docker-postgres-1 pg_isready -U postgres 2>$null | Out-Null
 } while ($LASTEXITCODE -ne 0 -and $retries -lt 15)
 
 if ($retries -lt 15) {
