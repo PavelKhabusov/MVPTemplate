@@ -408,10 +408,19 @@
     "docFeedback": "Doc Feedback",
     "colorScheme": "Color Scheme",
     "schemeCyan": "Cyan",
-    "schemeEmerald": "Emerald",
-    "schemeRose": "Rose",
-    "schemeAmber": "Amber",
+    "schemeBlue": "Blue",
+    "schemeIndigo": "Indigo",
     "schemeViolet": "Violet",
+    "schemePink": "Pink",
+    "schemeRose": "Rose",
+    "schemeRed": "Red",
+    "schemeOrange": "Orange",
+    "schemeAmber": "Amber",
+    "schemeEmerald": "Emerald",
+    "schemeTeal": "Teal",
+    "schemeSlate": "Slate",
+    "customColor": "Custom Color",
+    "customColorPlaceholder": "Enter hex color",
     "payments": "Payments"
   }
 }

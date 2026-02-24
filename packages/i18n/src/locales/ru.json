@@ -408,10 +408,19 @@
     "docFeedback": "Отзывы о документации",
     "colorScheme": "Цветовая схема",
     "schemeCyan": "Голубой",
-    "schemeEmerald": "Изумрудный",
-    "schemeRose": "Розовый",
-    "schemeAmber": "Янтарный",
+    "schemeBlue": "Синий",
+    "schemeIndigo": "Индиго",
     "schemeViolet": "Фиолетовый",
+    "schemePink": "Розовый",
+    "schemeRose": "Алый",
+    "schemeRed": "Красный",
+    "schemeOrange": "Оранжевый",
+    "schemeAmber": "Янтарный",
+    "schemeEmerald": "Изумрудный",
+    "schemeTeal": "Бирюзовый",
+    "schemeSlate": "Серый",
+    "customColor": "Свой цвет",
+    "customColorPlaceholder": "Введите hex цвет",
     "payments": "Платежи"
   }
 }

@@ -408,10 +408,19 @@
     "docFeedback": "Comentarios de documentación",
     "colorScheme": "Paleta de colores",
     "schemeCyan": "Cian",
-    "schemeEmerald": "Esmeralda",
-    "schemeRose": "Rosa",
-    "schemeAmber": "Ámbar",
+    "schemeBlue": "Azul",
+    "schemeIndigo": "Índigo",
     "schemeViolet": "Violeta",
+    "schemePink": "Rosa",
+    "schemeRose": "Rosado",
+    "schemeRed": "Rojo",
+    "schemeOrange": "Naranja",
+    "schemeAmber": "Ámbar",
+    "schemeEmerald": "Esmeralda",
+    "schemeTeal": "Verde azulado",
+    "schemeSlate": "Gris",
+    "customColor": "Color personalizado",
+    "customColorPlaceholder": "Introduce color hex",
     "payments": "Pagos"
   }
 }

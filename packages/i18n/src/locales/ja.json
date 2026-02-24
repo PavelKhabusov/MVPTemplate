@@ -408,10 +408,19 @@
     "docFeedback": "ドキュメントフィードバック",
     "colorScheme": "カラースキーム",
     "schemeCyan": "シアン",
-    "schemeEmerald": "エメラルド",
-    "schemeRose": "ローズ",
-    "schemeAmber": "アンバー",
+    "schemeBlue": "ブルー",
+    "schemeIndigo": "インディゴ",
     "schemeViolet": "バイオレット",
+    "schemePink": "ピンク",
+    "schemeRose": "ローズ",
+    "schemeRed": "レッド",
+    "schemeOrange": "オレンジ",
+    "schemeAmber": "アンバー",
+    "schemeEmerald": "エメラルド",
+    "schemeTeal": "ティール",
+    "schemeSlate": "スレート",
+    "customColor": "カスタムカラー",
+    "customColorPlaceholder": "Hexカラーを入力",
     "payments": "決済"
   }
 }

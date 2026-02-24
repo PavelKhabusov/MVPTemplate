@@ -13,6 +13,7 @@ import {
   COLOR_SCHEMES,
   DEFAULT_SCHEME_KEY,
   applyColorScheme,
+  applyCustomColor,
 } from '@mvp/template-config'
 import { useRouter } from 'expo-router'
 import { useAuthStore } from '@mvp/store'
@@ -967,16 +968,33 @@ function TemplateConfigTab() {
   const overrides = useTemplateConfigStore((s) => s.overrides)
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
   const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
+  const customColor = useTemplateConfigStore((s) => s.customColor)
   const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
+  const setCustomColor = useTemplateConfigStore((s) => s.setCustomColor)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
 
+  const [hexInput, setHexInput] = useState(customColor ?? '')
+
   const frontendFlags = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend')
-  const backendFlags = TEMPLATE_FLAGS.filter((f) => f.scope !== 'frontend')
 
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || customColor !== null
+
+  const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(hexInput)
+
+  const handleApplyCustom = () => {
+    if (!isValidHex) return
+    setCustomColor(hexInput)
+    applyCustomColor(hexInput)
+  }
+
+  const handleSelectPreset = (key: string) => {
+    setColorScheme(key)
+    applyColorScheme(key)
+    setHexInput('')
+  }
 
   return (
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
@@ -991,35 +1009,43 @@ function TemplateConfigTab() {
             <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
               {t('templateConfig.colorScheme')}
             </Text>
-            <XStack gap="$3" flexWrap="wrap">
+
+            {/* Preset grid — 6 per row */}
+            <XStack flexWrap="wrap" gap="$2" marginBottom="$3">
               {COLOR_SCHEMES.map((scheme) => {
-                const isSelected = (colorScheme ?? DEFAULT_SCHEME_KEY) === scheme.key
+                const isSelected = !customColor && (colorScheme ?? DEFAULT_SCHEME_KEY) === scheme.key
                 return (
-                  <ScalePress
-                    key={scheme.key}
-                    onPress={() => {
-                      setColorScheme(scheme.key)
-                      applyColorScheme(scheme.key)
-                    }}
-                  >
-                    <YStack alignItems="center" gap="$1.5">
+                  <ScalePress key={scheme.key} onPress={() => handleSelectPreset(scheme.key)}>
+                    <YStack alignItems="center" gap="$1" width={48}>
                       <YStack
-                        width={44}
-                        height={44}
-                        borderRadius={22}
-                        borderWidth={3}
+                        width={36}
+                        height={36}
+                        borderRadius={18}
+                        borderWidth={2}
                         borderColor={isSelected ? '$color' : 'transparent'}
                         alignItems="center"
                         justifyContent="center"
                       >
                         <YStack
-                          width={34}
-                          height={34}
-                          borderRadius={17}
+                          width={28}
+                          height={28}
+                          borderRadius={14}
                           style={{ backgroundColor: scheme.swatch } as any}
-                        />
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          {isSelected && (
+                            <Ionicons name="checkmark" size={14} color="white" />
+                          )}
+                        </YStack>
                       </YStack>
-                      <Text fontSize="$1" color={isSelected ? '$color' : '$mutedText'} fontWeight={isSelected ? '600' : '400'}>
+                      <Text
+                        fontSize={10}
+                        color={isSelected ? '$color' : '$mutedText'}
+                        fontWeight={isSelected ? '600' : '400'}
+                        textAlign="center"
+                        numberOfLines={1}
+                      >
                         {t(scheme.labelKey)}
                       </Text>
                     </YStack>
@@ -1027,6 +1053,56 @@ function TemplateConfigTab() {
                 )
               })}
             </XStack>
+
+            {/* Custom hex color */}
+            <YStack gap="$2">
+              <Text fontSize="$2" color="$mutedText" fontWeight="500">
+                {t('templateConfig.customColor')}
+              </Text>
+              <XStack gap="$2" alignItems="center">
+                <YStack
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  borderWidth={2}
+                  borderColor={customColor ? '$color' : '$borderColor'}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <YStack
+                    width={24}
+                    height={24}
+                    borderRadius={12}
+                    style={{ backgroundColor: isValidHex ? hexInput : theme.subtleBackground.val } as any}
+                  />
+                </YStack>
+                <Input
+                  flex={1}
+                  size="$3"
+                  value={hexInput}
+                  onChangeText={setHexInput}
+                  placeholder={t('templateConfig.customColorPlaceholder')}
+                  placeholderTextColor={'$placeholderColor' as any}
+                  backgroundColor="$subtleBackground"
+                  borderColor={customColor ? '$accent' : '$borderColor'}
+                  color="$color"
+                  autoCapitalize="characters"
+                  maxLength={7}
+                />
+                {isValidHex && (
+                  <ScalePress onPress={handleApplyCustom}>
+                    <XStack
+                      backgroundColor="$accent"
+                      paddingHorizontal="$2.5"
+                      paddingVertical="$1.5"
+                      borderRadius="$2"
+                    >
+                      <Ionicons name="checkmark" size={18} color="white" />
+                    </XStack>
+                  </ScalePress>
+                )}
+              </XStack>
+            </YStack>
           </AppCard>
 
           {/* Frontend Flags */}
@@ -1059,48 +1135,6 @@ function TemplateConfigTab() {
             </YStack>
           </AppCard>
 
-          {/* Backend Flags */}
-          <AppCard animated={false}>
-            <XStack alignItems="center" gap="$2" marginBottom="$2">
-              <Text fontWeight="600" color="$color" fontSize="$4">
-                {t('templateConfig.backend')}
-              </Text>
-              <XStack
-                backgroundColor="$subtleBackground"
-                paddingHorizontal="$1.5"
-                paddingVertical={2}
-                borderRadius="$1"
-              >
-                <Text fontSize={10} color="$mutedText" fontWeight="600">
-                  .env
-                </Text>
-              </XStack>
-            </XStack>
-            <YStack gap="$2">
-              {backendFlags.map((flag) => {
-                const value = getFlagValue(flag.key, flag.defaultValue)
-                return (
-                  <XStack key={flag.key} alignItems="center" justifyContent="space-between">
-                    <XStack alignItems="center" gap="$2" flex={1}>
-                      <Ionicons
-                        name={flag.icon}
-                        size={18}
-                        color={value ? theme.accent.val : theme.mutedText.val}
-                      />
-                      <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                        {t(flag.labelKey)}
-                      </Text>
-                    </XStack>
-                    <AppSwitch
-                      checked={value}
-                      onCheckedChange={() => setFlag(flag.key, !value)}
-                    />
-                  </XStack>
-                )
-              })}
-            </YStack>
-          </AppCard>
-
           {/* Reset Button */}
           {hasOverrides && (
             <AppButton
@@ -1108,6 +1142,7 @@ function TemplateConfigTab() {
               onPress={() => {
                 resetAll()
                 applyColorScheme(DEFAULT_SCHEME_KEY)
+                setHexInput('')
               }}
             >
               {t('templateConfig.reset')}
