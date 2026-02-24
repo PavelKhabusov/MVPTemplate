@@ -8,9 +8,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$container = docker ps -q -f "ancestor=postgres:16-alpine"
-if (-not $container) {
-    Write-Error "PostgreSQL container is not running. Start it first: docker compose -f apps/backend/docker/docker-compose.dev.yml up -d"
+$container = "docker-postgres-1"
+$running = docker ps -q -f "name=$container"
+if (-not $running) {
+    Write-Error "PostgreSQL container is not running. Start it first: npm run docker"
     exit 1
 }
 
