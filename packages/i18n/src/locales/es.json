@@ -146,7 +146,7 @@
     "apiSettingsDesc": "Gestionar variables de entorno del backend. Los cambios se guardan en el archivo .env.",
     "apiAnalytics": "Analíticas",
     "apiEmail": "Correo",
-    "apiAuth": "Autenticación",
+    "apiAuth": "Autenticación Google",
     "apiPush": "Notificaciones Push",
     "apiPayments": "Pagos",
     "envSaved": "Configuración guardada correctamente",

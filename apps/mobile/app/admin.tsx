@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions } from 'react-native'
 import { YStack, XStack, Text, H2, H4, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress } from '@mvp/ui'
+import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress, useToast } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
 import {
@@ -610,16 +610,9 @@ function ApiSettingsTab() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const toast = useToast()
   const [envData, setEnvData] = useState<EnvData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const showToast = useCallback((message: string, type: 'success' | 'error') => {
-    if (toastTimer.current) clearTimeout(toastTimer.current)
-    setToast({ message, type })
-    toastTimer.current = setTimeout(() => setToast(null), 3000)
-  }, [])
 
   const fetchEnv = useCallback(async () => {
     try {
@@ -627,11 +620,11 @@ function ApiSettingsTab() {
       const res = await api.get('/admin/env')
       setEnvData(res.data.data)
     } catch {
-      showToast(t('admin.envSaveError'), 'error')
+      toast.error(t('admin.envSaveError'))
     } finally {
       setLoading(false)
     }
-  }, [t, showToast])
+  }, [t, toast])
 
   useEffect(() => {
     fetchEnv()
@@ -641,11 +634,11 @@ function ApiSettingsTab() {
     try {
       const res = await api.patch('/admin/env', { [key]: value })
       setEnvData(res.data.data)
-      showToast(t('admin.envSaved'), 'success')
+      toast.success(t('admin.envSaved'))
     } catch {
-      showToast(t('admin.envSaveError'), 'error')
+      toast.error(t('admin.envSaveError'))
     }
-  }, [t, showToast])
+  }, [t, toast])
 
   if (loading || !envData) {
     return (
@@ -659,29 +652,6 @@ function ApiSettingsTab() {
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
       <FadeIn>
         <YStack gap="$3">
-          {/* Toast */}
-          {toast && (
-            <FadeIn>
-              <XStack
-                backgroundColor={toast.type === 'success' ? '#22c55e' : '#ef4444'}
-                paddingHorizontal="$3"
-                paddingVertical="$2.5"
-                borderRadius="$3"
-                alignItems="center"
-                gap="$2"
-              >
-                <Ionicons
-                  name={toast.type === 'success' ? 'checkmark-circle' : 'alert-circle'}
-                  size={18}
-                  color="white"
-                />
-                <Text color="white" fontSize="$3" fontWeight="600" flex={1}>
-                  {toast.message}
-                </Text>
-              </XStack>
-            </FadeIn>
-          )}
-
           <Text color="$mutedText" fontSize="$2" lineHeight={18}>
             {t('admin.apiSettingsDesc')}
           </Text>
@@ -704,8 +674,8 @@ function ApiSettingsTab() {
               if (mainEntry.type === 'boolean') {
                 handleUpdate(mainKey, String(checked))
               } else {
-                // Secret: toggling off comments it out
-                if (!checked) handleUpdate(mainKey, null)
+                // Secret: toggling off comments it out, toggling on uncomments
+                handleUpdate(mainKey, checked ? '__TOGGLE_ON__' : null)
               }
             }
 

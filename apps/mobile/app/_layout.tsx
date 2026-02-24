@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner, ToastProvider } from '@mvp/ui'
 import { TemplateConfigSidebar, applyColorScheme, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
@@ -329,15 +329,17 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
           <PortalProvider>
-            <AuthProvider
-              authApi={authApi}
-              onAuthSuccess={() => router.replace('/')}
-              onNavigateToSignIn={() => router.replace('/sign-in')}
-              onNavigateToForgotPassword={() => router.push('/forgot-password')}
-            >
-              <PageSEO />
-              <RootNavigator />
-            </AuthProvider>
+            <ToastProvider>
+              <AuthProvider
+                authApi={authApi}
+                onAuthSuccess={() => router.replace('/')}
+                onNavigateToSignIn={() => router.replace('/sign-in')}
+                onNavigateToForgotPassword={() => router.push('/forgot-password')}
+              >
+                <PageSEO />
+                <RootNavigator />
+              </AuthProvider>
+            </ToastProvider>
           </PortalProvider>
         </TamaguiProvider>
       </QueryClientProvider>

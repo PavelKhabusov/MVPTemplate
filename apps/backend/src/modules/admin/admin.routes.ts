@@ -102,6 +102,10 @@ function updateEnvFile(filePath: string, updates: Record<string, string | boolea
       if (newValue === null || newValue === '') {
         return line // keep commented
       }
+      // __TOGGLE_ON__ means uncomment with existing placeholder value
+      if (newValue === '__TOGGLE_ON__') {
+        return `${key}=${commentMatch[2]}`
+      }
       const val = typeof newValue === 'boolean' ? String(newValue) : newValue
       return `${key}=${val}`
     }

@@ -146,7 +146,7 @@
     "apiSettingsDesc": "バックエンドの環境変数を管理します。変更は.envファイルに保存されます。",
     "apiAnalytics": "アナリティクス",
     "apiEmail": "メール",
-    "apiAuth": "認証",
+    "apiAuth": "Google認証",
     "apiPush": "プッシュ通知",
     "apiPayments": "決済",
     "envSaved": "設定が正常に保存されました",
