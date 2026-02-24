@@ -17,8 +17,8 @@ import { AppError } from '../../common/errors/app-error'
 // Keys exposed via the admin env API, grouped by category
 const ENV_GROUPS = {
   analytics: {
-    keys: ['ANALYTICS_ENABLED', 'REQUEST_LOGGING'],
-    types: { ANALYTICS_ENABLED: 'boolean', REQUEST_LOGGING: 'boolean' } as Record<string, string>,
+    keys: ['ANALYTICS_ENABLED', 'REQUEST_LOGGING', 'EXPO_PUBLIC_POSTHOG_KEY'],
+    types: { ANALYTICS_ENABLED: 'boolean', REQUEST_LOGGING: 'boolean', EXPO_PUBLIC_POSTHOG_KEY: 'secret' } as Record<string, string>,
   },
   email: {
     keys: ['EMAIL_ENABLED', 'EMAIL_VERIFICATION_REQUIRED', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM'],

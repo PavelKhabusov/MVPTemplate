@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react'
+import React, { createContext, useContext, useState, useCallback, useRef, useMemo } from 'react'
 import { Platform } from 'react-native'
 import { XStack, Text, useTheme } from 'tamagui'
 import { AnimatePresence, MotiView } from 'moti'
@@ -60,8 +60,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const error = useCallback((msg: string) => show(msg, 'error'), [show])
   const info = useCallback((msg: string) => show(msg, 'info'), [show])
 
+  const value = useMemo(() => ({ show, success, error, info }), [show, success, error, info])
+
   return (
-    <ToastContext.Provider value={{ show, success, error, info }}>
+    <ToastContext.Provider value={value}>
       {children}
       <ToastOverlay toasts={toasts} onDismiss={removeToast} />
     </ToastContext.Provider>

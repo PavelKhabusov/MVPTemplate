@@ -684,6 +684,7 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             <EnvStringField
               key={key}
               envKey={key}
+              label={t(`admin.envLabel_${key}`, { defaultValue: key })}
               value={entry.value}
               isSecret={entry.type === 'secret'}
               onSave={onUpdate}
@@ -694,7 +695,7 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
           {activeProvider === 'robokassa' && testModeEntry && (
             <XStack alignItems="center" justifyContent="space-between">
               <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                ROBOKASSA_TEST_MODE
+                {t('admin.envLabel_ROBOKASSA_TEST_MODE')}
               </Text>
               <AppSwitch
                 checked={testModeEntry.value === 'true'}
@@ -708,25 +709,49 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
   )
 }
 
+// Map env var names → template flag keys for syncing API Settings ↔ Template Config
+const ENV_TO_FLAG: Record<string, string> = {}
+for (const flag of TEMPLATE_FLAGS) {
+  if (flag.envVar) ENV_TO_FLAG[flag.envVar] = flag.key
+}
+
 function ApiSettingsTab() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const toast = useToast()
+  const setFlag = useTemplateConfigStore((s) => s.setFlag)
   const [envData, setEnvData] = useState<EnvData | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const syncFlagsFromEnv = useCallback((data: EnvData) => {
+    for (const [, keys] of Object.entries(data)) {
+      for (const [envKey, entry] of Object.entries(keys)) {
+        const flagKey = ENV_TO_FLAG[envKey]
+        if (!flagKey) continue
+        const flag = TEMPLATE_FLAGS.find((f) => f.key === flagKey)
+        if (!flag) continue
+        const isOn = flag.envType === 'boolean'
+          ? entry.value === 'true'
+          : entry.value !== null && entry.value !== ''
+        setFlag(flagKey, isOn)
+      }
+    }
+  }, [setFlag])
 
   const fetchEnv = useCallback(async () => {
     try {
       setLoading(true)
       const res = await api.get('/admin/env')
-      setEnvData(res.data.data)
+      const data = res.data.data
+      setEnvData(data)
+      syncFlagsFromEnv(data)
     } catch {
-      toast.error(t('admin.envSaveError'))
+      // silent — initial load error
     } finally {
       setLoading(false)
     }
-  }, [t, toast])
+  }, [syncFlagsFromEnv])
 
   useEffect(() => {
     fetchEnv()
@@ -737,10 +762,23 @@ function ApiSettingsTab() {
       const res = await api.patch('/admin/env', { [key]: value })
       setEnvData(res.data.data)
       toast.success(t('admin.envSaved'))
+
+      // Sync with Template Config store
+      const flagKey = ENV_TO_FLAG[key]
+      if (flagKey) {
+        const flag = TEMPLATE_FLAGS.find((f) => f.key === flagKey)
+        if (flag) {
+          const isOn = flag.envType === 'boolean'
+            ? value === 'true' || value === true
+            : value !== null && value !== '' && value !== false
+          setFlag(flagKey, isOn)
+        }
+      }
     } catch {
       toast.error(t('admin.envSaveError'))
     }
-  }, [t, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t, setFlag])
 
   if (loading || !envData) {
     return (
@@ -813,15 +851,26 @@ function ApiSettingsTab() {
                     />
                   )}
                 </XStack>
-                {isGroupOn && subKeys.length > 0 && (
+                {isGroupOn && (
                   <YStack gap="$3">
+                    {/* Show input for secret-type main toggle (e.g. Google Client ID, Expo Token) */}
+                    {mainKey && mainEntry && mainEntry.type === 'secret' && (
+                      <EnvStringField
+                        envKey={mainKey}
+                        label={t(`admin.envLabel_${mainKey}`, { defaultValue: mainKey })}
+                        value={mainEntry.value}
+                        isSecret
+                        onSave={handleUpdate}
+                      />
+                    )}
                     {subKeys.map(([key, entry]) => {
+                      const label = t(`admin.envLabel_${key}`, { defaultValue: key })
                       if (entry.type === 'boolean') {
                         const isOn = entry.value === 'true'
                         return (
                           <XStack key={key} alignItems="center" justifyContent="space-between">
                             <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                              {key}
+                              {label}
                             </Text>
                             <AppSwitch
                               checked={isOn}
@@ -836,6 +885,7 @@ function ApiSettingsTab() {
                         <EnvStringField
                           key={key}
                           envKey={key}
+                          label={label}
                           value={entry.value}
                           isSecret={entry.type === 'secret'}
                           onSave={handleUpdate}
@@ -857,8 +907,9 @@ function ApiSettingsTab() {
   )
 }
 
-function EnvStringField({ envKey, value, isSecret, onSave }: {
+function EnvStringField({ envKey, label, value, isSecret, onSave }: {
   envKey: string
+  label?: string
   value: string | null
   isSecret: boolean
   onSave: (key: string, value: string | null) => void
@@ -879,7 +930,7 @@ function EnvStringField({ envKey, value, isSecret, onSave }: {
 
   return (
     <YStack gap="$1.5">
-      <Text fontSize="$2" color="$mutedText">{envKey}</Text>
+      <Text fontSize="$2" color="$mutedText">{label ?? envKey}</Text>
       <XStack gap="$2" alignItems="center">
         <Input
           flex={1}
@@ -1140,12 +1191,8 @@ export default function AdminScreen() {
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
-        analyticsEnabled
-          ? api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null)
-          : Promise.resolve(null),
-        docFeedbackEnabled
-          ? api.get('/doc-feedback/admin/stats').catch(() => null)
-          : Promise.resolve(null),
+        api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null),
+        api.get('/doc-feedback/admin/stats').catch(() => null),
       ])
       setUsers(usersRes.data.data)
       setTotalPages(usersRes.data.pagination?.totalPages ?? 1)
@@ -1158,7 +1205,7 @@ export default function AdminScreen() {
     } finally {
       setLoading(false)
     }
-  }, [t, analyticsEnabled, docFeedbackEnabled])
+  }, [t])
 
   useEffect(() => {
     fetchData()
