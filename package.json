@@ -14,6 +14,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
+    "db:push": "npm run db:push -w apps/backend",
     "clean": "turbo clean && rm -rf node_modules",
     "generate-env": "node scripts/generate-env.mjs",
     "setup": "npm install && node scripts/generate-env.mjs",
