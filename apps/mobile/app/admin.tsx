@@ -722,6 +722,8 @@ function ApiSettingsTab() {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const toast = useToast()
+  const { width: screenWidth } = useWindowDimensions()
+  const isWide = screenWidth > 768
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
   const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
   const setCustomColor = useTemplateConfigStore((s) => s.setCustomColor)
@@ -827,6 +829,122 @@ function ApiSettingsTab() {
     )
   }
 
+  const renderEnvCard = (group: string, keys: Record<string, { value: string | null; type: string }>) => {
+    const meta = ENV_GROUP_META[group]
+    if (!meta) return null
+
+    const mainKey = meta.mainToggle
+    const mainEntry = mainKey ? keys[mainKey] : undefined
+    const isGroupOn = mainEntry
+      ? mainEntry.type === 'boolean'
+        ? mainEntry.value === 'true'
+        : mainEntry.value !== null && mainEntry.value !== ''
+      : true
+
+    const handleMainToggle = (checked: boolean) => {
+      if (!mainKey || !mainEntry) return
+      if (mainEntry.type === 'boolean') {
+        handleUpdate(mainKey, String(checked))
+      } else {
+        handleUpdate(mainKey, checked ? '__TOGGLE_ON__' : null)
+      }
+    }
+
+    if (group === 'frontend') {
+      return (
+        <FrontendEnvCard
+          key={group}
+          keys={keys}
+          onUpdate={handleUpdate}
+          onBatchUpdate={handleBatchUpdate}
+        />
+      )
+    }
+
+    if (group === 'payments') {
+      return (
+        <PaymentsEnvCard
+          key={group}
+          keys={keys}
+          isGroupOn={isGroupOn}
+          onToggle={handleMainToggle}
+          onUpdate={handleUpdate}
+        />
+      )
+    }
+
+    const subKeys = Object.entries(keys).filter(([key]) => key !== mainKey)
+
+    return (
+      <AppCard key={group} animated={false}>
+        <XStack alignItems="center" justifyContent="space-between" marginBottom={subKeys.length > 0 && isGroupOn ? '$3' : 0}>
+          <XStack alignItems="center" gap="$2" flex={1}>
+            <Ionicons name={meta.icon} size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+            <Text fontWeight="600" color="$color" fontSize="$4">
+              {t(meta.labelKey)}
+            </Text>
+          </XStack>
+          {mainEntry && (
+            <AppSwitch
+              checked={isGroupOn}
+              onCheckedChange={handleMainToggle}
+            />
+          )}
+        </XStack>
+        {isGroupOn && (
+          <YStack gap="$3">
+            {mainKey && mainEntry && mainEntry.type === 'secret' && (
+              <EnvStringField
+                envKey={mainKey}
+                label={t(`admin.envLabel_${mainKey}`, { defaultValue: mainKey })}
+                value={mainEntry.value}
+                isSecret
+                onSave={handleUpdate}
+              />
+            )}
+            {subKeys.map(([key, entry]) => {
+              const label = t(`admin.envLabel_${key}`, { defaultValue: key })
+              if (entry.type === 'boolean') {
+                const isOn = entry.value === 'true'
+                return (
+                  <XStack key={key} alignItems="center" justifyContent="space-between">
+                    <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                      {label}
+                    </Text>
+                    <AppSwitch
+                      checked={isOn}
+                      onCheckedChange={(checked) => handleUpdate(key, String(checked))}
+                    />
+                  </XStack>
+                )
+              }
+              return (
+                <EnvStringField
+                  key={key}
+                  envKey={key}
+                  label={label}
+                  value={entry.value}
+                  isSecret={entry.type === 'secret'}
+                  onSave={handleUpdate}
+                />
+              )
+            })}
+          </YStack>
+        )}
+      </AppCard>
+    )
+  }
+
+  const cards = envData ? Object.entries(envData).map(([group, keys]) => renderEnvCard(group, keys)).filter(Boolean) : []
+
+  // Distribute cards into 2 columns for masonry layout
+  const col1: React.ReactNode[] = []
+  const col2: React.ReactNode[] = []
+  cards.forEach((card, i) => {
+    if (i % 2 === 0) col1.push(card)
+    else col2.push(card)
+  })
+
   return (
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
       <FadeIn>
@@ -835,119 +953,14 @@ function ApiSettingsTab() {
             {t('admin.apiSettingsDesc')}
           </Text>
 
-          {Object.entries(envData).map(([group, keys]) => {
-            const meta = ENV_GROUP_META[group]
-            if (!meta) return null
-
-            const mainKey = meta.mainToggle
-            const mainEntry = mainKey ? keys[mainKey] : undefined
-            // Main toggle: boolean → true/false, secret → non-null means enabled
-            const isGroupOn = mainEntry
-              ? mainEntry.type === 'boolean'
-                ? mainEntry.value === 'true'
-                : mainEntry.value !== null && mainEntry.value !== ''
-              : true
-
-            const handleMainToggle = (checked: boolean) => {
-              if (!mainKey || !mainEntry) return
-              if (mainEntry.type === 'boolean') {
-                handleUpdate(mainKey, String(checked))
-              } else {
-                // Secret: toggling off comments it out, toggling on uncomments
-                handleUpdate(mainKey, checked ? '__TOGGLE_ON__' : null)
-              }
-            }
-
-            // Frontend: use dedicated card with color scheme UI
-            if (group === 'frontend') {
-              return (
-                <FrontendEnvCard
-                  key={group}
-                  keys={keys}
-                  onUpdate={handleUpdate}
-                  onBatchUpdate={handleBatchUpdate}
-                />
-              )
-            }
-
-            // Payments: use dedicated card with provider tabs
-            if (group === 'payments') {
-              return (
-                <PaymentsEnvCard
-                  key={group}
-                  keys={keys}
-                  isGroupOn={isGroupOn}
-                  onToggle={handleMainToggle}
-                  onUpdate={handleUpdate}
-                />
-              )
-            }
-
-            // Sub-keys: everything except the main toggle
-            const subKeys = Object.entries(keys).filter(([key]) => key !== mainKey)
-
-            return (
-              <AppCard key={group} animated={false}>
-                <XStack alignItems="center" justifyContent="space-between" marginBottom={subKeys.length > 0 && isGroupOn ? '$3' : 0}>
-                  <XStack alignItems="center" gap="$2" flex={1}>
-                    <Ionicons name={meta.icon} size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
-                    <Text fontWeight="600" color="$color" fontSize="$4">
-                      {t(meta.labelKey)}
-                    </Text>
-                  </XStack>
-                  {mainEntry && (
-                    <AppSwitch
-                      checked={isGroupOn}
-                      onCheckedChange={handleMainToggle}
-                    />
-                  )}
-                </XStack>
-                {isGroupOn && (
-                  <YStack gap="$3">
-                    {/* Show input for secret-type main toggle (e.g. Google Client ID, Expo Token) */}
-                    {mainKey && mainEntry && mainEntry.type === 'secret' && (
-                      <EnvStringField
-                        envKey={mainKey}
-                        label={t(`admin.envLabel_${mainKey}`, { defaultValue: mainKey })}
-                        value={mainEntry.value}
-                        isSecret
-                        onSave={handleUpdate}
-                      />
-                    )}
-                    {subKeys.map(([key, entry]) => {
-                      const label = t(`admin.envLabel_${key}`, { defaultValue: key })
-                      if (entry.type === 'boolean') {
-                        const isOn = entry.value === 'true'
-                        return (
-                          <XStack key={key} alignItems="center" justifyContent="space-between">
-                            <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                              {label}
-                            </Text>
-                            <AppSwitch
-                              checked={isOn}
-                              onCheckedChange={(checked) => handleUpdate(key, String(checked))}
-                            />
-                          </XStack>
-                        )
-                      }
-
-                      // String or secret
-                      return (
-                        <EnvStringField
-                          key={key}
-                          envKey={key}
-                          label={label}
-                          value={entry.value}
-                          isSecret={entry.type === 'secret'}
-                          onSave={handleUpdate}
-                        />
-                      )
-                    })}
-                  </YStack>
-                )}
-              </AppCard>
-            )
-          })}
+          {isWide ? (
+            <XStack gap="$3" alignItems="flex-start">
+              <YStack flex={1} gap="$3">{col1}</YStack>
+              <YStack flex={1} gap="$3">{col2}</YStack>
+            </XStack>
+          ) : (
+            <YStack gap="$3">{cards}</YStack>
+          )}
 
           <Text color="$mutedText" fontSize="$1" textAlign="center" marginTop="$2">
             {t('admin.restartRequired')}
