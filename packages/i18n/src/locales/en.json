@@ -235,6 +235,8 @@
     "openaiMaxTokensDesc": "Maximum tokens per response (1–128000)",
     "hintGemini": "Get API key at Google AI Studio →",
     "hintOpenai": "Get API key at OpenAI Platform →",
+    "aiProxyEnabled": "Use proxy for AI",
+    "aiProxyEnabledDesc": "Route AI requests through managed proxies",
     "hintStripe": "Get keys at Stripe Dashboard →",
     "hintYookassa": "Get keys at YooKassa Dashboard →",
     "hintRobokassa": "Get keys at Robokassa Partner →",

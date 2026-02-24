@@ -235,6 +235,8 @@
     "openaiMaxTokensDesc": "Максимум токенов в ответе (1–128000)",
     "hintGemini": "Получить API-ключ в Google AI Studio →",
     "hintOpenai": "Получить API-ключ в OpenAI Platform →",
+    "aiProxyEnabled": "Использовать прокси для ИИ",
+    "aiProxyEnabledDesc": "Направлять ИИ-запросы через управляемые прокси",
     "hintStripe": "Получить ключи в Stripe Dashboard →",
     "hintYookassa": "Получить ключи в ЮKassa →",
     "hintRobokassa": "Получить ключи в Robokassa →",

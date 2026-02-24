@@ -235,6 +235,8 @@
     "openaiMaxTokensDesc": "レスポンスあたりの最大トークン数",
     "hintGemini": "Google AI StudioでAPIキーを取得 →",
     "hintOpenai": "OpenAI PlatformでAPIキーを取得 →",
+    "aiProxyEnabled": "AIにプロキシを使用",
+    "aiProxyEnabledDesc": "AIリクエストを管理プロキシ経由でルーティング",
     "hintStripe": "Stripe Dashboardでキーを取得 →",
     "hintYookassa": "YooKassaでキーを取得 →",
     "hintRobokassa": "Robokassaでキーを取得 →",

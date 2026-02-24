@@ -61,6 +61,9 @@ const envSchema = z.object({
   OPENAI_MODEL: z.string().default('gpt-4o-mini'),
   OPENAI_MAX_TOKENS: z.coerce.number().default(4096),
 
+  // AI → Proxy: route AI requests through managed proxies
+  AI_PROXY_ENABLED: envBoolean,
+
   // Proxy (legacy env vars — proxy is now managed via DB)
   PROXY_ENABLED: envBoolean,
   PROXY_URL: z.string().optional(),

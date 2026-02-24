@@ -235,6 +235,8 @@
     "openaiMaxTokensDesc": "Máximo de tokens por respuesta (1–128000)",
     "hintGemini": "Obtener clave API en Google AI Studio →",
     "hintOpenai": "Obtener clave API en OpenAI Platform →",
+    "aiProxyEnabled": "Usar proxy para IA",
+    "aiProxyEnabledDesc": "Enrutar solicitudes de IA a través de proxies gestionados",
     "hintStripe": "Obtener claves en Stripe Dashboard →",
     "hintYookassa": "Obtener claves en YooKassa →",
     "hintRobokassa": "Obtener claves en Robokassa →",
