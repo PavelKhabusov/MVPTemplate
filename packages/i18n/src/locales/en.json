@@ -149,6 +149,7 @@
     "apiAuth": "Google Authentication",
     "apiPush": "Push Notifications",
     "apiPayments": "Payments",
+    "apiFrontend": "Frontend Settings",
     "envSaved": "Settings saved successfully",
     "envSaveError": "Failed to save settings",
     "restartRequired": "Server restart required for changes to take effect",
@@ -170,7 +171,11 @@
     "envLabel_ROBOKASSA_MERCHANT_LOGIN": "Merchant Login",
     "envLabel_ROBOKASSA_PASSWORD1": "Password 1",
     "envLabel_ROBOKASSA_PASSWORD2": "Password 2",
-    "envLabel_ROBOKASSA_TEST_MODE": "Test Mode"
+    "envLabel_ROBOKASSA_TEST_MODE": "Test Mode",
+    "envLabel_EXPO_PUBLIC_DOCS_ENABLED": "Documentation",
+    "envLabel_EXPO_PUBLIC_COOKIE_BANNER": "Cookie Banner",
+    "envLabel_EXPO_PUBLIC_COLOR_SCHEME": "Color Scheme",
+    "envLabel_EXPO_PUBLIC_CUSTOM_COLOR": "Custom Color"
   },
   "notifications": {
     "title": "Notifications",

@@ -149,6 +149,7 @@
     "apiAuth": "Google認証",
     "apiPush": "プッシュ通知",
     "apiPayments": "決済",
+    "apiFrontend": "フロントエンド設定",
     "envSaved": "設定が正常に保存されました",
     "envSaveError": "設定の保存に失敗しました",
     "restartRequired": "変更を適用するにはサーバーの再起動が必要です",
@@ -170,7 +171,11 @@
     "envLabel_ROBOKASSA_MERCHANT_LOGIN": "マーチャントログイン",
     "envLabel_ROBOKASSA_PASSWORD1": "パスワード1",
     "envLabel_ROBOKASSA_PASSWORD2": "パスワード2",
-    "envLabel_ROBOKASSA_TEST_MODE": "テストモード"
+    "envLabel_ROBOKASSA_TEST_MODE": "テストモード",
+    "envLabel_EXPO_PUBLIC_DOCS_ENABLED": "ドキュメント",
+    "envLabel_EXPO_PUBLIC_COOKIE_BANNER": "Cookieバナー",
+    "envLabel_EXPO_PUBLIC_COLOR_SCHEME": "カラースキーム",
+    "envLabel_EXPO_PUBLIC_CUSTOM_COLOR": "カスタムカラー"
   },
   "notifications": {
     "title": "通知",

@@ -149,6 +149,7 @@
     "apiAuth": "Autenticación Google",
     "apiPush": "Notificaciones Push",
     "apiPayments": "Pagos",
+    "apiFrontend": "Configuración del frontend",
     "envSaved": "Configuración guardada correctamente",
     "envSaveError": "Error al guardar la configuración",
     "restartRequired": "Se requiere reiniciar el servidor para aplicar los cambios",
@@ -170,7 +171,11 @@
     "envLabel_ROBOKASSA_MERCHANT_LOGIN": "Login del comerciante",
     "envLabel_ROBOKASSA_PASSWORD1": "Contraseña 1",
     "envLabel_ROBOKASSA_PASSWORD2": "Contraseña 2",
-    "envLabel_ROBOKASSA_TEST_MODE": "Modo de prueba"
+    "envLabel_ROBOKASSA_TEST_MODE": "Modo de prueba",
+    "envLabel_EXPO_PUBLIC_DOCS_ENABLED": "Documentación",
+    "envLabel_EXPO_PUBLIC_COOKIE_BANNER": "Banner de cookies",
+    "envLabel_EXPO_PUBLIC_COLOR_SCHEME": "Esquema de color",
+    "envLabel_EXPO_PUBLIC_CUSTOM_COLOR": "Color personalizado"
   },
   "notifications": {
     "title": "Notificaciones",

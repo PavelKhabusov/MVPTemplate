@@ -149,6 +149,7 @@
     "apiAuth": "Google Аутентификация",
     "apiPush": "Push-уведомления",
     "apiPayments": "Платежи",
+    "apiFrontend": "Настройки фронтенда",
     "envSaved": "Настройки успешно сохранены",
     "envSaveError": "Не удалось сохранить настройки",
     "restartRequired": "Для применения изменений необходим перезапуск сервера",
@@ -170,7 +171,11 @@
     "envLabel_ROBOKASSA_MERCHANT_LOGIN": "Логин магазина",
     "envLabel_ROBOKASSA_PASSWORD1": "Пароль 1",
     "envLabel_ROBOKASSA_PASSWORD2": "Пароль 2",
-    "envLabel_ROBOKASSA_TEST_MODE": "Тестовый режим"
+    "envLabel_ROBOKASSA_TEST_MODE": "Тестовый режим",
+    "envLabel_EXPO_PUBLIC_DOCS_ENABLED": "Документация",
+    "envLabel_EXPO_PUBLIC_COOKIE_BANNER": "Баннер cookie",
+    "envLabel_EXPO_PUBLIC_COLOR_SCHEME": "Цветовая схема",
+    "envLabel_EXPO_PUBLIC_CUSTOM_COLOR": "Пользовательский цвет"
   },
   "notifications": {
     "title": "Уведомления",

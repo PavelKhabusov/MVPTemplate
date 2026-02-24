@@ -605,6 +605,7 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   auth: { icon: 'logo-google', labelKey: 'admin.apiAuth', mainToggle: 'GOOGLE_CLIENT_ID' },
   pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN' },
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
+  frontend: { icon: 'color-palette-outline', labelKey: 'admin.apiFrontend' },
 }
 
 const PAYMENT_PROVIDERS = [
@@ -722,12 +723,26 @@ function ApiSettingsTab() {
   const insets = useSafeAreaInsets()
   const toast = useToast()
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
+  const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
+  const setCustomColor = useTemplateConfigStore((s) => s.setCustomColor)
   const [envData, setEnvData] = useState<EnvData | null>(null)
   const [loading, setLoading] = useState(true)
 
   const syncFlagsFromEnv = useCallback((data: EnvData) => {
     for (const [, keys] of Object.entries(data)) {
       for (const [envKey, entry] of Object.entries(keys)) {
+        // Sync color scheme
+        if (envKey === 'EXPO_PUBLIC_COLOR_SCHEME' && entry.value) {
+          setColorScheme(entry.value)
+          applyColorScheme(entry.value)
+          continue
+        }
+        // Sync custom color
+        if (envKey === 'EXPO_PUBLIC_CUSTOM_COLOR' && entry.value) {
+          setCustomColor(entry.value)
+          applyCustomColor(entry.value)
+          continue
+        }
         const flagKey = ENV_TO_FLAG[envKey]
         if (!flagKey) continue
         const flag = TEMPLATE_FLAGS.find((f) => f.key === flagKey)
@@ -738,7 +753,7 @@ function ApiSettingsTab() {
         setFlag(flagKey, isOn)
       }
     }
-  }, [setFlag])
+  }, [setFlag, setColorScheme, setCustomColor])
 
   const fetchEnv = useCallback(async () => {
     try {
@@ -765,21 +780,33 @@ function ApiSettingsTab() {
       toast.success(t('admin.envSaved'))
 
       // Sync with Template Config store
-      const flagKey = ENV_TO_FLAG[key]
-      if (flagKey) {
-        const flag = TEMPLATE_FLAGS.find((f) => f.key === flagKey)
-        if (flag) {
-          const isOn = flag.envType === 'boolean'
-            ? value === 'true' || value === true
-            : value !== null && value !== '' && value !== false
-          setFlag(flagKey, isOn)
+      if (key === 'EXPO_PUBLIC_COLOR_SCHEME') {
+        if (typeof value === 'string' && value) {
+          setColorScheme(value)
+          applyColorScheme(value)
+        }
+      } else if (key === 'EXPO_PUBLIC_CUSTOM_COLOR') {
+        if (typeof value === 'string' && value) {
+          setCustomColor(value)
+          applyCustomColor(value)
+        }
+      } else {
+        const flagKey = ENV_TO_FLAG[key]
+        if (flagKey) {
+          const flag = TEMPLATE_FLAGS.find((f) => f.key === flagKey)
+          if (flag) {
+            const isOn = flag.envType === 'boolean'
+              ? value === 'true' || value === true
+              : value !== null && value !== '' && value !== false
+            setFlag(flagKey, isOn)
+          }
         }
       }
     } catch {
       toast.error(t('admin.envSaveError'))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, setFlag])
+  }, [t, setFlag, setColorScheme, setCustomColor])
 
   if (loading || !envData) {
     return (
