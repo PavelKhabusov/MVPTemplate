@@ -228,7 +228,13 @@
     "geminiModelLegacy": "Gemini 2.0 Flash",
     "geminiConcurrentLimit": "Параллельные генерации",
     "geminiConcurrentLimitDesc": "Макс. одновременных ИИ-запросов (1–10)",
-    "geminiApiKeyHint": "Получить API-ключ в Google AI Studio →"
+    "geminiApiKeyHint": "Получить API-ключ в Google AI Studio →",
+    "hintStripe": "Получить ключи в Stripe Dashboard →",
+    "hintYookassa": "Получить ключи в ЮKassa →",
+    "hintRobokassa": "Получить ключи в Robokassa →",
+    "hintPosthog": "Получить ключ в PostHog →",
+    "hintGoogle": "Получить данные в Google Cloud Console →",
+    "hintExpo": "Получить токен в Expo Settings →"
   },
   "notifications": {
     "title": "Уведомления",

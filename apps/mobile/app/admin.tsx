@@ -599,11 +599,11 @@ function PaymentsAdminTab() {
 interface EnvEntry { value: string | null; type: string }
 type EnvData = Record<string, Record<string, EnvEntry>>
 
-const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string; mainToggle?: string }> = {
-  analytics: { icon: 'bar-chart-outline', labelKey: 'admin.apiAnalytics', mainToggle: 'ANALYTICS_ENABLED' },
+const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string; mainToggle?: string; hintKey?: string; hintUrl?: string }> = {
+  analytics: { icon: 'bar-chart-outline', labelKey: 'admin.apiAnalytics', mainToggle: 'ANALYTICS_ENABLED', hintKey: 'admin.hintPosthog', hintUrl: 'https://app.posthog.com/project/settings' },
   email: { icon: 'mail-outline', labelKey: 'admin.apiEmail', mainToggle: 'EMAIL_ENABLED' },
-  auth: { icon: 'logo-google', labelKey: 'admin.apiAuth', mainToggle: 'GOOGLE_CLIENT_ID' },
-  pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN' },
+  auth: { icon: 'logo-google', labelKey: 'admin.apiAuth', mainToggle: 'GOOGLE_CLIENT_ID', hintKey: 'admin.hintGoogle', hintUrl: 'https://console.cloud.google.com/apis/credentials' },
+  pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN', hintKey: 'admin.hintExpo', hintUrl: 'https://expo.dev/settings/access-tokens' },
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
   frontend: { icon: 'color-palette-outline', labelKey: 'admin.apiFrontend' },
   ai: { icon: 'sparkles-outline', labelKey: 'admin.apiAI', mainToggle: 'GEMINI_API_KEY' },
@@ -611,9 +611,9 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
 }
 
 const PAYMENT_PROVIDERS = [
-  { key: 'stripe', label: 'Stripe', color: '#635BFF', keys: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'] },
-  { key: 'yookassa', label: 'YooKassa', color: '#0077FF', keys: ['YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YOOKASSA_WEBHOOK_SECRET'] },
-  { key: 'robokassa', label: 'Robokassa', color: '#E5392B', keys: ['ROBOKASSA_MERCHANT_LOGIN', 'ROBOKASSA_PASSWORD1', 'ROBOKASSA_PASSWORD2'] },
+  { key: 'stripe', label: 'Stripe', color: '#635BFF', keys: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'], hintKey: 'admin.hintStripe', hintUrl: 'https://dashboard.stripe.com/apikeys' },
+  { key: 'yookassa', label: 'YooKassa', color: '#0077FF', keys: ['YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YOOKASSA_WEBHOOK_SECRET'], hintKey: 'admin.hintYookassa', hintUrl: 'https://yookassa.ru/my/merchant/integration' },
+  { key: 'robokassa', label: 'Robokassa', color: '#E5392B', keys: ['ROBOKASSA_MERCHANT_LOGIN', 'ROBOKASSA_PASSWORD1', 'ROBOKASSA_PASSWORD2'], hintKey: 'admin.hintRobokassa', hintUrl: 'https://partner.robokassa.ru/' },
 ] as const
 
 function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
@@ -694,6 +694,13 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               onSave={onUpdate}
             />
           ))}
+
+          {/* Provider dashboard link */}
+          <ScalePress onPress={() => Linking.openURL(activeProviderData.hintUrl)}>
+            <Text fontSize="$2" color="$accent">
+              {t(activeProviderData.hintKey)}
+            </Text>
+          </ScalePress>
 
           {/* Robokassa test mode toggle — show when robokassa is active */}
           {activeProvider === 'robokassa' && testModeEntry && (
@@ -1059,6 +1066,13 @@ function ApiSettingsTab() {
                 isSecret
                 onSave={handleUpdate}
               />
+            )}
+            {meta.hintUrl && meta.hintKey && (
+              <ScalePress onPress={() => Linking.openURL(meta.hintUrl!)}>
+                <Text fontSize="$2" color="$accent">
+                  {t(meta.hintKey)}
+                </Text>
+              </ScalePress>
             )}
             {subKeys.map(([key, entry]) => {
               const label = t(`admin.envLabel_${key}`, { defaultValue: key })

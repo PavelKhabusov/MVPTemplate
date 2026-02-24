@@ -228,7 +228,13 @@
     "geminiModelLegacy": "Gemini 2.0 Flash",
     "geminiConcurrentLimit": "Generaciones simultáneas",
     "geminiConcurrentLimitDesc": "Máximo de solicitudes simultáneas de IA (1–10)",
-    "geminiApiKeyHint": "Obtener clave API en Google AI Studio →"
+    "geminiApiKeyHint": "Obtener clave API en Google AI Studio →",
+    "hintStripe": "Obtener claves en Stripe Dashboard →",
+    "hintYookassa": "Obtener claves en YooKassa →",
+    "hintRobokassa": "Obtener claves en Robokassa →",
+    "hintPosthog": "Obtener clave en PostHog →",
+    "hintGoogle": "Obtener credenciales en Google Cloud Console →",
+    "hintExpo": "Obtener token en Expo Settings →"
   },
   "notifications": {
     "title": "Notificaciones",

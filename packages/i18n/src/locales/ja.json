@@ -228,7 +228,13 @@
     "geminiModelLegacy": "Gemini 2.0 Flash",
     "geminiConcurrentLimit": "同時生成数",
     "geminiConcurrentLimitDesc": "最大同時AIリクエスト数（1〜10）",
-    "geminiApiKeyHint": "Google AI StudioでAPIキーを取得 →"
+    "geminiApiKeyHint": "Google AI StudioでAPIキーを取得 →",
+    "hintStripe": "Stripe Dashboardでキーを取得 →",
+    "hintYookassa": "YooKassaでキーを取得 →",
+    "hintRobokassa": "Robokassaでキーを取得 →",
+    "hintPosthog": "PostHogでキーを取得 →",
+    "hintGoogle": "Google Cloud Consoleで認証情報を取得 →",
+    "hintExpo": "Expo Settingsでトークンを取得 →"
   },
   "notifications": {
     "title": "通知",
