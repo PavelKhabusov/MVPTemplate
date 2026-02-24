@@ -1047,6 +1047,8 @@ function StorageAdminTab() {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const toast = useToast()
+  const { width: screenWidth } = useWindowDimensions()
+  const isWide = screenWidth > 768
 
   const [stats, setStats] = useState<StorageStats | null>(null)
   const [config, setConfig] = useState<StorageConfig | null>(null)
@@ -1369,34 +1371,34 @@ function StorageAdminTab() {
               </YStack>
             )}
 
-            <YStack gap="$2">
-              <XStack gap="$3">
-                <YStack flex={1}>
-                  <AppButton
-                    variant="outline"
-                    onPress={handleDownloadAll}
-                    disabled={isDownloading || stats.local.fileCount === 0}
-                  >
-                    {isDownloading ? t('admin.downloading') : t('admin.downloadAll')}
-                  </AppButton>
-                </YStack>
-                <YStack flex={1}>
-                  <AppButton
-                    variant="outline"
-                    onPress={handleDownloadAllS3}
-                    disabled={isDownloadingS3 || !config.s3Configured || stats.s3.fileCount === 0}
-                  >
-                    {isDownloadingS3 ? t('admin.downloading') : t('admin.downloadAllS3')}
-                  </AppButton>
-                </YStack>
-              </XStack>
-              <AppButton
-                onPress={handleMigrateToS3}
-                disabled={isMigrating || !config.s3Configured}
-              >
-                {isMigrating ? t('admin.migratingToS3') : t('admin.migrateToS3')}
-              </AppButton>
-            </YStack>
+            <XStack gap="$2" flexWrap={isWide ? 'nowrap' : 'wrap'}>
+              <YStack flex={1} flexBasis={isWide ? 0 : '45%'}>
+                <AppButton
+                  variant="outline"
+                  onPress={handleDownloadAll}
+                  disabled={isDownloading || stats.local.fileCount === 0}
+                >
+                  {isDownloading ? t('admin.downloading') : t('admin.downloadAll')}
+                </AppButton>
+              </YStack>
+              <YStack flex={1} flexBasis={isWide ? 0 : '45%'}>
+                <AppButton
+                  variant="outline"
+                  onPress={handleDownloadAllS3}
+                  disabled={isDownloadingS3 || !config.s3Configured || stats.s3.fileCount === 0}
+                >
+                  {isDownloadingS3 ? t('admin.downloading') : t('admin.downloadAllS3')}
+                </AppButton>
+              </YStack>
+              <YStack flex={1} flexBasis={isWide ? 0 : '100%'}>
+                <AppButton
+                  onPress={handleMigrateToS3}
+                  disabled={isMigrating || !config.s3Configured}
+                >
+                  {isMigrating ? t('admin.migratingToS3') : t('admin.migrateToS3')}
+                </AppButton>
+              </YStack>
+            </XStack>
           </AppCard>
         </YStack>
       </FadeIn>
