@@ -956,14 +956,15 @@ export default function AdminScreen() {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const userRole = useAuthStore((s) => s.user?.role)
 
-  // Guard: redirect non-admins
+  // Guard: redirect non-admins and unauthenticated users
   useEffect(() => {
-    if (userRole !== undefined && userRole !== 'admin') {
+    if (!isAuthenticated || userRole !== 'admin') {
       router.replace('/(tabs)/settings')
     }
-  }, [userRole, router])
+  }, [isAuthenticated, userRole, router])
 
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
