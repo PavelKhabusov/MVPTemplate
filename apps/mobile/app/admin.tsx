@@ -598,12 +598,12 @@ function PaymentsAdminTab() {
 interface EnvEntry { value: string | null; type: string }
 type EnvData = Record<string, Record<string, EnvEntry>>
 
-const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string }> = {
-  analytics: { icon: 'bar-chart-outline', labelKey: 'admin.apiAnalytics' },
-  email: { icon: 'mail-outline', labelKey: 'admin.apiEmail' },
-  auth: { icon: 'logo-google', labelKey: 'admin.apiAuth' },
-  pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush' },
-  payments: { icon: 'card-outline', labelKey: 'admin.apiPayments' },
+const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string; mainToggle?: string }> = {
+  analytics: { icon: 'bar-chart-outline', labelKey: 'admin.apiAnalytics', mainToggle: 'ANALYTICS_ENABLED' },
+  email: { icon: 'mail-outline', labelKey: 'admin.apiEmail', mainToggle: 'EMAIL_ENABLED' },
+  auth: { icon: 'logo-google', labelKey: 'admin.apiAuth', mainToggle: 'GOOGLE_CLIENT_ID' },
+  pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN' },
+  payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
 }
 
 function ApiSettingsTab() {
@@ -690,43 +690,75 @@ function ApiSettingsTab() {
             const meta = ENV_GROUP_META[group]
             if (!meta) return null
 
+            const mainKey = meta.mainToggle
+            const mainEntry = mainKey ? keys[mainKey] : undefined
+            // Main toggle: boolean → true/false, secret → non-null means enabled
+            const isGroupOn = mainEntry
+              ? mainEntry.type === 'boolean'
+                ? mainEntry.value === 'true'
+                : mainEntry.value !== null && mainEntry.value !== ''
+              : true
+
+            const handleMainToggle = (checked: boolean) => {
+              if (!mainKey || !mainEntry) return
+              if (mainEntry.type === 'boolean') {
+                handleUpdate(mainKey, String(checked))
+              } else {
+                // Secret: toggling off comments it out
+                if (!checked) handleUpdate(mainKey, null)
+              }
+            }
+
+            // Sub-keys: everything except the main toggle
+            const subKeys = Object.entries(keys).filter(([key]) => key !== mainKey)
+
             return (
               <AppCard key={group} animated={false}>
-                <XStack alignItems="center" gap="$2" marginBottom="$3">
-                  <Ionicons name={meta.icon} size={20} color={theme.accent.val} />
-                  <Text fontWeight="600" color="$color" fontSize="$4">
-                    {t(meta.labelKey)}
-                  </Text>
+                <XStack alignItems="center" justifyContent="space-between" marginBottom={subKeys.length > 0 && isGroupOn ? '$3' : 0}>
+                  <XStack alignItems="center" gap="$2" flex={1}>
+                    <Ionicons name={meta.icon} size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+                    <Text fontWeight="600" color="$color" fontSize="$4">
+                      {t(meta.labelKey)}
+                    </Text>
+                  </XStack>
+                  {mainEntry && (
+                    <AppSwitch
+                      checked={isGroupOn}
+                      onCheckedChange={handleMainToggle}
+                    />
+                  )}
                 </XStack>
-                <YStack gap="$3">
-                  {Object.entries(keys).map(([key, entry]) => {
-                    if (entry.type === 'boolean') {
-                      const isOn = entry.value === 'true'
-                      return (
-                        <XStack key={key} alignItems="center" justifyContent="space-between">
-                          <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                            {key}
-                          </Text>
-                          <AppSwitch
-                            checked={isOn}
-                            onCheckedChange={(checked) => handleUpdate(key, String(checked))}
-                          />
-                        </XStack>
-                      )
-                    }
+                {isGroupOn && subKeys.length > 0 && (
+                  <YStack gap="$3">
+                    {subKeys.map(([key, entry]) => {
+                      if (entry.type === 'boolean') {
+                        const isOn = entry.value === 'true'
+                        return (
+                          <XStack key={key} alignItems="center" justifyContent="space-between">
+                            <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                              {key}
+                            </Text>
+                            <AppSwitch
+                              checked={isOn}
+                              onCheckedChange={(checked) => handleUpdate(key, String(checked))}
+                            />
+                          </XStack>
+                        )
+                      }
 
-                    // String or secret
-                    return (
-                      <EnvStringField
-                        key={key}
-                        envKey={key}
-                        value={entry.value}
-                        isSecret={entry.type === 'secret'}
-                        onSave={handleUpdate}
-                      />
-                    )
-                  })}
-                </YStack>
+                      // String or secret
+                      return (
+                        <EnvStringField
+                          key={key}
+                          envKey={key}
+                          value={entry.value}
+                          isSecret={entry.type === 'secret'}
+                          onSave={handleUpdate}
+                        />
+                      )
+                    })}
+                  </YStack>
+                )}
               </AppCard>
             )
           })}
