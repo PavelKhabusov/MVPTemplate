@@ -14,6 +14,8 @@ import {
   DEFAULT_SCHEME_KEY,
   applyColorScheme,
 } from '@mvp/template-config'
+import { useRouter } from 'expo-router'
+import { useAuthStore } from '@mvp/store'
 import { api } from '../src/services/api'
 
 const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
@@ -953,6 +955,16 @@ export default function AdminScreen() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const router = useRouter()
+  const userRole = useAuthStore((s) => s.user?.role)
+
+  // Guard: redirect non-admins
+  useEffect(() => {
+    if (userRole !== undefined && userRole !== 'admin') {
+      router.replace('/(tabs)/settings')
+    }
+  }, [userRole, router])
+
   const analyticsEnabled = useTemplateFlag('analytics', true)
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
