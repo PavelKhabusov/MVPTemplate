@@ -808,6 +808,17 @@ function ApiSettingsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, setFlag, setColorScheme, setCustomColor])
 
+  const handleBatchUpdate = useCallback(async (patch: Record<string, string | null>) => {
+    try {
+      const res = await api.patch('/admin/env', patch)
+      setEnvData(res.data.data)
+      toast.success(t('admin.envSaved'))
+    } catch {
+      toast.error(t('admin.envSaveError'))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t])
+
   if (loading || !envData) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" padding="$4">
@@ -845,6 +856,18 @@ function ApiSettingsTab() {
                 // Secret: toggling off comments it out, toggling on uncomments
                 handleUpdate(mainKey, checked ? '__TOGGLE_ON__' : null)
               }
+            }
+
+            // Frontend: use dedicated card with color scheme UI
+            if (group === 'frontend') {
+              return (
+                <FrontendEnvCard
+                  key={group}
+                  keys={keys}
+                  onUpdate={handleUpdate}
+                  onBatchUpdate={handleBatchUpdate}
+                />
+              )
             }
 
             // Payments: use dedicated card with provider tabs
@@ -988,10 +1011,177 @@ function EnvStringField({ envKey, label, value, isSecret, onSave }: {
   )
 }
 
+function FrontendEnvCard({ keys, onUpdate, onBatchUpdate }: {
+  keys: Record<string, EnvEntry>
+  onUpdate: (key: string, value: string | boolean | null) => void
+  onBatchUpdate: (patch: Record<string, string | null>) => void
+}) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
+  const customColor = useTemplateConfigStore((s) => s.customColor)
+  const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
+  const setCustomColor = useTemplateConfigStore((s) => s.setCustomColor)
+
+  const schemeValue = keys['EXPO_PUBLIC_COLOR_SCHEME']?.value
+  const customColorValue = keys['EXPO_PUBLIC_CUSTOM_COLOR']?.value
+  const [hexInput, setHexInput] = useState(customColorValue ?? customColor ?? '')
+  const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(hexInput)
+
+  const handleSelectPreset = (key: string) => {
+    setColorScheme(key)
+    applyColorScheme(key)
+    setHexInput('')
+    onBatchUpdate({ EXPO_PUBLIC_COLOR_SCHEME: key, EXPO_PUBLIC_CUSTOM_COLOR: null })
+  }
+
+  const handleApplyCustom = () => {
+    if (!isValidHex) return
+    setCustomColor(hexInput)
+    applyCustomColor(hexInput)
+    onBatchUpdate({ EXPO_PUBLIC_CUSTOM_COLOR: hexInput, EXPO_PUBLIC_COLOR_SCHEME: null })
+  }
+
+  // Boolean flag entries (docs, cookie banner)
+  const booleanKeys = Object.entries(keys).filter(
+    ([key, entry]) => entry.type === 'boolean' && key !== 'EXPO_PUBLIC_COLOR_SCHEME' && key !== 'EXPO_PUBLIC_CUSTOM_COLOR'
+  )
+
+  const activeScheme = customColor ? null : (colorScheme ?? schemeValue ?? DEFAULT_SCHEME_KEY)
+
+  return (
+    <AppCard animated={false}>
+      <XStack alignItems="center" gap="$2" marginBottom="$3">
+        <Ionicons name="color-palette-outline" size={20} color={theme.accent.val} />
+        <Text fontWeight="600" color="$color" fontSize="$4">
+          {t('admin.apiFrontend')}
+        </Text>
+      </XStack>
+
+      {/* Color Scheme */}
+      <Text fontSize="$2" color="$mutedText" fontWeight="500" marginBottom="$2">
+        {t('templateConfig.colorScheme')}
+      </Text>
+      <XStack flexWrap="wrap" gap="$2" marginBottom="$3">
+        {COLOR_SCHEMES.map((scheme) => {
+          const isSelected = !customColor && activeScheme === scheme.key
+          return (
+            <ScalePress key={scheme.key} onPress={() => handleSelectPreset(scheme.key)}>
+              <YStack alignItems="center" gap="$1" width={48}>
+                <YStack
+                  width={36}
+                  height={36}
+                  borderRadius={18}
+                  borderWidth={2}
+                  borderColor={isSelected ? '$color' : 'transparent'}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <YStack
+                    width={28}
+                    height={28}
+                    borderRadius={14}
+                    style={{ backgroundColor: scheme.swatch } as any}
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    {isSelected && (
+                      <Ionicons name="checkmark" size={14} color="white" />
+                    )}
+                  </YStack>
+                </YStack>
+                <Text
+                  fontSize={10}
+                  color={isSelected ? '$color' : '$mutedText'}
+                  fontWeight={isSelected ? '600' : '400'}
+                  textAlign="center"
+                  numberOfLines={1}
+                >
+                  {t(scheme.labelKey)}
+                </Text>
+              </YStack>
+            </ScalePress>
+          )
+        })}
+      </XStack>
+
+      {/* Custom hex color */}
+      <Text fontSize="$2" color="$mutedText" fontWeight="500" marginBottom="$2">
+        {t('templateConfig.customColor')}
+      </Text>
+      <XStack gap="$2" alignItems="center" marginBottom="$3">
+        <YStack
+          width={32}
+          height={32}
+          borderRadius={16}
+          borderWidth={2}
+          borderColor={customColor ? '$color' : '$borderColor'}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <YStack
+            width={24}
+            height={24}
+            borderRadius={12}
+            style={{ backgroundColor: isValidHex ? hexInput : theme.subtleBackground.val } as any}
+          />
+        </YStack>
+        <Input
+          flex={1}
+          size="$3"
+          value={hexInput}
+          onChangeText={setHexInput}
+          placeholder={t('templateConfig.customColorPlaceholder')}
+          placeholderTextColor={'$placeholderColor' as any}
+          backgroundColor="$subtleBackground"
+          borderColor={customColor ? '$accent' : '$borderColor'}
+          color="$color"
+          autoCapitalize="characters"
+          maxLength={7}
+        />
+        {isValidHex && (
+          <ScalePress onPress={handleApplyCustom}>
+            <XStack
+              backgroundColor="$accent"
+              paddingHorizontal="$2.5"
+              paddingVertical="$1.5"
+              borderRadius="$2"
+            >
+              <Ionicons name="checkmark" size={18} color="white" />
+            </XStack>
+          </ScalePress>
+        )}
+      </XStack>
+
+      {/* Boolean flags (docs, cookie banner) */}
+      {booleanKeys.length > 0 && (
+        <YStack gap="$2">
+          {booleanKeys.map(([key, entry]) => {
+            const label = t(`admin.envLabel_${key}`, { defaultValue: key })
+            const isOn = entry.value === 'true'
+            return (
+              <XStack key={key} alignItems="center" justifyContent="space-between">
+                <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                  {label}
+                </Text>
+                <AppSwitch
+                  checked={isOn}
+                  onCheckedChange={(checked) => onUpdate(key, String(checked))}
+                />
+              </XStack>
+            )
+          })}
+        </YStack>
+      )}
+    </AppCard>
+  )
+}
+
 function TemplateConfigTab() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const toast = useToast()
   const overrides = useTemplateConfigStore((s) => s.overrides)
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
   const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
@@ -1011,16 +1201,35 @@ function TemplateConfigTab() {
 
   const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(hexInput)
 
+  // Persist a single env key to backend
+  const syncEnv = useCallback(async (patch: Record<string, string | boolean | null>) => {
+    try {
+      await api.patch('/admin/env', patch)
+    } catch {
+      toast.error(t('admin.envSaveError'))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t])
+
   const handleApplyCustom = () => {
     if (!isValidHex) return
     setCustomColor(hexInput)
     applyCustomColor(hexInput)
+    syncEnv({ EXPO_PUBLIC_CUSTOM_COLOR: hexInput, EXPO_PUBLIC_COLOR_SCHEME: null })
   }
 
   const handleSelectPreset = (key: string) => {
     setColorScheme(key)
     applyColorScheme(key)
     setHexInput('')
+    syncEnv({ EXPO_PUBLIC_COLOR_SCHEME: key, EXPO_PUBLIC_CUSTOM_COLOR: null })
+  }
+
+  const handleToggleFlag = (flag: typeof frontendFlags[number], newValue: boolean) => {
+    setFlag(flag.key, newValue)
+    if (flag.envVar) {
+      syncEnv({ [flag.envVar]: String(newValue) })
+    }
   }
 
   return (
@@ -1154,7 +1363,7 @@ function TemplateConfigTab() {
                     </XStack>
                     <AppSwitch
                       checked={value}
-                      onCheckedChange={() => setFlag(flag.key, !value)}
+                      onCheckedChange={() => handleToggleFlag(flag, !value)}
                     />
                   </XStack>
                 )
@@ -1170,6 +1379,12 @@ function TemplateConfigTab() {
                 resetAll()
                 applyColorScheme(DEFAULT_SCHEME_KEY)
                 setHexInput('')
+                syncEnv({
+                  EXPO_PUBLIC_COLOR_SCHEME: DEFAULT_SCHEME_KEY,
+                  EXPO_PUBLIC_CUSTOM_COLOR: null,
+                  EXPO_PUBLIC_DOCS_ENABLED: 'true',
+                  EXPO_PUBLIC_COOKIE_BANNER: 'true',
+                })
               }}
             >
               {t('templateConfig.reset')}
