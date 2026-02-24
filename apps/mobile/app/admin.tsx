@@ -1064,6 +1064,7 @@ function StorageAdminTab() {
   const [isMigrating, setIsMigrating] = useState(false)
   const [migrationProgress, setMigrationProgress] = useState({ total: 0, migrated: 0, skipped: 0, failed: 0, currentFile: '' })
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isDownloadingS3, setIsDownloadingS3] = useState(false)
   const [savingConfig, setSavingConfig] = useState(false)
   const [s3ConfigOpen, setS3ConfigOpen] = useState(false)
 
@@ -1176,6 +1177,27 @@ function StorageAdminTab() {
       toast.error(t('common.error'))
     } finally {
       setIsDownloading(false)
+    }
+  }
+
+  const handleDownloadAllS3 = async () => {
+    if (Platform.OS !== 'web') return
+    setIsDownloadingS3(true)
+    try {
+      const res = await api.get('/admin/storage/download-all-s3', { responseType: 'blob', timeout: 600000 })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `s3-backup-${new Date().toISOString().slice(0, 10)}.zip`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(t('admin.downloadAllS3'))
+    } catch {
+      toast.error(t('common.error'))
+    } finally {
+      setIsDownloadingS3(false)
     }
   }
 
@@ -1347,25 +1369,34 @@ function StorageAdminTab() {
               </YStack>
             )}
 
-            <XStack gap="$3">
-              <YStack flex={1}>
-                <AppButton
-                  variant="outline"
-                  onPress={handleDownloadAll}
-                  disabled={isDownloading || stats.local.fileCount === 0}
-                >
-                  {isDownloading ? t('admin.downloading') : t('admin.downloadAll')}
-                </AppButton>
-              </YStack>
-              <YStack flex={1}>
-                <AppButton
-                  onPress={handleMigrateToS3}
-                  disabled={isMigrating || !config.s3Configured}
-                >
-                  {isMigrating ? t('admin.migratingToS3') : t('admin.migrateToS3')}
-                </AppButton>
-              </YStack>
-            </XStack>
+            <YStack gap="$2">
+              <XStack gap="$3">
+                <YStack flex={1}>
+                  <AppButton
+                    variant="outline"
+                    onPress={handleDownloadAll}
+                    disabled={isDownloading || stats.local.fileCount === 0}
+                  >
+                    {isDownloading ? t('admin.downloading') : t('admin.downloadAll')}
+                  </AppButton>
+                </YStack>
+                <YStack flex={1}>
+                  <AppButton
+                    variant="outline"
+                    onPress={handleDownloadAllS3}
+                    disabled={isDownloadingS3 || !config.s3Configured || stats.s3.fileCount === 0}
+                  >
+                    {isDownloadingS3 ? t('admin.downloading') : t('admin.downloadAllS3')}
+                  </AppButton>
+                </YStack>
+              </XStack>
+              <AppButton
+                onPress={handleMigrateToS3}
+                disabled={isMigrating || !config.s3Configured}
+              >
+                {isMigrating ? t('admin.migratingToS3') : t('admin.migrateToS3')}
+              </AppButton>
+            </YStack>
           </AppCard>
         </YStack>
       </FadeIn>

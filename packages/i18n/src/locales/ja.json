@@ -211,7 +211,8 @@
     "migrationSkipped": "スキップ",
     "migrationFailed": "失敗",
     "migrationBackup": "移行前にバックアップを取ってください",
-    "downloadAll": "すべてダウンロード",
+    "downloadAll": "ローカルをDL",
+    "downloadAllS3": "S3をDL",
     "downloading": "ダウンロード中..."
   },
   "notifications": {

@@ -211,7 +211,8 @@
     "migrationSkipped": "пропущено",
     "migrationFailed": "ошибки",
     "migrationBackup": "Убедитесь, что у вас есть резервная копия перед миграцией",
-    "downloadAll": "Скачать всё",
+    "downloadAll": "Скачать локальные",
+    "downloadAllS3": "Скачать S3",
     "downloading": "Скачивание..."
   },
   "notifications": {

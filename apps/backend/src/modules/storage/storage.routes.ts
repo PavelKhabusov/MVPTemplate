@@ -2,7 +2,8 @@ import { FastifyInstance } from 'fastify'
 import fs from 'fs'
 import { join, relative } from 'path'
 import archiver from 'archiver'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { PutObjectCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
+import { Readable } from 'stream'
 import { lookup } from 'mime-types'
 import { authenticate } from '../../common/middleware/authenticate'
 import { requireAdmin } from '../../common/middleware/require-admin'
@@ -215,6 +216,66 @@ export async function storageRoutes(app: FastifyInstance) {
     const archive = archiver('zip', { zlib: { level: 5 } })
     archive.pipe(reply.raw)
     archive.directory(uploadsDir, 'uploads')
+    await archive.finalize()
+  })
+
+  // GET /api/admin/storage/download-all-s3
+  app.get('/download-all-s3', async (_request, reply) => {
+    const storageService = app.storageService
+    if (!storageService.isS3Configured()) {
+      throw AppError.badRequest('S3 is not configured')
+    }
+
+    const s3Client = storageService.getS3Client()
+    const bucket = storageService.getS3Bucket()
+    if (!s3Client || !bucket) {
+      throw AppError.badRequest('S3 client not initialized')
+    }
+
+    // List all S3 objects
+    const allKeys: string[] = []
+    let continuationToken: string | undefined
+    do {
+      const listRes = await s3Client.send(new ListObjectsV2Command({
+        Bucket: bucket,
+        ContinuationToken: continuationToken,
+      }))
+      if (listRes.Contents) {
+        for (const obj of listRes.Contents) {
+          if (obj.Key) allKeys.push(obj.Key)
+        }
+      }
+      continuationToken = listRes.NextContinuationToken
+    } while (continuationToken)
+
+    if (allKeys.length === 0) {
+      throw AppError.notFound('No files in S3 bucket')
+    }
+
+    const dateStr = new Date().toISOString().slice(0, 10)
+    reply.hijack()
+    reply.raw.writeHead(200, {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename=s3-backup-${dateStr}.zip`,
+    })
+
+    const archive = archiver('zip', { zlib: { level: 5 } })
+    archive.pipe(reply.raw)
+
+    for (const key of allKeys) {
+      try {
+        const getRes = await s3Client.send(new GetObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        }))
+        if (getRes.Body) {
+          archive.append(getRes.Body as Readable, { name: key })
+        }
+      } catch {
+        // Skip files that fail to download
+      }
+    }
+
     await archive.finalize()
   })
 }

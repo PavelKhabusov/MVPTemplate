@@ -211,7 +211,8 @@
     "migrationSkipped": "omitidos",
     "migrationFailed": "fallidos",
     "migrationBackup": "Asegúrate de tener una copia de seguridad antes de migrar",
-    "downloadAll": "Descargar todo",
+    "downloadAll": "Descargar local",
+    "downloadAllS3": "Descargar S3",
     "downloading": "Descargando..."
   },
   "notifications": {
