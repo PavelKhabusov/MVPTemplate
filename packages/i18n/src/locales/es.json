@@ -141,7 +141,17 @@
     "editPlan": "Editar",
     "deletePlan": "Eliminar plan",
     "deletePlanConfirm": "¿Estás seguro de que quieres eliminar este plan? Esta acción no se puede deshacer.",
-    "inactive": "Inactivo"
+    "inactive": "Inactivo",
+    "apiSettings": "API",
+    "apiSettingsDesc": "Gestionar variables de entorno del backend. Los cambios se guardan en el archivo .env.",
+    "apiAnalytics": "Analíticas",
+    "apiEmail": "Correo",
+    "apiAuth": "Autenticación",
+    "apiPush": "Notificaciones Push",
+    "apiPayments": "Pagos",
+    "envSaved": "Configuración guardada correctamente",
+    "envSaveError": "Error al guardar la configuración",
+    "restartRequired": "Se requiere reiniciar el servidor para aplicar los cambios"
   },
   "notifications": {
     "title": "Notificaciones",

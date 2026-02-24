@@ -141,7 +141,17 @@
     "editPlan": "Edit",
     "deletePlan": "Delete Plan",
     "deletePlanConfirm": "Are you sure you want to delete this plan? This action cannot be undone.",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "apiSettings": "API",
+    "apiSettingsDesc": "Manage backend environment variables. Changes are saved to the .env file.",
+    "apiAnalytics": "Analytics",
+    "apiEmail": "Email",
+    "apiAuth": "Authentication",
+    "apiPush": "Push Notifications",
+    "apiPayments": "Payments",
+    "envSaved": "Settings saved successfully",
+    "envSaveError": "Failed to save settings",
+    "restartRequired": "Server restart required for changes to take effect"
   },
   "notifications": {
     "title": "Notifications",

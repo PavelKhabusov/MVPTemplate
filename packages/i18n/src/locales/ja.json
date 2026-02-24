@@ -141,7 +141,17 @@
     "editPlan": "編集",
     "deletePlan": "プランを削除",
     "deletePlanConfirm": "このプランを削除してもよろしいですか？この操作は元に戻せません。",
-    "inactive": "無効"
+    "inactive": "無効",
+    "apiSettings": "API",
+    "apiSettingsDesc": "バックエンドの環境変数を管理します。変更は.envファイルに保存されます。",
+    "apiAnalytics": "アナリティクス",
+    "apiEmail": "メール",
+    "apiAuth": "認証",
+    "apiPush": "プッシュ通知",
+    "apiPayments": "決済",
+    "envSaved": "設定が正常に保存されました",
+    "envSaveError": "設定の保存に失敗しました",
+    "restartRequired": "変更を適用するにはサーバーの再起動が必要です"
   },
   "notifications": {
     "title": "通知",

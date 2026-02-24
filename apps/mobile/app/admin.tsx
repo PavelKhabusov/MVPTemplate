@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions } from 'react-native'
 import { YStack, XStack, Text, H2, H4, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -593,6 +593,203 @@ function PaymentsAdminTab() {
   )
 }
 
+interface EnvEntry { value: string | null; type: string }
+type EnvData = Record<string, Record<string, EnvEntry>>
+
+const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string }> = {
+  analytics: { icon: 'bar-chart-outline', labelKey: 'admin.apiAnalytics' },
+  email: { icon: 'mail-outline', labelKey: 'admin.apiEmail' },
+  auth: { icon: 'logo-google', labelKey: 'admin.apiAuth' },
+  pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush' },
+  payments: { icon: 'card-outline', labelKey: 'admin.apiPayments' },
+}
+
+function ApiSettingsTab() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const [envData, setEnvData] = useState<EnvData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const showToast = useCallback((message: string, type: 'success' | 'error') => {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    setToast({ message, type })
+    toastTimer.current = setTimeout(() => setToast(null), 3000)
+  }, [])
+
+  const fetchEnv = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res = await api.get('/admin/env')
+      setEnvData(res.data.data)
+    } catch {
+      showToast(t('admin.envSaveError'), 'error')
+    } finally {
+      setLoading(false)
+    }
+  }, [t, showToast])
+
+  useEffect(() => {
+    fetchEnv()
+  }, [fetchEnv])
+
+  const handleUpdate = useCallback(async (key: string, value: string | boolean | null) => {
+    try {
+      const res = await api.patch('/admin/env', { [key]: value })
+      setEnvData(res.data.data)
+      showToast(t('admin.envSaved'), 'success')
+    } catch {
+      showToast(t('admin.envSaveError'), 'error')
+    }
+  }, [t, showToast])
+
+  if (loading || !envData) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" padding="$4">
+        <Text color="$mutedText">{t('common.loading')}</Text>
+      </YStack>
+    )
+  }
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+      <FadeIn>
+        <YStack gap="$3">
+          {/* Toast */}
+          {toast && (
+            <FadeIn>
+              <XStack
+                backgroundColor={toast.type === 'success' ? '#22c55e' : '#ef4444'}
+                paddingHorizontal="$3"
+                paddingVertical="$2.5"
+                borderRadius="$3"
+                alignItems="center"
+                gap="$2"
+              >
+                <Ionicons
+                  name={toast.type === 'success' ? 'checkmark-circle' : 'alert-circle'}
+                  size={18}
+                  color="white"
+                />
+                <Text color="white" fontSize="$3" fontWeight="600" flex={1}>
+                  {toast.message}
+                </Text>
+              </XStack>
+            </FadeIn>
+          )}
+
+          <Text color="$mutedText" fontSize="$2" lineHeight={18}>
+            {t('admin.apiSettingsDesc')}
+          </Text>
+
+          {Object.entries(envData).map(([group, keys]) => {
+            const meta = ENV_GROUP_META[group]
+            if (!meta) return null
+
+            return (
+              <AppCard key={group} animated={false}>
+                <XStack alignItems="center" gap="$2" marginBottom="$3">
+                  <Ionicons name={meta.icon} size={20} color={theme.accent.val} />
+                  <Text fontWeight="600" color="$color" fontSize="$4">
+                    {t(meta.labelKey)}
+                  </Text>
+                </XStack>
+                <YStack gap="$3">
+                  {Object.entries(keys).map(([key, entry]) => {
+                    if (entry.type === 'boolean') {
+                      const isOn = entry.value === 'true'
+                      return (
+                        <XStack key={key} alignItems="center" justifyContent="space-between">
+                          <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                            {key}
+                          </Text>
+                          <AppSwitch
+                            checked={isOn}
+                            onCheckedChange={(checked) => handleUpdate(key, String(checked))}
+                          />
+                        </XStack>
+                      )
+                    }
+
+                    // String or secret
+                    return (
+                      <EnvStringField
+                        key={key}
+                        envKey={key}
+                        value={entry.value}
+                        isSecret={entry.type === 'secret'}
+                        onSave={handleUpdate}
+                      />
+                    )
+                  })}
+                </YStack>
+              </AppCard>
+            )
+          })}
+
+          <Text color="$mutedText" fontSize="$1" textAlign="center" marginTop="$2">
+            {t('admin.restartRequired')}
+          </Text>
+        </YStack>
+      </FadeIn>
+    </ScrollView>
+  )
+}
+
+function EnvStringField({ envKey, value, isSecret, onSave }: {
+  envKey: string
+  value: string | null
+  isSecret: boolean
+  onSave: (key: string, value: string | null) => void
+}) {
+  const theme = useTheme()
+  const [localValue, setLocalValue] = useState(value ?? '')
+  const [dirty, setDirty] = useState(false)
+
+  const handleChange = (text: string) => {
+    setLocalValue(text)
+    setDirty(text !== (value ?? ''))
+  }
+
+  const handleSave = () => {
+    onSave(envKey, localValue || null)
+    setDirty(false)
+  }
+
+  return (
+    <YStack gap="$1.5">
+      <Text fontSize="$2" color="$mutedText">{envKey}</Text>
+      <XStack gap="$2" alignItems="center">
+        <Input
+          flex={1}
+          size="$3"
+          value={localValue}
+          onChangeText={handleChange}
+          placeholder={isSecret ? '••••••••' : ''}
+          secureTextEntry={isSecret && !localValue}
+          backgroundColor="$subtleBackground"
+          borderColor="$borderColor"
+          color="$color"
+        />
+        {dirty && (
+          <ScalePress onPress={handleSave}>
+            <XStack
+              backgroundColor="$accent"
+              paddingHorizontal="$2.5"
+              paddingVertical="$1.5"
+              borderRadius="$2"
+            >
+              <Ionicons name="checkmark" size={18} color="white" />
+            </XStack>
+          </ScalePress>
+        )}
+      </XStack>
+    </YStack>
+  )
+}
+
 function TemplateConfigTab() {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -760,7 +957,7 @@ export default function AdminScreen() {
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'api' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -998,6 +1195,21 @@ export default function AdminScreen() {
                 </XStack>
               </ScalePress>
             )}
+            <ScalePress onPress={() => setActiveTab('api')}>
+              <XStack
+                backgroundColor={activeTab === 'api' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+                gap="$1.5"
+                alignItems="center"
+              >
+                <Ionicons name="settings-outline" size={16} color={activeTab === 'api' ? 'white' : theme.accent.val} />
+                <Text color={activeTab === 'api' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.apiSettings')}
+                </Text>
+              </XStack>
+            </ScalePress>
             {isTemplateConfigEnabled && (
               <ScalePress onPress={() => {
                 if (Platform.OS === 'web') {
@@ -1339,6 +1551,11 @@ export default function AdminScreen() {
       {/* Payments Tab */}
       {paymentsEnabled && activeTab === 'payments' && (
         <PaymentsAdminTab />
+      )}
+
+      {/* API Settings Tab */}
+      {activeTab === 'api' && (
+        <ApiSettingsTab />
       )}
 
       {/* Template Config Tab */}
