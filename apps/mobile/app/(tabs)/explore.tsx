@@ -6,7 +6,8 @@ import { useTranslation } from '@mvp/i18n'
 import { useBookmarksStore } from '@mvp/store'
 import { FadeIn, SlideIn, AnimatedListItem, AppCard, ScalePress, AppAvatar } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
-import { useSearch } from '../../src/features/search/useSearch'
+import { useSearch } from '@mvp/lib'
+import { api } from '../../src/services/api'
 
 const CATEGORIES = [
   { key: 'catDesign', icon: 'color-palette-outline' as const, gradient: ['#FF6B35', '#FF8F66'] },
@@ -27,7 +28,12 @@ export default function ExploreScreen() {
   const insets = useSafeAreaInsets()
   const theme = useTheme()
   const { bookmarkedIds, toggle: toggleBookmark } = useBookmarksStore()
-  const { query, setQuery, results, isLoading, addRecentSearch } = useSearch()
+  const { query, setQuery, results, isLoading, addRecentSearch } = useSearch(
+    async (q) => {
+      const { data } = await api.get('/search', { params: { q } })
+      return data.data
+    }
+  )
   const [refreshing, setRefreshing] = useState(false)
 
   const onRefresh = useCallback(() => {
