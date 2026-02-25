@@ -133,10 +133,10 @@ export function applyFontFamily(family: FontFamily) {
     styleEl.id = styleId
     document.head.appendChild(styleEl)
   }
-  // Exclude icon font elements (Ionicons, MaterialIcons, etc.) — they rely on fontFamily for glyph rendering
-  const iconFonts = ['Ionicons', 'MaterialIcons', 'FontAwesome', 'AntDesign', 'Feather', 'Entypo', 'EvilIcons', 'Foundation', 'MaterialCommunityIcons', 'Octicons', 'SimpleLineIcons', 'Zocial']
-  const notSelectors = iconFonts.map((f) => `:not([style*="${f}"])`).join('')
-  styleEl.textContent = `body { font-family: ${config.cssStack}; } body *${notSelectors} { font-family: ${config.cssStack} !important; }`
+  // Apply font to body only — React Native Web uses atomic CSS classes (not inline styles)
+  // for fontFamily, so !important overrides on `body *` would break icon fonts (Ionicons etc.)
+  // Inheriting from body is sufficient; RNW's own CSS classes will override for icon elements.
+  styleEl.textContent = `body { font-family: ${config.cssStack}; }`
 }
 
 const FONT_ZOOM: Record<FontScale, number> = {

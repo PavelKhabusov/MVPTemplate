@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { randomUUID } from 'crypto'
 import { mkdir } from 'fs/promises'
 import { join, extname } from 'path'
+import { fileTypeFromBuffer } from 'file-type'
 import { authenticate } from '../../common/middleware/authenticate'
 import { usersRepository } from './users.repository'
 import { updateProfileSchema, updateSettingsSchema } from './users.schema'
@@ -57,6 +58,12 @@ export async function usersRoutes(app: FastifyInstance) {
       chunks.push(chunk)
     }
     const buffer = Buffer.concat(chunks)
+
+    // Validate actual file content via magic bytes (prevents MIME spoofing)
+    const detected = await fileTypeFromBuffer(buffer)
+    if (!detected || !ALLOWED_TYPES.includes(detected.mime)) {
+      throw AppError.badRequest('Only JPEG, PNG, and WebP images are allowed')
+    }
 
     const storage = app.storageService
 

@@ -195,14 +195,8 @@ export const authService = {
     const tokenHash = hashToken(token)
     const stored = await authRepository.findPasswordResetToken(tokenHash)
 
-    if (!stored) {
-      throw AppError.badRequest('Invalid reset token')
-    }
-    if (stored.usedAt) {
-      throw AppError.badRequest('This reset link has already been used')
-    }
-    if (stored.expiresAt < new Date()) {
-      throw AppError.badRequest('Reset token has expired')
+    if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
+      throw AppError.badRequest('Invalid or expired reset token')
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS)

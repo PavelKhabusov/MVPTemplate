@@ -1,9 +1,10 @@
 import axios from 'axios'
 import { secureStorage } from '@mvp/lib'
 
-// Survive HMR: keep token in globalThis so module re-evaluation doesn't lose it
+// Survive HMR in development: keep token in globalThis so module re-evaluation doesn't lose it.
+// In production this is a no-op — token lives only in the module closure.
 const TOKEN_KEY = '__mvp_access_token__'
-const _global = globalThis as any
+const _global = process.env.NODE_ENV === 'development' ? (globalThis as any) : null
 
 interface AuthHttpClientConfig {
   baseURL: string
@@ -17,7 +18,7 @@ export function createAuthHttpClient(config: AuthHttpClientConfig) {
     headers: { 'Content-Type': 'application/json' },
   })
 
-  let accessToken: string | null = _global[TOKEN_KEY] ?? null
+  let accessToken: string | null = _global?.[TOKEN_KEY] ?? null
   let isRefreshing = false
   let refreshQueue: Array<{
     resolve: (token: string) => void
@@ -26,7 +27,7 @@ export function createAuthHttpClient(config: AuthHttpClientConfig) {
 
   function setAccessToken(token: string | null) {
     accessToken = token
-    _global[TOKEN_KEY] = token
+    if (_global) _global[TOKEN_KEY] = token
   }
 
   function getAccessToken() {
@@ -73,7 +74,7 @@ export function createAuthHttpClient(config: AuthHttpClientConfig) {
           const newRefreshToken = data.data.refreshToken
 
           accessToken = newAccessToken
-          _global[TOKEN_KEY] = newAccessToken
+          if (_global) _global[TOKEN_KEY] = newAccessToken
           await secureStorage.set('refreshToken', newRefreshToken)
 
           refreshQueue.forEach(({ resolve }) => resolve(newAccessToken))
@@ -85,7 +86,7 @@ export function createAuthHttpClient(config: AuthHttpClientConfig) {
           refreshQueue.forEach(({ reject }) => reject(refreshError))
           refreshQueue = []
           accessToken = null
-          _global[TOKEN_KEY] = null
+          if (_global) _global[TOKEN_KEY] = null
           await secureStorage.remove('refreshToken')
           return Promise.reject(refreshError)
         } finally {

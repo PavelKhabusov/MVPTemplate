@@ -35,24 +35,28 @@ export default function PricingScreen() {
     }
   }, [])
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true)
       const [plansRes, subRes] = await Promise.all([
-        api.get('/payments/plans'),
-        api.get('/payments/subscription').catch(() => null),
+        api.get('/payments/plans', { signal }),
+        api.get('/payments/subscription', { signal }).catch(() => null),
       ])
       setPlans(plansRes.data.data ?? [])
       setSubscription(subRes?.data?.data ?? null)
-    } catch {
-      // ignore
+    } catch (err: any) {
+      if (err?.name !== 'CanceledError' && err?.name !== 'AbortError') {
+        // ignore other errors silently
+      }
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchData()
+    const controller = new AbortController()
+    fetchData(controller.signal)
+    return () => controller.abort()
   }, [fetchData])
 
   // Check if there are both monthly and yearly plans
