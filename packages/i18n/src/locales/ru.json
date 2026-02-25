@@ -558,7 +558,8 @@
     "fontScale": "Масштаб шрифта",
     "fontCompact": "Компактный",
     "fontDefault": "Стандарт",
-    "fontLarge": "Крупный"
+    "fontLarge": "Крупный",
+    "fontFamily": "Шрифт"
   },
   "profileMenu": {
     "profile": "Профиль",

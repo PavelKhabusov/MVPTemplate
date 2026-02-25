@@ -558,7 +558,8 @@
     "fontScale": "Escala de fuente",
     "fontCompact": "Compacto",
     "fontDefault": "Estándar",
-    "fontLarge": "Grande"
+    "fontLarge": "Grande",
+    "fontFamily": "Fuente"
   },
   "profileMenu": {
     "profile": "Perfil",

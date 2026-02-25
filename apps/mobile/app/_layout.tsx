@@ -10,7 +10,7 @@ import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar, ScalePress, SearchModal } from '@mvp/ui'
 import { AnimatePresence, MotiView } from 'moti'
-import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag, applyRadiusScale, applyCardStyle, getFontZoom } from '@mvp/template-config'
+import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag, applyRadiusScale, applyCardStyle, applyFontFamily, getFontZoom } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n, useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
@@ -675,6 +675,7 @@ export default function RootLayout() {
   const templateCustomColor = useTemplateConfigStore((s) => s.customColor)
   const templateRadiusScale = useTemplateConfigStore((s) => s.radiusScale)
   const templateCardStyle = useTemplateConfigStore((s) => s.cardStyle)
+  const templateFontFamily = useTemplateConfigStore((s) => s.fontFamily)
 
   useLayoutEffect(() => {
     if (Platform.OS === 'web') {
@@ -685,8 +686,9 @@ export default function RootLayout() {
       }
       applyRadiusScale(templateRadiusScale)
       applyCardStyle(templateCardStyle)
+      applyFontFamily(templateFontFamily)
     }
-  }, [resolvedTheme, templateColorScheme, templateCustomColor, templateRadiusScale, templateCardStyle])
+  }, [resolvedTheme, templateColorScheme, templateCustomColor, templateRadiusScale, templateCardStyle, templateFontFamily])
 
   const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 

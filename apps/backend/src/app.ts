@@ -46,7 +46,9 @@ export async function buildApp() {
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
   await app.register(cors, {
-    origin: env.NODE_ENV === 'development' ? true : env.CORS_ORIGIN,
+    origin: env.NODE_ENV === 'development'
+      ? ['http://localhost:8081', 'http://localhost:3000', 'http://localhost:19006']
+      : env.CORS_ORIGIN,
     credentials: true,
   })
 
@@ -58,32 +60,34 @@ export async function buildApp() {
     keyGenerator: (request) => request.ip,
   })
 
-  // Documentation
-  await app.register(swagger, {
-    openapi: {
-      info: {
-        title: 'MVP Template API',
-        version: '1.0.0',
-        description: 'API documentation for MVP Template',
-      },
-      servers: [
-        { url: `http://${env.HOST}:${env.PORT}`, description: 'Development' },
-      ],
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
+  // Documentation (development only — disabled in production)
+  if (env.NODE_ENV !== 'production') {
+    await app.register(swagger, {
+      openapi: {
+        info: {
+          title: 'MVP Template API',
+          version: '1.0.0',
+          description: 'API documentation for MVP Template',
+        },
+        servers: [
+          { url: `http://${env.HOST}:${env.PORT}`, description: 'Development' },
+        ],
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+            },
           },
         },
       },
-    },
-  })
-  await app.register(swaggerUi, {
-    routePrefix: '/docs',
-    uiConfig: { docExpansion: 'list' },
-  })
+    })
+    await app.register(swaggerUi, {
+      routePrefix: '/docs',
+      uiConfig: { docExpansion: 'list' },
+    })
+  }
 
   // File uploads
   await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024 } })
