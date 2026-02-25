@@ -534,6 +534,17 @@
     "placementSidebar": "In Sidebar",
     "placementHeader": "In Header",
     "placementBoth": "Both",
-    "placementNowhere": "Nowhere"
+    "placementNowhere": "Nowhere",
+    "language": "Language",
+    "headerNavAlign": "Tab Alignment",
+    "alignLeft": "Left",
+    "alignCenter": "Center",
+    "alignRight": "Right",
+    "compactProfile": "Compact Profile"
+  },
+  "profileMenu": {
+    "profile": "Profile",
+    "theme": "Theme",
+    "language": "Language"
   }
 }

@@ -538,6 +538,17 @@
     "placementSidebar": "サイドバーに",
     "placementHeader": "ヘッダーに",
     "placementBoth": "両方",
-    "placementNowhere": "なし"
+    "placementNowhere": "なし",
+    "language": "言語",
+    "headerNavAlign": "タブ配置",
+    "alignLeft": "左",
+    "alignCenter": "中央",
+    "alignRight": "右",
+    "compactProfile": "コンパクトプロフィール"
+  },
+  "profileMenu": {
+    "profile": "プロフィール",
+    "theme": "テーマ",
+    "language": "言語"
   }
 }

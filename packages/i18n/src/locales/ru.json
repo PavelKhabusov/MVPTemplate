@@ -534,6 +534,17 @@
     "placementSidebar": "В сайдбаре",
     "placementHeader": "В хедере",
     "placementBoth": "Оба",
-    "placementNowhere": "Нигде"
+    "placementNowhere": "Нигде",
+    "language": "Язык",
+    "headerNavAlign": "Положение табов",
+    "alignLeft": "Слева",
+    "alignCenter": "По центру",
+    "alignRight": "Справа",
+    "compactProfile": "Компактный профиль"
+  },
+  "profileMenu": {
+    "profile": "Профиль",
+    "theme": "Тема",
+    "language": "Язык"
   }
 }
