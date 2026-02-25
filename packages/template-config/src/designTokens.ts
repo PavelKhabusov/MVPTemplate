@@ -1,5 +1,5 @@
 import { updateTheme } from '@tamagui/theme'
-import type { RadiusScale, FontScale, CardStyle } from './store'
+import type { RadiusScale, FontScale, FontFamily, CardStyle } from './store'
 
 const RADIUS_VALUES: Record<RadiusScale, { sm: number; md: number; lg: number }> = {
   sharp:   { sm: 2, md: 4, lg: 6 },
