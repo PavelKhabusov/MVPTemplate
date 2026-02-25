@@ -233,9 +233,9 @@ function WebRootLayout() {
             onNavigate={(href) => router.push(href as any)}
           />
         )}
+        {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
       </XStack>
       <CookieBanner />
-      {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
     </YStack>
   )
 }
