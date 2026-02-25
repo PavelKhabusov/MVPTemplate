@@ -442,7 +442,6 @@ function WebRootLayout() {
   const languagePlacement = useTemplateConfigStore((s) => s.languagePlacement)
   const themePlacement = useTemplateConfigStore((s) => s.themePlacement)
   const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
-  const contentMaxWidth = useTemplateConfigStore((s) => s.contentMaxWidth)
   const [searchOpen, setSearchOpen] = useState(false)
 
   const showHeader = webLayout === 'header' || webLayout === 'both'
@@ -528,7 +527,7 @@ function WebRootLayout() {
           />
         )}
         <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
-          <YStack width="100%" maxWidth={contentMaxWidth} marginHorizontal="auto" flex={1}>
+          <YStack width="100%" maxWidth={1200} marginHorizontal="auto" flex={1}>
             <Slot />
           </YStack>
         </YStack>

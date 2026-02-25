@@ -20,7 +20,6 @@ interface TemplateConfigState {
   languagePlacement: ItemPlacement
   themePlacement: ItemPlacement
   searchPlacement: SearchPlacement
-  contentMaxWidth: number
   setSidebarOpen: (open: boolean) => void
   setFlag: (key: string, value: boolean) => void
   setColorScheme: (key: string) => void
@@ -32,7 +31,6 @@ interface TemplateConfigState {
   setLanguagePlacement: (placement: ItemPlacement) => void
   setThemePlacement: (placement: ItemPlacement) => void
   setSearchPlacement: (placement: SearchPlacement) => void
-  setContentMaxWidth: (width: number) => void
   resetAll: () => void
 }
 
@@ -50,7 +48,6 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       languagePlacement: 'nowhere',
       themePlacement: 'nowhere',
       searchPlacement: 'nowhere',
-      contentMaxWidth: 1200,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setFlag: (key, value) =>
         set((state) => ({
@@ -65,8 +62,7 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       setLanguagePlacement: (placement) => set({ languagePlacement: placement }),
       setThemePlacement: (placement) => set({ themePlacement: placement }),
       setSearchPlacement: (placement) => set({ searchPlacement: placement }),
-      setContentMaxWidth: (width) => set({ contentMaxWidth: width }),
-      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false, languagePlacement: 'nowhere', themePlacement: 'nowhere', searchPlacement: 'nowhere', contentMaxWidth: 1200 }),
+      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false, languagePlacement: 'nowhere', themePlacement: 'nowhere', searchPlacement: 'nowhere' }),
     }),
     {
       name: 'template-config',
@@ -82,7 +78,6 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
         languagePlacement: state.languagePlacement,
         themePlacement: state.themePlacement,
         searchPlacement: state.searchPlacement,
-        contentMaxWidth: state.contentMaxWidth,
       }),
     },
   ),

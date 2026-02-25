@@ -543,9 +543,7 @@
     "compactProfile": "Perfil compacto",
     "languagePlacement": "Posición del idioma",
     "themePlacement": "Posición del tema",
-    "searchPlacement": "Barra de búsqueda",
-    "contentMaxWidth": "Ancho del contenido",
-    "contentFullWidth": "Ancho completo"
+    "searchPlacement": "Barra de búsqueda"
   },
   "profileMenu": {
     "profile": "Perfil",

@@ -543,9 +543,7 @@
     "compactProfile": "Компактный профиль",
     "languagePlacement": "Позиция языка",
     "themePlacement": "Позиция темы",
-    "searchPlacement": "Панель поиска",
-    "contentMaxWidth": "Ширина контента",
-    "contentFullWidth": "На всю ширину"
+    "searchPlacement": "Панель поиска"
   },
   "profileMenu": {
     "profile": "Профиль",

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Platform, Pressable, TextInput } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
@@ -25,14 +25,18 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
     }
   }, [open])
 
-  // Close on Escape
+  // Close on Escape (capture phase to fire before TextInput)
   useEffect(() => {
     if (Platform.OS !== 'web' || !open) return
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+        onClose()
+      }
     }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    window.addEventListener('keydown', handler, true)
+    return () => window.removeEventListener('keydown', handler, true)
   }, [open, onClose])
 
   useEffect(() => {

@@ -238,8 +238,6 @@ export function TemplateConfigSidebar() {
   const setThemePlacement = useTemplateConfigStore((s) => s.setThemePlacement)
   const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
   const setSearchPlacement = useTemplateConfigStore((s) => s.setSearchPlacement)
-  const contentMaxWidth = useTemplateConfigStore((s) => s.contentMaxWidth)
-  const setContentMaxWidth = useTemplateConfigStore((s) => s.setContentMaxWidth)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
@@ -256,7 +254,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere' || contentMaxWidth !== 1200
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere'
 
   return (
     <YStack
@@ -502,19 +500,6 @@ export function TemplateConfigSidebar() {
                   ]
             }
             onChange={setSearchPlacement}
-          />
-          <SelectRow<string>
-            icon="resize-outline"
-            label={t('templateConfig.contentMaxWidth')}
-            value={String(contentMaxWidth)}
-            options={[
-              { value: '800', label: '800px' },
-              { value: '1000', label: '1000px' },
-              { value: '1200', label: '1200px' },
-              { value: '1400', label: '1400px' },
-              { value: '9999', label: t('templateConfig.contentFullWidth') },
-            ]}
-            onChange={(v) => setContentMaxWidth(Number(v))}
           />
         </YStack>
 

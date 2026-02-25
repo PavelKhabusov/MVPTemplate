@@ -547,9 +547,7 @@
     "compactProfile": "コンパクトプロフィール",
     "languagePlacement": "言語の位置",
     "themePlacement": "テーマの位置",
-    "searchPlacement": "検索バー",
-    "contentMaxWidth": "コンテンツ幅",
-    "contentFullWidth": "全幅"
+    "searchPlacement": "検索バー"
   },
   "profileMenu": {
     "profile": "プロフィール",
