@@ -8,8 +8,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider } from '@mvp/ui'
-import { TemplateConfigSidebar, TemplateConfigButton, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
+import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar } from '@mvp/ui'
+import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -168,6 +168,33 @@ function ThemeToggle({ collapsed }: { collapsed: boolean }) {
   )
 }
 
+function UserBadge({ collapsed }: { collapsed: boolean }) {
+  const user = useAuthStore((s) => s.user)
+  if (!user) return null
+
+  return (
+    <XStack
+      alignItems="center"
+      justifyContent={collapsed ? 'center' : 'flex-start'}
+      gap="$2"
+      paddingVertical="$2"
+      paddingHorizontal="$3"
+      borderRadius="$3"
+      hoverStyle={{ backgroundColor: '$backgroundHover' }}
+      cursor="pointer"
+      onPress={() => router.push('/settings' as any)}
+    >
+      <AppAvatar uri={user.avatarUrl} name={user.name} size={collapsed ? 28 : 32} />
+      {!collapsed && (
+        <YStack flex={1}>
+          <Text color="$color" fontSize="$2" fontWeight="600" numberOfLines={1}>{user.name}</Text>
+          <Text color="$mutedText" fontSize={11} numberOfLines={1}>{user.email}</Text>
+        </YStack>
+      )}
+    </XStack>
+  )
+}
+
 function WebRootLayout() {
   const { t } = useTranslation()
   const pathname = usePathname()
@@ -175,11 +202,11 @@ function WebRootLayout() {
   const isAdmin = user?.role === 'admin'
   const isMobile = useIsMobileWeb()
   const webLayout = useTemplateConfigStore((s) => s.webLayout)
-  const configPlacement = useTemplateConfigStore((s) => s.configPlacement)
+  const userBadgePlacement = useTemplateConfigStore((s) => s.userBadgePlacement)
   const showHeader = webLayout === 'header' || webLayout === 'both'
   const showSidebar = webLayout === 'sidebar' || webLayout === 'both'
-  const showConfigInSidebar = configPlacement === 'sidebar' || configPlacement === 'both'
-  const showConfigInHeader = configPlacement === 'header' || configPlacement === 'both'
+  const showBadgeInSidebar = userBadgePlacement === 'sidebar' || userBadgePlacement === 'both'
+  const showBadgeInHeader = userBadgePlacement === 'header' || userBadgePlacement === 'both'
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
@@ -211,8 +238,8 @@ function WebRootLayout() {
           title="MVP Template"
           rightContent={
             <>
-              {isTemplateConfigEnabled && isAdmin && showConfigInHeader && <TemplateConfigButton />}
               <ThemeToggle collapsed={false} />
+              {showBadgeInHeader && <UserBadge collapsed={false} />}
             </>
           }
         />
@@ -223,7 +250,12 @@ function WebRootLayout() {
             items={navItems}
             currentPath={pathname}
             onNavigate={(href) => router.push(href as any)}
-            footer={(collapsed) => <ThemeToggle collapsed={collapsed} />}
+            footer={(collapsed) => (
+              <>
+                {showBadgeInSidebar && <UserBadge collapsed={collapsed} />}
+                <ThemeToggle collapsed={collapsed} />
+              </>
+            )}
             logo={require('../assets/icon.png')}
             title="MVP Template"
           />
@@ -239,7 +271,7 @@ function WebRootLayout() {
             onNavigate={(href) => router.push(href as any)}
           />
         )}
-        {isTemplateConfigEnabled && isAdmin && (showConfigInSidebar || showConfigInHeader) && <TemplateConfigSidebar />}
+        {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
       </XStack>
       <CookieBanner />
     </YStack>

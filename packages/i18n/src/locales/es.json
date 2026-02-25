@@ -530,7 +530,7 @@
     "layoutSidebar": "Barra lateral",
     "layoutHeader": "Encabezado",
     "layoutBoth": "Ambos",
-    "configPlacement": "Panel de config",
+    "userBadge": "Tarjeta de usuario",
     "placementSidebar": "En barra lateral",
     "placementHeader": "En encabezado",
     "placementBoth": "Ambos",

@@ -530,7 +530,7 @@
     "layoutSidebar": "Sidebar",
     "layoutHeader": "Header",
     "layoutBoth": "Both",
-    "configPlacement": "Config Panel",
+    "userBadge": "User Badge",
     "placementSidebar": "In Sidebar",
     "placementHeader": "In Header",
     "placementBoth": "Both",

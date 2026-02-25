@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { mmkvStorage } from '@mvp/lib'
 
 export type WebLayout = 'sidebar' | 'header' | 'both'
-export type ConfigPlacement = 'sidebar' | 'header' | 'nowhere' | 'both'
+export type UserBadgePlacement = 'sidebar' | 'header' | 'nowhere' | 'both'
 
 interface TemplateConfigState {
   sidebarOpen: boolean
@@ -11,13 +11,13 @@ interface TemplateConfigState {
   colorScheme: string | null
   customColor: string | null
   webLayout: WebLayout
-  configPlacement: ConfigPlacement
+  userBadgePlacement: UserBadgePlacement
   setSidebarOpen: (open: boolean) => void
   setFlag: (key: string, value: boolean) => void
   setColorScheme: (key: string) => void
   setCustomColor: (hex: string | null) => void
   setWebLayout: (layout: WebLayout) => void
-  setConfigPlacement: (placement: ConfigPlacement) => void
+  setUserBadgePlacement: (placement: UserBadgePlacement) => void
   resetAll: () => void
 }
 
@@ -29,7 +29,7 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       colorScheme: null,
       customColor: null,
       webLayout: 'sidebar',
-      configPlacement: 'sidebar',
+      userBadgePlacement: 'sidebar',
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setFlag: (key, value) =>
         set((state) => ({
@@ -38,8 +38,8 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       setColorScheme: (key) => set({ colorScheme: key, customColor: null }),
       setCustomColor: (hex) => set({ customColor: hex, colorScheme: null }),
       setWebLayout: (layout) => set({ webLayout: layout }),
-      setConfigPlacement: (placement) => set({ configPlacement: placement }),
-      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', configPlacement: 'sidebar' }),
+      setUserBadgePlacement: (placement) => set({ userBadgePlacement: placement }),
+      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar' }),
     }),
     {
       name: 'template-config',
@@ -49,7 +49,7 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
         colorScheme: state.colorScheme,
         customColor: state.customColor,
         webLayout: state.webLayout,
-        configPlacement: state.configPlacement,
+        userBadgePlacement: state.userBadgePlacement,
       }),
     },
   ),

@@ -7,7 +7,7 @@ import { useTranslation } from '@mvp/i18n'
 import { useIsMobileWeb } from '@mvp/ui'
 import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
-import type { WebLayout, ConfigPlacement } from './store'
+import type { WebLayout, UserBadgePlacement } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
 import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
@@ -190,8 +190,8 @@ export function TemplateConfigSidebar() {
   const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
   const webLayout = useTemplateConfigStore((s) => s.webLayout)
   const setWebLayout = useTemplateConfigStore((s) => s.setWebLayout)
-  const configPlacement = useTemplateConfigStore((s) => s.configPlacement)
-  const setConfigPlacement = useTemplateConfigStore((s) => s.setConfigPlacement)
+  const userBadgePlacement = useTemplateConfigStore((s) => s.userBadgePlacement)
+  const setUserBadgePlacement = useTemplateConfigStore((s) => s.setUserBadgePlacement)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
@@ -207,7 +207,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || configPlacement !== 'sidebar'
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar'
 
   return (
     <YStack
@@ -324,10 +324,10 @@ export function TemplateConfigSidebar() {
             ]}
             onChange={setWebLayout}
           />
-          <SelectRow<ConfigPlacement>
-            icon="construct-outline"
-            label={t('templateConfig.configPlacement')}
-            value={configPlacement}
+          <SelectRow<UserBadgePlacement>
+            icon="person-outline"
+            label={t('templateConfig.userBadge')}
+            value={userBadgePlacement}
             options={
               webLayout === 'sidebar'
                 ? [
@@ -346,7 +346,7 @@ export function TemplateConfigSidebar() {
                     { value: 'nowhere', label: t('templateConfig.placementNowhere') },
                   ]
             }
-            onChange={setConfigPlacement}
+            onChange={setUserBadgePlacement}
           />
         </YStack>
 
