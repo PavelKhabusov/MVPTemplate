@@ -59,6 +59,83 @@ export function applyCardStyle(style: CardStyle) {
   }
 }
 
+// Font family definitions
+const FONT_FAMILY_CONFIG: Record<FontFamily, { label: string; googleUrl: string | null; cssStack: string }> = {
+  system: {
+    label: 'System',
+    googleUrl: null,
+    cssStack: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  },
+  inter: {
+    label: 'Inter',
+    googleUrl: null, // already bundled via @tamagui/font-inter
+    cssStack: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  roboto: {
+    label: 'Roboto',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap',
+    cssStack: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  'open-sans': {
+    label: 'Open Sans',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap',
+    cssStack: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  nunito: {
+    label: 'Nunito',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap',
+    cssStack: '"Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  'dm-sans': {
+    label: 'DM Sans',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap',
+    cssStack: '"DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  'space-grotesk': {
+    label: 'Space Grotesk',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap',
+    cssStack: '"Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  montserrat: {
+    label: 'Montserrat',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap',
+    cssStack: '"Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+}
+
+export { FONT_FAMILY_CONFIG }
+
+export function applyFontFamily(family: FontFamily) {
+  if (typeof document === 'undefined') return
+
+  const config = FONT_FAMILY_CONFIG[family]
+
+  // Manage Google Fonts <link> tag
+  const linkId = 'mvp-google-font-link'
+  let linkEl = document.getElementById(linkId) as HTMLLinkElement | null
+  if (config.googleUrl) {
+    if (!linkEl) {
+      linkEl = document.createElement('link')
+      linkEl.id = linkId
+      linkEl.rel = 'stylesheet'
+      document.head.appendChild(linkEl)
+    }
+    linkEl.href = config.googleUrl
+  } else {
+    linkEl?.remove()
+  }
+
+  // Apply font-family via CSS injection
+  const styleId = 'mvp-font-family-css'
+  let styleEl = document.getElementById(styleId) as HTMLStyleElement | null
+  if (!styleEl) {
+    styleEl = document.createElement('style')
+    styleEl.id = styleId
+    document.head.appendChild(styleEl)
+  }
+  styleEl.textContent = `body, body * { font-family: ${config.cssStack} !important; }`
+}
+
 const FONT_ZOOM: Record<FontScale, number> = {
   compact: 0.92,
   default: 1,

@@ -9,11 +9,11 @@ import { useIsMobileWeb } from '@mvp/ui'
 import { useCookieConsentStore, useThemeStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
-import type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, SearchPlacement, RadiusScale, FontScale, CardStyle } from './store'
+import type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, SearchPlacement, RadiusScale, FontScale, FontFamily, CardStyle } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
 import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
-import { applyRadiusScale, applyCardStyle } from './designTokens'
+import { applyRadiusScale, applyCardStyle, applyFontFamily, FONT_FAMILY_CONFIG } from './designTokens'
 
 function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value: boolean; onToggle: () => void; action?: { label: string; onPress: () => void } }) {
   const theme = useTheme()
