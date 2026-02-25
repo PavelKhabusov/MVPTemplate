@@ -133,7 +133,10 @@ export function applyFontFamily(family: FontFamily) {
     styleEl.id = styleId
     document.head.appendChild(styleEl)
   }
-  styleEl.textContent = `body, body * { font-family: ${config.cssStack} !important; }`
+  // Exclude icon font elements (Ionicons, MaterialIcons, etc.) — they rely on fontFamily for glyph rendering
+  const iconFonts = ['Ionicons', 'MaterialIcons', 'FontAwesome', 'AntDesign', 'Feather', 'Entypo', 'EvilIcons', 'Foundation', 'MaterialCommunityIcons', 'Octicons', 'SimpleLineIcons', 'Zocial']
+  const notSelectors = iconFonts.map((f) => `:not([style*="${f}"])`).join('')
+  styleEl.textContent = `body { font-family: ${config.cssStack}; } body *${notSelectors} { font-family: ${config.cssStack} !important; }`
 }
 
 const FONT_ZOOM: Record<FontScale, number> = {

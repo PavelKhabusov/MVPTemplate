@@ -124,13 +124,12 @@ export class StorageService {
     }
   }
 
-  getPublicUrl(key: string, request: FastifyRequest): string {
+  getPublicUrl(key: string, _request: FastifyRequest): string {
     if (this.storageType === 's3' && this.s3PublicUrl) {
       return `${this.s3PublicUrl.replace(/\/$/, '')}/${key}`
     }
 
-    const host = request.headers.host ?? `${env.HOST}:${env.PORT}`
-    return `${request.protocol}://${host}/uploads/${key}`
+    return `${env.APP_URL}/uploads/${key}`
   }
 
   async s3Exists(key: string): Promise<boolean> {

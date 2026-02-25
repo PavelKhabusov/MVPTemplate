@@ -148,14 +148,8 @@ export const authService = {
     const tokenHash = hashToken(token)
     const stored = await authRepository.findEmailVerificationToken(tokenHash)
 
-    if (!stored) {
-      throw AppError.badRequest('Invalid verification token')
-    }
-    if (stored.verifiedAt) {
-      throw AppError.badRequest('Email already verified')
-    }
-    if (stored.expiresAt < new Date()) {
-      throw AppError.badRequest('Verification token has expired')
+    if (!stored || stored.verifiedAt || stored.expiresAt < new Date()) {
+      throw AppError.badRequest('Invalid or expired verification token')
     }
 
     await authRepository.markEmailVerified(tokenHash, stored.userId)
