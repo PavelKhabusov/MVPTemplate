@@ -49,9 +49,7 @@ const ENV_GROUPS = {
   },
 } as const
 
-const ALL_ALLOWED_KEYS: string[] = Object.values(ENV_GROUPS).flatMap((g) => [...g.keys])
-
-const updateEnvSchema = z.record(z.string(), z.union([z.string(), z.boolean(), z.null()]))
+const ALL_ENV_KEYS: string[] = Object.values(ENV_GROUPS).flatMap((g) => [...g.keys])
 
 export async function adminRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate)
@@ -95,8 +93,11 @@ export async function adminRoutes(app: FastifyInstance) {
     })
   })
 
-  // GET /api/admin/env — read current .env values (only allowed keys)
+  // GET /api/admin/env — read current .env values (only allowed keys, disabled in production)
   app.get('/env', async (_request, reply) => {
+    if (env.NODE_ENV === 'production') {
+      throw AppError.forbidden('Environment configuration is not accessible via API in production')
+    }
     try {
       const envPath = getEnvFilePath()
       const { values } = parseEnvFile(envPath)
@@ -115,46 +116,6 @@ export async function adminRoutes(app: FastifyInstance) {
       return sendSuccess(reply, result)
     } catch (err: any) {
       throw AppError.internal('Failed to read environment file')
-    }
-  })
-
-  // PATCH /api/admin/env — update .env values
-  app.patch('/env', async (request, reply) => {
-    try {
-      const body = updateEnvSchema.parse(request.body)
-
-      // Filter to only allowed keys
-      const filtered: Record<string, string | boolean | null> = {}
-      for (const [key, value] of Object.entries(body)) {
-        if (ALL_ALLOWED_KEYS.includes(key)) {
-          filtered[key] = value
-        }
-      }
-
-      if (Object.keys(filtered).length === 0) {
-        throw AppError.badRequest('No valid environment keys provided')
-      }
-
-      const envPath = getEnvFilePath()
-      updateEnvFile(envPath, filtered)
-
-      // Re-read and return updated state
-      const { values } = parseEnvFile(envPath)
-      const result: Record<string, Record<string, { value: string | null; type: string }>> = {}
-      for (const [group, config] of Object.entries(ENV_GROUPS)) {
-        result[group] = {}
-        for (const key of config.keys) {
-          result[group][key] = {
-            value: key in values ? values[key] : null,
-            type: config.types[key] || 'string',
-          }
-        }
-      }
-
-      return sendSuccess(reply, result)
-    } catch (err: any) {
-      if (err instanceof AppError) throw err
-      throw AppError.internal('Failed to update environment file')
     }
   })
 }

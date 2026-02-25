@@ -791,7 +791,7 @@ export function TemplateConfigSidebar() {
         {/* Reset Button */}
         {hasOverrides && (
           <YStack paddingHorizontal="$3" marginTop="$3">
-            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY); applyRadiusScale('default'); applyCardStyle('elevated') }}>
+            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY); applyRadiusScale('default'); applyCardStyle('elevated'); applyFontFamily('inter') }}>
               <XStack
                 alignItems="center"
                 justifyContent="center"
