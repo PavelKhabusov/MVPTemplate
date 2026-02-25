@@ -525,7 +525,15 @@
     "customColor": "Свой цвет",
     "customColorPlaceholder": "Введите hex цвет",
     "payments": "Платежи",
-    "webHeader": "Веб-хедер",
-    "webSidebar": "Веб-сайдбар"
+    "layoutSection": "Макет",
+    "webLayout": "Веб-макет",
+    "layoutSidebar": "Сайдбар",
+    "layoutHeader": "Хедер",
+    "layoutBoth": "Оба",
+    "configPlacement": "Панель настроек",
+    "placementSidebar": "В сайдбаре",
+    "placementHeader": "В хедере",
+    "placementBoth": "Оба",
+    "placementNowhere": "Нигде"
   }
 }

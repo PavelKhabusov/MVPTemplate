@@ -9,7 +9,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider } from '@mvp/ui'
-import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
+import { TemplateConfigSidebar, TemplateConfigButton, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n } from '@mvp/i18n'
@@ -174,11 +174,12 @@ function WebRootLayout() {
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin'
   const isMobile = useIsMobileWeb()
-  const showHeader = useTemplateFlag('webHeader', false)
-  const showSidebar = useTemplateFlag('webSidebar', true)
-
-  // Fallback: if both OFF, show sidebar
-  const effectiveSidebar = !showHeader && !showSidebar ? true : showSidebar
+  const webLayout = useTemplateConfigStore((s) => s.webLayout)
+  const configPlacement = useTemplateConfigStore((s) => s.configPlacement)
+  const showHeader = webLayout === 'header' || webLayout === 'both'
+  const showSidebar = webLayout === 'sidebar' || webLayout === 'both'
+  const showConfigInSidebar = configPlacement === 'sidebar' || configPlacement === 'both'
+  const showConfigInHeader = configPlacement === 'header' || configPlacement === 'both'
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
@@ -208,11 +209,16 @@ function WebRootLayout() {
           onNavigate={(href) => router.push(href as any)}
           logo={require('../assets/icon.png')}
           title="MVP Template"
-          rightContent={<ThemeToggle collapsed={false} />}
+          rightContent={
+            <>
+              {isTemplateConfigEnabled && isAdmin && showConfigInHeader && <TemplateConfigButton />}
+              <ThemeToggle collapsed={false} />
+            </>
+          }
         />
       )}
       <XStack flex={1} style={{ overflow: 'hidden' } as any}>
-        {effectiveSidebar && (
+        {showSidebar && (
           <WebSidebar
             items={navItems}
             currentPath={pathname}
@@ -226,14 +232,14 @@ function WebRootLayout() {
           <Slot />
         </YStack>
         {/* Mobile bottom tabs when sidebar is off but header is on */}
-        {!effectiveSidebar && isMobile && (
+        {!showSidebar && isMobile && (
           <WebSidebar
             items={navItems}
             currentPath={pathname}
             onNavigate={(href) => router.push(href as any)}
           />
         )}
-        {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
+        {isTemplateConfigEnabled && isAdmin && (showConfigInSidebar || showConfigInHeader) && <TemplateConfigSidebar />}
       </XStack>
       <CookieBanner />
     </YStack>

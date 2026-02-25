@@ -22,6 +22,4 @@ export const TEMPLATE_FLAGS: TemplateFlag[] = [
   { key: 'docFeedback', labelKey: 'templateConfig.docFeedback', icon: 'chatbubble-outline', defaultValue: true, scope: 'both' },
   { key: 'pushNotifications', labelKey: 'templateConfig.pushNotifications', icon: 'notifications-outline', defaultValue: false, scope: 'backend', envVar: 'EXPO_ACCESS_TOKEN', envType: 'secret' },
   { key: 'payments', labelKey: 'templateConfig.payments', icon: 'card-outline', defaultValue: false, scope: 'both', envVar: 'PAYMENTS_ENABLED', envType: 'boolean' },
-  { key: 'webHeader', labelKey: 'templateConfig.webHeader', icon: 'menu-outline', defaultValue: false, scope: 'frontend' },
-  { key: 'webSidebar', labelKey: 'templateConfig.webSidebar', icon: 'grid-outline', defaultValue: true, scope: 'frontend' },
 ]

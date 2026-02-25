@@ -17,6 +17,7 @@
     "react-native-reanimated": "*",
     "react-native-marked": "*",
     "@mvp/i18n": "*",
+    "@mvp/store": "*",
     "@mvp/ui": "*"
   }
 }

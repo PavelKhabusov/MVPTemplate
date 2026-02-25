@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Platform, ScrollView, Pressable } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
@@ -7,6 +7,7 @@ import { useTranslation } from '@mvp/i18n'
 import { useIsMobileWeb } from '@mvp/ui'
 import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
+import type { WebLayout, ConfigPlacement } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
 import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
@@ -76,6 +77,87 @@ function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value:
   )
 }
 
+function SelectRow<T extends string>({
+  icon,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  icon: keyof typeof Ionicons.glyphMap
+  label: string
+  value: T
+  options: { value: T; label: string }[]
+  onChange: (value: T) => void
+}) {
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+
+  const selectedLabel = options.find((o) => o.value === value)?.label ?? value
+
+  return (
+    <YStack>
+      <Pressable onPress={() => setOpen(!open)}>
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          paddingHorizontal="$3"
+          paddingVertical="$2"
+          hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+        >
+          <XStack alignItems="center" gap="$2" flex={1}>
+            <Ionicons name={icon} size={16} color={theme.accent.val} />
+            <Text fontSize="$2" color="$color" flex={1} numberOfLines={1}>
+              {label}
+            </Text>
+          </XStack>
+          <XStack alignItems="center" gap="$1">
+            <Text fontSize="$2" color="$mutedText">{selectedLabel}</Text>
+            <Ionicons
+              name={open ? 'chevron-up' : 'chevron-down'}
+              size={14}
+              color={theme.mutedText.val}
+            />
+          </XStack>
+        </XStack>
+      </Pressable>
+      {open && (
+        <YStack paddingLeft="$6" paddingRight="$3" paddingBottom="$1">
+          {options.map((opt) => (
+            <Pressable
+              key={opt.value}
+              onPress={() => { onChange(opt.value); setOpen(false) }}
+            >
+              <XStack
+                alignItems="center"
+                gap="$2"
+                paddingVertical="$1.5"
+                paddingHorizontal="$2"
+                borderRadius="$2"
+                backgroundColor={value === opt.value ? '$backgroundHover' : 'transparent'}
+                hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+              >
+                <Ionicons
+                  name={value === opt.value ? 'radio-button-on' : 'radio-button-off'}
+                  size={14}
+                  color={value === opt.value ? theme.accent.val : theme.mutedText.val}
+                />
+                <Text
+                  fontSize="$2"
+                  color={value === opt.value ? '$color' : '$mutedText'}
+                  fontWeight={value === opt.value ? '600' : '400'}
+                >
+                  {opt.label}
+                </Text>
+              </XStack>
+            </Pressable>
+          ))}
+        </YStack>
+      )}
+    </YStack>
+  )
+}
+
 function buildThemeOutput(schemeKey: string | null): string | null {
   if (!schemeKey || schemeKey === DEFAULT_SCHEME_KEY) return null
   const scheme = COLOR_SCHEMES.find((s) => s.key === schemeKey)
@@ -106,6 +188,10 @@ export function TemplateConfigSidebar() {
   const setFlag = useTemplateConfigStore((s) => s.setFlag)
   const colorScheme = useTemplateConfigStore((s) => s.colorScheme)
   const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
+  const webLayout = useTemplateConfigStore((s) => s.webLayout)
+  const setWebLayout = useTemplateConfigStore((s) => s.setWebLayout)
+  const configPlacement = useTemplateConfigStore((s) => s.configPlacement)
+  const setConfigPlacement = useTemplateConfigStore((s) => s.setConfigPlacement)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
@@ -121,7 +207,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || configPlacement !== 'sidebar'
 
   return (
     <YStack
@@ -213,6 +299,56 @@ export function TemplateConfigSidebar() {
             )
           })}
         </XStack>
+
+        {/* Web Layout */}
+        <Text
+          fontSize={11}
+          fontWeight="700"
+          color="$mutedText"
+          textTransform="uppercase"
+          letterSpacing={1}
+          paddingHorizontal="$3"
+          marginBottom="$1"
+        >
+          {t('templateConfig.layoutSection')}
+        </Text>
+        <YStack marginBottom="$3">
+          <SelectRow<WebLayout>
+            icon="browsers-outline"
+            label={t('templateConfig.webLayout')}
+            value={webLayout}
+            options={[
+              { value: 'sidebar', label: t('templateConfig.layoutSidebar') },
+              { value: 'header', label: t('templateConfig.layoutHeader') },
+              { value: 'both', label: t('templateConfig.layoutBoth') },
+            ]}
+            onChange={setWebLayout}
+          />
+          <SelectRow<ConfigPlacement>
+            icon="construct-outline"
+            label={t('templateConfig.configPlacement')}
+            value={configPlacement}
+            options={
+              webLayout === 'sidebar'
+                ? [
+                    { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                    { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                  ]
+                : webLayout === 'header'
+                ? [
+                    { value: 'header', label: t('templateConfig.placementHeader') },
+                    { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                  ]
+                : [
+                    { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                    { value: 'header', label: t('templateConfig.placementHeader') },
+                    { value: 'both', label: t('templateConfig.placementBoth') },
+                    { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                  ]
+            }
+            onChange={setConfigPlacement}
+          />
+        </YStack>
 
         {/* Frontend Flags */}
         <Text

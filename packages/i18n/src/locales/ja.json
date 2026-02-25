@@ -529,7 +529,15 @@
     "customColor": "カスタムカラー",
     "customColorPlaceholder": "Hexカラーを入力",
     "payments": "決済",
-    "webHeader": "Webヘッダー",
-    "webSidebar": "Webサイドバー"
+    "layoutSection": "レイアウト",
+    "webLayout": "Webレイアウト",
+    "layoutSidebar": "サイドバー",
+    "layoutHeader": "ヘッダー",
+    "layoutBoth": "両方",
+    "configPlacement": "設定パネル",
+    "placementSidebar": "サイドバーに",
+    "placementHeader": "ヘッダーに",
+    "placementBoth": "両方",
+    "placementNowhere": "なし"
   }
 }

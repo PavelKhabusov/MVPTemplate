@@ -525,7 +525,15 @@
     "customColor": "Custom Color",
     "customColorPlaceholder": "Enter hex color",
     "payments": "Payments",
-    "webHeader": "Web Header",
-    "webSidebar": "Web Sidebar"
+    "layoutSection": "Layout",
+    "webLayout": "Web Layout",
+    "layoutSidebar": "Sidebar",
+    "layoutHeader": "Header",
+    "layoutBoth": "Both",
+    "configPlacement": "Config Panel",
+    "placementSidebar": "In Sidebar",
+    "placementHeader": "In Header",
+    "placementBoth": "Both",
+    "placementNowhere": "Nowhere"
   }
 }
