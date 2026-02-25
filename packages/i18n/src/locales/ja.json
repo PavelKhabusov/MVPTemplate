@@ -528,6 +528,8 @@
     "schemeSlate": "スレート",
     "customColor": "カスタムカラー",
     "customColorPlaceholder": "Hexカラーを入力",
-    "payments": "決済"
+    "payments": "決済",
+    "webHeader": "Webヘッダー",
+    "webSidebar": "Webサイドバー"
   }
 }

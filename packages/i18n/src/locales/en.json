@@ -524,6 +524,8 @@
     "schemeSlate": "Slate",
     "customColor": "Custom Color",
     "customColorPlaceholder": "Enter hex color",
-    "payments": "Payments"
+    "payments": "Payments",
+    "webHeader": "Web Header",
+    "webSidebar": "Web Sidebar"
   }
 }

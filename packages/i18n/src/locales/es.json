@@ -524,6 +524,8 @@
     "schemeSlate": "Gris",
     "customColor": "Color personalizado",
     "customColorPlaceholder": "Introduce color hex",
-    "payments": "Pagos"
+    "payments": "Pagos",
+    "webHeader": "Encabezado web",
+    "webSidebar": "Barra lateral"
   }
 }

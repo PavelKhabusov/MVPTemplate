@@ -1,46 +1,148 @@
-import { XStack, Text, YStack } from 'tamagui'
-import { Platform } from 'react-native'
+import { Image, Platform } from 'react-native'
+import { XStack, YStack, Text, useTheme } from 'tamagui'
+import { Ionicons } from '@expo/vector-icons'
+import { useIsMobileWeb } from './WebSidebar'
 
-// Only rendered on web platform
-export function WebHeader() {
-  if (Platform.OS !== 'web') return null
+interface NavItem {
+  href: string
+  label: string
+  icon: keyof typeof Ionicons.glyphMap
+  iconFilled: keyof typeof Ionicons.glyphMap
+}
+
+interface WebHeaderProps {
+  items: NavItem[]
+  currentPath: string
+  onNavigate: (href: string) => void
+  logo?: any
+  title?: string
+  rightContent?: React.ReactNode
+}
+
+export function WebHeader({ items, currentPath, onNavigate, logo, title = 'MVP Template', rightContent }: WebHeaderProps) {
+  const theme = useTheme()
+  const isMobile = useIsMobileWeb()
+
+  if (Platform.OS !== 'web' || isMobile) return null
 
   return (
     <XStack
-      backgroundColor="$background"
+      backgroundColor="$sidebarBg"
       borderBottomWidth={1}
-      borderBottomColor="$borderColor"
+      borderBottomColor="$sidebarBorder"
       paddingHorizontal="$4"
-      paddingVertical="$3"
       alignItems="center"
       justifyContent="space-between"
       height={56}
+      style={{ position: 'sticky', top: 0, zIndex: 50, flexShrink: 0 } as any}
     >
-      <Text fontWeight="bold" fontSize="$5" color="$primary">
-        MVPTemplate
-      </Text>
+      {/* Left: Logo + Title */}
+      <XStack
+        alignItems="center"
+        gap="$3"
+        cursor="pointer"
+        hoverStyle={{ opacity: 0.8 }}
+        onPress={() => onNavigate('/landing')}
+      >
+        {logo ? (
+          <Image source={logo} style={{ width: 32, height: 32, borderRadius: 8 }} />
+        ) : (
+          <YStack
+            width={32}
+            height={32}
+            borderRadius={8}
+            alignItems="center"
+            justifyContent="center"
+            style={{
+              background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
+            }}
+          >
+            <Text color="white" fontWeight="bold" fontSize="$3">M</Text>
+          </YStack>
+        )}
+        <Text fontWeight="bold" fontSize="$4" color="$color" numberOfLines={1}>
+          {title}
+        </Text>
+      </XStack>
 
-      <XStack gap="$4" alignItems="center">
-        <NavLink href="/" label="Home" />
-        <NavLink href="/explore" label="Explore" />
-        <NavLink href="/profile" label="Profile" />
+      {/* Center: Navigation */}
+      <XStack gap="$1" alignItems="center" role="navigation" aria-label="Main navigation">
+        {items.map((item) => {
+          const isActive = currentPath === item.href ||
+            (item.href !== '/' && currentPath.startsWith(item.href))
+          return (
+            <HeaderNavItem
+              key={item.href}
+              item={item}
+              isActive={isActive}
+              onPress={() => onNavigate(item.href)}
+            />
+          )
+        })}
+      </XStack>
+
+      {/* Right: Custom content (ThemeToggle, avatar, etc.) */}
+      <XStack alignItems="center" gap="$3">
+        {rightContent}
       </XStack>
     </XStack>
   )
 }
 
-function NavLink({ href, label }: { href: string; label: string }) {
+function HeaderNavItem({
+  item,
+  isActive,
+  onPress,
+}: {
+  item: NavItem
+  isActive: boolean
+  onPress: () => void
+}) {
+  const theme = useTheme()
+
   return (
-    <Text
-      // @ts-expect-error — web-only tag prop
-      tag="a"
-      href={href}
-      color="$color"
-      fontSize="$3"
-      hoverStyle={{ color: '$primary' }}
+    <XStack
+      position="relative"
+      paddingVertical="$2"
+      paddingHorizontal="$3"
+      borderRadius="$3"
+      alignItems="center"
+      gap="$2"
+      backgroundColor={isActive ? '$backgroundHover' : 'transparent'}
+      hoverStyle={{ backgroundColor: '$backgroundHover' }}
       cursor="pointer"
+      onPress={onPress}
+      role="link"
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={item.label}
     >
-      {label}
-    </Text>
+      <Ionicons
+        name={isActive ? item.iconFilled : item.icon}
+        size={18}
+        color={isActive ? theme.accent.val : theme.mutedText.val}
+      />
+      <Text
+        color={isActive ? '$color' : '$mutedText'}
+        fontWeight={isActive ? '600' : '400'}
+        fontSize="$2"
+        numberOfLines={1}
+      >
+        {item.label}
+      </Text>
+      {/* Active indicator — bottom accent bar */}
+      {isActive && (
+        <YStack
+          position="absolute"
+          bottom={-1}
+          left={8}
+          right={8}
+          height={2}
+          borderRadius={1}
+          style={{
+            background: `linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
+          }}
+        />
+      )}
+    </XStack>
   )
 }

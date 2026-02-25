@@ -524,6 +524,8 @@
     "schemeSlate": "Серый",
     "customColor": "Свой цвет",
     "customColorPlaceholder": "Введите hex цвет",
-    "payments": "Платежи"
+    "payments": "Платежи",
+    "webHeader": "Веб-хедер",
+    "webSidebar": "Веб-сайдбар"
   }
 }

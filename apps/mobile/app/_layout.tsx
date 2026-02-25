@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar, useIsMobileWeb, CookieBanner, ToastProvider } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider } from '@mvp/ui'
 import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
@@ -174,6 +174,11 @@ function WebRootLayout() {
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin'
   const isMobile = useIsMobileWeb()
+  const showHeader = useTemplateFlag('webHeader', false)
+  const showSidebar = useTemplateFlag('webSidebar', true)
+
+  // Fallback: if both OFF, show sidebar
+  const effectiveSidebar = !showHeader && !showSidebar ? true : showSidebar
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
@@ -195,21 +200,43 @@ function WebRootLayout() {
   ]
 
   return (
-    <XStack flex={1} backgroundColor="$background" style={{ height: '100vh' } as any}>
-      <WebSidebar
-        items={navItems}
-        currentPath={pathname}
-        onNavigate={(href) => router.push(href as any)}
-        footer={(collapsed) => <ThemeToggle collapsed={collapsed} />}
-        logo={require('../assets/icon.png')}
-        title="MVP Template"
-      />
-      <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
-        <Slot />
-      </YStack>
+    <YStack flex={1} backgroundColor="$background" style={{ height: '100vh' } as any}>
+      {showHeader && !isMobile && (
+        <WebHeader
+          items={navItems}
+          currentPath={pathname}
+          onNavigate={(href) => router.push(href as any)}
+          logo={require('../assets/icon.png')}
+          title="MVP Template"
+          rightContent={<ThemeToggle collapsed={false} />}
+        />
+      )}
+      <XStack flex={1} style={{ overflow: 'hidden' } as any}>
+        {effectiveSidebar && (
+          <WebSidebar
+            items={navItems}
+            currentPath={pathname}
+            onNavigate={(href) => router.push(href as any)}
+            footer={(collapsed) => <ThemeToggle collapsed={collapsed} />}
+            logo={require('../assets/icon.png')}
+            title="MVP Template"
+          />
+        )}
+        <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
+          <Slot />
+        </YStack>
+        {/* Mobile bottom tabs when sidebar is off but header is on */}
+        {!effectiveSidebar && isMobile && (
+          <WebSidebar
+            items={navItems}
+            currentPath={pathname}
+            onNavigate={(href) => router.push(href as any)}
+          />
+        )}
+      </XStack>
       <CookieBanner />
       {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
-    </XStack>
+    </YStack>
   )
 }
 
