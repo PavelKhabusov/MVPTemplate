@@ -297,6 +297,8 @@ export function TemplateConfigSidebar() {
   const setRadiusScale = useTemplateConfigStore((s) => s.setRadiusScale)
   const fontScale = useTemplateConfigStore((s) => s.fontScale)
   const setFontScale = useTemplateConfigStore((s) => s.setFontScale)
+  const fontFamily = useTemplateConfigStore((s) => s.fontFamily)
+  const setFontFamily = useTemplateConfigStore((s) => s.setFontFamily)
   const cardStyle = useTemplateConfigStore((s) => s.cardStyle)
   const setCardStyle = useTemplateConfigStore((s) => s.setCardStyle)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
