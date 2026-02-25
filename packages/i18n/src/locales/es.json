@@ -543,7 +543,22 @@
     "compactProfile": "Perfil compacto",
     "languagePlacement": "Posición del idioma",
     "themePlacement": "Posición del tema",
-    "searchPlacement": "Barra de búsqueda"
+    "searchPlacement": "Barra de búsqueda",
+    "themeSection": "Tema",
+    "borderRadius": "Bordes",
+    "radiusSharp": "Afilado",
+    "radiusDefault": "Estándar",
+    "radiusRounded": "Redondeado",
+    "radiusPill": "Píldora",
+    "cardStyle": "Estilo de tarjeta",
+    "cardFlat": "Plano",
+    "cardBordered": "Con borde",
+    "cardElevated": "Elevado",
+    "cardGlass": "Cristal",
+    "fontScale": "Escala de fuente",
+    "fontCompact": "Compacto",
+    "fontDefault": "Estándar",
+    "fontLarge": "Grande"
   },
   "profileMenu": {
     "profile": "Perfil",

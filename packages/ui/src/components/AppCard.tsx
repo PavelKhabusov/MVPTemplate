@@ -19,7 +19,7 @@ export function AppCard({
   const card = (
     <YStack
       backgroundColor="$cardBackground"
-      borderRadius="$4"
+      borderRadius={Number(theme.radiusMd?.val) || 12}
       padding="$4"
       borderWidth={0.5}
       borderColor={theme.cardBorder.val}

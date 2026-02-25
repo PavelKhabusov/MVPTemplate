@@ -8,10 +8,11 @@ import type { SupportedLanguage } from '@mvp/i18n'
 import { useIsMobileWeb } from '@mvp/ui'
 import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
-import type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, SearchPlacement } from './store'
+import type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, SearchPlacement, RadiusScale, FontScale, CardStyle } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
 import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
+import { applyRadiusScale, applyCardStyle } from './designTokens'
 
 function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value: boolean; onToggle: () => void; action?: { label: string; onPress: () => void } }) {
   const theme = useTheme()
@@ -194,24 +195,44 @@ function SelectRow<T extends string>({
   )
 }
 
-function buildThemeOutput(schemeKey: string | null): string | null {
-  if (!schemeKey || schemeKey === DEFAULT_SCHEME_KEY) return null
-  const scheme = COLOR_SCHEMES.find((s) => s.key === schemeKey)
-  if (!scheme) return null
+const RADIUS_OUTPUT: Record<RadiusScale, string> = {
+  sharp:   'radiusSm: 2, radiusMd: 4, radiusLg: 6',
+  default: 'radiusSm: 8, radiusMd: 12, radiusLg: 16',
+  rounded: 'radiusSm: 12, radiusMd: 20, radiusLg: 28',
+  pill:    'radiusSm: 50, radiusMd: 50, radiusLg: 50',
+}
 
-  return [
-    '// tamagui.config.ts — light theme',
-    `accent: '${scheme.light.accent}',`,
-    `accentGradientStart: '${scheme.light.accentGradientStart}',`,
-    `accentGradientEnd: '${scheme.light.accentGradientEnd}',`,
-    `secondary: '${scheme.light.secondary}',`,
-    '',
-    '// tamagui.config.ts — dark theme',
-    `accent: '${scheme.dark.accent}',`,
-    `accentGradientStart: '${scheme.dark.accentGradientStart}',`,
-    `accentGradientEnd: '${scheme.dark.accentGradientEnd}',`,
-    `secondary: '${scheme.dark.secondary}',`,
-  ].join('\n')
+function buildThemeOutput(schemeKey: string | null, radius: RadiusScale, card: CardStyle): string | null {
+  const lines: string[] = []
+  const scheme = schemeKey ? COLOR_SCHEMES.find((s) => s.key === schemeKey) : null
+
+  if (scheme && schemeKey !== DEFAULT_SCHEME_KEY) {
+    lines.push(
+      '// tamagui.config.ts — light theme',
+      `accent: '${scheme.light.accent}',`,
+      `accentGradientStart: '${scheme.light.accentGradientStart}',`,
+      `accentGradientEnd: '${scheme.light.accentGradientEnd}',`,
+      `secondary: '${scheme.light.secondary}',`,
+      '',
+      '// tamagui.config.ts — dark theme',
+      `accent: '${scheme.dark.accent}',`,
+      `accentGradientStart: '${scheme.dark.accentGradientStart}',`,
+      `accentGradientEnd: '${scheme.dark.accentGradientEnd}',`,
+      `secondary: '${scheme.dark.secondary}',`,
+    )
+  }
+
+  if (radius !== 'default') {
+    if (lines.length > 0) lines.push('')
+    lines.push(`// Border radius: ${radius}`, RADIUS_OUTPUT[radius])
+  }
+
+  if (card !== 'elevated') {
+    if (lines.length > 0) lines.push('')
+    lines.push(`// Card style: ${card}`)
+  }
+
+  return lines.length > 0 ? lines.join('\n') : null
 }
 
 
@@ -238,12 +259,18 @@ export function TemplateConfigSidebar() {
   const setThemePlacement = useTemplateConfigStore((s) => s.setThemePlacement)
   const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
   const setSearchPlacement = useTemplateConfigStore((s) => s.setSearchPlacement)
+  const radiusScale = useTemplateConfigStore((s) => s.radiusScale)
+  const setRadiusScale = useTemplateConfigStore((s) => s.setRadiusScale)
+  const fontScale = useTemplateConfigStore((s) => s.fontScale)
+  const setFontScale = useTemplateConfigStore((s) => s.setFontScale)
+  const cardStyle = useTemplateConfigStore((s) => s.cardStyle)
+  const setCardStyle = useTemplateConfigStore((s) => s.setCardStyle)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
   const showHeaderControls = webLayout === 'header' || webLayout === 'both'
 
-  const themeOutput = useMemo(() => buildThemeOutput(colorScheme), [colorScheme])
+  const themeOutput = useMemo(() => buildThemeOutput(colorScheme, radiusScale, cardStyle), [colorScheme, radiusScale, cardStyle])
 
   if (Platform.OS !== 'web') return null
   if (isMobile) return null
@@ -254,7 +281,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere'
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere' || radiusScale !== 'default' || fontScale !== 'default' || cardStyle !== 'elevated'
 
   return (
     <YStack
@@ -346,6 +373,103 @@ export function TemplateConfigSidebar() {
             )
           })}
         </XStack>
+
+        {/* Theme */}
+        <Text
+          fontSize={11}
+          fontWeight="700"
+          color="$mutedText"
+          textTransform="uppercase"
+          letterSpacing={1}
+          paddingHorizontal="$3"
+          marginBottom="$2"
+        >
+          {t('templateConfig.themeSection')}
+        </Text>
+
+        {/* Border Radius */}
+        <YStack paddingHorizontal="$3" gap="$1.5" marginBottom="$3">
+          <Text fontSize="$2" color="$color">{t('templateConfig.borderRadius')}</Text>
+          <XStack gap="$2">
+            {([
+              { value: 'sharp' as RadiusScale, label: t('templateConfig.radiusSharp'), radius: 2 },
+              { value: 'default' as RadiusScale, label: t('templateConfig.radiusDefault'), radius: 8 },
+              { value: 'rounded' as RadiusScale, label: t('templateConfig.radiusRounded'), radius: 14 },
+              { value: 'pill' as RadiusScale, label: t('templateConfig.radiusPill'), radius: 50 },
+            ]).map((opt) => (
+              <Pressable
+                key={opt.value}
+                onPress={() => { setRadiusScale(opt.value); applyRadiusScale(opt.value) }}
+              >
+                <YStack alignItems="center" gap="$1">
+                  <YStack
+                    width={36}
+                    height={36}
+                    borderRadius={opt.radius}
+                    borderWidth={2}
+                    borderColor={radiusScale === opt.value ? '$accent' : '$borderColor'}
+                    backgroundColor={radiusScale === opt.value ? '$accent' : '$cardBackground'}
+                    opacity={radiusScale === opt.value ? 1 : 0.6}
+                  />
+                  <Text fontSize={10} color={radiusScale === opt.value ? '$accent' : '$mutedText'}>
+                    {opt.label}
+                  </Text>
+                </YStack>
+              </Pressable>
+            ))}
+          </XStack>
+        </YStack>
+
+        {/* Card Style */}
+        <YStack paddingHorizontal="$3" gap="$1.5" marginBottom="$3">
+          <Text fontSize="$2" color="$color">{t('templateConfig.cardStyle')}</Text>
+          <XStack gap="$2">
+            {([
+              { value: 'flat' as CardStyle, label: t('templateConfig.cardFlat') },
+              { value: 'bordered' as CardStyle, label: t('templateConfig.cardBordered') },
+              { value: 'elevated' as CardStyle, label: t('templateConfig.cardElevated') },
+              { value: 'glass' as CardStyle, label: t('templateConfig.cardGlass') },
+            ]).map((opt) => (
+              <Pressable
+                key={opt.value}
+                onPress={() => { setCardStyle(opt.value); applyCardStyle(opt.value) }}
+              >
+                <YStack alignItems="center" gap="$1">
+                  <YStack
+                    width={48}
+                    height={32}
+                    borderRadius={6}
+                    borderWidth={cardStyle === opt.value ? 2 : opt.value === 'bordered' || opt.value === 'flat' ? 1 : 0.5}
+                    borderColor={cardStyle === opt.value ? '$accent' : opt.value === 'flat' ? 'transparent' : opt.value === 'bordered' ? '$borderColorHover' : '$borderColor'}
+                    backgroundColor={opt.value === 'glass' ? '$surfaceGlass' : '$cardBackground'}
+                    style={{
+                      ...(opt.value === 'elevated' ? { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 } : {}),
+                      ...(opt.value === 'glass' ? { backdropFilter: 'blur(8px)' } : {}),
+                    } as any}
+                  />
+                  <Text fontSize={10} color={cardStyle === opt.value ? '$accent' : '$mutedText'}>
+                    {opt.label}
+                  </Text>
+                </YStack>
+              </Pressable>
+            ))}
+          </XStack>
+        </YStack>
+
+        {/* Font Scale */}
+        <YStack marginBottom="$3">
+          <SelectRow<FontScale>
+            icon="text-outline"
+            label={t('templateConfig.fontScale')}
+            value={fontScale}
+            options={[
+              { value: 'compact', label: t('templateConfig.fontCompact') },
+              { value: 'default', label: t('templateConfig.fontDefault') },
+              { value: 'large', label: t('templateConfig.fontLarge') },
+            ]}
+            onChange={setFontScale}
+          />
+        </YStack>
 
         {/* Web Layout */}
         <Text
@@ -575,7 +699,7 @@ export function TemplateConfigSidebar() {
         {/* Reset Button */}
         {hasOverrides && (
           <YStack paddingHorizontal="$3" marginTop="$3">
-            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY) }}>
+            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY); applyRadiusScale('default'); applyCardStyle('elevated') }}>
               <XStack
                 alignItems="center"
                 justifyContent="center"

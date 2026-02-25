@@ -90,7 +90,7 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
           >
             <YStack
               backgroundColor="$cardBackground"
-              borderRadius="$4"
+              borderRadius={Number(theme.radiusMd?.val) || 12}
               borderWidth={1}
               borderColor="$borderColor"
               overflow="hidden"
@@ -127,7 +127,7 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
                 <Pressable onPress={onClose}>
                   <XStack
                     backgroundColor="$subtleBackground"
-                    borderRadius="$2"
+                    borderRadius={Number(theme.radiusSm?.val) || 8}
                     paddingHorizontal="$2"
                     paddingVertical="$1"
                     borderWidth={1}

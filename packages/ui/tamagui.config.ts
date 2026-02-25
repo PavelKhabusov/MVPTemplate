@@ -65,6 +65,9 @@ const tamaguiConfig = createTamagui({
       cardShadow: 'rgba(0,0,0,0.04)',
       accentGradientStart: '#0891B2',
       accentGradientEnd: brandColors.secondaryDark,
+      radiusSm: 8,
+      radiusMd: 12,
+      radiusLg: 16,
     },
     dark: {
       ...config.themes.dark,
@@ -97,6 +100,9 @@ const tamaguiConfig = createTamagui({
       cardShadow: 'rgba(0,0,0,0.3)',
       accentGradientStart: brandColors.primary,
       accentGradientEnd: brandColors.secondary,
+      radiusSm: 8,
+      radiusMd: 12,
+      radiusLg: 16,
     },
   },
 })

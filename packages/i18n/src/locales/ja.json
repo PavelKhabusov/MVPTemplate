@@ -547,7 +547,22 @@
     "compactProfile": "コンパクトプロフィール",
     "languagePlacement": "言語の位置",
     "themePlacement": "テーマの位置",
-    "searchPlacement": "検索バー"
+    "searchPlacement": "検索バー",
+    "themeSection": "テーマ",
+    "borderRadius": "角丸",
+    "radiusSharp": "シャープ",
+    "radiusDefault": "デフォルト",
+    "radiusRounded": "丸み",
+    "radiusPill": "ピル",
+    "cardStyle": "カードスタイル",
+    "cardFlat": "フラット",
+    "cardBordered": "ボーダー",
+    "cardElevated": "シャドウ",
+    "cardGlass": "グラス",
+    "fontScale": "フォントサイズ",
+    "fontCompact": "コンパクト",
+    "fontDefault": "デフォルト",
+    "fontLarge": "大きい"
   },
   "profileMenu": {
     "profile": "プロフィール",

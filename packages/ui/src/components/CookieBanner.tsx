@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Platform } from 'react-native'
-import { YStack, XStack, Text } from 'tamagui'
+import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { AnimatePresence, MotiView } from 'moti'
 import { useTranslation } from '@mvp/i18n'
 import { useCookieConsentStore } from '@mvp/store'
@@ -10,6 +10,7 @@ import { ScalePress } from '../animations/ScalePress'
 
 export function CookieBanner() {
   const { t } = useTranslation()
+  const theme = useTheme()
   const consent = useCookieConsentStore((s) => s.consent)
   const setConsent = useCookieConsentStore((s) => s.setConsent)
   const cookieBannerEnabled = useTemplateFlag('cookieBanner', true)
@@ -55,7 +56,7 @@ export function CookieBanner() {
         >
           <YStack
             backgroundColor="$cardBackground"
-            borderRadius="$4"
+            borderRadius={Number(theme.radiusMd?.val) || 12}
             borderWidth={1}
             borderColor="$borderColor"
             padding="$4"
@@ -89,7 +90,7 @@ export function CookieBanner() {
                     backgroundColor="transparent"
                     borderWidth={1}
                     borderColor="$borderColor"
-                    borderRadius="$3"
+                    borderRadius={Number(theme.radiusSm?.val) || 8}
                     paddingHorizontal="$3"
                     paddingVertical="$2"
                     alignItems="center"
@@ -105,7 +106,7 @@ export function CookieBanner() {
                 <ScalePress onPress={handleAccept}>
                   <XStack
                     backgroundColor="$accent"
-                    borderRadius="$3"
+                    borderRadius={Number(theme.radiusSm?.val) || 8}
                     paddingHorizontal="$3.5"
                     paddingVertical="$2"
                     alignItems="center"

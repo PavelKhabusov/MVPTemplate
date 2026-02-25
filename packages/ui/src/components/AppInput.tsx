@@ -63,7 +63,7 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
           backgroundColor="$cardBackground"
           borderWidth={1}
           borderColor={error ? '$error' : '$borderColor'}
-          borderRadius="$3"
+          borderRadius={Number(theme.radiusSm?.val) || 8}
           paddingHorizontal="$3"
           paddingRight={isPassword ? 44 : '$3'}
           height={44}

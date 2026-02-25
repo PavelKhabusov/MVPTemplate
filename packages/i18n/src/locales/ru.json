@@ -543,7 +543,22 @@
     "compactProfile": "Компактный профиль",
     "languagePlacement": "Позиция языка",
     "themePlacement": "Позиция темы",
-    "searchPlacement": "Панель поиска"
+    "searchPlacement": "Панель поиска",
+    "themeSection": "Тема",
+    "borderRadius": "Скругления",
+    "radiusSharp": "Острые",
+    "radiusDefault": "Стандарт",
+    "radiusRounded": "Скруглённые",
+    "radiusPill": "Пилюля",
+    "cardStyle": "Стиль карточек",
+    "cardFlat": "Плоский",
+    "cardBordered": "С рамкой",
+    "cardElevated": "С тенью",
+    "cardGlass": "Стекло",
+    "fontScale": "Масштаб шрифта",
+    "fontCompact": "Компактный",
+    "fontDefault": "Стандарт",
+    "fontLarge": "Крупный"
   },
   "profileMenu": {
     "profile": "Профиль",

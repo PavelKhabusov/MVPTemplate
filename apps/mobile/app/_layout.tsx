@@ -10,7 +10,7 @@ import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar, ScalePress, SearchModal } from '@mvp/ui'
 import { AnimatePresence, MotiView } from 'moti'
-import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
+import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag, applyRadiusScale, applyCardStyle, getFontZoom } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n, useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
@@ -460,6 +460,8 @@ function WebRootLayout() {
   const languagePlacement = useTemplateConfigStore((s) => s.languagePlacement)
   const themePlacement = useTemplateConfigStore((s) => s.themePlacement)
   const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
+  const fontScale = useTemplateConfigStore((s) => s.fontScale)
+  const fontZoom = getFontZoom(fontScale)
   const [searchOpen, setSearchOpen] = useState(false)
 
   const showHeader = webLayout === 'header' || webLayout === 'both'
@@ -550,7 +552,7 @@ function WebRootLayout() {
           />
         )}
         <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
-          <YStack width="100%" maxWidth={1200} marginHorizontal="auto" flex={1}>
+          <YStack width="100%" maxWidth={1200} marginHorizontal="auto" flex={1} style={fontZoom !== 1 ? { zoom: fontZoom } as any : undefined}>
             <Slot />
           </YStack>
         </YStack>
@@ -671,6 +673,8 @@ export default function RootLayout() {
   // Apply persisted color scheme and force theme update when theme or color scheme changes.
   const templateColorScheme = useTemplateConfigStore((s) => s.colorScheme)
   const templateCustomColor = useTemplateConfigStore((s) => s.customColor)
+  const templateRadiusScale = useTemplateConfigStore((s) => s.radiusScale)
+  const templateCardStyle = useTemplateConfigStore((s) => s.cardStyle)
 
   useLayoutEffect(() => {
     if (Platform.OS === 'web') {
@@ -679,8 +683,10 @@ export default function RootLayout() {
       } else {
         applyColorScheme(templateColorScheme ?? DEFAULT_SCHEME_KEY)
       }
+      applyRadiusScale(templateRadiusScale)
+      applyCardStyle(templateCardStyle)
     }
-  }, [resolvedTheme, templateColorScheme, templateCustomColor])
+  }, [resolvedTheme, templateColorScheme, templateCustomColor, templateRadiusScale, templateCardStyle])
 
   const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
 

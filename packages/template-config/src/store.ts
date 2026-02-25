@@ -7,6 +7,9 @@ export type UserBadgePlacement = 'sidebar' | 'header' | 'nowhere' | 'both'
 export type HeaderNavAlign = 'left' | 'center' | 'right'
 export type ItemPlacement = 'sidebar' | 'header' | 'nowhere' | 'both'
 export type SearchPlacement = 'sidebar' | 'header' | 'nowhere'
+export type RadiusScale = 'sharp' | 'default' | 'rounded' | 'pill'
+export type FontScale = 'compact' | 'default' | 'large'
+export type CardStyle = 'flat' | 'bordered' | 'elevated' | 'glass'
 
 interface TemplateConfigState {
   sidebarOpen: boolean
@@ -20,6 +23,9 @@ interface TemplateConfigState {
   languagePlacement: ItemPlacement
   themePlacement: ItemPlacement
   searchPlacement: SearchPlacement
+  radiusScale: RadiusScale
+  fontScale: FontScale
+  cardStyle: CardStyle
   setSidebarOpen: (open: boolean) => void
   setFlag: (key: string, value: boolean) => void
   setColorScheme: (key: string) => void
@@ -31,6 +37,9 @@ interface TemplateConfigState {
   setLanguagePlacement: (placement: ItemPlacement) => void
   setThemePlacement: (placement: ItemPlacement) => void
   setSearchPlacement: (placement: SearchPlacement) => void
+  setRadiusScale: (scale: RadiusScale) => void
+  setFontScale: (scale: FontScale) => void
+  setCardStyle: (style: CardStyle) => void
   resetAll: () => void
 }
 
@@ -48,6 +57,9 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       languagePlacement: 'nowhere',
       themePlacement: 'nowhere',
       searchPlacement: 'nowhere',
+      radiusScale: 'default',
+      fontScale: 'default',
+      cardStyle: 'elevated',
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setFlag: (key, value) =>
         set((state) => ({
@@ -62,7 +74,10 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       setLanguagePlacement: (placement) => set({ languagePlacement: placement }),
       setThemePlacement: (placement) => set({ themePlacement: placement }),
       setSearchPlacement: (placement) => set({ searchPlacement: placement }),
-      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false, languagePlacement: 'nowhere', themePlacement: 'nowhere', searchPlacement: 'nowhere' }),
+      setRadiusScale: (scale) => set({ radiusScale: scale }),
+      setFontScale: (scale) => set({ fontScale: scale }),
+      setCardStyle: (style) => set({ cardStyle: style }),
+      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false, languagePlacement: 'nowhere', themePlacement: 'nowhere', searchPlacement: 'nowhere', radiusScale: 'default', fontScale: 'default', cardStyle: 'elevated' }),
     }),
     {
       name: 'template-config',
@@ -78,6 +93,9 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
         languagePlacement: state.languagePlacement,
         themePlacement: state.themePlacement,
         searchPlacement: state.searchPlacement,
+        radiusScale: state.radiusScale,
+        fontScale: state.fontScale,
+        cardStyle: state.cardStyle,
       }),
     },
   ),
