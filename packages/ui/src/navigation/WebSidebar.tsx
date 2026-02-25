@@ -27,6 +27,7 @@ interface WebSidebarProps {
   items: NavItem[]
   currentPath: string
   onNavigate: (href: string) => void
+  topContent?: React.ReactNode | ((collapsed: boolean) => React.ReactNode)
   footer?: React.ReactNode | ((collapsed: boolean) => React.ReactNode)
   logo?: any // Image source (require() or { uri })
   title?: string
@@ -51,7 +52,7 @@ export function useIsMobileWeb() {
   return isMobile
 }
 
-export function WebSidebar({ items, currentPath, onNavigate, footer, logo, title = 'MVP Template', hideLogo = false }: WebSidebarProps) {
+export function WebSidebar({ items, currentPath, onNavigate, topContent, footer, logo, title = 'MVP Template', hideLogo = false }: WebSidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const theme = useTheme()
   const isMobile = useIsMobileWeb()
@@ -161,6 +162,13 @@ export function WebSidebar({ items, currentPath, onNavigate, footer, logo, title
               </Text>
             )}
           </XStack>
+        )}
+
+        {/* Top Content (e.g. search) */}
+        {topContent && (
+          <YStack paddingHorizontal="$2" marginBottom="$2">
+            {typeof topContent === 'function' ? topContent(collapsed) : topContent}
+          </YStack>
         )}
 
         {/* Navigation Items */}

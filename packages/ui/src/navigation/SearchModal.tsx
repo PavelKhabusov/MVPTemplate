@@ -86,7 +86,7 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
             animate={{ opacity: 1, scale: 1, translateY: 0 }}
             exit={{ opacity: 0, scale: 0.95, translateY: -10 }}
             transition={{ type: 'timing', duration: 200 }}
-            style={{ width: '100%', maxWidth: 600, paddingHorizontal: 20, zIndex: 10001 }}
+            style={{ width: '100%', maxWidth: 680, paddingHorizontal: 24, zIndex: 10001 }}
           >
             <YStack
               backgroundColor="$cardBackground"
@@ -102,13 +102,13 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
               {/* Search Input */}
               <XStack
                 alignItems="center"
-                gap="$2"
-                paddingHorizontal="$4"
-                paddingVertical="$3"
+                gap="$3"
+                paddingHorizontal="$5"
+                paddingVertical="$4"
                 borderBottomWidth={1}
                 borderBottomColor="$borderColor"
               >
-                <Ionicons name="search-outline" size={20} color={theme.mutedText.val} />
+                <Ionicons name="search-outline" size={22} color={theme.mutedText.val} />
                 <TextInput
                   ref={inputRef}
                   value={query}
@@ -117,7 +117,8 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
                   placeholderTextColor={theme.mutedText.val}
                   style={{
                     flex: 1,
-                    fontSize: 16,
+                    fontSize: 18,
+                    lineHeight: 24,
                     color: theme.color.val,
                     outlineStyle: 'none',
                     backgroundColor: 'transparent',
@@ -126,23 +127,23 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
                 <Pressable onPress={onClose}>
                   <XStack
                     backgroundColor="$subtleBackground"
-                    borderRadius="$1"
-                    paddingHorizontal="$1.5"
-                    paddingVertical={2}
+                    borderRadius="$2"
+                    paddingHorizontal="$2"
+                    paddingVertical="$1"
                     borderWidth={1}
                     borderColor="$borderColor"
                   >
-                    <Text fontSize={11} color="$mutedText">ESC</Text>
+                    <Text fontSize={12} color="$mutedText" fontWeight="500">esc</Text>
                   </XStack>
                 </Pressable>
               </XStack>
 
               {/* Results Area */}
-              <YStack padding="$4" minHeight={120} alignItems="center" justifyContent="center">
+              <YStack padding="$5" minHeight={200} alignItems="center" justifyContent="center">
                 {results || (
-                  <YStack alignItems="center" gap="$2">
-                    <Ionicons name="search" size={32} color={theme.mutedText.val} style={{ opacity: 0.3 }} />
-                    <Text color="$mutedText" fontSize="$2">
+                  <YStack alignItems="center" gap="$3">
+                    <Ionicons name="search" size={40} color={theme.mutedText.val} style={{ opacity: 0.3 }} />
+                    <Text color="$mutedText" fontSize="$3">
                       {query ? 'No results found' : 'Type to search...'}
                     </Text>
                   </YStack>

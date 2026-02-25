@@ -247,37 +247,51 @@ function SearchTrigger({ collapsed, onPress }: { collapsed: boolean; onPress: ()
   const { t } = useTranslation()
   const theme = useTheme()
   const isMobile = useIsMobileWeb()
+  const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform)
 
   return (
     <XStack
-      paddingVertical="$2.5"
+      paddingVertical="$2"
       paddingHorizontal="$3"
       borderRadius="$3"
       alignItems="center"
       justifyContent={collapsed ? 'center' : 'flex-start'}
       gap="$3"
+      backgroundColor="$subtleBackground"
       hoverStyle={{ backgroundColor: '$backgroundHover' }}
       cursor="pointer"
       onPress={onPress}
+      borderWidth={1}
+      borderColor="$borderColor"
     >
-      <Ionicons name="search-outline" size={20} color={theme.mutedText.val} />
+      <Ionicons name="search-outline" size={18} color={theme.mutedText.val} />
       {!collapsed && (
         <XStack flex={1} alignItems="center" justifyContent="space-between">
-          <Text color="$mutedText" fontSize="$3" numberOfLines={1}>
+          <Text color="$mutedText" fontSize="$2" numberOfLines={1}>
             {t('common.search')}
           </Text>
           {!isMobile && (
-            <XStack
-              backgroundColor="$subtleBackground"
-              borderRadius="$1"
-              paddingHorizontal="$1.5"
-              paddingVertical={2}
-              borderWidth={1}
-              borderColor="$borderColor"
-            >
-              <Text fontSize={10} color="$mutedText" style={{ fontFamily: 'monospace' } as any}>
-                {typeof navigator !== 'undefined' && /Mac/.test(navigator.platform) ? '⌘K' : 'Ctrl+K'}
-              </Text>
+            <XStack alignItems="center" gap="$1">
+              <XStack
+                backgroundColor="$background"
+                borderRadius="$1"
+                paddingHorizontal="$1.5"
+                paddingVertical={1}
+                borderWidth={1}
+                borderColor="$borderColor"
+              >
+                <Text fontSize={11} color="$mutedText" fontWeight="500">{isMac ? '⌘' : 'Ctrl'}</Text>
+              </XStack>
+              <XStack
+                backgroundColor="$background"
+                borderRadius="$1"
+                paddingHorizontal="$1.5"
+                paddingVertical={1}
+                borderWidth={1}
+                borderColor="$borderColor"
+              >
+                <Text fontSize={11} color="$mutedText" fontWeight="500">K</Text>
+              </XStack>
             </XStack>
           )}
         </XStack>
@@ -487,11 +501,14 @@ function WebRootLayout() {
     ...(isAdmin ? [{ href: '/admin', label: t('admin.title'), icon: 'shield-outline' as const, iconFilled: 'shield' as const, animation: 'bell' as const }] : []),
   ]
 
+  // When sidebar is visible, admin panel is already accessible there — no need to duplicate in header
+  const headerNavItems = showSidebar ? navItems.filter((item) => item.href !== '/admin') : navItems
+
   return (
     <YStack flex={1} backgroundColor="$background" style={{ height: '100vh' } as any}>
       {showHeader && !isMobile && (
         <WebHeader
-          items={navItems}
+          items={headerNavItems}
           currentPath={pathname}
           onNavigate={(href) => router.push(href as any)}
           logo={require('../assets/icon.png')}
@@ -514,9 +531,11 @@ function WebRootLayout() {
             currentPath={pathname}
             onNavigate={(href) => router.push(href as any)}
             hideLogo={showHeader}
+            topContent={showSearchInSidebar ? (collapsed: boolean) => (
+              <SearchTrigger collapsed={collapsed} onPress={() => setSearchOpen(true)} />
+            ) : undefined}
             footer={(collapsed) => (
               <>
-                {showSearchInSidebar && <SearchTrigger collapsed={collapsed} onPress={() => setSearchOpen(true)} />}
                 {showBadgeInSidebar && <UserBadge collapsed={collapsed} compact={compactProfile} />}
                 {showLangInSidebar && <LanguagePicker collapsed={collapsed} />}
                 {showThemeInSidebar && <ThemeToggle collapsed={collapsed} />}
