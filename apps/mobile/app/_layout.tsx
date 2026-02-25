@@ -266,27 +266,31 @@ function SearchTrigger({ collapsed, onPress }: { collapsed: boolean; onPress: ()
     >
       <Ionicons name="search-outline" size={18} color={theme.mutedText.val} />
       {!collapsed && (
-        <XStack flex={1} alignItems="center" justifyContent="space-between">
+        <XStack flex={1} alignItems="center" justifyContent="space-between" gap="$3">
           <Text color="$mutedText" fontSize="$2" numberOfLines={1}>
             {t('common.search')}
           </Text>
           {!isMobile && (
-            <XStack alignItems="center" gap="$1">
+            <XStack alignItems="center" gap="$1.5">
               <XStack
                 backgroundColor="$background"
-                borderRadius="$1"
-                paddingHorizontal="$1.5"
-                paddingVertical={1}
+                borderRadius="$1.5"
+                width={24}
+                height={24}
+                alignItems="center"
+                justifyContent="center"
                 borderWidth={1}
                 borderColor="$borderColor"
               >
-                <Text fontSize={11} color="$mutedText" fontWeight="500">{isMac ? '⌘' : 'Ctrl'}</Text>
+                <Text fontSize={11} color="$mutedText" fontWeight="500">{isMac ? '⌘' : '⌃'}</Text>
               </XStack>
               <XStack
                 backgroundColor="$background"
-                borderRadius="$1"
-                paddingHorizontal="$1.5"
-                paddingVertical={1}
+                borderRadius="$1.5"
+                width={24}
+                height={24}
+                alignItems="center"
+                justifyContent="center"
                 borderWidth={1}
                 borderColor="$borderColor"
               >
