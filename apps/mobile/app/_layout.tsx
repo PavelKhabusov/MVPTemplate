@@ -8,12 +8,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar, ScalePress } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar, ScalePress, SearchModal } from '@mvp/ui'
 import { AnimatePresence, MotiView } from 'moti'
 import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n, useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
+import type { SupportedLanguage } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
 import { storage } from '@mvp/lib'
 import { SEO } from '@mvp/ui'
@@ -167,12 +168,135 @@ function ThemeToggle({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-function UserBadge({ collapsed, compact }: { collapsed: boolean; compact: boolean }) {
+function LanguagePicker({ collapsed, dropdownDirection = 'up' }: { collapsed: boolean; dropdownDirection?: 'up' | 'down' }) {
+  const { i18n, changeLanguage } = useAppTranslation()
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+  const currentLang = i18n.language as SupportedLanguage
+
+  return (
+    <YStack position="relative">
+      <XStack
+        paddingVertical="$2.5"
+        paddingHorizontal="$3"
+        borderRadius="$3"
+        alignItems="center"
+        justifyContent={collapsed ? 'center' : 'flex-start'}
+        gap="$3"
+        hoverStyle={{ backgroundColor: '$backgroundHover' }}
+        cursor="pointer"
+        onPress={() => setOpen(!open)}
+      >
+        <Ionicons name="language-outline" size={20} color={theme.mutedText.val} />
+        {!collapsed && (
+          <Text color="$mutedText" fontSize="$3" numberOfLines={1}>
+            {LANGUAGE_LABELS[currentLang]}
+          </Text>
+        )}
+      </XStack>
+      <AnimatePresence>
+        {open && (
+          <MotiView
+            from={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: 'timing', duration: 150 }}
+            style={{
+              position: 'absolute',
+              ...(dropdownDirection === 'up' ? { bottom: '100%', marginBottom: 4 } : { top: '100%', marginTop: 4 }),
+              left: 0, right: collapsed ? undefined : 0, minWidth: 160, zIndex: 101,
+            }}
+          >
+            <YStack
+              backgroundColor="$cardBackground"
+              borderRadius="$3"
+              borderWidth={1}
+              borderColor="$borderColor"
+              padding="$1"
+              shadowColor="$cardShadow"
+              shadowRadius={8}
+              shadowOpacity={1}
+              shadowOffset={{ width: 0, height: dropdownDirection === 'up' ? -4 : 4 }}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <ScalePress key={lang} onPress={() => { changeLanguage(lang); setOpen(false) }}>
+                  <XStack
+                    paddingHorizontal="$3"
+                    paddingVertical="$1.5"
+                    borderRadius="$2"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    hoverStyle={{ backgroundColor: '$subtleBackground' } as any}
+                  >
+                    <Text fontSize="$2" color={currentLang === lang ? '$color' : '$mutedText'}>
+                      {LANGUAGE_LABELS[lang]}
+                    </Text>
+                    {currentLang === lang && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                  </XStack>
+                </ScalePress>
+              ))}
+            </YStack>
+          </MotiView>
+        )}
+      </AnimatePresence>
+    </YStack>
+  )
+}
+
+function SearchTrigger({ collapsed, onPress }: { collapsed: boolean; onPress: () => void }) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useIsMobileWeb()
+
+  return (
+    <XStack
+      paddingVertical="$2.5"
+      paddingHorizontal="$3"
+      borderRadius="$3"
+      alignItems="center"
+      justifyContent={collapsed ? 'center' : 'flex-start'}
+      gap="$3"
+      hoverStyle={{ backgroundColor: '$backgroundHover' }}
+      cursor="pointer"
+      onPress={onPress}
+    >
+      <Ionicons name="search-outline" size={20} color={theme.mutedText.val} />
+      {!collapsed && (
+        <XStack flex={1} alignItems="center" justifyContent="space-between">
+          <Text color="$mutedText" fontSize="$3" numberOfLines={1}>
+            {t('common.search')}
+          </Text>
+          {!isMobile && (
+            <XStack
+              backgroundColor="$subtleBackground"
+              borderRadius="$1"
+              paddingHorizontal="$1.5"
+              paddingVertical={2}
+              borderWidth={1}
+              borderColor="$borderColor"
+            >
+              <Text fontSize={10} color="$mutedText" style={{ fontFamily: 'monospace' } as any}>
+                {typeof navigator !== 'undefined' && /Mac/.test(navigator.platform) ? '⌘K' : 'Ctrl+K'}
+              </Text>
+            </XStack>
+          )}
+        </XStack>
+      )}
+    </XStack>
+  )
+}
+
+function UserBadge({ collapsed, compact, dropdownDirection = 'up' }: { collapsed: boolean; compact: boolean; dropdownDirection?: 'up' | 'down' }) {
   const user = useAuthStore((s) => s.user)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [langExpanded, setLangExpanded] = useState(false)
   const theme = useTheme()
   const { t, i18n, changeLanguage } = useAppTranslation()
   const { mode, setMode } = useThemeStore()
+
+  useEffect(() => {
+    if (!menuOpen) setLangExpanded(false)
+  }, [menuOpen])
 
   if (!user) return null
 
@@ -228,7 +352,7 @@ function UserBadge({ collapsed, compact }: { collapsed: boolean; compact: boolea
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'timing', duration: 150 }}
-            style={{ position: 'absolute', bottom: '100%', left: 0, right: collapsed ? undefined : 0, minWidth: 200, marginBottom: 4, zIndex: 101 }}
+            style={{ position: 'absolute', ...(dropdownDirection === 'up' ? { bottom: '100%', marginBottom: 4 } : { top: '100%', marginTop: 4 }), left: 0, right: collapsed ? undefined : 0, minWidth: 200, zIndex: 101 }}
           >
             <YStack
               backgroundColor="$cardBackground"
@@ -239,7 +363,7 @@ function UserBadge({ collapsed, compact }: { collapsed: boolean; compact: boolea
               shadowColor="$cardShadow"
               shadowRadius={8}
               shadowOpacity={1}
-              shadowOffset={{ width: 0, height: -4 }}
+              shadowOffset={{ width: 0, height: dropdownDirection === 'up' ? -4 : 4 }}
             >
               {/* User info header */}
               <YStack paddingHorizontal="$3" paddingVertical="$2">
@@ -248,18 +372,31 @@ function UserBadge({ collapsed, compact }: { collapsed: boolean; compact: boolea
               </YStack>
               <YStack height={1} backgroundColor="$borderColor" marginVertical="$1" />
 
-              {/* Language */}
-              <Text color="$mutedText" fontSize={10} fontWeight="700" paddingHorizontal="$3" paddingTop="$1" textTransform="uppercase" letterSpacing={0.5}>
-                {t('profileMenu.language')}
-              </Text>
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <ScalePress key={lang} onPress={() => { changeLanguage(lang); setMenuOpen(false) }}>
-                  <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" justifyContent="space-between" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
-                    <Text fontSize="$2" color="$color">{LANGUAGE_LABELS[lang]}</Text>
-                    {i18n.language === lang && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+              {/* Language — expandable sub-dropdown */}
+              <ScalePress onPress={() => setLangExpanded(!langExpanded)}>
+                <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" justifyContent="space-between" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
+                  <XStack alignItems="center" gap="$2">
+                    <Ionicons name="language-outline" size={14} color={theme.mutedText.val} />
+                    <Text fontSize="$2" color="$color">{t('profileMenu.language')}</Text>
                   </XStack>
-                </ScalePress>
-              ))}
+                  <XStack alignItems="center" gap="$1">
+                    <Text fontSize={11} color="$mutedText">{LANGUAGE_LABELS[i18n.language as SupportedLanguage]}</Text>
+                    <Ionicons name={langExpanded ? 'chevron-up' : 'chevron-down'} size={12} color={theme.mutedText.val} />
+                  </XStack>
+                </XStack>
+              </ScalePress>
+              {langExpanded && (
+                <YStack paddingLeft="$4">
+                  {SUPPORTED_LANGUAGES.map((lang) => (
+                    <ScalePress key={lang} onPress={() => { changeLanguage(lang); setMenuOpen(false) }}>
+                      <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" justifyContent="space-between" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
+                        <Text fontSize="$2" color="$color">{LANGUAGE_LABELS[lang]}</Text>
+                        {i18n.language === lang && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                      </XStack>
+                    </ScalePress>
+                  ))}
+                </YStack>
+              )}
 
               {/* Theme */}
               <Text color="$mutedText" fontSize={10} fontWeight="700" paddingHorizontal="$3" paddingTop="$2" textTransform="uppercase" letterSpacing={0.5}>
@@ -302,10 +439,35 @@ function WebRootLayout() {
   const userBadgePlacement = useTemplateConfigStore((s) => s.userBadgePlacement)
   const headerNavAlign = useTemplateConfigStore((s) => s.headerNavAlign)
   const compactProfile = useTemplateConfigStore((s) => s.compactProfile)
+  const languagePlacement = useTemplateConfigStore((s) => s.languagePlacement)
+  const themePlacement = useTemplateConfigStore((s) => s.themePlacement)
+  const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
+  const contentMaxWidth = useTemplateConfigStore((s) => s.contentMaxWidth)
+  const [searchOpen, setSearchOpen] = useState(false)
+
   const showHeader = webLayout === 'header' || webLayout === 'both'
   const showSidebar = webLayout === 'sidebar' || webLayout === 'both'
   const showBadgeInSidebar = userBadgePlacement === 'sidebar' || userBadgePlacement === 'both'
   const showBadgeInHeader = userBadgePlacement === 'header' || userBadgePlacement === 'both'
+  const showLangInSidebar = !compactProfile && (languagePlacement === 'sidebar' || languagePlacement === 'both')
+  const showLangInHeader = !compactProfile && (languagePlacement === 'header' || languagePlacement === 'both')
+  const showThemeInSidebar = !compactProfile && (themePlacement === 'sidebar' || themePlacement === 'both')
+  const showThemeInHeader = !compactProfile && (themePlacement === 'header' || themePlacement === 'both')
+  const showSearchInSidebar = searchPlacement === 'sidebar'
+  const showSearchInHeader = searchPlacement === 'header'
+
+  // Global Cmd+K / Ctrl+K hotkey
+  useEffect(() => {
+    if (searchPlacement === 'nowhere') return
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearchOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [searchPlacement])
 
   // Landing page renders full-width without sidebar
   if (pathname === '/landing') {
@@ -338,8 +500,10 @@ function WebRootLayout() {
           navAlign={headerNavAlign}
           rightContent={
             <>
-              {!compactProfile && <ThemeToggle collapsed={false} />}
-              {showBadgeInHeader && <UserBadge collapsed={false} compact={compactProfile} />}
+              {showSearchInHeader && <SearchTrigger collapsed={false} onPress={() => setSearchOpen(true)} />}
+              {showLangInHeader && <LanguagePicker collapsed={false} dropdownDirection="down" />}
+              {showThemeInHeader && <ThemeToggle collapsed={false} />}
+              {showBadgeInHeader && <UserBadge collapsed={false} compact={compactProfile} dropdownDirection="down" />}
             </>
           }
         />
@@ -353,8 +517,10 @@ function WebRootLayout() {
             hideLogo={showHeader}
             footer={(collapsed) => (
               <>
+                {showSearchInSidebar && <SearchTrigger collapsed={collapsed} onPress={() => setSearchOpen(true)} />}
                 {showBadgeInSidebar && <UserBadge collapsed={collapsed} compact={compactProfile} />}
-                {!compactProfile && <ThemeToggle collapsed={collapsed} />}
+                {showLangInSidebar && <LanguagePicker collapsed={collapsed} />}
+                {showThemeInSidebar && <ThemeToggle collapsed={collapsed} />}
               </>
             )}
             logo={require('../assets/icon.png')}
@@ -362,7 +528,9 @@ function WebRootLayout() {
           />
         )}
         <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
-          <Slot />
+          <YStack width="100%" maxWidth={contentMaxWidth} marginHorizontal="auto" flex={1}>
+            <Slot />
+          </YStack>
         </YStack>
         {/* Mobile bottom tabs when sidebar is off but header is on */}
         {!showSidebar && isMobile && (
@@ -374,6 +542,7 @@ function WebRootLayout() {
         )}
         {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
       </XStack>
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <CookieBanner />
     </YStack>
   )

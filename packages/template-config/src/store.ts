@@ -5,6 +5,8 @@ import { mmkvStorage } from '@mvp/lib'
 export type WebLayout = 'sidebar' | 'header' | 'both'
 export type UserBadgePlacement = 'sidebar' | 'header' | 'nowhere' | 'both'
 export type HeaderNavAlign = 'left' | 'center' | 'right'
+export type ItemPlacement = 'sidebar' | 'header' | 'nowhere' | 'both'
+export type SearchPlacement = 'sidebar' | 'header' | 'nowhere'
 
 interface TemplateConfigState {
   sidebarOpen: boolean
@@ -15,6 +17,10 @@ interface TemplateConfigState {
   userBadgePlacement: UserBadgePlacement
   headerNavAlign: HeaderNavAlign
   compactProfile: boolean
+  languagePlacement: ItemPlacement
+  themePlacement: ItemPlacement
+  searchPlacement: SearchPlacement
+  contentMaxWidth: number
   setSidebarOpen: (open: boolean) => void
   setFlag: (key: string, value: boolean) => void
   setColorScheme: (key: string) => void
@@ -23,6 +29,10 @@ interface TemplateConfigState {
   setUserBadgePlacement: (placement: UserBadgePlacement) => void
   setHeaderNavAlign: (align: HeaderNavAlign) => void
   setCompactProfile: (compact: boolean) => void
+  setLanguagePlacement: (placement: ItemPlacement) => void
+  setThemePlacement: (placement: ItemPlacement) => void
+  setSearchPlacement: (placement: SearchPlacement) => void
+  setContentMaxWidth: (width: number) => void
   resetAll: () => void
 }
 
@@ -37,6 +47,10 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       userBadgePlacement: 'sidebar',
       headerNavAlign: 'center',
       compactProfile: false,
+      languagePlacement: 'nowhere',
+      themePlacement: 'nowhere',
+      searchPlacement: 'nowhere',
+      contentMaxWidth: 1200,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setFlag: (key, value) =>
         set((state) => ({
@@ -48,7 +62,11 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       setUserBadgePlacement: (placement) => set({ userBadgePlacement: placement }),
       setHeaderNavAlign: (align) => set({ headerNavAlign: align }),
       setCompactProfile: (compact) => set({ compactProfile: compact }),
-      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false }),
+      setLanguagePlacement: (placement) => set({ languagePlacement: placement }),
+      setThemePlacement: (placement) => set({ themePlacement: placement }),
+      setSearchPlacement: (placement) => set({ searchPlacement: placement }),
+      setContentMaxWidth: (width) => set({ contentMaxWidth: width }),
+      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false, languagePlacement: 'nowhere', themePlacement: 'nowhere', searchPlacement: 'nowhere', contentMaxWidth: 1200 }),
     }),
     {
       name: 'template-config',
@@ -61,6 +79,10 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
         userBadgePlacement: state.userBadgePlacement,
         headerNavAlign: state.headerNavAlign,
         compactProfile: state.compactProfile,
+        languagePlacement: state.languagePlacement,
+        themePlacement: state.themePlacement,
+        searchPlacement: state.searchPlacement,
+        contentMaxWidth: state.contentMaxWidth,
       }),
     },
   ),

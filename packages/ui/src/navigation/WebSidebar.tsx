@@ -162,7 +162,6 @@ export function WebSidebar({ items, currentPath, onNavigate, footer, logo, title
             )}
           </XStack>
         )}
-        {hideLogo && <YStack height="$2" />}
 
         {/* Navigation Items */}
         <YStack gap="$1" paddingHorizontal="$2" flex={1} role="navigation" aria-label="Main navigation">

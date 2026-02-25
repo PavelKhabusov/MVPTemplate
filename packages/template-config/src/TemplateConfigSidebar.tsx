@@ -8,7 +8,7 @@ import type { SupportedLanguage } from '@mvp/i18n'
 import { useIsMobileWeb } from '@mvp/ui'
 import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
-import type { WebLayout, UserBadgePlacement, HeaderNavAlign } from './store'
+import type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, SearchPlacement } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
 import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
@@ -232,6 +232,14 @@ export function TemplateConfigSidebar() {
   const setHeaderNavAlign = useTemplateConfigStore((s) => s.setHeaderNavAlign)
   const compactProfile = useTemplateConfigStore((s) => s.compactProfile)
   const setCompactProfile = useTemplateConfigStore((s) => s.setCompactProfile)
+  const languagePlacement = useTemplateConfigStore((s) => s.languagePlacement)
+  const setLanguagePlacement = useTemplateConfigStore((s) => s.setLanguagePlacement)
+  const themePlacement = useTemplateConfigStore((s) => s.themePlacement)
+  const setThemePlacement = useTemplateConfigStore((s) => s.setThemePlacement)
+  const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
+  const setSearchPlacement = useTemplateConfigStore((s) => s.setSearchPlacement)
+  const contentMaxWidth = useTemplateConfigStore((s) => s.contentMaxWidth)
+  const setContentMaxWidth = useTemplateConfigStore((s) => s.setContentMaxWidth)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
@@ -248,7 +256,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere' || contentMaxWidth !== 1200
 
   return (
     <YStack
@@ -420,6 +428,94 @@ export function TemplateConfigSidebar() {
               onToggle={() => setCompactProfile(!compactProfile)}
             />
           )}
+          {!compactProfile && (
+            <SelectRow<ItemPlacement>
+              icon="language-outline"
+              label={t('templateConfig.languagePlacement')}
+              value={languagePlacement}
+              options={
+                webLayout === 'sidebar'
+                  ? [
+                      { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                      { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                    ]
+                  : webLayout === 'header'
+                  ? [
+                      { value: 'header', label: t('templateConfig.placementHeader') },
+                      { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                    ]
+                  : [
+                      { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                      { value: 'header', label: t('templateConfig.placementHeader') },
+                      { value: 'both', label: t('templateConfig.placementBoth') },
+                      { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                    ]
+              }
+              onChange={setLanguagePlacement}
+            />
+          )}
+          {!compactProfile && (
+            <SelectRow<ItemPlacement>
+              icon="contrast-outline"
+              label={t('templateConfig.themePlacement')}
+              value={themePlacement}
+              options={
+                webLayout === 'sidebar'
+                  ? [
+                      { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                      { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                    ]
+                  : webLayout === 'header'
+                  ? [
+                      { value: 'header', label: t('templateConfig.placementHeader') },
+                      { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                    ]
+                  : [
+                      { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                      { value: 'header', label: t('templateConfig.placementHeader') },
+                      { value: 'both', label: t('templateConfig.placementBoth') },
+                      { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                    ]
+              }
+              onChange={setThemePlacement}
+            />
+          )}
+          <SelectRow<SearchPlacement>
+            icon="search-outline"
+            label={t('templateConfig.searchPlacement')}
+            value={searchPlacement}
+            options={
+              webLayout === 'sidebar'
+                ? [
+                    { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                    { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                  ]
+                : webLayout === 'header'
+                ? [
+                    { value: 'header', label: t('templateConfig.placementHeader') },
+                    { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                  ]
+                : [
+                    { value: 'sidebar', label: t('templateConfig.placementSidebar') },
+                    { value: 'header', label: t('templateConfig.placementHeader') },
+                    { value: 'nowhere', label: t('templateConfig.placementNowhere') },
+                  ]
+            }
+            onChange={setSearchPlacement}
+          />
+          <SelectRow<string>
+            icon="resize-outline"
+            label={t('templateConfig.contentMaxWidth')}
+            value={String(contentMaxWidth)}
+            options={[
+              { value: '800', label: '800px' },
+              { value: '1000', label: '1000px' },
+              { value: '1200', label: '1200px' },
+              { value: '1400', label: '1400px' },
+              { value: '9999', label: t('templateConfig.contentFullWidth') },
+            ]}
+            onChange={(v) => setContentMaxWidth(Number(v))}
+          />
         </YStack>
 
         {/* Frontend Flags */}
