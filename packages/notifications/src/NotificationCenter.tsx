@@ -1,28 +1,17 @@
 import { useState, useCallback } from 'react'
-import { ScrollView, Platform } from 'react-native'
+import { ScrollView } from 'react-native'
 import { YStack, Text, XStack, H2 } from 'tamagui'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
 import { StateView, FadeIn, AnimatedListItem, AppCard, ScalePress, SettingsGroup, SettingsGroupItem } from '@mvp/ui'
-import { useTemplateFlag } from '@mvp/template-config'
-import { api } from '../../services/api'
-import { useQueryState } from '@mvp/lib'
-import { storage } from '@mvp/lib'
-import { registerForPushNotifications } from '../../services/push'
-
-interface Notification {
-  id: string
-  title: string
-  body: string | null
-  type: string
-  isRead: boolean
-  createdAt: string
-}
+import { useQueryState, storage } from '@mvp/lib'
+import { registerForPushNotifications } from './push'
+import type { NotificationHttpClient, Notification } from './types'
 
 const PUSH_PREF_KEY = 'push_notifications_enabled'
 
-function usePushPreference() {
+function usePushPreference(http: NotificationHttpClient) {
   const [enabled, setEnabled] = useState(() => {
     return storage.getString(PUSH_PREF_KEY) !== 'false'
   })
@@ -32,42 +21,46 @@ function usePushPreference() {
     storage.set(PUSH_PREF_KEY, value ? 'true' : 'false')
 
     if (value) {
-      await registerForPushNotifications().catch(() => {})
+      await registerForPushNotifications(http).catch(() => {})
     } else {
       try {
-        await api.delete('/push/unregister')
+        await http.delete('/push/unregister')
       } catch {}
     }
-  }, [])
+  }, [http])
 
   return { enabled, toggle }
 }
 
-function useNotifications() {
+function useNotifications(http: NotificationHttpClient) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   return useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const { data } = await api.get('/notifications')
-      return data.data as Notification[]
+      const { data } = await http.get('/notifications')
+      return (data as any).data as Notification[]
     },
     enabled: isAuthenticated,
   })
 }
 
-export function NotificationCenter() {
+interface NotificationCenterProps {
+  http: NotificationHttpClient
+  emailEnabled?: boolean
+}
+
+export function NotificationCenter({ http, emailEnabled = false }: NotificationCenterProps) {
   const { t } = useTranslation()
-  const query = useNotifications()
+  const query = useNotifications(http)
   const state = useQueryState(query, {
     emptyCheck: (data) => data.length === 0,
     emptyMessage: t('notifications.empty'),
   })
   const queryClient = useQueryClient()
-  const pushPref = usePushPreference()
-  const emailEnabled = useTemplateFlag('email', false)
+  const pushPref = usePushPreference(http)
 
   const markAllRead = useMutation({
-    mutationFn: () => api.post('/notifications/read-all'),
+    mutationFn: () => http.post('/notifications/read-all'),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   })
 

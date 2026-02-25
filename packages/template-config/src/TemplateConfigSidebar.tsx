@@ -3,11 +3,12 @@ import { Platform, ScrollView, Pressable } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { MotiView } from 'moti'
-import { useTranslation } from '@mvp/i18n'
+import { useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
+import type { SupportedLanguage } from '@mvp/i18n'
 import { useIsMobileWeb } from '@mvp/ui'
 import { useCookieConsentStore } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
-import type { WebLayout, UserBadgePlacement } from './store'
+import type { WebLayout, UserBadgePlacement, HeaderNavAlign } from './store'
 import { TEMPLATE_FLAGS } from './flags'
 import type { TemplateFlag } from './flags'
 import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
@@ -72,6 +73,41 @@ function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value:
             />
           </YStack>
         </XStack>
+      </XStack>
+    </Pressable>
+  )
+}
+
+function ToggleRow({ icon, label, value, onToggle }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: boolean; onToggle: () => void }) {
+  const theme = useTheme()
+
+  return (
+    <Pressable onPress={onToggle}>
+      <XStack
+        alignItems="center"
+        justifyContent="space-between"
+        paddingHorizontal="$3"
+        paddingVertical="$2"
+        hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+      >
+        <XStack alignItems="center" gap="$2" flex={1}>
+          <Ionicons name={icon} size={16} color={value ? theme.accent.val : theme.mutedText.val} />
+          <Text fontSize="$2" color="$color" flex={1} numberOfLines={1}>{label}</Text>
+        </XStack>
+        <YStack
+          width={36}
+          height={20}
+          borderRadius={10}
+          backgroundColor={value ? '$accent' : '$borderColor'}
+          justifyContent="center"
+          paddingHorizontal={2}
+        >
+          <MotiView
+            animate={{ translateX: value ? 16 : 0 }}
+            transition={{ type: 'timing', duration: 150 }}
+            style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: 'white' }}
+          />
+        </YStack>
       </XStack>
     </Pressable>
   )
@@ -180,7 +216,7 @@ function buildThemeOutput(schemeKey: string | null): string | null {
 
 
 export function TemplateConfigSidebar() {
-  const { t } = useTranslation()
+  const { t, i18n, changeLanguage } = useAppTranslation()
   const theme = useTheme()
   const sidebarOpen = useTemplateConfigStore((s) => s.sidebarOpen)
   const setSidebarOpen = useTemplateConfigStore((s) => s.setSidebarOpen)
@@ -192,9 +228,14 @@ export function TemplateConfigSidebar() {
   const setWebLayout = useTemplateConfigStore((s) => s.setWebLayout)
   const userBadgePlacement = useTemplateConfigStore((s) => s.userBadgePlacement)
   const setUserBadgePlacement = useTemplateConfigStore((s) => s.setUserBadgePlacement)
+  const headerNavAlign = useTemplateConfigStore((s) => s.headerNavAlign)
+  const setHeaderNavAlign = useTemplateConfigStore((s) => s.setHeaderNavAlign)
+  const compactProfile = useTemplateConfigStore((s) => s.compactProfile)
+  const setCompactProfile = useTemplateConfigStore((s) => s.setCompactProfile)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
+  const showHeaderControls = webLayout === 'header' || webLayout === 'both'
 
   const themeOutput = useMemo(() => buildThemeOutput(colorScheme), [colorScheme])
 
@@ -207,7 +248,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar'
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile
 
   return (
     <YStack
@@ -348,6 +389,37 @@ export function TemplateConfigSidebar() {
             }
             onChange={setUserBadgePlacement}
           />
+          <SelectRow<SupportedLanguage>
+            icon="language-outline"
+            label={t('templateConfig.language')}
+            value={i18n.language as SupportedLanguage}
+            options={SUPPORTED_LANGUAGES.map((lang) => ({
+              value: lang,
+              label: LANGUAGE_LABELS[lang],
+            }))}
+            onChange={(lang) => changeLanguage(lang)}
+          />
+          {showHeaderControls && (
+            <SelectRow<HeaderNavAlign>
+              icon="apps-outline"
+              label={t('templateConfig.headerNavAlign')}
+              value={headerNavAlign}
+              options={[
+                { value: 'left', label: t('templateConfig.alignLeft') },
+                { value: 'center', label: t('templateConfig.alignCenter') },
+                { value: 'right', label: t('templateConfig.alignRight') },
+              ]}
+              onChange={setHeaderNavAlign}
+            />
+          )}
+          {userBadgePlacement !== 'nowhere' && (
+            <ToggleRow
+              icon="person-circle-outline"
+              label={t('templateConfig.compactProfile')}
+              value={compactProfile}
+              onToggle={() => setCompactProfile(!compactProfile)}
+            />
+          )}
         </YStack>
 
         {/* Frontend Flags */}

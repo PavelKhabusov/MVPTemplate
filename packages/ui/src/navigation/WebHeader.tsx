@@ -17,13 +17,27 @@ interface WebHeaderProps {
   logo?: any
   title?: string
   rightContent?: React.ReactNode
+  navAlign?: 'left' | 'center' | 'right'
 }
 
-export function WebHeader({ items, currentPath, onNavigate, logo, title = 'MVP Template', rightContent }: WebHeaderProps) {
+export function WebHeader({ items, currentPath, onNavigate, logo, title = 'MVP Template', rightContent, navAlign = 'center' }: WebHeaderProps) {
   const theme = useTheme()
   const isMobile = useIsMobileWeb()
 
   if (Platform.OS !== 'web' || isMobile) return null
+
+  const navItems = items.map((item) => {
+    const isActive = currentPath === item.href ||
+      (item.href !== '/' && currentPath.startsWith(item.href))
+    return (
+      <HeaderNavItem
+        key={item.href}
+        item={item}
+        isActive={isActive}
+        onPress={() => onNavigate(item.href)}
+      />
+    )
+  })
 
   return (
     <XStack
@@ -32,11 +46,10 @@ export function WebHeader({ items, currentPath, onNavigate, logo, title = 'MVP T
       borderBottomColor="$sidebarBorder"
       paddingHorizontal="$4"
       alignItems="center"
-      justifyContent="space-between"
       height={56}
       style={{ position: 'sticky', top: 0, zIndex: 50, flexShrink: 0 } as any}
     >
-      {/* Left: Logo + Title */}
+      {/* Logo + Title */}
       <XStack
         alignItems="center"
         gap="$3"
@@ -65,26 +78,37 @@ export function WebHeader({ items, currentPath, onNavigate, logo, title = 'MVP T
         </Text>
       </XStack>
 
-      {/* Center: Navigation */}
-      <XStack gap="$1" alignItems="center" role="navigation" aria-label="Main navigation">
-        {items.map((item) => {
-          const isActive = currentPath === item.href ||
-            (item.href !== '/' && currentPath.startsWith(item.href))
-          return (
-            <HeaderNavItem
-              key={item.href}
-              item={item}
-              isActive={isActive}
-              onPress={() => onNavigate(item.href)}
-            />
-          )
-        })}
-      </XStack>
+      {navAlign === 'left' && (
+        <>
+          <XStack gap="$1" alignItems="center" marginLeft="$4" role="navigation" aria-label="Main navigation">
+            {navItems}
+          </XStack>
+          <XStack flex={1} />
+          <XStack alignItems="center" gap="$3">{rightContent}</XStack>
+        </>
+      )}
 
-      {/* Right: Custom content (ThemeToggle, avatar, etc.) */}
-      <XStack alignItems="center" gap="$3">
-        {rightContent}
-      </XStack>
+      {navAlign === 'center' && (
+        <>
+          <XStack flex={1} />
+          <XStack gap="$1" alignItems="center" role="navigation" aria-label="Main navigation">
+            {navItems}
+          </XStack>
+          <XStack flex={1} justifyContent="flex-end">
+            <XStack alignItems="center" gap="$3">{rightContent}</XStack>
+          </XStack>
+        </>
+      )}
+
+      {navAlign === 'right' && (
+        <>
+          <XStack flex={1} />
+          <XStack gap="$1" alignItems="center" role="navigation" aria-label="Main navigation">
+            {navItems}
+          </XStack>
+          <XStack alignItems="center" gap="$3" marginLeft="$4">{rightContent}</XStack>
+        </>
+      )}
     </XStack>
   )
 }

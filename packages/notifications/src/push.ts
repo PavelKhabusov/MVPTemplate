@@ -1,7 +1,7 @@
 import { Platform } from 'react-native'
 import * as Notifications from 'expo-notifications'
 import * as Device from 'expo-device'
-import { api } from './api'
+import type { NotificationHttpClient } from './types'
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -13,7 +13,9 @@ Notifications.setNotificationHandler({
   }),
 })
 
-export async function registerForPushNotifications(): Promise<string | null> {
+export async function registerForPushNotifications(
+  http: NotificationHttpClient
+): Promise<string | null> {
   if (!Device.isDevice) {
     console.warn('Push notifications require a physical device')
     return null
@@ -36,7 +38,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
 
   // Register token with backend
   try {
-    await api.post('/push/register', {
+    await http.post('/push/register', {
       token,
       platform: Platform.OS,
     })

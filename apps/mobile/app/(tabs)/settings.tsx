@@ -29,7 +29,8 @@ import Animated, {
   useAnimatedScrollHandler,
 } from 'react-native-reanimated'
 import { authApi } from '../../src/services/auth'
-import { NotificationCenter } from '../../src/features/notifications/NotificationCenter'
+import { NotificationCenter } from '@mvp/notifications'
+import { api } from '../../src/services/api'
 
 const THEME_LABELS: Record<ThemeMode, string> = {
   system: 'settings.themeSystem',
@@ -55,6 +56,7 @@ export default function SettingsScreen() {
 
 function NotificationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const theme = useTheme()
+  const emailEnabled = useTemplateFlag('email', false)
 
   useEffect(() => {
     if (Platform.OS === 'web' && visible) {
@@ -77,7 +79,7 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
             <Ionicons name="close" size={24} color={theme.color.val} />
           </ScalePress>
         </XStack>
-        <NotificationCenter />
+        <NotificationCenter http={api} emailEnabled={emailEnabled} />
       </YStack>
     )
   }
@@ -90,7 +92,7 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
             <Ionicons name="close" size={24} color={theme.color.val} />
           </ScalePress>
         </XStack>
-        <NotificationCenter />
+        <NotificationCenter http={api} emailEnabled={emailEnabled} />
       </YStack>
     </Modal>
   )

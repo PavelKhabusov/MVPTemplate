@@ -20,6 +20,7 @@
     "@mvp/docs": "*",
     "@mvp/i18n": "*",
     "@mvp/lib": "*",
+    "@mvp/notifications": "*",
     "@mvp/proxy": "*",
     "@mvp/store": "*",
     "@mvp/ui": "*",

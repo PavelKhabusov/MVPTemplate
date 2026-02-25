@@ -4,6 +4,7 @@ import { mmkvStorage } from '@mvp/lib'
 
 export type WebLayout = 'sidebar' | 'header' | 'both'
 export type UserBadgePlacement = 'sidebar' | 'header' | 'nowhere' | 'both'
+export type HeaderNavAlign = 'left' | 'center' | 'right'
 
 interface TemplateConfigState {
   sidebarOpen: boolean
@@ -12,12 +13,16 @@ interface TemplateConfigState {
   customColor: string | null
   webLayout: WebLayout
   userBadgePlacement: UserBadgePlacement
+  headerNavAlign: HeaderNavAlign
+  compactProfile: boolean
   setSidebarOpen: (open: boolean) => void
   setFlag: (key: string, value: boolean) => void
   setColorScheme: (key: string) => void
   setCustomColor: (hex: string | null) => void
   setWebLayout: (layout: WebLayout) => void
   setUserBadgePlacement: (placement: UserBadgePlacement) => void
+  setHeaderNavAlign: (align: HeaderNavAlign) => void
+  setCompactProfile: (compact: boolean) => void
   resetAll: () => void
 }
 
@@ -30,6 +35,8 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       customColor: null,
       webLayout: 'sidebar',
       userBadgePlacement: 'sidebar',
+      headerNavAlign: 'center',
+      compactProfile: false,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setFlag: (key, value) =>
         set((state) => ({
@@ -39,7 +46,9 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       setCustomColor: (hex) => set({ customColor: hex, colorScheme: null }),
       setWebLayout: (layout) => set({ webLayout: layout }),
       setUserBadgePlacement: (placement) => set({ userBadgePlacement: placement }),
-      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar' }),
+      setHeaderNavAlign: (align) => set({ headerNavAlign: align }),
+      setCompactProfile: (compact) => set({ compactProfile: compact }),
+      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false }),
     }),
     {
       name: 'template-config',
@@ -50,6 +59,8 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
         customColor: state.customColor,
         webLayout: state.webLayout,
         userBadgePlacement: state.userBadgePlacement,
+        headerNavAlign: state.headerNavAlign,
+        compactProfile: state.compactProfile,
       }),
     },
   ),

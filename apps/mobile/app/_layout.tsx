@@ -8,12 +8,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
-import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar } from '@mvp/ui'
+import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar, ScalePress } from '@mvp/ui'
+import { AnimatePresence, MotiView } from 'moti'
 import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag } from '@mvp/template-config'
 import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
-import { initI18n } from '@mvp/i18n'
-import { useTranslation } from '@mvp/i18n'
+import { initI18n, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
+import type { SupportedLanguage } from '@mvp/i18n'
+import { useAppTranslation } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
 import { storage } from '@mvp/lib'
 import { SEO } from '@mvp/ui'
@@ -22,8 +24,7 @@ import { queryClient } from '../src/services/query-client'
 import { AuthProvider } from '@mvp/auth'
 import { authApi } from '../src/services/auth'
 import { api, getAccessToken } from '../src/services/api'
-import { registerForPushNotifications } from '../src/services/push'
-import { connectSSE, disconnectSSE } from '../src/services/sse'
+import { registerForPushNotifications, configureSSE, connectSSE, disconnectSSE } from '@mvp/notifications'
 
 // Moti's declarative API writes shared values during render by design — disable strict mode
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false })
@@ -168,30 +169,128 @@ function ThemeToggle({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-function UserBadge({ collapsed }: { collapsed: boolean }) {
+function UserBadge({ collapsed, compact }: { collapsed: boolean; compact: boolean }) {
   const user = useAuthStore((s) => s.user)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const theme = useTheme()
+  const { t, i18n, changeLanguage } = useAppTranslation()
+  const { mode, setMode } = useThemeStore()
+
   if (!user) return null
 
+  if (!compact) {
+    return (
+      <XStack
+        alignItems="center"
+        justifyContent={collapsed ? 'center' : 'flex-start'}
+        gap="$2"
+        paddingVertical="$2"
+        paddingHorizontal="$3"
+        borderRadius="$3"
+        hoverStyle={{ backgroundColor: '$backgroundHover' }}
+        cursor="pointer"
+        onPress={() => router.push('/settings' as any)}
+      >
+        <AppAvatar uri={user.avatarUrl} name={user.name} size={collapsed ? 28 : 32} />
+        {!collapsed && (
+          <YStack flex={1}>
+            <Text color="$color" fontSize="$2" fontWeight="600" numberOfLines={1}>{user.name}</Text>
+            <Text color="$mutedText" fontSize={11} numberOfLines={1}>{user.email}</Text>
+          </YStack>
+        )}
+      </XStack>
+    )
+  }
+
   return (
-    <XStack
-      alignItems="center"
-      justifyContent={collapsed ? 'center' : 'flex-start'}
-      gap="$2"
-      paddingVertical="$2"
-      paddingHorizontal="$3"
-      borderRadius="$3"
-      hoverStyle={{ backgroundColor: '$backgroundHover' }}
-      cursor="pointer"
-      onPress={() => router.push('/settings' as any)}
-    >
-      <AppAvatar uri={user.avatarUrl} name={user.name} size={collapsed ? 28 : 32} />
-      {!collapsed && (
-        <YStack flex={1}>
-          <Text color="$color" fontSize="$2" fontWeight="600" numberOfLines={1}>{user.name}</Text>
-          <Text color="$mutedText" fontSize={11} numberOfLines={1}>{user.email}</Text>
-        </YStack>
-      )}
-    </XStack>
+    <YStack position="relative" zIndex={100}>
+      <XStack
+        alignItems="center"
+        justifyContent={collapsed ? 'center' : 'flex-start'}
+        gap="$2"
+        paddingVertical="$2"
+        paddingHorizontal="$3"
+        borderRadius="$3"
+        hoverStyle={{ backgroundColor: '$backgroundHover' }}
+        cursor="pointer"
+        onPress={() => setMenuOpen(!menuOpen)}
+      >
+        <AppAvatar uri={user.avatarUrl} name={user.name} size={collapsed ? 28 : 32} />
+        {!collapsed && (
+          <YStack flex={1}>
+            <Text color="$color" fontSize="$2" fontWeight="600" numberOfLines={1}>{user.name}</Text>
+            <Text color="$mutedText" fontSize={11} numberOfLines={1}>{user.email}</Text>
+          </YStack>
+        )}
+      </XStack>
+      <AnimatePresence>
+        {menuOpen && (
+          <MotiView
+            from={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: 'timing', duration: 150 }}
+            style={{ position: 'absolute', bottom: '100%', left: 0, right: collapsed ? undefined : 0, minWidth: 200, marginBottom: 4, zIndex: 101 }}
+          >
+            <YStack
+              backgroundColor="$cardBackground"
+              borderRadius="$3"
+              borderWidth={1}
+              borderColor="$borderColor"
+              padding="$1"
+              shadowColor="$cardShadow"
+              shadowRadius={8}
+              shadowOpacity={1}
+              shadowOffset={{ width: 0, height: -4 }}
+            >
+              {/* User info header */}
+              <YStack paddingHorizontal="$3" paddingVertical="$2">
+                <Text color="$color" fontSize="$2" fontWeight="600" numberOfLines={1}>{user.name}</Text>
+                <Text color="$mutedText" fontSize={11} numberOfLines={1}>{user.email}</Text>
+              </YStack>
+              <YStack height={1} backgroundColor="$borderColor" marginVertical="$1" />
+
+              {/* Language */}
+              <Text color="$mutedText" fontSize={10} fontWeight="700" paddingHorizontal="$3" paddingTop="$1" textTransform="uppercase" letterSpacing={0.5}>
+                {t('profileMenu.language')}
+              </Text>
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <ScalePress key={lang} onPress={() => { changeLanguage(lang); setMenuOpen(false) }}>
+                  <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" justifyContent="space-between" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
+                    <Text fontSize="$2" color="$color">{LANGUAGE_LABELS[lang]}</Text>
+                    {i18n.language === lang && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                  </XStack>
+                </ScalePress>
+              ))}
+
+              {/* Theme */}
+              <Text color="$mutedText" fontSize={10} fontWeight="700" paddingHorizontal="$3" paddingTop="$2" textTransform="uppercase" letterSpacing={0.5}>
+                {t('profileMenu.theme')}
+              </Text>
+              {THEME_CYCLE.map((m) => (
+                <ScalePress key={m} onPress={() => { setMode(m); setMenuOpen(false) }}>
+                  <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" gap="$2" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
+                    <Ionicons name={THEME_ICONS[m]} size={14} color={mode === m ? theme.accent.val : theme.mutedText.val} />
+                    <Text fontSize="$2" color={mode === m ? '$color' : '$mutedText'} flex={1}>{t(THEME_LABELS[m])}</Text>
+                    {mode === m && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                  </XStack>
+                </ScalePress>
+              ))}
+
+              <YStack height={1} backgroundColor="$borderColor" marginVertical="$1" />
+
+              {/* Profile link */}
+              <ScalePress onPress={() => { router.push('/settings' as any); setMenuOpen(false) }}>
+                <XStack paddingHorizontal="$3" paddingVertical="$2" borderRadius="$2" alignItems="center" gap="$2" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
+                  <Ionicons name="person-outline" size={14} color={theme.mutedText.val} />
+                  <Text fontSize="$2" color="$color">{t('profileMenu.profile')}</Text>
+                </XStack>
+              </ScalePress>
+            </YStack>
+          </MotiView>
+        )}
+      </AnimatePresence>
+    </YStack>
   )
 }
 
@@ -203,6 +302,8 @@ function WebRootLayout() {
   const isMobile = useIsMobileWeb()
   const webLayout = useTemplateConfigStore((s) => s.webLayout)
   const userBadgePlacement = useTemplateConfigStore((s) => s.userBadgePlacement)
+  const headerNavAlign = useTemplateConfigStore((s) => s.headerNavAlign)
+  const compactProfile = useTemplateConfigStore((s) => s.compactProfile)
   const showHeader = webLayout === 'header' || webLayout === 'both'
   const showSidebar = webLayout === 'sidebar' || webLayout === 'both'
   const showBadgeInSidebar = userBadgePlacement === 'sidebar' || userBadgePlacement === 'both'
@@ -236,10 +337,11 @@ function WebRootLayout() {
           onNavigate={(href) => router.push(href as any)}
           logo={require('../assets/icon.png')}
           title="MVP Template"
+          navAlign={headerNavAlign}
           rightContent={
             <>
-              <ThemeToggle collapsed={false} />
-              {showBadgeInHeader && <UserBadge collapsed={false} />}
+              {!compactProfile && <ThemeToggle collapsed={false} />}
+              {showBadgeInHeader && <UserBadge collapsed={false} compact={compactProfile} />}
             </>
           }
         />
@@ -250,10 +352,11 @@ function WebRootLayout() {
             items={navItems}
             currentPath={pathname}
             onNavigate={(href) => router.push(href as any)}
+            hideLogo={showHeader}
             footer={(collapsed) => (
               <>
-                {showBadgeInSidebar && <UserBadge collapsed={collapsed} />}
-                <ThemeToggle collapsed={collapsed} />
+                {showBadgeInSidebar && <UserBadge collapsed={collapsed} compact={compactProfile} />}
+                {!compactProfile && <ThemeToggle collapsed={collapsed} />}
               </>
             )}
             logo={require('../assets/icon.png')}
@@ -356,6 +459,12 @@ export default function RootLayout() {
     }).catch(() => {})
   }, [])
 
+  // Configure SSE once
+  useEffect(() => {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+    configureSSE({ apiUrl, getAccessToken, queryClient })
+  }, [])
+
   // Register push notifications and connect SSE when authenticated
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
@@ -363,7 +472,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (isAuthenticated) {
       if (pushEnabled) {
-        registerForPushNotifications().catch(() => {})
+        registerForPushNotifications(api).catch(() => {})
       }
       connectSSE()
     }

@@ -1,37 +1,41 @@
-import { getAccessToken } from './api'
-import { queryClient } from './query-client'
+import { QueryClient } from '@tanstack/react-query'
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+interface SSEConfig {
+  apiUrl: string
+  getAccessToken: () => string | null
+  queryClient: QueryClient
+}
 
 let eventSource: EventSource | null = null
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+let _config: SSEConfig | null = null
+
+export function configureSSE(config: SSEConfig) {
+  _config = config
+}
 
 /**
  * Connect to SSE endpoint with authentication.
  * Uses query param for token since EventSource doesn't support custom headers.
- * In production, consider using a short-lived ticket instead of the JWT directly.
  */
 export function connectSSE() {
-  if (typeof EventSource === 'undefined') return // Not available on native
+  if (typeof EventSource === 'undefined') return
+  if (!_config) return
 
-  const token = getAccessToken()
+  const token = _config.getAccessToken()
   if (!token) return
 
   disconnectSSE()
 
-  const url = `${API_URL}/api/sse/events?token=${encodeURIComponent(token)}`
+  const url = `${_config.apiUrl}/api/sse/events?token=${encodeURIComponent(token)}`
 
   eventSource = new EventSource(url)
 
-  eventSource.addEventListener('notification', (event: any) => {
-    try {
-      const data = JSON.parse(event.data)
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
-    } catch {}
+  eventSource.addEventListener('notification', () => {
+    _config?.queryClient.invalidateQueries({ queryKey: ['notifications'] })
   })
 
   eventSource.addEventListener('error', () => {
-    // Reconnect with fresh token after delay
     disconnectSSE()
     reconnectTimer = setTimeout(() => connectSSE(), 5000)
   })
