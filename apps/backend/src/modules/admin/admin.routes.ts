@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify'
-import { z } from 'zod'
 import { authenticate } from '../../common/middleware/authenticate'
 import { requireAdmin } from '../../common/middleware/require-admin'
 import { adminRepository } from './admin.repository'
@@ -11,7 +10,8 @@ import {
 } from './admin.schema'
 import { sendSuccess, sendPaginated } from '../../common/utils/response'
 import { AppError } from '../../common/errors/app-error'
-import { getEnvFilePath, parseEnvFile, updateEnvFile } from '../../common/utils/env-file'
+import { env } from '../../config/env'
+import { getEnvFilePath, parseEnvFile } from '../../common/utils/env-file'
 
 // Keys exposed via the admin env API, grouped by category
 const ENV_GROUPS = {

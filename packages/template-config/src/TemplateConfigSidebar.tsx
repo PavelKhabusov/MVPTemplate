@@ -318,7 +318,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere' || radiusScale !== 'default' || fontScale !== 'default' || cardStyle !== 'elevated'
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere' || radiusScale !== 'default' || fontScale !== 'default' || fontFamily !== 'inter' || cardStyle !== 'elevated'
 
   return (
     <YStack
@@ -506,6 +506,50 @@ export function TemplateConfigSidebar() {
             ]}
             onChange={setFontScale}
           />
+        </YStack>
+
+        {/* Font Family */}
+        <YStack paddingHorizontal="$3" gap="$1.5" marginBottom="$3">
+          <XStack alignItems="center" gap="$2">
+            <Ionicons name="logo-google" size={16} color={theme.accent.val} />
+            <Text fontSize="$2" color="$color">{t('templateConfig.fontFamily')}</Text>
+          </XStack>
+          <YStack gap="$1">
+            {(Object.keys(FONT_FAMILY_CONFIG) as FontFamily[]).map((key) => {
+              const cfg = FONT_FAMILY_CONFIG[key]
+              const isSelected = fontFamily === key
+              return (
+                <Pressable
+                  key={key}
+                  onPress={() => { setFontFamily(key); applyFontFamily(key) }}
+                >
+                  <XStack
+                    alignItems="center"
+                    justifyContent="space-between"
+                    paddingHorizontal="$2"
+                    paddingVertical={6}
+                    borderRadius={6}
+                    borderWidth={1}
+                    borderColor={isSelected ? '$accent' : 'transparent'}
+                    backgroundColor={isSelected ? '$subtleBackground' : 'transparent'}
+                    hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+                  >
+                    <Text
+                      fontSize={13}
+                      color={isSelected ? '$accent' : '$color'}
+                      fontWeight={isSelected ? '600' : '400'}
+                      style={{ fontFamily: cfg.cssStack } as any}
+                    >
+                      {cfg.label}
+                    </Text>
+                    {isSelected && (
+                      <Ionicons name="checkmark" size={14} color={theme.accent.val} />
+                    )}
+                  </XStack>
+                </Pressable>
+              )
+            })}
+          </YStack>
         </YStack>
 
         {/* Web Layout */}
