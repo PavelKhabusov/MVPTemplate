@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Platform, ScrollView, Pressable } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
@@ -6,7 +6,8 @@ import { MotiView } from 'moti'
 import { useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
 import { useIsMobileWeb } from '@mvp/ui'
-import { useCookieConsentStore } from '@mvp/store'
+import { useCookieConsentStore, useThemeStore } from '@mvp/store'
+import type { ThemeMode } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
 import type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, SearchPlacement, RadiusScale, FontScale, CardStyle } from './store'
 import { TEMPLATE_FLAGS } from './flags'
@@ -114,7 +115,7 @@ function ToggleRow({ icon, label, value, onToggle }: { icon: keyof typeof Ionico
   )
 }
 
-function SelectRow<T extends string>({
+function SegmentedControl<T extends string>({
   icon,
   label,
   value,
@@ -128,69 +129,102 @@ function SelectRow<T extends string>({
   onChange: (value: T) => void
 }) {
   const theme = useTheme()
-  const [open, setOpen] = useState(false)
-
-  const selectedLabel = options.find((o) => o.value === value)?.label ?? value
 
   return (
-    <YStack>
-      <Pressable onPress={() => setOpen(!open)}>
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          paddingHorizontal="$3"
-          paddingVertical="$2"
-          hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
-        >
-          <XStack alignItems="center" gap="$2" flex={1}>
-            <Ionicons name={icon} size={16} color={theme.accent.val} />
-            <Text fontSize="$2" color="$color" flex={1} numberOfLines={1}>
-              {label}
-            </Text>
-          </XStack>
-          <XStack alignItems="center" gap="$1">
-            <Text fontSize="$2" color="$mutedText">{selectedLabel}</Text>
-            <Ionicons
-              name={open ? 'chevron-up' : 'chevron-down'}
-              size={14}
-              color={theme.mutedText.val}
-            />
-          </XStack>
-        </XStack>
-      </Pressable>
-      {open && (
-        <YStack paddingLeft="$6" paddingRight="$3" paddingBottom="$1">
-          {options.map((opt) => (
-            <Pressable
-              key={opt.value}
-              onPress={() => { onChange(opt.value); setOpen(false) }}
+    <YStack paddingHorizontal="$3" paddingVertical="$1.5" gap="$1.5">
+      <XStack alignItems="center" gap="$2">
+        <Ionicons name={icon} size={16} color={theme.accent.val} />
+        <Text fontSize="$2" color="$color">{label}</Text>
+      </XStack>
+      <XStack
+        borderRadius={8}
+        borderWidth={1}
+        borderColor="$borderColor"
+        overflow="hidden"
+      >
+        {options.map((opt, i) => (
+          <Pressable
+            key={opt.value}
+            onPress={() => onChange(opt.value)}
+            style={{ flex: 1 }}
+          >
+            <XStack
+              alignItems="center"
+              justifyContent="center"
+              paddingVertical={6}
+              backgroundColor={value === opt.value ? '$accent' : 'transparent'}
+              borderLeftWidth={i > 0 ? 1 : 0}
+              borderLeftColor="$borderColor"
             >
-              <XStack
-                alignItems="center"
-                gap="$2"
-                paddingVertical="$1.5"
-                paddingHorizontal="$2"
-                borderRadius="$2"
-                backgroundColor={value === opt.value ? '$backgroundHover' : 'transparent'}
-                hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
+              <Text
+                fontSize={11}
+                fontWeight={value === opt.value ? '600' : '400'}
+                color={value === opt.value ? 'white' : '$mutedText'}
+                numberOfLines={1}
               >
+                {opt.label}
+              </Text>
+            </XStack>
+          </Pressable>
+        ))}
+      </XStack>
+    </YStack>
+  )
+}
+
+function IconButtonGroup<T extends string>({
+  icon,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  icon: keyof typeof Ionicons.glyphMap
+  label: string
+  value: T
+  options: { value: T; icon?: keyof typeof Ionicons.glyphMap; text?: string }[]
+  onChange: (value: T) => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <YStack paddingHorizontal="$3" paddingVertical="$1.5" gap="$1.5">
+      <XStack alignItems="center" gap="$2">
+        <Ionicons name={icon} size={16} color={theme.accent.val} />
+        <Text fontSize="$2" color="$color">{label}</Text>
+      </XStack>
+      <XStack gap="$1.5">
+        {options.map((opt) => (
+          <Pressable key={opt.value} onPress={() => onChange(opt.value)}>
+            <YStack
+              width={36}
+              height={32}
+              borderRadius={8}
+              alignItems="center"
+              justifyContent="center"
+              backgroundColor={value === opt.value ? '$accent' : '$subtleBackground'}
+              borderWidth={1}
+              borderColor={value === opt.value ? '$accent' : '$borderColor'}
+            >
+              {opt.icon ? (
                 <Ionicons
-                  name={value === opt.value ? 'radio-button-on' : 'radio-button-off'}
-                  size={14}
-                  color={value === opt.value ? theme.accent.val : theme.mutedText.val}
+                  name={opt.icon}
+                  size={16}
+                  color={value === opt.value ? 'white' : theme.mutedText.val}
                 />
+              ) : (
                 <Text
-                  fontSize="$2"
-                  color={value === opt.value ? '$color' : '$mutedText'}
-                  fontWeight={value === opt.value ? '600' : '400'}
+                  fontSize={11}
+                  fontWeight="700"
+                  color={value === opt.value ? 'white' : '$mutedText'}
                 >
-                  {opt.label}
+                  {opt.text}
                 </Text>
-              </XStack>
-            </Pressable>
-          ))}
-        </YStack>
-      )}
+              )}
+            </YStack>
+          </Pressable>
+        ))}
+      </XStack>
     </YStack>
   )
 }
@@ -268,6 +302,7 @@ export function TemplateConfigSidebar() {
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
   const resetConsent = useCookieConsentStore((s) => s.resetConsent)
   const isMobile = useIsMobileWeb()
+  const { mode, setMode } = useThemeStore()
   const showHeaderControls = webLayout === 'header' || webLayout === 'both'
 
   const themeOutput = useMemo(() => buildThemeOutput(colorScheme, radiusScale, cardStyle), [colorScheme, radiusScale, cardStyle])
@@ -458,7 +493,7 @@ export function TemplateConfigSidebar() {
 
         {/* Font Scale */}
         <YStack marginBottom="$3">
-          <SelectRow<FontScale>
+          <SegmentedControl<FontScale>
             icon="text-outline"
             label={t('templateConfig.fontScale')}
             value={fontScale}
@@ -484,7 +519,7 @@ export function TemplateConfigSidebar() {
           {t('templateConfig.layoutSection')}
         </Text>
         <YStack marginBottom="$3">
-          <SelectRow<WebLayout>
+          <SegmentedControl<WebLayout>
             icon="browsers-outline"
             label={t('templateConfig.webLayout')}
             value={webLayout}
@@ -495,7 +530,7 @@ export function TemplateConfigSidebar() {
             ]}
             onChange={setWebLayout}
           />
-          <SelectRow<UserBadgePlacement>
+          <SegmentedControl<UserBadgePlacement>
             icon="person-outline"
             label={t('templateConfig.userBadge')}
             value={userBadgePlacement}
@@ -519,18 +554,29 @@ export function TemplateConfigSidebar() {
             }
             onChange={setUserBadgePlacement}
           />
-          <SelectRow<SupportedLanguage>
+          <IconButtonGroup<SupportedLanguage>
             icon="language-outline"
             label={t('templateConfig.language')}
             value={i18n.language as SupportedLanguage}
             options={SUPPORTED_LANGUAGES.map((lang) => ({
               value: lang,
-              label: LANGUAGE_LABELS[lang],
+              text: lang.toUpperCase(),
             }))}
             onChange={(lang) => changeLanguage(lang)}
           />
+          <IconButtonGroup<ThemeMode>
+            icon="contrast-outline"
+            label={t('profileMenu.theme')}
+            value={mode}
+            options={[
+              { value: 'light', icon: 'sunny-outline' },
+              { value: 'dark', icon: 'moon-outline' },
+              { value: 'system', icon: 'contrast-outline' },
+            ]}
+            onChange={(m) => setMode(m)}
+          />
           {showHeaderControls && (
-            <SelectRow<HeaderNavAlign>
+            <SegmentedControl<HeaderNavAlign>
               icon="apps-outline"
               label={t('templateConfig.headerNavAlign')}
               value={headerNavAlign}
@@ -551,7 +597,7 @@ export function TemplateConfigSidebar() {
             />
           )}
           {!compactProfile && (
-            <SelectRow<ItemPlacement>
+            <SegmentedControl<ItemPlacement>
               icon="language-outline"
               label={t('templateConfig.languagePlacement')}
               value={languagePlacement}
@@ -577,7 +623,7 @@ export function TemplateConfigSidebar() {
             />
           )}
           {!compactProfile && (
-            <SelectRow<ItemPlacement>
+            <SegmentedControl<ItemPlacement>
               icon="contrast-outline"
               label={t('templateConfig.themePlacement')}
               value={themePlacement}
@@ -602,7 +648,7 @@ export function TemplateConfigSidebar() {
               onChange={setThemePlacement}
             />
           )}
-          <SelectRow<SearchPlacement>
+          <SegmentedControl<SearchPlacement>
             icon="search-outline"
             label={t('templateConfig.searchPlacement')}
             value={searchPlacement}
