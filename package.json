@@ -8,7 +8,8 @@
   "scripts": {
     "docker": "docker compose -f apps/backend/docker/docker-compose.dev.yml up -d",
     "docker:stop": "docker compose -f apps/backend/docker/docker-compose.dev.yml down",
-    "dev": "turbo dev --filter=mobile --filter=backend",
+    "update-ip": "node scripts/update-ip.mjs",
+    "dev": "node scripts/update-ip.mjs && turbo dev --filter=mobile --filter=backend",
     "dev:mobile": "npm run start -w apps/mobile",
     "dev:backend": "npm run dev -w apps/backend",
     "build": "turbo build",
