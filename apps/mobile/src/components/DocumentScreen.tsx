@@ -61,7 +61,14 @@ function markdownToHtml(markdown: string, title: string): string {
 
 async function downloadPDF(content: string, title: string) {
   if (Platform.OS === 'web') {
-    window.print()
+    const html = markdownToHtml(content, title)
+    const win = window.open('', '_blank')
+    if (win) {
+      win.document.write(html)
+      win.document.close()
+      win.focus()
+      win.print()
+    }
     return
   }
 
