@@ -65,7 +65,7 @@ export function AppButton({
     <ScalePress disabled={isDisabled} scale={animated ? undefined : 1}>
       <Button
         size={sizeToToken[size]}
-        borderRadius={Number(theme.radiusSm?.val) || 8}
+        borderRadius={Number(theme.radiusSm?.val) ?? 8}
         disabled={isDisabled}
         opacity={isDisabled ? 0.5 : 1}
         role="button"

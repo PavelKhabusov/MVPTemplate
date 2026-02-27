@@ -107,7 +107,7 @@ function ToastOverlay({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: (
           >
             <XStack
               backgroundColor={theme.cardBackground.val}
-              borderRadius={Number(theme.radiusSm?.val) || 8}
+              borderRadius={Number(theme.radiusSm?.val) ?? 8}
               borderWidth={1}
               borderColor={COLORS[toast.type]}
               paddingHorizontal="$3"

@@ -54,7 +54,7 @@ export function CookieBanner({ enabled = true }: { enabled?: boolean }) {
         >
           <YStack
             backgroundColor="$cardBackground"
-            borderRadius={Number(theme.radiusMd?.val) || 12}
+            borderRadius={Number(theme.radiusMd?.val) ?? 12}
             borderWidth={1}
             borderColor="$borderColor"
             padding="$4"
@@ -88,7 +88,7 @@ export function CookieBanner({ enabled = true }: { enabled?: boolean }) {
                     backgroundColor="transparent"
                     borderWidth={1}
                     borderColor="$borderColor"
-                    borderRadius={Number(theme.radiusSm?.val) || 8}
+                    borderRadius={Number(theme.radiusSm?.val) ?? 8}
                     paddingHorizontal="$3"
                     paddingVertical="$2"
                     alignItems="center"
@@ -104,7 +104,7 @@ export function CookieBanner({ enabled = true }: { enabled?: boolean }) {
                 <ScalePress onPress={handleAccept}>
                   <XStack
                     backgroundColor="$accent"
-                    borderRadius={Number(theme.radiusSm?.val) || 8}
+                    borderRadius={Number(theme.radiusSm?.val) ?? 8}
                     paddingHorizontal="$3.5"
                     paddingVertical="$2"
                     alignItems="center"
