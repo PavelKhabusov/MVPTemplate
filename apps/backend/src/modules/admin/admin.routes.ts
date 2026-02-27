@@ -11,7 +11,7 @@ import {
 import { sendSuccess, sendPaginated } from '../../common/utils/response'
 import { AppError } from '../../common/errors/app-error'
 import { env } from '../../config/env'
-import { getEnvFilePath, parseEnvFile } from '../../common/utils/env-file'
+import { getEnvFilePath, parseEnvFile, updateEnvFile } from '../../common/utils/env-file'
 
 // Keys exposed via the admin env API, grouped by category
 const ENV_GROUPS = {
@@ -120,6 +120,44 @@ export async function adminRoutes(app: FastifyInstance) {
       return sendSuccess(reply, result)
     } catch (err: any) {
       throw AppError.internal('Failed to read environment file')
+    }
+  })
+
+  // PATCH /api/admin/env — update one or more env values
+  app.patch('/env', async (request, reply) => {
+    if (env.NODE_ENV === 'production') {
+      throw AppError.forbidden('Environment configuration is not accessible via API in production')
+    }
+
+    const updates = request.body as Record<string, string | boolean | null>
+
+    // Only allow whitelisted keys
+    const filtered: Record<string, string | boolean | null> = {}
+    for (const [key, value] of Object.entries(updates)) {
+      if (ALL_ENV_KEYS.includes(key)) {
+        filtered[key] = value
+      }
+    }
+
+    try {
+      const envPath = getEnvFilePath()
+      updateEnvFile(envPath, filtered)
+      const { values } = parseEnvFile(envPath)
+
+      const result: Record<string, Record<string, { value: string | null; type: string }>> = {}
+      for (const [group, config] of Object.entries(ENV_GROUPS)) {
+        result[group] = {}
+        for (const key of config.keys) {
+          result[group][key] = {
+            value: key in values ? values[key] : null,
+            type: config.types[key] || 'string',
+          }
+        }
+      }
+
+      return sendSuccess(reply, result)
+    } catch (err: any) {
+      throw AppError.internal('Failed to update environment file')
     }
   })
 }
