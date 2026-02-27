@@ -79,23 +79,28 @@ function updateIp() {
   }
 }
 
-// ─── Шаг 5: открываем новые окна терминала (macOS) ───────────────────────────
-function openTerminalWindow(title, cmd) {
-  // Используем osascript для открытия нового окна в Terminal.app
+// ─── Шаг 5: открываем терминалы в VS Code ────────────────────────────────────
+function openVSCodeTerminal(label, cmd) {
+  // Открываем новую панель терминала в VS Code (Ctrl+Shift+`) и запускаем команду
   const script = `
-    tell application "Terminal"
+    tell application "Visual Studio Code"
       activate
-      set newWin to do script "${cmd.replace(/"/g, '\\"')}"
-      tell newWin
-        set custom title to "${title}"
+    end tell
+    delay 0.4
+    tell application "System Events"
+      tell process "Code"
+        key code 50 using {control down, shift down}
+        delay 0.8
+        keystroke "${cmd.replace(/"/g, '\\"').replace(/\\/g, '\\\\')}"
+        key code 36
       end tell
     end tell
   `
   try {
     execFileSync('osascript', ['-e', script])
-    ok(`Открыто окно: ${title}`)
+    ok(`Запущен терминал VS Code: ${label}`)
   } catch (e) {
-    fatal(`Не удалось открыть терминал для ${title}: ` + e.message)
+    fatal(`Не удалось открыть терминал VS Code для ${label}: ` + e.message)
   }
 }
 
@@ -116,9 +121,9 @@ async function main() {
   ok('Открываем терминалы для backend и mobile...')
   console.log()
 
-  openTerminalWindow('Backend', `cd ${ROOT} && npm run dev -w apps/backend`)
-  await sleep(500)
-  openTerminalWindow('Mobile', `cd ${ROOT} && npm run start -w apps/mobile`)
+  openVSCodeTerminal('Backend', `cd ${ROOT} && npm run dev -w apps/backend`)
+  await sleep(1200)
+  openVSCodeTerminal('Mobile', `cd ${ROOT} && npm run start -w apps/mobile`)
 
   console.log()
   ok('Готово! Backend и Mobile запущены в отдельных окнах.')
