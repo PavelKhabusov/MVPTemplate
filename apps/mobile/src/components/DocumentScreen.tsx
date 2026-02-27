@@ -62,13 +62,14 @@ function markdownToHtml(markdown: string, title: string): string {
 async function downloadPDF(content: string, title: string) {
   if (Platform.OS === 'web') {
     const html = markdownToHtml(content, title)
-    const win = window.open('', '_blank')
-    if (win) {
-      win.document.write(html)
-      win.document.close()
-      win.focus()
-      win.print()
-    }
+    const iframe = document.createElement('iframe')
+    Object.assign(iframe.style, { position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0' })
+    document.body.appendChild(iframe)
+    iframe.contentDocument!.write(html)
+    iframe.contentDocument!.close()
+    iframe.contentWindow!.focus()
+    iframe.contentWindow!.print()
+    setTimeout(() => document.body.removeChild(iframe), 1000)
     return
   }
 
