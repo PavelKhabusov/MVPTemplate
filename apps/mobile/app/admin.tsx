@@ -711,9 +711,10 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
 }
 
 const PAYMENT_PROVIDERS = [
-  { key: 'stripe', label: 'Stripe', color: '#635BFF', keys: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'], hintKey: 'admin.hintStripe', hintUrl: 'https://dashboard.stripe.com/apikeys' },
-  { key: 'yookassa', label: 'YooKassa', color: '#0077FF', keys: ['YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YOOKASSA_WEBHOOK_SECRET'], hintKey: 'admin.hintYookassa', hintUrl: 'https://yookassa.ru/my/merchant/integration' },
-  { key: 'robokassa', label: 'Robokassa', color: '#E5392B', keys: ['ROBOKASSA_MERCHANT_LOGIN', 'ROBOKASSA_PASSWORD1', 'ROBOKASSA_PASSWORD2'], hintKey: 'admin.hintRobokassa', hintUrl: 'https://partner.robokassa.ru/' },
+  { key: 'stripe',    label: 'Stripe',    color: '#635BFF', enabledKey: 'STRIPE_ENABLED',    keys: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'],                                 hintKey: 'admin.hintStripe',    hintUrl: 'https://dashboard.stripe.com/apikeys' },
+  { key: 'paypal',   label: 'PayPal',    color: '#003087', enabledKey: 'PAYPAL_ENABLED',     keys: ['PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET', 'PAYPAL_WEBHOOK_ID'],               hintKey: 'admin.hintPaypal',    hintUrl: 'https://developer.paypal.com/dashboard/' },
+  { key: 'yookassa', label: 'YooKassa',  color: '#0077FF', enabledKey: 'YOOKASSA_ENABLED',   keys: ['YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YOOKASSA_WEBHOOK_SECRET'],          hintKey: 'admin.hintYookassa',  hintUrl: 'https://yookassa.ru/my/merchant/integration' },
+  { key: 'robokassa', label: 'Robokassa', color: '#E5392B', enabledKey: 'ROBOKASSA_ENABLED',  keys: ['ROBOKASSA_MERCHANT_LOGIN', 'ROBOKASSA_PASSWORD1', 'ROBOKASSA_PASSWORD2'],      hintKey: 'admin.hintRobokassa', hintUrl: 'https://partner.robokassa.ru/' },
 ] as const
 
 function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
@@ -727,7 +728,10 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
   const [activeProvider, setActiveProvider] = useState<typeof PAYMENT_PROVIDERS[number]['key']>('stripe')
 
   const testModeEntry = keys['ROBOKASSA_TEST_MODE']
+  const paypalModeEntry = keys['PAYPAL_MODE']
   const activeProviderData = PAYMENT_PROVIDERS.find((p) => p.key === activeProvider)!
+  const enabledEntry = keys[activeProviderData.enabledKey]
+  const isProviderEnabled = enabledEntry ? enabledEntry.value === 'true' : true
   const providerKeys = activeProviderData.keys
     .filter((k) => k in keys)
     .map((k) => [k, keys[k]] as [string, EnvEntry])
@@ -783,6 +787,19 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             </XStack>
           </ScrollView>
 
+          {/* Per-provider enable toggle */}
+          {enabledEntry && (
+            <XStack alignItems="center" justifyContent="space-between" paddingVertical="$1">
+              <Text fontSize="$3" color="$color" flex={1}>
+                {t('admin.providerEnabled', { provider: activeProviderData.label })}
+              </Text>
+              <AppSwitch
+                checked={isProviderEnabled}
+                onCheckedChange={(checked) => onUpdate(activeProviderData.enabledKey, String(checked))}
+              />
+            </XStack>
+          )}
+
           {/* Provider env fields */}
           {providerKeys.map(([key, entry]) => (
             <EnvStringField
@@ -802,7 +819,7 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             </Text>
           </ScalePress>
 
-          {/* Robokassa test mode toggle — show when robokassa is active */}
+          {/* Robokassa test mode toggle */}
           {activeProvider === 'robokassa' && testModeEntry && (
             <XStack alignItems="center" justifyContent="space-between">
               <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
@@ -811,6 +828,19 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               <AppSwitch
                 checked={testModeEntry.value === 'true'}
                 onCheckedChange={(checked) => onUpdate('ROBOKASSA_TEST_MODE', String(checked))}
+              />
+            </XStack>
+          )}
+
+          {/* PayPal sandbox/live mode toggle */}
+          {activeProvider === 'paypal' && paypalModeEntry && (
+            <XStack alignItems="center" justifyContent="space-between">
+              <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                {t('admin.paypalSandbox')}
+              </Text>
+              <AppSwitch
+                checked={paypalModeEntry.value !== 'live'}
+                onCheckedChange={(checked) => onUpdate('PAYPAL_MODE', checked ? 'sandbox' : 'live')}
               />
             </XStack>
           )}
