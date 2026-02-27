@@ -80,7 +80,10 @@
     "documents": "Документы",
     "downloadPDF": "Скачать PDF",
     "about": "О приложении",
+    "aboutApp": "О приложении",
     "version": "Версия",
+    "developer": "Разработчик",
+    "madeWith": "Сделано с ❤️",
     "signOut": "Выйти"
   },
   "profile": {

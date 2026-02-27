@@ -80,7 +80,10 @@
     "documents": "Documents",
     "downloadPDF": "Download PDF",
     "about": "About",
+    "aboutApp": "About App",
     "version": "Version",
+    "developer": "Developer",
+    "madeWith": "Made with ❤️",
     "signOut": "Sign Out"
   },
   "profile": {

@@ -6,6 +6,8 @@
 export const APP_CONFIG = {
   name: 'MVPTemplate',
   version: '1.0.0',
+  developer: 'Pavel Khabusov',
+  year: '2025',
 
   // API
   apiUrl: process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000',

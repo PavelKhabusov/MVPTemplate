@@ -31,6 +31,7 @@ import Animated, {
 import { authApi } from '../../src/services/auth'
 import { NotificationCenter } from '@mvp/notifications'
 import { api } from '../../src/services/api'
+import { APP_CONFIG } from '../../src/config/app'
 
 const THEME_LABELS: Record<ThemeMode, string> = {
   system: 'settings.themeSystem',
@@ -98,6 +99,105 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
   )
 }
 
+function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+
+  const content = (
+    <YStack alignItems="center" gap="$5" paddingHorizontal="$5" paddingVertical="$6">
+      <YStack alignItems="center" gap="$2">
+        <YStack
+          width={72}
+          height={72}
+          borderRadius="$5"
+          backgroundColor="$subtleBackground"
+          borderWidth={1}
+          borderColor="$borderColor"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
+        </YStack>
+        <Text fontSize="$6" fontWeight="700" color="$color">{APP_CONFIG.name}</Text>
+        <Text fontSize="$2" color="$mutedText">v{APP_CONFIG.version}</Text>
+      </YStack>
+
+      <YStack width="100%" gap="$2">
+        <XStack
+          paddingVertical="$3"
+          paddingHorizontal="$4"
+          backgroundColor="$subtleBackground"
+          borderRadius="$3"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Text fontSize="$3" color="$mutedText">{t('settings.version')}</Text>
+          <Text fontSize="$3" color="$color" fontWeight="500">{APP_CONFIG.version}</Text>
+        </XStack>
+        <XStack
+          paddingVertical="$3"
+          paddingHorizontal="$4"
+          backgroundColor="$subtleBackground"
+          borderRadius="$3"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Text fontSize="$3" color="$mutedText">{t('settings.developer')}</Text>
+          <Text fontSize="$3" color="$color" fontWeight="500">{APP_CONFIG.developer}</Text>
+        </XStack>
+      </YStack>
+
+      <Text fontSize="$2" color="$mutedText" textAlign="center">
+        {t('settings.madeWith')} · © {APP_CONFIG.year}
+      </Text>
+    </YStack>
+  )
+
+  if (!visible) return null
+
+  if (Platform.OS === 'web') {
+    return (
+      <YStack
+        // @ts-ignore
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' }}
+        onPress={onClose}
+      >
+        <YStack
+          backgroundColor="$background"
+          borderRadius="$5"
+          borderWidth={1}
+          borderColor="$borderColor"
+          maxWidth={400}
+          width="90%"
+          // @ts-ignore
+          onPress={(e: any) => e.stopPropagation()}
+        >
+          <XStack justifyContent="flex-end" padding="$3">
+            <ScalePress onPress={onClose}>
+              <Ionicons name="close" size={22} color={theme.mutedText.val} />
+            </ScalePress>
+          </XStack>
+          {content}
+        </YStack>
+      </YStack>
+    )
+  }
+
+  return (
+    <Modal visible animationType="slide" presentationStyle="formSheet" onRequestClose={onClose}>
+      <YStack flex={1} backgroundColor="$background" paddingTop={insets.top}>
+        <XStack justifyContent="flex-end" padding="$3">
+          <ScalePress onPress={onClose}>
+            <Ionicons name="close" size={24} color={theme.color.val} />
+          </ScalePress>
+        </XStack>
+        {content}
+      </YStack>
+    </Modal>
+  )
+}
+
 function UnauthenticatedSettingsView() {
   const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -107,6 +207,7 @@ function UnauthenticatedSettingsView() {
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -202,7 +303,8 @@ function UnauthenticatedSettingsView() {
           <SettingsGroupItem
             icon="information-circle-outline"
             label={t('settings.about')}
-            value="1.0.0"
+            value={APP_CONFIG.version}
+            onPress={() => setShowAbout(true)}
           />
         </SettingsGroup>
       </SlideIn>
@@ -227,6 +329,8 @@ function UnauthenticatedSettingsView() {
           />
         </SettingsGroup>
       </SlideIn>
+
+      <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
     </ScrollView>
   )
 }
@@ -244,6 +348,7 @@ function AuthenticatedSettingsView() {
   const paymentsEnabled = useTemplateFlag('payments', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
 
   const scrollY = useSharedValue(0)
@@ -408,7 +513,8 @@ function AuthenticatedSettingsView() {
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
-              value="1.0.0"
+              value={APP_CONFIG.version}
+              onPress={() => setShowAbout(true)}
             />
           </SettingsGroup>
         </StaggerGroup>
@@ -435,6 +541,7 @@ function AuthenticatedSettingsView() {
         </StaggerGroup>
 
         {pushEnabled && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
+        <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
 
         {/* Admin */}
         {userRole === 'admin' && (
@@ -477,6 +584,7 @@ function WebSettingsView() {
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -624,7 +732,8 @@ function WebSettingsView() {
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
-              value="1.0.0"
+              value={APP_CONFIG.version}
+              onPress={() => setShowAbout(true)}
             />
           </SettingsGroup>
         </StaggerGroup>
@@ -651,6 +760,7 @@ function WebSettingsView() {
         </StaggerGroup>
 
         {pushEnabled && isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
+        <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
 
         {/* Admin */}
         {userRole === 'admin' && (
