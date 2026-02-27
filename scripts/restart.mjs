@@ -46,32 +46,15 @@ function killOldProcesses() {
   ok('Старые процессы остановлены')
 }
 
-// ─── Шаг 2: Docker ───────────────────────────────────────────────────────────
+// ─── Шаг 2: Docker (с ожиданием healthcheck) ─────────────────────────────────
 function startDocker() {
-  info('Запускаем Docker (postgres + redis)...')
+  info('Запускаем Docker и ждём готовности сервисов...')
   try {
-    execSync('docker compose -f apps/backend/docker/docker-compose.dev.yml up -d', { stdio: 'inherit', cwd: ROOT })
-    ok('Docker запущен')
+    execSync('docker compose -f apps/backend/docker/docker-compose.dev.yml up -d --wait', { stdio: 'inherit', cwd: ROOT })
+    ok('Docker запущен, postgres и redis готовы')
   } catch (e) {
     fatal('Ошибка запуска Docker: ' + e.message)
   }
-}
-
-// ─── Шаг 3: ждём PostgreSQL ──────────────────────────────────────────────────
-async function waitForPostgres(maxAttempts = 20, interval = 1500) {
-  info('Ждём готовности PostgreSQL...')
-  for (let i = 0; i < maxAttempts; i++) {
-    const result = run("docker exec $(docker ps -qf 'name=postgres') pg_isready -U postgres 2>/dev/null")
-    if (result.includes('accepting connections')) {
-      process.stdout.write('\r' + ' '.repeat(60) + '\r')
-      ok('PostgreSQL готов')
-      return
-    }
-    process.stdout.write(`\r  ${c.yellow}Ожидание PostgreSQL... ${i + 1}/${maxAttempts}${c.reset}`)
-    await sleep(interval)
-  }
-  process.stdout.write('\r' + ' '.repeat(60) + '\r')
-  warn('PostgreSQL не ответил вовремя, продолжаем...')
 }
 
 // ─── Шаг 4: обновляем IP ─────────────────────────────────────────────────────
@@ -115,7 +98,6 @@ async function main() {
 
   killOldProcesses()
   startDocker()
-  await waitForPostgres()
   updateIp()
 
   console.log()
