@@ -19,7 +19,7 @@ export const TEMPLATE_FLAGS: TemplateFlag[] = [
   { key: 'analytics', labelKey: 'templateConfig.analytics', icon: 'bar-chart-outline', defaultValue: true, scope: 'backend', envVar: 'ANALYTICS_ENABLED', envType: 'boolean' },
   { key: 'posthog', labelKey: 'templateConfig.posthog', icon: 'stats-chart-outline', defaultValue: false, scope: 'both', envVar: 'EXPO_PUBLIC_POSTHOG_KEY', envType: 'secret' },
   { key: 'cookieBanner', labelKey: 'templateConfig.cookieBanner', icon: 'information-circle-outline', defaultValue: true, scope: 'frontend', envVar: 'EXPO_PUBLIC_COOKIE_BANNER', envType: 'boolean' },
-  { key: 'docFeedback', labelKey: 'templateConfig.docFeedback', icon: 'chatbubble-outline', defaultValue: true, scope: 'both' },
+  { key: 'docFeedback', labelKey: 'templateConfig.docFeedback', icon: 'chatbubble-outline', defaultValue: true, scope: 'frontend' },
   { key: 'pushNotifications', labelKey: 'templateConfig.pushNotifications', icon: 'notifications-outline', defaultValue: false, scope: 'backend', envVar: 'EXPO_ACCESS_TOKEN', envType: 'secret' },
   { key: 'payments', labelKey: 'templateConfig.payments', icon: 'card-outline', defaultValue: false, scope: 'both', envVar: 'PAYMENTS_ENABLED', envType: 'boolean' },
 ]

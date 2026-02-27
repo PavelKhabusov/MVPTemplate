@@ -2921,6 +2921,7 @@ function TemplateConfigTab() {
             <YStack gap="$2">
               {frontendFlags.map((flag) => {
                 const value = getFlagValue(flag.key, flag.defaultValue)
+                if (flag.key === 'docFeedback' && !getFlagValue('docs', true)) return null
                 return (
                   <XStack key={flag.key} alignItems="center" justifyContent="space-between">
                     <XStack alignItems="center" gap="$2" flex={1}>
