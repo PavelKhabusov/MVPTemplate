@@ -4,7 +4,7 @@ import { XStack, YStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from '@mvp/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS, type SupportedLanguage } from '@mvp/i18n'
-import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
+import { useThemeStore, useLanguageStore, useAuthStore, useCompanyStore } from '@mvp/store'
 import { MotiView, AnimatePresence } from 'moti'
 import { AppAvatar } from '../components/AppAvatar'
 import { ScalePress } from '../animations/ScalePress'
@@ -21,6 +21,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const user = useAuthStore((s) => s.user)
+  const appName = useCompanyStore((s) => s.info.appName) || 'MVPTemplate'
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -100,7 +101,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
                 <Text color="white" fontWeight="bold" fontSize={16}>M</Text>
               </YStack>
             )}
-            <Text fontWeight="bold" fontSize="$4" color="$color">MVP Template</Text>
+            <Text fontWeight="bold" fontSize="$4" color="$color">{appName}</Text>
           </XStack>
         </ScalePress>
 
