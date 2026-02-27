@@ -1,0 +1,177 @@
+import React from 'react'
+import { Modal } from 'react-native'
+import { YStack, XStack, Text, useTheme } from 'tamagui'
+import { Ionicons } from '@expo/vector-icons'
+import { AnimatePresence, MotiView } from 'moti'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ScalePress } from '../animations/ScalePress'
+
+export interface WizardStep {
+  id: string
+  icon: string
+  title: string
+  description: string
+}
+
+export interface OnboardingWizardProps {
+  visible: boolean
+  steps: WizardStep[]
+  onComplete: () => void
+  onSkip: () => void
+  labels?: {
+    skip?: string
+    next?: string
+    complete?: string
+  }
+}
+
+export function OnboardingWizard({
+  visible,
+  steps,
+  onComplete,
+  onSkip,
+  labels = {},
+}: OnboardingWizardProps) {
+  const insets = useSafeAreaInsets()
+  const [currentIndex, setCurrentIndex] = React.useState(0)
+
+  const { skip = 'Skip', next = 'Next', complete = 'Get Started' } = labels
+  const isLast = currentIndex === steps.length - 1
+
+  const handleNext = () => {
+    if (isLast) {
+      onComplete()
+      return
+    }
+    setCurrentIndex((i) => i + 1)
+  }
+
+  // Reset index when wizard becomes invisible (re-show from start next time)
+  React.useEffect(() => {
+    if (!visible) setCurrentIndex(0)
+  }, [visible])
+
+  if (!visible) return null
+
+  return (
+    <Modal visible animationType="fade" statusBarTranslucent>
+      <YStack flex={1} backgroundColor="$background">
+        {/* Skip */}
+        <XStack position="absolute" top={insets.top + 16} right={20} zIndex={10}>
+          <ScalePress onPress={onSkip}>
+            <XStack padding="$2.5">
+              <Text color="$mutedText" fontSize="$3">{skip}</Text>
+            </XStack>
+          </ScalePress>
+        </XStack>
+
+        {/* Animated step content */}
+        <AnimatePresence mode="wait">
+          <MotiView
+            key={currentIndex}
+            from={{ opacity: 0, translateX: 40 }}
+            animate={{ opacity: 1, translateX: 0 }}
+            exit={{ opacity: 0, translateX: -40 }}
+            transition={{ type: 'timing', duration: 280 }}
+            style={{ flex: 1 }}
+          >
+            <StepContent step={steps[currentIndex]} insetTop={insets.top} />
+          </MotiView>
+        </AnimatePresence>
+
+        {/* Bottom bar */}
+        <YStack
+          paddingBottom={Math.max(insets.bottom, 16) + 24}
+          paddingHorizontal="$5"
+          gap="$5"
+          alignItems="center"
+        >
+          {/* Progress dots */}
+          <XStack gap="$2" alignItems="center">
+            {steps.map((_, idx) => (
+              <ProgressDot key={idx} active={idx === currentIndex} />
+            ))}
+          </XStack>
+
+          {/* CTA */}
+          <ScalePress onPress={handleNext} style={{ width: '100%' as any }}>
+            <XStack
+              backgroundColor="$accent"
+              borderRadius="$5"
+              paddingVertical="$4"
+              alignItems="center"
+              justifyContent="center"
+              gap="$2"
+            >
+              <Text color="white" fontWeight="700" fontSize="$4">
+                {isLast ? complete : next}
+              </Text>
+              {!isLast && <Ionicons name="arrow-forward" size={18} color="white" />}
+            </XStack>
+          </ScalePress>
+        </YStack>
+      </YStack>
+    </Modal>
+  )
+}
+
+function StepContent({ step, insetTop }: { step: WizardStep; insetTop: number }) {
+  const theme = useTheme()
+  return (
+    <YStack
+      flex={1}
+      alignItems="center"
+      justifyContent="center"
+      paddingHorizontal="$6"
+      gap="$8"
+      paddingTop={insetTop + 60}
+      paddingBottom="$4"
+    >
+      {/* Icon */}
+      <MotiView
+        from={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', damping: 16, stiffness: 100, delay: 60 }}
+      >
+        <YStack width={128} height={128} alignItems="center" justifyContent="center">
+          <YStack
+            position="absolute"
+            width={128}
+            height={128}
+            borderRadius={64}
+            backgroundColor="$accent"
+            opacity={0.12}
+          />
+          <Ionicons name={step.icon as any} size={56} color={theme.accent.val} />
+        </YStack>
+      </MotiView>
+
+      {/* Text */}
+      <MotiView
+        from={{ opacity: 0, translateY: 20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 350, delay: 120 }}
+      >
+        <YStack gap="$3" alignItems="center">
+          <Text fontSize="$8" fontWeight="700" color="$color" textAlign="center">
+            {step.title}
+          </Text>
+          <Text fontSize="$4" color="$mutedText" textAlign="center" lineHeight={24}>
+            {step.description}
+          </Text>
+        </YStack>
+      </MotiView>
+    </YStack>
+  )
+}
+
+function ProgressDot({ active }: { active: boolean }) {
+  const theme = useTheme()
+  return (
+    <MotiView
+      animate={{ width: active ? 24 : 8, opacity: active ? 1 : 0.35 }}
+      transition={{ type: 'spring', damping: 18, stiffness: 140 }}
+      style={{ height: 8, borderRadius: 4, backgroundColor: theme.accent.val }}
+    />
+  )
+}

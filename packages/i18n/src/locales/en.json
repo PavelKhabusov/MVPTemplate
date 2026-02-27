@@ -336,13 +336,22 @@
   },
   "onboarding": {
     "skip": "Skip",
+    "next": "Next",
     "getStarted": "Get Started",
-    "slide1Title": "Welcome",
-    "slide1Description": "Welcome to the app",
-    "slide2Title": "Explore",
-    "slide2Description": "Discover amazing features",
-    "slide3Title": "Get Started",
-    "slide3Description": "Create your account and start"
+    "step1Title": "Welcome to {{appName}}",
+    "step1Desc": "Your all-in-one app — ready to go. Let us show you around.",
+    "step2Title": "Discover & Explore",
+    "step2Desc": "Browse categories, search content, and save your favorites with a tap.",
+    "step3Title": "Stay in the Loop",
+    "step3Desc": "Get real-time notifications and never miss what matters to you.",
+    "step4Title": "You're All Set!",
+    "step4Desc": "Your workspace is ready. Dive in and make it yours.",
+    "tourStats": "Track Your Progress",
+    "tourStatsDesc": "These cards show key metrics at a glance — always up to date.",
+    "tourActions": "Quick Actions",
+    "tourActionsDesc": "Jump to the most important features in one tap.",
+    "tourNotes": "Personal Notes",
+    "tourNotesDesc": "Capture ideas and thoughts right on your home screen."
   },
   "home": {
     "welcome": "Welcome back",
