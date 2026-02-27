@@ -21,7 +21,9 @@
     "generate-env": "node scripts/generate-env.mjs",
     "setup": "npm install && node scripts/generate-env.mjs",
     "test": "npm run test -w apps/backend",
+    "test:watch": "npm run test:watch -w apps/backend",
     "test:ui": "npm run test:ui -w apps/backend",
+    "test:coverage": "npm run test:coverage -w apps/backend",
     "gitpush": "git push origin HEAD"
   },
   "devDependencies": {

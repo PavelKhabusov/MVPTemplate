@@ -160,4 +160,17 @@ export class StripeProvider implements PaymentProvider {
       cancelAtPeriodEnd: sub.cancel_at_period_end,
     }
   }
+
+  async refundPayment(providerPaymentId: string, amountMinorUnits?: number): Promise<RefundResult> {
+    const refund = await this.stripe.refunds.create({
+      payment_intent: providerPaymentId,
+      ...(amountMinorUnits !== undefined ? { amount: amountMinorUnits } : {}),
+    })
+    return {
+      refundId: refund.id,
+      amount: refund.amount,
+      currency: refund.currency,
+      status: refund.status ?? 'pending',
+    }
+  }
 }
