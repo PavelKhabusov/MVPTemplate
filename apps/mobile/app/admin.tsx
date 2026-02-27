@@ -2999,11 +2999,11 @@ export default function AdminScreen() {
       setActiveTab('users')
     }
   }, [analyticsEnabled, pushEnabled, activeTab])
+
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [config, setConfig] = useState<AdminConfig | null>(null)
   const [analyticsData, setAnalyticsData] = useState<AnalyticsDashboard | null>(null)
-  const [feedbackStats, setFeedbackStats] = useState<DocFeedbackStat[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -3036,19 +3036,17 @@ export default function AdminScreen() {
       setLoading(true)
       const params: Record<string, string | number> = { page: p, limit: 20 }
       if (q) params.search = q
-      const [usersRes, statsRes, configRes, analyticsRes, feedbackRes] = await Promise.all([
+      const [usersRes, statsRes, configRes, analyticsRes] = await Promise.all([
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
         api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null),
-        api.get('/doc-feedback/admin/stats').catch(() => null),
       ])
       setUsers(usersRes.data.data)
       setTotalPages(usersRes.data.pagination?.totalPages ?? 1)
       setStats(statsRes.data.data)
       setConfig(configRes.data.data)
       if (analyticsRes) setAnalyticsData(analyticsRes.data.data)
-      if (feedbackRes) setFeedbackStats(feedbackRes.data.data)
     } catch (err: any) {
       Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
     } finally {
@@ -3181,20 +3179,6 @@ export default function AdminScreen() {
                 </Text>
               </XStack>
             </ScalePress>
-            {docFeedbackEnabled && (
-              <ScalePress onPress={() => setActiveTab('feedback')}>
-                <XStack
-                  backgroundColor={activeTab === 'feedback' ? '$accent' : '$subtleBackground'}
-                  paddingHorizontal="$3"
-                  paddingVertical="$2"
-                  borderRadius="$3"
-                >
-                  <Text color={activeTab === 'feedback' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                    {t('admin.docFeedback')}
-                  </Text>
-                </XStack>
-              </ScalePress>
-            )}
             {pushEnabled && (
               <ScalePress onPress={() => setActiveTab('notify')}>
                 <XStack
@@ -3430,6 +3414,40 @@ export default function AdminScreen() {
                     <ScreensBarChart data={analyticsData.popularScreens} />
                   </AppCard>
                 )}
+
+                {/* Doc Feedback */}
+                {docFeedbackEnabled && analyticsData.docFeedback && analyticsData.docFeedback.length > 0 && (
+                  <AppCard animated={false}>
+                    <Text fontWeight="600" color="$color" fontSize="$3" marginBottom="$2">
+                      {t('admin.docFeedback')}
+                    </Text>
+                    <YStack gap="$2">
+                      {analyticsData.docFeedback.map((item) => {
+                        const pct = item.total > 0 ? Math.round((item.likes / item.total) * 100) : 0
+                        return (
+                          <XStack key={item.pageId} alignItems="center" justifyContent="space-between" paddingVertical="$1">
+                            <YStack flex={1} gap="$0.5">
+                              <Text fontWeight="500" color="$color" fontSize="$3">{item.pageId}</Text>
+                              <XStack gap="$3" alignItems="center">
+                                <XStack alignItems="center" gap="$1">
+                                  <Ionicons name="thumbs-up" size={13} color={theme.accent.val} />
+                                  <Text fontSize="$2" color="$accent">{item.likes}</Text>
+                                </XStack>
+                                <XStack alignItems="center" gap="$1">
+                                  <Ionicons name="thumbs-down" size={13} color="#EF4444" />
+                                  <Text fontSize="$2" color="#EF4444">{item.dislikes}</Text>
+                                </XStack>
+                              </XStack>
+                            </YStack>
+                            <Text fontSize="$4" fontWeight="bold" color={pct >= 50 ? '$accent' : '#EF4444'}>
+                              {pct}%
+                            </Text>
+                          </XStack>
+                        )
+                      })}
+                    </YStack>
+                  </AppCard>
+                )}
               </YStack>
             </FadeIn>
           ) : (
@@ -3457,53 +3475,6 @@ export default function AdminScreen() {
             ) : null
           }
         />
-      )}
-
-      {/* Doc Feedback Tab */}
-      {docFeedbackEnabled && activeTab === 'feedback' && (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
-          {feedbackStats && feedbackStats.length > 0 ? (
-            <FadeIn>
-              <YStack gap="$3">
-                {feedbackStats.map((item) => {
-                  const total = item.likes + item.dislikes
-                  const pct = total > 0 ? Math.round((item.likes / total) * 100) : 0
-                  return (
-                    <AppCard key={item.pageId} animated={false}>
-                      <XStack alignItems="center" justifyContent="space-between">
-                        <YStack flex={1} gap="$1">
-                          <Text fontWeight="600" color="$color" fontSize="$3">
-                            {item.pageId}
-                          </Text>
-                          <XStack gap="$3" alignItems="center">
-                            <XStack alignItems="center" gap="$1">
-                              <Ionicons name="thumbs-up" size={14} color={theme.accent.val} />
-                              <Text fontSize="$2" color="$accent">{item.likes}</Text>
-                            </XStack>
-                            <XStack alignItems="center" gap="$1">
-                              <Ionicons name="thumbs-down" size={14} color="#EF4444" />
-                              <Text fontSize="$2" color="#EF4444">{item.dislikes}</Text>
-                            </XStack>
-                          </XStack>
-                        </YStack>
-                        <YStack alignItems="center">
-                          <Text fontSize="$6" fontWeight="bold" color={pct >= 50 ? '$accent' : '#EF4444'}>
-                            {pct}%
-                          </Text>
-                          <Text fontSize="$1" color="$mutedText">{t('admin.helpful')}</Text>
-                        </YStack>
-                      </XStack>
-                    </AppCard>
-                  )
-                })}
-              </YStack>
-            </FadeIn>
-          ) : (
-            <YStack alignItems="center" padding="$6">
-              <Text color="$mutedText">{loading ? t('common.loading') : t('admin.noFeedback')}</Text>
-            </YStack>
-          )}
-        </ScrollView>
       )}
 
       {/* Notify Tab */}
