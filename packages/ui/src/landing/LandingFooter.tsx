@@ -3,6 +3,7 @@ import { Image, Platform } from 'react-native'
 import { YStack, XStack, Text, Separator, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { ScalePress } from '../animations/ScalePress'
+import { useCompanyStore } from '@mvp/store'
 
 interface LandingFooterProps {
   onNavigate: (href: string) => void
@@ -12,6 +13,8 @@ interface LandingFooterProps {
 export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
   const { t } = useTranslation()
   const theme = useTheme()
+  const company = useCompanyStore((s) => s.info)
+  const appName = company.appName || 'MVPTemplate'
 
   useEffect(() => {
     if (Platform.OS !== 'web') return
@@ -59,7 +62,7 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
                   <Text color="white" fontWeight="bold" fontSize={14}>M</Text>
                 </YStack>
               )}
-              <Text fontWeight="bold" fontSize="$4" color="$color">MVP Template</Text>
+              <Text fontWeight="bold" fontSize="$4" color="$color">{appName}</Text>
             </XStack>
             <Text fontSize="$3" color="$mutedText" lineHeight={22} maxWidth={280}>
               {t('landing.footerDesc')}
@@ -101,7 +104,7 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
 
         {/* Copyright */}
         <Text fontSize="$2" color="$mutedText" textAlign="center">
-          &copy; {new Date().getFullYear()} MVP Template. {t('landing.footerRights')}
+          &copy; {new Date().getFullYear()} {appName}. {t('landing.footerRights')}
         </Text>
       </YStack>
     </YStack>

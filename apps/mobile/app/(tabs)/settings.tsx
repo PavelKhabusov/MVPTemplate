@@ -6,7 +6,7 @@ import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
-import { useAuthStore, useThemeStore, useLanguageStore } from '@mvp/store'
+import { useAuthStore, useThemeStore, useLanguageStore, useCompanyStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import {
   FadeIn,
@@ -103,6 +103,10 @@ function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => voi
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const company = useCompanyStore((s) => s.info)
+
+  const displayName = company.appName || APP_CONFIG.name
+  const displayCompany = company.companyName || APP_CONFIG.developer
 
   const content = (
     <YStack alignItems="center" gap="$5" paddingHorizontal="$5" paddingVertical="$6">
@@ -119,7 +123,10 @@ function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => voi
         >
           <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
         </YStack>
-        <Text fontSize="$6" fontWeight="700" color="$color">{APP_CONFIG.name}</Text>
+        <Text fontSize="$6" fontWeight="700" color="$color">{displayName}</Text>
+        {company.tagline ? (
+          <Text fontSize="$2" color="$mutedText" textAlign="center">{company.tagline}</Text>
+        ) : null}
         <Text fontSize="$2" color="$mutedText">v{APP_CONFIG.version}</Text>
       </YStack>
 
@@ -144,8 +151,34 @@ function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => voi
           alignItems="center"
         >
           <Text fontSize="$3" color="$mutedText">{t('settings.developer')}</Text>
-          <Text fontSize="$3" color="$color" fontWeight="500">{APP_CONFIG.developer}</Text>
+          <Text fontSize="$3" color="$color" fontWeight="500">{displayCompany}</Text>
         </XStack>
+        {company.website ? (
+          <XStack
+            paddingVertical="$3"
+            paddingHorizontal="$4"
+            backgroundColor="$subtleBackground"
+            borderRadius="$3"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text fontSize="$3" color="$mutedText">{t('admin.companyWebsite')}</Text>
+            <Text fontSize="$3" color="$accent" fontWeight="500">{company.website}</Text>
+          </XStack>
+        ) : null}
+        {company.supportEmail ? (
+          <XStack
+            paddingVertical="$3"
+            paddingHorizontal="$4"
+            backgroundColor="$subtleBackground"
+            borderRadius="$3"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text fontSize="$3" color="$mutedText">{t('admin.companySupportEmail')}</Text>
+            <Text fontSize="$3" color="$accent" fontWeight="500">{company.supportEmail}</Text>
+          </XStack>
+        ) : null}
       </YStack>
 
       <Text fontSize="$2" color="$mutedText" textAlign="center">
