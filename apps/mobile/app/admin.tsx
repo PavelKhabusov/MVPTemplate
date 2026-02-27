@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, type ReactNode } from 'react'
-import { FlatList, Platform, Modal, Alert, ScrollView, useWindowDimensions, Linking, Pressable } from 'react-native'
+import { FlatList, Platform, Alert, ScrollView, useWindowDimensions, Linking, Pressable } from 'react-native'
 import { YStack, XStack, Text, H2, H4, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { AppAvatar, AppButton, AppCard, AppSwitch, FadeIn, SlideIn, ScalePress, useToast } from '@mvp/ui'
+import { AppAvatar, AppButton, AppCard, AppSwitch, AppModal, FadeIn, SlideIn, ScalePress, useToast } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
 import {
@@ -96,106 +96,8 @@ function formatShortDate(iso: string): string {
   return `${d.getDate()}/${d.getMonth() + 1}`
 }
 
-/* ─── Reusable Admin Modal ─────────────────────────────────────────── */
-function AdminModal({
-  visible,
-  onClose,
-  title,
-  maxWidth = 520,
-  children,
-}: {
-  visible: boolean
-  onClose: () => void
-  title: string
-  maxWidth?: number
-  children: ReactNode
-}) {
-  const theme = useTheme()
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
-  const insets = useSafeAreaInsets()
-  const isWide = screenWidth > 600
-
-  if (Platform.OS !== 'web') {
-    return (
-      <Modal
-        visible={visible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={onClose}
-      >
-        <YStack
-          flex={1}
-          backgroundColor="$background"
-          padding="$4"
-          paddingTop={Platform.OS === 'ios' ? 60 : '$4'}
-        >
-          <XStack alignItems="center" justifyContent="space-between" marginBottom="$4">
-            <H4 color="$color" fontFamily="$body">{title}</H4>
-            <ScalePress onPress={onClose}>
-              <Ionicons name="close" size={24} color={theme.color.val} />
-            </ScalePress>
-          </XStack>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {children}
-          </ScrollView>
-        </YStack>
-      </Modal>
-    )
-  }
-
-  if (!visible) return null
-
-  return (
-    <YStack
-      position="absolute"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-      zIndex={10000}
-      alignItems="center"
-      justifyContent="center"
-    >
-      {/* Backdrop */}
-      <Pressable
-        onPress={onClose}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
-      />
-      {/* Content */}
-      <YStack
-        backgroundColor="$background"
-        borderRadius="$4"
-        width={isWide ? Math.min(maxWidth, screenWidth - 48) : screenWidth - 32}
-        maxHeight={screenHeight - insets.top - insets.bottom - 48}
-        shadowColor="$shadowColor"
-        shadowOffset={{ width: 0, height: 8 }}
-        shadowOpacity={0.15}
-        shadowRadius={24}
-        elevation={8}
-        overflow="hidden"
-      >
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          padding="$4"
-          paddingBottom="$3"
-          borderBottomWidth={1}
-          borderBottomColor="$borderColor"
-        >
-          <H4 color="$color" fontFamily="$body">{title}</H4>
-          <ScalePress onPress={onClose}>
-            <Ionicons name="close" size={24} color={theme.color.val} />
-          </ScalePress>
-        </XStack>
-        <ScrollView style={{ maxHeight: screenHeight - insets.top - insets.bottom - 140 }} showsVerticalScrollIndicator={false}>
-          <YStack padding="$4">
-            {children}
-          </YStack>
-        </ScrollView>
-      </YStack>
-    </YStack>
-  )
-}
+// AdminModal = AppModal alias kept for local use
+const AdminModal = AppModal
 
 
 function ScreensBarChart({ data }: { data: Array<{ screenName: string; views: number }> }) {
