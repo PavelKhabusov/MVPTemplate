@@ -59,7 +59,8 @@ export function PricingCard({ plan, isCurrentPlan, isHighlighted, onSelect, load
       borderRadius="$5"
       borderWidth={isHighlighted ? 0 : 1}
       borderColor="$borderColor"
-      flex={1}
+      flexGrow={1}
+      flexShrink={1}
       className={isHighlighted && Platform.OS === 'web' ? 'pricing-card-popular' : undefined}
       style={isHighlighted ? {
         background: `linear-gradient(160deg, ${theme.accentGradientStart.val}22 0%, ${theme.cardBackground.val} 40%, ${theme.cardBackground.val} 100%)`,
