@@ -1,9 +1,8 @@
-import React, { type ReactNode, useEffect } from 'react'
+import React, { type ReactNode, useEffect, useState } from 'react'
 import { Modal, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native'
 import { H4, Text, YStack, XStack, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-// Shorthand to avoid JSX HTML-element TypeScript errors in RN project
 const el = React.createElement
 
 export function AppModal({
@@ -24,7 +23,26 @@ export function AppModal({
   const theme = useTheme()
   const isWide = screenWidth > 600
 
-  // Escape key — web only
+  // Web: track mount state separately from `visible` so exit animation
+  // plays before the element is removed from the DOM.
+  const [mounted, setMounted] = useState(false)
+  const [shown, setShown] = useState(false) // drives CSS transition
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    if (visible) {
+      setMounted(true)
+      // One rAF lets the browser paint the hidden state before transitioning in
+      const id = requestAnimationFrame(() => setShown(true))
+      return () => cancelAnimationFrame(id)
+    } else {
+      setShown(false)
+      const t = setTimeout(() => setMounted(false), 240)
+      return () => clearTimeout(t)
+    }
+  }, [visible])
+
+  // Escape key
   useEffect(() => {
     if (!visible || Platform.OS !== 'web') return
     const handler = (e: KeyboardEvent) => {
@@ -64,20 +82,19 @@ export function AppModal({
   }
 
   // ── Web ───────────────────────────────────────────────────────────────
-  if (!visible || typeof document === 'undefined') return null
+  if (!mounted || typeof document === 'undefined') return null
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createPortal } = require('react-dom') as typeof import('react-dom')
 
   const modalWidth = isWide ? Math.min(maxWidth, screenWidth - 48) : screenWidth - 32
   const modalMaxHeight = screenHeight - insets.top - insets.bottom - 48
+  const ease = '240ms cubic-bezier(0.32, 0.72, 0, 1)'
 
-  // We use React.createElement('div'/'button') instead of JSX to avoid
-  // TypeScript errors from the React Native JSX type environment.
-  // Native DOM onClick / stopPropagation is 100% reliable — unlike
-  // RNW Pressable which ignores CSS z-index in its responder system.
   return createPortal(
+    // Outer div = backdrop (click to close) + transition overlay colour
     el('div', {
+      onClick: onClose,
       style: {
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -85,21 +102,11 @@ export function AppModal({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: shown ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)',
+        transition: `background-color ${ease}`,
       },
     },
-      // Backdrop
-      el('div', {
-        onClick: onClose,
-        style: {
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          cursor: 'pointer',
-        },
-      }),
-
-      // Modal panel — rendered after backdrop in DOM → same stacking context,
-      // higher paint order → receives pointer events first.
+      // Modal panel — stops click propagation; animates scale + fade
       el('div', {
         onClick: (e: MouseEvent) => e.stopPropagation(),
         style: {
@@ -110,9 +117,12 @@ export function AppModal({
           backgroundColor: theme.background.val,
           borderRadius: 16,
           overflow: 'hidden',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
           display: 'flex',
           flexDirection: 'column',
+          opacity: shown ? 1 : 0,
+          transform: shown ? 'scale(1) translateY(0px)' : 'scale(0.96) translateY(12px)',
+          transition: `opacity ${ease}, transform ${ease}`,
         },
       },
         // Header
@@ -127,7 +137,13 @@ export function AppModal({
             flexShrink: 0,
           },
         },
-          el(H4, { color: '$color', fontFamily: '$body', flex: 1, numberOfLines: 1, paddingRight: '$3' } as object, title),
+          el(H4 as React.ComponentType<object>, {
+            color: '$color',
+            fontFamily: '$body',
+            flex: 1,
+            numberOfLines: 1,
+            paddingRight: '$3',
+          }, title),
           el('button', {
             onClick: onClose,
             style: {
@@ -140,11 +156,14 @@ export function AppModal({
               padding: '4px 8px',
               borderRadius: 8,
               flexShrink: 0,
+              transition: 'opacity 150ms',
             },
+            onMouseEnter: (e: MouseEvent) => { (e.target as HTMLElement).style.opacity = '0.6' },
+            onMouseLeave: (e: MouseEvent) => { (e.target as HTMLElement).style.opacity = '1' },
           }, '×'),
         ),
 
-        // Scrollable content
+        // Content
         el('div', {
           style: {
             overflowY: 'auto',
@@ -152,7 +171,7 @@ export function AppModal({
             maxHeight: modalMaxHeight - 65,
           },
         },
-          el(YStack, { padding: '$4' } as object, children),
+          el(YStack as React.ComponentType<object>, { padding: '$4' }, children),
         ),
       ),
     ),

@@ -201,6 +201,63 @@ export function PaymentsAdminTab() {
                 </AppCard>
               </XStack>
 
+
+
+              {/* Recent Payments */}
+              <AppCard animated={false}>
+                <XStack alignItems="center" gap="$2" marginBottom="$3">
+                  <Ionicons name="receipt-outline" size={18} color={theme.accent.val} />
+                  <Text fontWeight="700" color="$color" fontSize="$4">{t('admin.recentPayments')}</Text>
+                </XStack>
+                {stats.recentPayments.length === 0 ? (
+                  <YStack alignItems="center" paddingVertical="$3" gap="$1">
+                    <Ionicons name="receipt-outline" size={28} color={theme.mutedText.val} />
+                    <Text color="$mutedText" fontSize="$2">{t('payments.noHistory')}</Text>
+                  </YStack>
+                ) : (
+                  <YStack>
+                    {stats.recentPayments.map((payment, idx) => {
+                      const statusColor = PAYMENT_STATUS_COLOR[payment.status] ?? '#6B7280'
+                      return (
+                        <XStack
+                          key={payment.id}
+                          paddingVertical="$2.5"
+                          borderBottomWidth={idx < stats.recentPayments.length - 1 ? 1 : 0}
+                          borderBottomColor="$borderColor"
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <YStack flex={1} gap="$0.5" marginRight="$3">
+                            <Text fontWeight="600" color="$color" fontSize="$3" numberOfLines={1}>
+                              {payment.description ?? payment.type}
+                            </Text>
+                            <XStack gap="$2" alignItems="center">
+                              <Text color="$mutedText" fontSize="$1">{payment.provider}</Text>
+                              <XStack
+                                paddingHorizontal="$1.5" paddingVertical={2} borderRadius="$1"
+                                style={{ backgroundColor: statusColor + '20' } as any}
+                              >
+                                <Text fontSize={10} fontWeight="600" style={{ color: statusColor } as any}>
+                                  {payment.status}
+                                </Text>
+                              </XStack>
+                            </XStack>
+                          </YStack>
+                          <YStack alignItems="flex-end" gap="$0.5">
+                            <Text fontWeight="700" fontSize="$3" color="$color">
+                              {formatPrice(payment.amount, payment.currency)}
+                            </Text>
+                            <Text color="$mutedText" fontSize="$1">
+                              {new Date(payment.createdAt).toLocaleDateString()}
+                            </Text>
+                          </YStack>
+                        </XStack>
+                      )
+                    })}
+                  </YStack>
+                )}
+              </AppCard>
+
               {/* Plans header */}
               <XStack justifyContent="space-between" alignItems="center">
                 <XStack alignItems="center" gap="$2">
@@ -339,61 +396,6 @@ export function PaymentsAdminTab() {
 
                 return <YStack gap="$3">{planCards}</YStack>
               })()}
-
-              {/* Recent Payments */}
-              <AppCard animated={false}>
-                <XStack alignItems="center" gap="$2" marginBottom="$3">
-                  <Ionicons name="receipt-outline" size={18} color={theme.accent.val} />
-                  <Text fontWeight="700" color="$color" fontSize="$4">{t('admin.recentPayments')}</Text>
-                </XStack>
-                {stats.recentPayments.length === 0 ? (
-                  <YStack alignItems="center" paddingVertical="$3" gap="$1">
-                    <Ionicons name="receipt-outline" size={28} color={theme.mutedText.val} />
-                    <Text color="$mutedText" fontSize="$2">{t('payments.noHistory')}</Text>
-                  </YStack>
-                ) : (
-                  <YStack>
-                    {stats.recentPayments.map((payment, idx) => {
-                      const statusColor = PAYMENT_STATUS_COLOR[payment.status] ?? '#6B7280'
-                      return (
-                        <XStack
-                          key={payment.id}
-                          paddingVertical="$2.5"
-                          borderBottomWidth={idx < stats.recentPayments.length - 1 ? 1 : 0}
-                          borderBottomColor="$borderColor"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <YStack flex={1} gap="$0.5" marginRight="$3">
-                            <Text fontWeight="600" color="$color" fontSize="$3" numberOfLines={1}>
-                              {payment.description ?? payment.type}
-                            </Text>
-                            <XStack gap="$2" alignItems="center">
-                              <Text color="$mutedText" fontSize="$1">{payment.provider}</Text>
-                              <XStack
-                                paddingHorizontal="$1.5" paddingVertical={2} borderRadius="$1"
-                                style={{ backgroundColor: statusColor + '20' } as any}
-                              >
-                                <Text fontSize={10} fontWeight="600" style={{ color: statusColor } as any}>
-                                  {payment.status}
-                                </Text>
-                              </XStack>
-                            </XStack>
-                          </YStack>
-                          <YStack alignItems="flex-end" gap="$0.5">
-                            <Text fontWeight="700" fontSize="$3" color="$color">
-                              {formatPrice(payment.amount, payment.currency)}
-                            </Text>
-                            <Text color="$mutedText" fontSize="$1">
-                              {new Date(payment.createdAt).toLocaleDateString()}
-                            </Text>
-                          </YStack>
-                        </XStack>
-                      )
-                    })}
-                  </YStack>
-                )}
-              </AppCard>
             </>
           ) : (
             <Text color="$mutedText" textAlign="center" paddingVertical="$6">{t('common.error')}</Text>
