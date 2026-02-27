@@ -304,12 +304,18 @@ export function LandingFeatures() {
                     >
                       <Ionicons name="card" size={32} color={acc} />
                     </YStack>
-                    <XStack gap="$2">
+                    <XStack gap="$2" flexWrap="wrap" justifyContent="center">
                       <YStack
                         paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
                         borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
                       >
                         <Text fontSize={11} color="$mutedText">Stripe</Text>
+                      </YStack>
+                      <YStack
+                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
+                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
+                      >
+                        <Text fontSize={11} color="$mutedText">PayPal</Text>
                       </YStack>
                       <YStack
                         paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}

@@ -158,6 +158,7 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/payments/cancel` | Yes | Cancel subscription |
 | `GET` | `/payments/history` | Yes | Payment history (paginated) |
 | `POST` | `/payments/webhook/stripe` | — | Stripe webhook |
+| `POST` | `/payments/webhook/paypal` | — | PayPal webhook |
 | `POST` | `/payments/webhook/yookassa` | — | YooKassa webhook |
 | `POST` | `/payments/webhook/robokassa` | — | Robokassa webhook |
 | `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
@@ -390,7 +391,7 @@ Push notifications are disabled by default. Enabling requires an Expo access tok
 
 ## Payments (Optional)
 
-Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports three providers: **Stripe** (international), **YooKassa** (Russia), and **Robokassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
+Payments are disabled by default. Supports four providers: **Stripe** (international), **PayPal** (international), **YooKassa** (Russia), and **Robokassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
 
 ### Setup
 
@@ -412,6 +413,16 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports three prov
    YOOKASSA_SECRET_KEY=your-secret-key
    ```
    > Get keys from [YooKassa Dashboard](https://yookassa.ru/my). Set webhook URL to `https://your-domain.com/api/payments/webhook/yookassa`.
+
+   **PayPal:**
+   ```env
+   PAYMENTS_ENABLED=true
+   PAYPAL_CLIENT_ID=your-client-id
+   PAYPAL_CLIENT_SECRET=your-client-secret
+   PAYPAL_WEBHOOK_ID=your-webhook-id
+   PAYPAL_MODE=sandbox
+   ```
+   > Get credentials from [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). Set `PAYPAL_MODE=live` for production.
 
    **Robokassa:**
    ```env
@@ -442,6 +453,10 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports three prov
 | `PAYMENTS_ENABLED` | `false` | Enable/disable payments module |
 | `STRIPE_SECRET_KEY` | — | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret |
+| `PAYPAL_CLIENT_ID` | — | PayPal client ID |
+| `PAYPAL_CLIENT_SECRET` | — | PayPal client secret |
+| `PAYPAL_WEBHOOK_ID` | — | PayPal webhook ID |
+| `PAYPAL_MODE` | `sandbox` | `sandbox` or `live` |
 | `YOOKASSA_SHOP_ID` | — | YooKassa shop ID |
 | `YOOKASSA_SECRET_KEY` | — | YooKassa secret key |
 | `ROBOKASSA_MERCHANT_LOGIN` | — | Robokassa merchant login |
@@ -549,7 +564,7 @@ Full CRUD proxy management with testing, status tracking, and priority-based sel
 - **SSE**: real-time events with auto-reconnect
 - **Analytics**: PostHog abstraction with feature flags
 - **SEO**: meta tags, OG/Twitter cards, sitemap
-- **Payments**: Stripe + YooKassa + Robokassa, subscriptions & one-time, admin stats
+- **Payments**: Stripe + PayPal + YooKassa + Robokassa, subscriptions & one-time, admin stats
 - **AI Providers**: Gemini + OpenAI with tab switching, model selection
 - **Proxy Management**: CRUD with testing (HTTPS, TCP, diagnostics), priority, status tracking
 - **File Storage**: local filesystem or S3-compatible (MinIO, Cloudflare R2), live migration in admin
