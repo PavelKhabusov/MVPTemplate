@@ -45,7 +45,7 @@ export interface CancelSubscriptionParams {
 }
 
 export interface PaymentProvider {
-  readonly name: 'stripe' | 'yookassa' | 'robokassa'
+  readonly name: 'stripe' | 'yookassa' | 'robokassa' | 'paypal'
 
   createCheckoutSession(params: CreateCheckoutParams): Promise<CheckoutResult>
 

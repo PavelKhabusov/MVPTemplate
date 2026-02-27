@@ -39,17 +39,31 @@ const envSchema = z.object({
 
   // Payments
   PAYMENTS_ENABLED: envBoolean,
+
+  // Stripe
+  STRIPE_ENABLED: envBoolean.default(true),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+
+  // YooKassa
+  YOOKASSA_ENABLED: envBoolean.default(true),
   YOOKASSA_SHOP_ID: z.string().optional(),
   YOOKASSA_SECRET_KEY: z.string().optional(),
   YOOKASSA_WEBHOOK_SECRET: z.string().optional(),
 
   // Robokassa
+  ROBOKASSA_ENABLED: envBoolean.default(true),
   ROBOKASSA_MERCHANT_LOGIN: z.string().optional(),
   ROBOKASSA_PASSWORD1: z.string().optional(),
   ROBOKASSA_PASSWORD2: z.string().optional(),
   ROBOKASSA_TEST_MODE: envBoolean.default(true),
+
+  // PayPal
+  PAYPAL_ENABLED: envBoolean,
+  PAYPAL_CLIENT_ID: z.string().optional(),
+  PAYPAL_CLIENT_SECRET: z.string().optional(),
+  PAYPAL_WEBHOOK_ID: z.string().optional(),
+  PAYPAL_MODE: z.enum(['sandbox', 'live']).default('sandbox'),
 
   // AI / Gemini
   GEMINI_API_KEY: z.string().optional(),

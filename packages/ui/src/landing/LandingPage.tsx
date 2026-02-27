@@ -12,9 +12,10 @@ import { CookieBanner } from '../components/CookieBanner'
 
 interface LandingPageProps {
   logo?: any
+  paymentsEnabled?: boolean
 }
 
-export function LandingPage({ logo }: LandingPageProps) {
+export function LandingPage({ logo, paymentsEnabled = false }: LandingPageProps) {
   if (Platform.OS !== 'web') return null
 
   const navigate = (href: string) => {
@@ -23,7 +24,7 @@ export function LandingPage({ logo }: LandingPageProps) {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <LandingNav onNavigate={navigate} logo={logo} />
+      <LandingNav onNavigate={navigate} logo={logo} paymentsEnabled={paymentsEnabled} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <LandingHero onNavigate={navigate} />
         <LandingFeatures />

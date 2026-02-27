@@ -474,6 +474,7 @@ function WebRootLayout() {
   const showThemeInHeader = !compactProfile && (themePlacement === 'header' || themePlacement === 'both')
   const showSearchInSidebar = searchPlacement === 'sidebar'
   const showSearchInHeader = searchPlacement === 'header'
+  const cookieBannerEnabled = useTemplateFlag('cookieBanner', true)
 
   // Global Cmd+K / Ctrl+K hotkey
   useEffect(() => {
@@ -567,7 +568,7 @@ function WebRootLayout() {
         {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
       </XStack>
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-      <CookieBanner />
+      <CookieBanner enabled={cookieBannerEnabled} />
     </YStack>
   )
 }

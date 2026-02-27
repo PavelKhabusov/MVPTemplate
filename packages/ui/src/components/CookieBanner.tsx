@@ -4,16 +4,14 @@ import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { AnimatePresence, MotiView } from 'moti'
 import { useTranslation } from '@mvp/i18n'
 import { useCookieConsentStore } from '@mvp/store'
-import { useTemplateFlag } from '@mvp/template-config'
 import { router } from 'expo-router'
 import { ScalePress } from '../animations/ScalePress'
 
-export function CookieBanner() {
+export function CookieBanner({ enabled = true }: { enabled?: boolean }) {
   const { t } = useTranslation()
   const theme = useTheme()
   const consent = useCookieConsentStore((s) => s.consent)
   const setConsent = useCookieConsentStore((s) => s.setConsent)
-  const cookieBannerEnabled = useTemplateFlag('cookieBanner', true)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -23,7 +21,7 @@ export function CookieBanner() {
   }, [consent])
 
   if (Platform.OS !== 'web') return null
-  if (!cookieBannerEnabled) return null
+  if (!enabled) return null
   if (consent !== null) return null
 
   const handleAccept = () => {
