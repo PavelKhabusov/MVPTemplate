@@ -370,63 +370,64 @@ function PaymentsAdminTab() {
     fetchData()
   }, [fetchData])
 
-  const handleCreatePlan = async () => {
-    if (!planName.trim()) return
-    setCreating(true)
-    try {
-      const priceAmount = Math.round(parseFloat(planPrice || '0') * 100)
-      await api.post('/payments/admin/plans', {
-        name: planName.trim(),
-        description: planDescription.trim() || undefined,
-        priceAmount,
-        currency: planCurrency.trim().toLowerCase() || 'usd',
-        interval: planInterval,
-        provider: planProvider,
-        providerPriceId: planProviderPriceId.trim() || undefined,
-        features: planFeatures
-          .split('\n')
-          .map((f) => f.trim())
-          .filter(Boolean),
-      })
-      setPlanName('')
-      setPlanDescription('')
-      setPlanPrice('')
-      setPlanProviderPriceId('')
-      setPlanFeatures('')
-      setShowCreateForm(false)
-      fetchData()
-      Alert.alert(t('admin.planCreated'))
-    } catch (err: any) {
-      Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
-    } finally {
-      setCreating(false)
-    }
+  const openCreateModal = () => {
+    setEditingPlan(null)
+    setPlanName(''); setPlanDescription(''); setPlanPrice('')
+    setPlanCurrency('usd'); setPlanInterval('month')
+    setPlanProvider('stripe'); setPlanProviderPriceId(''); setPlanFeatures('')
+    setShowPlanModal(true)
   }
 
-  const openEditPlan = (plan: AdminPlan) => {
+  const openEditModal = (plan: AdminPlan) => {
     setEditingPlan(plan)
-    setEditName(plan.name)
-    setEditDescription(plan.description ?? '')
-    setEditPrice(String(plan.priceAmount / 100))
-    setEditFeatures(plan.features.join('\n'))
+    setPlanName(plan.name)
+    setPlanDescription(plan.description ?? '')
+    setPlanPrice(String(plan.priceAmount / 100))
+    setPlanCurrency(plan.currency)
+    setPlanInterval(plan.interval as 'month' | 'year' | 'one_time')
+    setPlanProvider(plan.provider as 'stripe' | 'yookassa' | 'robokassa' | 'paypal')
+    setPlanProviderPriceId(plan.providerPriceId ?? '')
+    setPlanFeatures(plan.features.join('\n'))
+    setShowPlanModal(true)
   }
 
-  const handleSaveEdit = async () => {
-    if (!editingPlan) return
-    setSavingEdit(true)
+  const closePlanModal = () => { setShowPlanModal(false); setEditingPlan(null) }
+
+  const handleSavePlan = async () => {
+    if (!planName.trim()) return
+    setSavingPlan(true)
+    const priceAmount = Math.round(parseFloat(planPrice || '0') * 100)
+    const features = planFeatures.split('\n').map((f) => f.trim()).filter(Boolean)
     try {
-      await api.patch(`/payments/admin/plans/${editingPlan.id}`, {
-        name: editName.trim(),
-        description: editDescription.trim() || undefined,
-        priceAmount: Math.round(parseFloat(editPrice || '0') * 100),
-        features: editFeatures.split('\n').map((f) => f.trim()).filter(Boolean),
-      })
-      setEditingPlan(null)
+      if (editingPlan) {
+        await api.patch(`/payments/admin/plans/${editingPlan.id}`, {
+          name: planName.trim(),
+          description: planDescription.trim() || undefined,
+          priceAmount,
+          currency: planCurrency.trim().toLowerCase() || 'usd',
+          interval: planInterval,
+          provider: planProvider,
+          providerPriceId: planProviderPriceId.trim() || undefined,
+          features,
+        })
+      } else {
+        await api.post('/payments/admin/plans', {
+          name: planName.trim(),
+          description: planDescription.trim() || undefined,
+          priceAmount,
+          currency: planCurrency.trim().toLowerCase() || 'usd',
+          interval: planInterval,
+          provider: planProvider,
+          providerPriceId: planProviderPriceId.trim() || undefined,
+          features,
+        })
+      }
+      closePlanModal()
       fetchData()
     } catch (err: any) {
       Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
     } finally {
-      setSavingEdit(false)
+      setSavingPlan(false)
     }
   }
 
@@ -450,17 +451,11 @@ function PaymentsAdminTab() {
 
   const handleDeletePlan = (plan: AdminPlan) => {
     if (Platform.OS === 'web') {
-      if (window.confirm(t('admin.deletePlanConfirm'))) {
-        performDeletePlan(plan)
-      }
+      if (window.confirm(t('admin.deletePlanConfirm'))) performDeletePlan(plan)
     } else {
       Alert.alert(t('admin.deletePlan'), t('admin.deletePlanConfirm'), [
         { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => performDeletePlan(plan),
-        },
+        { text: t('common.delete'), style: 'destructive', onPress: () => performDeletePlan(plan) },
       ])
     }
   }
