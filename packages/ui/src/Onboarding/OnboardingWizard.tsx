@@ -66,18 +66,20 @@ export function OnboardingWizard({
         </XStack>
 
         {/* Animated step content — pure crossfade prevents layout jumps */}
-        <AnimatePresence>
-          <MotiView
-            key={currentIndex}
-            from={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'timing', duration: 200 }}
-            style={{ flex: 1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          >
-            <StepContent step={steps[currentIndex]} insetTop={insets.top} />
-          </MotiView>
-        </AnimatePresence>
+        <YStack flex={1} overflow="hidden">
+          <AnimatePresence>
+            <MotiView
+              key={currentIndex}
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'timing', duration: 200 }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            >
+              <StepContent step={steps[currentIndex]} insetTop={insets.top} />
+            </MotiView>
+          </AnimatePresence>
+        </YStack>
 
         {/* Bottom bar */}
         <YStack
