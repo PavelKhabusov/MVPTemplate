@@ -4,8 +4,7 @@ import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { AnimatePresence, MotiView } from 'moti'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ScalePress } from '../animations/ScalePress'
-import { AppModal } from '../components/AppModal'
+import { ScalePress, AppModal } from '@mvp/ui'
 
 export interface WizardStep {
   id: string
@@ -34,6 +33,7 @@ export function OnboardingWizard({
   labels = {},
 }: OnboardingWizardProps) {
   const insets = useSafeAreaInsets()
+  const theme = useTheme()
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const { skip = 'Skip', next = 'Next', complete = 'Get Started' } = labels
@@ -81,24 +81,6 @@ export function OnboardingWizard({
           {!isLast && <Ionicons name="arrow-forward" size={18} color="white" />}
         </XStack>
       </ScalePress>
-    </YStack>
-  )
-
-  // ── Animated step area (shared) ────────────────────────────────────────────
-  const stepArea = (insetTop: number) => (
-    <YStack flex={1} overflow="hidden">
-      <AnimatePresence>
-        <MotiView
-          key={currentIndex}
-          from={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ type: 'timing', duration: 200 }}
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-        >
-          <StepContent step={steps[currentIndex]} insetTop={insetTop} />
-        </MotiView>
-      </AnimatePresence>
     </YStack>
   )
 
@@ -169,7 +151,21 @@ export function OnboardingWizard({
           </ScalePress>
         </XStack>
 
-        {stepArea(insets.top)}
+        {/* Step content */}
+        <YStack flex={1} overflow="hidden">
+          <AnimatePresence>
+            <MotiView
+              key={currentIndex}
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'timing', duration: 200 }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            >
+              <StepContent step={steps[currentIndex]} insetTop={insets.top} />
+            </MotiView>
+          </AnimatePresence>
+        </YStack>
 
         {/* Bottom bar */}
         <YStack

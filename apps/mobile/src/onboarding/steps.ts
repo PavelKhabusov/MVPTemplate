@@ -1,4 +1,4 @@
-import type { WizardStep, CoachMarkStep } from '@mvp/ui'
+import type { WizardStep, CoachMarkStep } from '@mvp/onboarding'
 
 /**
  * Factory for wizard steps — pass the `t` translation function and app name.

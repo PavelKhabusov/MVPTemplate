@@ -20,5 +20,3 @@ export { SEO } from './SEO'
 export { default as tamaguiConfig } from '../tamagui.config'
 export type { AppConfig } from '../tamagui.config'
 
-// Onboarding
-export * from './Onboarding'

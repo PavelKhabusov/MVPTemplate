@@ -5,7 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore, useNotesStore } from '@mvp/store'
 import { router } from 'expo-router'
-import { FadeIn, SlideIn, AnimatedListItem, AppCard, AppButton, ScalePress, RefreshSpinner, CoachMark } from '@mvp/ui'
+import { FadeIn, SlideIn, AnimatedListItem, AppCard, AppButton, ScalePress, RefreshSpinner } from '@mvp/ui'
+import { CoachMark } from '@mvp/onboarding'
 import { Ionicons } from '@expo/vector-icons'
 
 function StatCard({ value, label, icon, color }: { value: string; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }) {

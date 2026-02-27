@@ -1,6 +1,7 @@
-import { OnboardingWizard, useCoachMark } from '@mvp/ui'
+import { OnboardingWizard, useCoachMark } from '@mvp/onboarding'
 import { useAppStore, useCompanyStore } from '@mvp/store'
 import { useTranslation } from '@mvp/i18n'
+import { useTemplateFlag } from '@mvp/template-config'
 import { createWizardSteps, createHomeCoachSteps } from '../onboarding/steps'
 
 export function OnboardingController() {
@@ -9,8 +10,9 @@ export function OnboardingController() {
   const hasCompleted = useAppStore((s) => s.hasCompletedOnboarding)
   const setOnboardingComplete = useAppStore((s) => s.setOnboardingComplete)
   const { startTour } = useCoachMark()
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
 
-  if (hasCompleted) return null
+  if (hasCompleted || !onboardingEnabled) return null
 
   return (
     <OnboardingWizard
