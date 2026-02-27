@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { authenticate } from '../../common/middleware/authenticate'
 import { requireAdmin } from '../../common/middleware/require-admin'
 import { analyticsRepository } from './analytics.repository'
+import { docFeedbackRepository } from '../doc-feedback/doc-feedback.repository'
 import { ingestEventsSchema, analyticsQuerySchema } from './analytics.schema'
 import { sendSuccess } from '../../common/utils/response'
 
@@ -29,13 +30,14 @@ export async function analyticsRoutes(app: FastifyInstance) {
   app.get('/dashboard', { preHandler: [authenticate, requireAdmin] }, async (request, reply) => {
     const { days } = analyticsQuerySchema.parse(request.query)
 
-    const [activeUsers, registrations, popularScreens, dailyActivity, avgSessionTime] =
+    const [activeUsers, registrations, popularScreens, dailyActivity, avgSessionTime, docFeedback] =
       await Promise.all([
         analyticsRepository.getActiveUsers(),
         analyticsRepository.getRegistrations(days),
         analyticsRepository.getPopularScreens(days),
         analyticsRepository.getDailyActivity(days),
         analyticsRepository.getAverageSessionTime(days),
+        docFeedbackRepository.getAllStats(),
       ])
 
     return sendSuccess(reply, {
@@ -44,6 +46,7 @@ export async function analyticsRoutes(app: FastifyInstance) {
       popularScreens,
       dailyActivity,
       avgSessionTime,
+      docFeedback,
     })
   })
 

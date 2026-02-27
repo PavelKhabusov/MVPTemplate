@@ -51,19 +51,20 @@ interface AdminConfig {
   features: string[]
 }
 
+interface DocFeedbackStat {
+  pageId: string
+  likes: number
+  dislikes: number
+  total: number
+}
+
 interface AnalyticsDashboard {
   activeUsers: { dau: number; wau: number; mau: number }
   registrations: Array<{ day: string; count: number }>
   popularScreens: Array<{ screenName: string; views: number }>
   dailyActivity: Array<{ day: string; events: number; uniqueUsers: number }>
   avgSessionTime: number
-}
-
-interface DocFeedbackStat {
-  pageId: string
-  likes: number
-  dislikes: number
-  total: number
+  docFeedback: DocFeedbackStat[]
 }
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -378,7 +379,6 @@ function PaymentsAdminTab() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const { height } = useWindowDimensions()
   const [stats, setStats] = useState<{
     totalRevenue: Array<{ total: number; currency: string }>
     activeSubscriptions: number
@@ -753,43 +753,12 @@ function PaymentsAdminTab() {
       </FadeIn>
 
       {/* Plan Create / Edit Modal */}
-      <Modal
+      <BottomSheet
         visible={showPlanModal}
-        animationType="slide"
-        transparent
-        presentationStyle="overFullScreen"
-        onRequestClose={closePlanModal}
+        onClose={closePlanModal}
+        title={editingPlan ? t('admin.editPlan') : t('admin.createPlan')}
       >
-        <Pressable
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' }}
-          onPress={closePlanModal}
-        >
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' }}
-          >
-            <YStack backgroundColor="$background" style={{ maxHeight: height * 0.92 }}>
-              {/* Handle */}
-              <YStack alignItems="center" paddingTop="$3" paddingBottom="$1">
-                <YStack width={36} height={4} borderRadius={2} backgroundColor="$borderColor" />
-              </YStack>
-
-              {/* Header */}
-              <XStack paddingHorizontal="$4" paddingVertical="$3" justifyContent="space-between" alignItems="center">
-                <Text fontWeight="700" fontSize="$5" color="$color">
-                  {editingPlan ? t('admin.editPlan') : t('admin.createPlan')}
-                </Text>
-                <ScalePress onPress={closePlanModal}>
-                  <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
-                </ScalePress>
-              </XStack>
-              <YStack height={1} backgroundColor="$borderColor" />
-
-              <ScrollView
-                contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
-                keyboardShouldPersistTaps="handled"
-              >
-                <YStack gap="$3">
+        <YStack gap="$3">
                   <YStack gap="$1.5">
                     <Text fontSize="$2" color="$mutedText" fontWeight="600">{t('admin.planName')}</Text>
                     <Input value={planName} onChangeText={setPlanName} placeholder="Pro Plan" placeholderTextColor={theme.mutedText.val as any} backgroundColor="$subtleBackground" borderWidth={1} borderColor="$borderColor" borderRadius="$3" paddingHorizontal="$3" height={44} fontSize="$3" color="$color" />
@@ -875,12 +844,8 @@ function PaymentsAdminTab() {
                   >
                     {savingPlan ? t('common.loading') : editingPlan ? t('admin.saveChanges') : t('admin.createPlan')}
                   </AppButton>
-                </YStack>
-              </ScrollView>
-            </YStack>
-          </Pressable>
-        </Pressable>
-      </Modal>
+        </YStack>
+      </BottomSheet>
     </ScrollView>
   )
 }
@@ -2605,6 +2570,7 @@ function TemplateConfigTab() {
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
 
   const [hexInput, setHexInput] = useState(customColor ?? '')
+  const [showFontModal, setShowFontModal] = useState(false)
 
   const frontendFlags = TEMPLATE_FLAGS.filter((f) => f.scope === 'frontend')
 
@@ -2859,74 +2825,93 @@ function TemplateConfigTab() {
             </XStack>
           </AppCard>
 
-          {/* Font Scale */}
-          <AppCard animated={false}>
-            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
-              {t('templateConfig.fontScale')}
-            </Text>
-            <XStack gap="$2">
-              {(
-                [
-                  { value: 'compact' as FontScale, labelKey: 'templateConfig.fontCompact' },
-                  { value: 'default' as FontScale, labelKey: 'templateConfig.fontDefault' },
-                  { value: 'large' as FontScale, labelKey: 'templateConfig.fontLarge' },
-                ] as const
-              ).map((opt) => {
-                const active = fontScale === opt.value
-                return (
-                  <ScalePress key={opt.value} onPress={() => handleSetFontScale(opt.value)}>
-                    <XStack
-                      paddingHorizontal="$3"
-                      paddingVertical="$1.5"
-                      borderRadius="$3"
-                      borderWidth={1}
-                      borderColor={active ? '$accent' : '$borderColor'}
-                      backgroundColor="$subtleBackground"
-                    >
-                      <Text
-                        fontSize="$2"
-                        color={active ? '$accent' : '$mutedText'}
-                        fontWeight={active ? '600' : '400'}
-                      >
-                        {t(opt.labelKey)}
-                      </Text>
-                    </XStack>
-                  </ScalePress>
-                )
-              })}
-            </XStack>
-          </AppCard>
+          {/* Typography — opens BottomSheet */}
+          <ScalePress onPress={() => setShowFontModal(true)}>
+            <AppCard animated={false}>
+              <XStack justifyContent="space-between" alignItems="center">
+                <XStack gap="$3" alignItems="center">
+                  <YStack width={36} height={36} borderRadius={18} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
+                    <Ionicons name="text-outline" size={18} color={theme.accent.val} />
+                  </YStack>
+                  <YStack gap="$0.5">
+                    <Text fontWeight="600" color="$color" fontSize="$4">{t('templateConfig.fontFamily')}</Text>
+                    <Text fontSize="$2" color="$mutedText">
+                      {FONT_FAMILY_CONFIG[fontFamily]?.label ?? fontFamily} · {fontScale}
+                    </Text>
+                  </YStack>
+                </XStack>
+                <Ionicons name="chevron-forward" size={18} color={theme.mutedText.val} />
+              </XStack>
+            </AppCard>
+          </ScalePress>
 
-          {/* Font Family */}
-          <AppCard animated={false}>
-            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
-              {t('templateConfig.fontFamily')}
-            </Text>
-            <YStack gap="$2">
-              {(Object.entries(FONT_FAMILY_CONFIG) as [FontFamily, { label: string }][]).map(([key, cfg]) => {
-                const active = fontFamily === key
-                return (
-                  <ScalePress key={key} onPress={() => handleSetFontFamily(key)}>
-                    <XStack
-                      alignItems="center"
-                      justifyContent="space-between"
-                      paddingHorizontal="$3"
-                      paddingVertical="$2"
-                      borderRadius="$3"
-                      borderWidth={1}
-                      borderColor={active ? '$accent' : '$borderColor'}
-                      backgroundColor="$subtleBackground"
-                    >
-                      <Text fontSize="$3" color={active ? '$accent' : '$color'} fontWeight={active ? '600' : '400'}>
-                        {cfg.label}
-                      </Text>
-                      {active && <Ionicons name="checkmark" size={16} color={theme.accent.val} />}
-                    </XStack>
-                  </ScalePress>
-                )
-              })}
+          <BottomSheet
+            visible={showFontModal}
+            onClose={() => setShowFontModal(false)}
+            title={t('templateConfig.fontFamily')}
+          >
+            <YStack gap="$4">
+              {/* Font Scale */}
+              <YStack gap="$2">
+                <Text fontWeight="600" color="$color" fontSize="$4">{t('templateConfig.fontScale')}</Text>
+                <XStack gap="$2">
+                  {(
+                    [
+                      { value: 'compact' as FontScale, labelKey: 'templateConfig.fontCompact' },
+                      { value: 'default' as FontScale, labelKey: 'templateConfig.fontDefault' },
+                      { value: 'large' as FontScale, labelKey: 'templateConfig.fontLarge' },
+                    ] as const
+                  ).map((opt) => {
+                    const active = fontScale === opt.value
+                    return (
+                      <ScalePress key={opt.value} onPress={() => handleSetFontScale(opt.value)}>
+                        <XStack
+                          paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3"
+                          borderWidth={1}
+                          borderColor={active ? '$accent' : '$borderColor'}
+                          backgroundColor={active ? '$accentBackground' : '$subtleBackground'}
+                        >
+                          <Text fontSize="$3" color={active ? '$accent' : '$color'} fontWeight={active ? '700' : '400'}>
+                            {t(opt.labelKey)}
+                          </Text>
+                        </XStack>
+                      </ScalePress>
+                    )
+                  })}
+                </XStack>
+              </YStack>
+
+              <YStack height={1} backgroundColor="$borderColor" />
+
+              {/* Font Family */}
+              <YStack gap="$2">
+                <Text fontWeight="600" color="$color" fontSize="$4">{t('templateConfig.fontFamily')}</Text>
+                <YStack gap="$2">
+                  {(Object.entries(FONT_FAMILY_CONFIG) as [FontFamily, { label: string }][]).map(([key, cfg]) => {
+                    const active = fontFamily === key
+                    return (
+                      <ScalePress key={key} onPress={() => handleSetFontFamily(key)}>
+                        <XStack
+                          alignItems="center" justifyContent="space-between"
+                          paddingHorizontal="$3" paddingVertical="$3" borderRadius="$3"
+                          borderWidth={1}
+                          borderColor={active ? '$accent' : '$borderColor'}
+                          backgroundColor={active ? '$accentBackground' : '$subtleBackground'}
+                        >
+                          <YStack gap="$0.5">
+                            <Text fontSize="$3" color={active ? '$accent' : '$color'} fontWeight={active ? '700' : '400'}>
+                              {cfg.label}
+                            </Text>
+                          </YStack>
+                          {active && <Ionicons name="checkmark-circle" size={20} color={theme.accent.val} />}
+                        </XStack>
+                      </ScalePress>
+                    )
+                  })}
+                </YStack>
+              </YStack>
             </YStack>
-          </AppCard>
+          </BottomSheet>
 
           {/* Frontend Flags */}
           <AppCard animated={false}>
@@ -3004,7 +2989,7 @@ export default function AdminScreen() {
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
