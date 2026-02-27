@@ -345,7 +345,6 @@ function AuthenticatedSettingsView() {
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
-  const paymentsEnabled = useTemplateFlag('payments', false)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
@@ -489,13 +488,11 @@ function AuthenticatedSettingsView() {
         {/* General */}
         <StaggerGroup index={groupIndex++}>
           <SettingsGroup header={t('settings.title')}>
-            {paymentsEnabled && (
-              <SettingsGroupItem
-                icon="card-outline"
-                label={t('payments.managePlan')}
-                onPress={() => router.push('/pricing')}
-              />
-            )}
+            <SettingsGroupItem
+              icon="pricetags-outline"
+              label={t('payments.title')}
+              onPress={() => router.push('/pricing')}
+            />
             {pushEnabled && (
               <SettingsGroupItem
                 icon="notifications-outline"
@@ -715,6 +712,11 @@ function WebSettingsView() {
         {/* General */}
         <StaggerGroup index={isAuthenticated ? 2 : 1}>
           <SettingsGroup header={t('settings.title')}>
+            <SettingsGroupItem
+              icon="pricetags-outline"
+              label={t('payments.title')}
+              onPress={() => router.push('/pricing')}
+            />
             {pushEnabled && (
               <SettingsGroupItem
                 icon="notifications-outline"
