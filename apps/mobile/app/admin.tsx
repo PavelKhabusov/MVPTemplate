@@ -197,71 +197,6 @@ function AdminModal({
   )
 }
 
-/* ─── Bottom Sheet ─────────────────────────────────────────────────── */
-function BottomSheet({
-  visible,
-  onClose,
-  title,
-  children,
-}: {
-  visible: boolean
-  onClose: () => void
-  title: string
-  children: ReactNode
-}) {
-  const theme = useTheme()
-  const insets = useSafeAreaInsets()
-  const { height } = useWindowDimensions()
-
-  // Modal renders in a React portal on web (document root) and as a native modal
-  // on iOS/Android — both cases are fixed to the viewport, not the scroll container.
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      presentationStyle="overFullScreen"
-      onRequestClose={onClose}
-      statusBarTranslucent
-    >
-      <Pressable
-        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' }}
-        onPress={onClose}
-      >
-        <Pressable
-          onPress={(e) => e.stopPropagation()}
-          style={{
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            overflow: 'hidden',
-            backgroundColor: theme.background.val,
-            maxHeight: height * 0.92,
-          }}
-        >
-          {/* Drag handle */}
-          <YStack alignItems="center" paddingTop="$3" paddingBottom="$1">
-            <YStack width={36} height={4} borderRadius={2} backgroundColor="$borderColor" />
-          </YStack>
-          {/* Header */}
-          <XStack paddingHorizontal="$4" paddingVertical="$3" justifyContent="space-between" alignItems="center">
-            <Text fontWeight="700" fontSize="$5" color="$color">{title}</Text>
-            <ScalePress onPress={onClose}>
-              <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
-            </ScalePress>
-          </XStack>
-          <YStack height={1} backgroundColor="$borderColor" />
-          <ScrollView
-            contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
-            keyboardShouldPersistTaps="handled"
-          >
-            {children}
-          </ScrollView>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  )
-}
-
 
 function ScreensBarChart({ data }: { data: Array<{ screenName: string; views: number }> }) {
   const theme = useTheme()
@@ -776,7 +711,7 @@ function PaymentsAdminTab() {
       </FadeIn>
 
       {/* Plan Create / Edit Modal */}
-      <BottomSheet
+      <AdminModal
         visible={showPlanModal}
         onClose={closePlanModal}
         title={editingPlan ? t('admin.editPlan') : t('admin.createPlan')}
@@ -868,7 +803,7 @@ function PaymentsAdminTab() {
                     {savingPlan ? t('common.loading') : editingPlan ? t('admin.saveChanges') : t('admin.createPlan')}
                   </AppButton>
         </YStack>
-      </BottomSheet>
+      </AdminModal>
     </ScrollView>
   )
 }
@@ -2868,7 +2803,7 @@ function TemplateConfigTab() {
             </AppCard>
           </ScalePress>
 
-          <BottomSheet
+          <AdminModal
             visible={showFontModal}
             onClose={() => setShowFontModal(false)}
             title={t('templateConfig.fontFamily')}
@@ -2934,7 +2869,7 @@ function TemplateConfigTab() {
                 </YStack>
               </YStack>
             </YStack>
-          </BottomSheet>
+          </AdminModal>
 
           {/* Frontend Flags */}
           <AppCard animated={false}>
