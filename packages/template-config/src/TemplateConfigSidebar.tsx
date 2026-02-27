@@ -270,7 +270,7 @@ function buildThemeOutput(schemeKey: string | null, radius: RadiusScale, card: C
     lines.push(`// Border radius: ${radius}`, RADIUS_OUTPUT[radius])
   }
 
-  if (card !== 'elevated') {
+  if (card !== 'bordered') {
     if (lines.length > 0) lines.push('')
     lines.push(`// Card style: ${card}`)
   }
@@ -327,7 +327,7 @@ export function TemplateConfigSidebar() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere' || radiusScale !== 'default' || fontScale !== 'default' || fontFamily !== 'inter' || cardStyle !== 'elevated'
+  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || webLayout !== 'sidebar' || userBadgePlacement !== 'sidebar' || headerNavAlign !== 'center' || compactProfile || languagePlacement !== 'nowhere' || themePlacement !== 'nowhere' || searchPlacement !== 'nowhere' || radiusScale !== 'default' || fontScale !== 'default' || fontFamily !== 'monospace' || cardStyle !== 'bordered'
 
   return (
     <YStack
@@ -826,7 +826,7 @@ export function TemplateConfigSidebar() {
         {/* Reset Button */}
         {hasOverrides && (
           <YStack paddingHorizontal="$3" marginTop="$3">
-            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY); applyRadiusScale('default'); applyCardStyle('elevated'); applyFontFamily('inter').catch(() => {}) }}>
+            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY); applyRadiusScale('default'); applyCardStyle('bordered'); applyFontFamily('monospace').catch(() => {}) }}>
               <XStack
                 alignItems="center"
                 justifyContent="center"

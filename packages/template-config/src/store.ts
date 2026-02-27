@@ -62,8 +62,8 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       searchPlacement: 'nowhere',
       radiusScale: 'default',
       fontScale: 'default',
-      fontFamily: 'inter',
-      cardStyle: 'elevated',
+      fontFamily: 'monospace',
+      cardStyle: 'bordered',
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setFlag: (key, value) =>
         set((state) => ({
@@ -82,7 +82,7 @@ export const useTemplateConfigStore = create<TemplateConfigState>()(
       setFontScale: (scale) => set({ fontScale: scale }),
       setFontFamily: (family) => set({ fontFamily: family }),
       setCardStyle: (style) => set({ cardStyle: style }),
-      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false, languagePlacement: 'nowhere', themePlacement: 'nowhere', searchPlacement: 'nowhere', radiusScale: 'default', fontScale: 'default', fontFamily: 'inter', cardStyle: 'elevated' }),
+      resetAll: () => set({ overrides: {}, colorScheme: null, customColor: null, webLayout: 'sidebar', userBadgePlacement: 'sidebar', headerNavAlign: 'center', compactProfile: false, languagePlacement: 'nowhere', themePlacement: 'nowhere', searchPlacement: 'nowhere', radiusScale: 'default', fontScale: 'default', fontFamily: 'monospace', cardStyle: 'bordered' }),
     }),
     {
       name: 'template-config',

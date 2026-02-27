@@ -222,7 +222,7 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   },
 ]
 
-export const DEFAULT_SCHEME_KEY = 'cyan'
+export const DEFAULT_SCHEME_KEY = 'slate'
 
 export function applyColorScheme(schemeKey: string): ColorScheme {
   const scheme = COLOR_SCHEMES.find((s) => s.key === schemeKey) ?? COLOR_SCHEMES[0]

@@ -304,10 +304,24 @@ interface AdminPlan {
   sortOrder: number
 }
 
+const PROVIDER_CFG: Record<string, { label: string; color: string }> = {
+  stripe: { label: 'Stripe', color: '#635BFF' },
+  yookassa: { label: 'YooKassa', color: '#00B2FF' },
+  robokassa: { label: 'Robokassa', color: '#F5A623' },
+  paypal: { label: 'PayPal', color: '#003087' },
+}
+
+const PAYMENT_STATUS_COLOR: Record<string, string> = {
+  succeeded: '#22C55E',
+  pending: '#F59E0B',
+  failed: '#EF4444',
+}
+
 function PaymentsAdminTab() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const { height } = useWindowDimensions()
   const [stats, setStats] = useState<{
     totalRevenue: Array<{ total: number; currency: string }>
     activeSubscriptions: number
@@ -326,8 +340,9 @@ function PaymentsAdminTab() {
   const [adminPlans, setAdminPlans] = useState<AdminPlan[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Create plan form state
-  const [showCreateForm, setShowCreateForm] = useState(false)
+  // Unified plan modal state (create + edit)
+  const [showPlanModal, setShowPlanModal] = useState(false)
+  const [editingPlan, setEditingPlan] = useState<AdminPlan | null>(null)
   const [planName, setPlanName] = useState('')
   const [planDescription, setPlanDescription] = useState('')
   const [planPrice, setPlanPrice] = useState('')
@@ -336,15 +351,7 @@ function PaymentsAdminTab() {
   const [planProvider, setPlanProvider] = useState<'stripe' | 'yookassa' | 'robokassa' | 'paypal'>('stripe')
   const [planProviderPriceId, setPlanProviderPriceId] = useState('')
   const [planFeatures, setPlanFeatures] = useState('')
-  const [creating, setCreating] = useState(false)
-
-  // Edit plan state
-  const [editingPlan, setEditingPlan] = useState<AdminPlan | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editDescription, setEditDescription] = useState('')
-  const [editPrice, setEditPrice] = useState('')
-  const [editFeatures, setEditFeatures] = useState('')
-  const [savingEdit, setSavingEdit] = useState(false)
+  const [savingPlan, setSavingPlan] = useState(false)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -2320,9 +2327,9 @@ function TemplateConfigTab() {
     colorScheme !== null ||
     customColor !== null ||
     radiusScale !== 'default' ||
-    cardStyle !== 'elevated' ||
+    cardStyle !== 'bordered' ||
     fontScale !== 'default' ||
-    fontFamily !== 'inter'
+    fontFamily !== 'monospace'
 
   const handleSetRadius = (scale: RadiusScale) => {
     setRadiusScale(scale)
