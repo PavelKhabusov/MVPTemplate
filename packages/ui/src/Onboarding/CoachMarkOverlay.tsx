@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { MotiView } from 'moti'
 import Svg, { Defs, Mask, Rect } from 'react-native-svg'
 import { ScalePress } from '../animations/ScalePress'
-import type { CoachMarkStep, SpotlightRect } from './CoachMarkContext'
+import type { CoachMarkStep, CoachMarkLabels, SpotlightRect } from './CoachMarkContext'
 import { useCoachMarkContext } from './CoachMarkContext'
 
 const PAD = 10
@@ -26,7 +26,7 @@ const TOOLTIP_HEIGHT_EST = 190
  */
 export function CoachMarkOverlay() {
   const { _state, nextStep, dismissTour } = useCoachMarkContext()
-  const { spotlightRect, steps, activeIndex } = _state
+  const { spotlightRect, steps, activeIndex, labels } = _state
 
   if (activeIndex === null || !spotlightRect || !steps[activeIndex]) return null
 
@@ -36,6 +36,7 @@ export function CoachMarkOverlay() {
       step={steps[activeIndex]}
       stepIndex={activeIndex}
       totalSteps={steps.length}
+      labels={labels}
       onNext={nextStep}
       onDismiss={dismissTour}
     />
@@ -47,6 +48,7 @@ interface OverlayContentProps {
   step: CoachMarkStep
   stepIndex: number
   totalSteps: number
+  labels: CoachMarkLabels
   onNext: () => void
   onDismiss: () => void
 }
@@ -56,6 +58,7 @@ function OverlayContent({
   step,
   stepIndex,
   totalSteps,
+  labels,
   onNext,
   onDismiss,
 }: OverlayContentProps) {
@@ -174,12 +177,12 @@ function OverlayContent({
             {/* Actions */}
             <XStack justifyContent="flex-end" gap="$4" marginTop="$1">
               <ScalePress onPress={onDismiss}>
-                <Text fontSize="$2" color="$mutedText">Skip</Text>
+                <Text fontSize="$2" color="$mutedText">{labels.skip ?? 'Skip'}</Text>
               </ScalePress>
               <ScalePress onPress={onNext}>
                 <XStack gap="$1.5" alignItems="center">
                   <Text fontSize="$2" color="$accent" fontWeight="600">
-                    {isLast ? 'Done' : 'Next'}
+                    {isLast ? (labels.done ?? 'Done') : (labels.next ?? 'Next')}
                   </Text>
                   {!isLast && (
                     <Ionicons name="arrow-forward" size={14} color={theme.accent.val} />

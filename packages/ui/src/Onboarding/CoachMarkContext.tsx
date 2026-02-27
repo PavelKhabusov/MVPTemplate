@@ -14,14 +14,21 @@ export interface SpotlightRect {
   height: number
 }
 
+export interface CoachMarkLabels {
+  skip?: string
+  next?: string
+  done?: string
+}
+
 interface CoachMarkState {
   steps: CoachMarkStep[]
   activeIndex: number | null
   spotlightRect: SpotlightRect | null
+  labels: CoachMarkLabels
 }
 
 interface CoachMarkContextValue {
-  startTour: (steps: CoachMarkStep[]) => void
+  startTour: (steps: CoachMarkStep[], labels?: CoachMarkLabels) => void
   nextStep: () => void
   dismissTour: () => void
   registerRef: (id: string, ref: React.RefObject<View>) => void
@@ -40,7 +47,7 @@ const CoachMarkContext = createContext<CoachMarkContextValue>({
   unregisterRef: () => {},
   registerScrollTo: () => {},
   unregisterScrollTo: () => {},
-  _state: { steps: [], activeIndex: null, spotlightRect: null },
+  _state: { steps: [], activeIndex: null, spotlightRect: null, labels: {} },
 })
 
 export function useCoachMark() {
@@ -63,6 +70,7 @@ export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
     steps: [],
     activeIndex: null,
     spotlightRect: null,
+    labels: {},
   })
 
   // Measure element when active step changes
@@ -111,22 +119,22 @@ export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.activeIndex, state.steps])
 
-  const startTour = useCallback((steps: CoachMarkStep[]) => {
-    setState({ steps, activeIndex: 0, spotlightRect: null })
+  const startTour = useCallback((steps: CoachMarkStep[], labels: CoachMarkLabels = {}) => {
+    setState({ steps, activeIndex: 0, spotlightRect: null, labels })
   }, [])
 
   const nextStep = useCallback(() => {
     setState((s) => {
       if (s.activeIndex === null) return s
       if (s.activeIndex >= s.steps.length - 1) {
-        return { steps: [], activeIndex: null, spotlightRect: null }
+        return { steps: [], activeIndex: null, spotlightRect: null, labels: {} }
       }
       return { ...s, activeIndex: s.activeIndex + 1, spotlightRect: null }
     })
   }, [])
 
   const dismissTour = useCallback(() => {
-    setState({ steps: [], activeIndex: null, spotlightRect: null })
+    setState({ steps: [], activeIndex: null, spotlightRect: null, labels: {} })
   }, [])
 
   const registerRef = useCallback((id: string, ref: React.RefObject<View>) => {

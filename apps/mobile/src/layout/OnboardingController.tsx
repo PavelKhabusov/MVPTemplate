@@ -24,7 +24,11 @@ export function OnboardingController() {
       }}
       onComplete={() => {
         setOnboardingComplete()
-        setTimeout(() => startTour(createHomeCoachSteps(t)), 600)
+        setTimeout(() => startTour(createHomeCoachSteps(t), {
+          skip: t('onboarding.skip'),
+          next: t('onboarding.next'),
+          done: t('common.done'),
+        }), 600)
       }}
       onSkip={setOnboardingComplete}
     />
