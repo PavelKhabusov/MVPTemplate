@@ -33,7 +33,9 @@ export function AppModal({
     if (visible) {
       setMounted(true)
       // One rAF lets the browser paint the hidden state before transitioning in
-      const id = requestAnimationFrame(() => setShown(true))
+      let id = requestAnimationFrame(() => {
+        id = requestAnimationFrame(() => setShown(true))
+      })
       return () => cancelAnimationFrame(id)
     } else {
       setShown(false)
