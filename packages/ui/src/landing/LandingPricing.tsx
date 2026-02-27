@@ -234,7 +234,7 @@ export function LandingPricing({ onNavigate, plans = [] }: LandingPricingProps) 
           <XStack
             gap="$4"
             justifyContent="center"
-            alignItems="flex-end"
+            alignItems="flex-start"
             flexWrap="wrap"
             width="100%"
           >
@@ -480,7 +480,7 @@ function PlaceholderCards({
   ]
 
   return (
-    <XStack gap="$4" justifyContent="center" alignItems="flex-end" flexWrap="wrap" width="100%">
+    <XStack gap="$4" justifyContent="center" alignItems="flex-start" flexWrap="wrap" width="100%">
       {plans.map((plan, idx) => (
         <YStack
           key={plan.name}
