@@ -20,6 +20,8 @@
     "clean": "turbo clean && rm -rf node_modules",
     "generate-env": "node scripts/generate-env.mjs",
     "setup": "npm install && node scripts/generate-env.mjs",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
     "gitpush": "git push origin HEAD"
   },
   "devDependencies": {
