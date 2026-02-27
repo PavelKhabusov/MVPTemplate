@@ -93,6 +93,7 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
             </Text>
             <FooterLink label={t('settings.privacy')} onPress={() => onNavigate('/privacy')} />
             <FooterLink label={t('settings.terms')} onPress={() => onNavigate('/terms')} />
+            <FooterLink label={t('landing.footerOffer')} onPress={() => onNavigate('/offer')} />
           </YStack>
         </XStack>
 
