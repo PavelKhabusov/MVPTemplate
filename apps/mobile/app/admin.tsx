@@ -14,6 +14,13 @@ import {
   DEFAULT_SCHEME_KEY,
   applyColorScheme,
   applyCustomColor,
+  applyRadiusScale,
+  applyCardStyle,
+  FONT_FAMILY_CONFIG,
+  type RadiusScale,
+  type CardStyle,
+  type FontScale,
+  type FontFamily,
 } from '@mvp/template-config'
 import { useRouter } from 'expo-router'
 import { useAuthStore } from '@mvp/store'
@@ -707,7 +714,6 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   sms: { icon: 'chatbubble-ellipses-outline', labelKey: 'admin.apiSMS', mainToggle: 'SMS_ENABLED' },
   pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN', hintKey: 'admin.hintExpo', hintUrl: 'https://expo.dev/settings/access-tokens' },
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
-  frontend: { icon: 'color-palette-outline', labelKey: 'admin.apiFrontend' },
   ai: { icon: 'sparkles-outline', labelKey: 'admin.apiAI', mainToggle: 'GEMINI_API_KEY' },
 }
 
@@ -1275,17 +1281,6 @@ function ApiSettingsTab() {
       } else {
         handleUpdate(mainKey, checked ? '__TOGGLE_ON__' : null)
       }
-    }
-
-    if (group === 'frontend') {
-      return (
-        <FrontendEnvCard
-          key={group}
-          keys={keys}
-          onUpdate={handleUpdate}
-          onBatchUpdate={handleBatchUpdate}
-        />
-      )
     }
 
     if (group === 'sms') {
@@ -2292,7 +2287,7 @@ function StorageAdminTab() {
   )
 }
 
-function FrontendEnvCard({ keys, onUpdate, onBatchUpdate }: {
+function _FrontendEnvCard_REMOVED({ keys, onUpdate, onBatchUpdate }: {
   keys: Record<string, EnvEntry>
   onUpdate: (key: string, value: string | boolean | null) => void
   onBatchUpdate: (patch: Record<string, string | null>) => void
@@ -2469,6 +2464,14 @@ function TemplateConfigTab() {
   const customColor = useTemplateConfigStore((s) => s.customColor)
   const setColorScheme = useTemplateConfigStore((s) => s.setColorScheme)
   const setCustomColor = useTemplateConfigStore((s) => s.setCustomColor)
+  const radiusScale = useTemplateConfigStore((s) => s.radiusScale)
+  const setRadiusScale = useTemplateConfigStore((s) => s.setRadiusScale)
+  const cardStyle = useTemplateConfigStore((s) => s.cardStyle)
+  const setCardStyle = useTemplateConfigStore((s) => s.setCardStyle)
+  const fontScale = useTemplateConfigStore((s) => s.fontScale)
+  const setFontScale = useTemplateConfigStore((s) => s.setFontScale)
+  const fontFamily = useTemplateConfigStore((s) => s.fontFamily)
+  const setFontFamily = useTemplateConfigStore((s) => s.setFontFamily)
   const resetAll = useTemplateConfigStore((s) => s.resetAll)
 
   const [hexInput, setHexInput] = useState(customColor ?? '')
@@ -2478,7 +2481,32 @@ function TemplateConfigTab() {
   const getFlagValue = (key: string, defaultValue: boolean) =>
     overrides[key] !== undefined ? overrides[key] : defaultValue
 
-  const hasOverrides = Object.keys(overrides).length > 0 || colorScheme !== null || customColor !== null
+  const hasOverrides =
+    Object.keys(overrides).length > 0 ||
+    colorScheme !== null ||
+    customColor !== null ||
+    radiusScale !== 'default' ||
+    cardStyle !== 'elevated' ||
+    fontScale !== 'default' ||
+    fontFamily !== 'inter'
+
+  const handleSetRadius = (scale: RadiusScale) => {
+    setRadiusScale(scale)
+    applyRadiusScale(scale)
+  }
+
+  const handleSetCardStyle = (style: CardStyle) => {
+    setCardStyle(style)
+    applyCardStyle(style)
+  }
+
+  const handleSetFontScale = (scale: FontScale) => {
+    setFontScale(scale)
+  }
+
+  const handleSetFontFamily = (family: FontFamily) => {
+    setFontFamily(family)
+  }
 
   const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(hexInput)
 
@@ -2619,6 +2647,154 @@ function TemplateConfigTab() {
                   </ScalePress>
                 )}
               </XStack>
+            </YStack>
+          </AppCard>
+
+          {/* Border Radius */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('templateConfig.borderRadius')}
+            </Text>
+            <XStack gap="$2" flexWrap="wrap">
+              {(
+                [
+                  { value: 'square' as RadiusScale, labelKey: 'templateConfig.radiusSquare' },
+                  { value: 'sharp' as RadiusScale, labelKey: 'templateConfig.radiusSharp' },
+                  { value: 'default' as RadiusScale, labelKey: 'templateConfig.radiusDefault' },
+                  { value: 'rounded' as RadiusScale, labelKey: 'templateConfig.radiusRounded' },
+                  { value: 'pill' as RadiusScale, labelKey: 'templateConfig.radiusPill' },
+                ] as const
+              ).map((opt) => {
+                const active = radiusScale === opt.value
+                return (
+                  <ScalePress key={opt.value} onPress={() => handleSetRadius(opt.value)}>
+                    <XStack
+                      paddingHorizontal="$3"
+                      paddingVertical="$1.5"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={active ? '$accent' : '$borderColor'}
+                      backgroundColor="$subtleBackground"
+                    >
+                      <Text
+                        fontSize="$2"
+                        color={active ? '$accent' : '$mutedText'}
+                        fontWeight={active ? '600' : '400'}
+                      >
+                        {t(opt.labelKey)}
+                      </Text>
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </AppCard>
+
+          {/* Card Style */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('templateConfig.cardStyle')}
+            </Text>
+            <XStack gap="$2" flexWrap="wrap">
+              {(
+                [
+                  { value: 'flat' as CardStyle, labelKey: 'templateConfig.cardFlat' },
+                  { value: 'bordered' as CardStyle, labelKey: 'templateConfig.cardBordered' },
+                  { value: 'elevated' as CardStyle, labelKey: 'templateConfig.cardElevated' },
+                  { value: 'glass' as CardStyle, labelKey: 'templateConfig.cardGlass' },
+                ] as const
+              ).map((opt) => {
+                const active = cardStyle === opt.value
+                return (
+                  <ScalePress key={opt.value} onPress={() => handleSetCardStyle(opt.value)}>
+                    <XStack
+                      paddingHorizontal="$3"
+                      paddingVertical="$1.5"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={active ? '$accent' : '$borderColor'}
+                      backgroundColor="$subtleBackground"
+                    >
+                      <Text
+                        fontSize="$2"
+                        color={active ? '$accent' : '$mutedText'}
+                        fontWeight={active ? '600' : '400'}
+                      >
+                        {t(opt.labelKey)}
+                      </Text>
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </AppCard>
+
+          {/* Font Scale */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('templateConfig.fontScale')}
+            </Text>
+            <XStack gap="$2">
+              {(
+                [
+                  { value: 'compact' as FontScale, labelKey: 'templateConfig.fontCompact' },
+                  { value: 'default' as FontScale, labelKey: 'templateConfig.fontDefault' },
+                  { value: 'large' as FontScale, labelKey: 'templateConfig.fontLarge' },
+                ] as const
+              ).map((opt) => {
+                const active = fontScale === opt.value
+                return (
+                  <ScalePress key={opt.value} onPress={() => handleSetFontScale(opt.value)}>
+                    <XStack
+                      paddingHorizontal="$3"
+                      paddingVertical="$1.5"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={active ? '$accent' : '$borderColor'}
+                      backgroundColor="$subtleBackground"
+                    >
+                      <Text
+                        fontSize="$2"
+                        color={active ? '$accent' : '$mutedText'}
+                        fontWeight={active ? '600' : '400'}
+                      >
+                        {t(opt.labelKey)}
+                      </Text>
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </AppCard>
+
+          {/* Font Family */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('templateConfig.fontFamily')}
+            </Text>
+            <YStack gap="$2">
+              {(Object.entries(FONT_FAMILY_CONFIG) as [FontFamily, { label: string }][]).map(([key, cfg]) => {
+                const active = fontFamily === key
+                return (
+                  <ScalePress key={key} onPress={() => handleSetFontFamily(key)}>
+                    <XStack
+                      alignItems="center"
+                      justifyContent="space-between"
+                      paddingHorizontal="$3"
+                      paddingVertical="$2"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={active ? '$accent' : '$borderColor'}
+                      backgroundColor="$subtleBackground"
+                    >
+                      <Text fontSize="$3" color={active ? '$accent' : '$color'} fontWeight={active ? '600' : '400'}>
+                        {cfg.label}
+                      </Text>
+                      {active && <Ionicons name="checkmark" size={16} color={theme.accent.val} />}
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
             </YStack>
           </AppCard>
 

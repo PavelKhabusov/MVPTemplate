@@ -682,14 +682,15 @@ export default function RootLayout() {
   const templateFontFamily = useTemplateConfigStore((s) => s.fontFamily)
 
   useLayoutEffect(() => {
+    // Radius and card style work via Tamagui updateTheme on all platforms
+    applyRadiusScale(templateRadiusScale)
+    applyCardStyle(templateCardStyle)
     if (Platform.OS === 'web') {
       if (templateCustomColor) {
         applyCustomColor(templateCustomColor)
       } else {
         applyColorScheme(templateColorScheme ?? DEFAULT_SCHEME_KEY)
       }
-      applyRadiusScale(templateRadiusScale)
-      applyCardStyle(templateCardStyle)
       applyFontFamily(templateFontFamily).catch(() => {})
     }
   }, [resolvedTheme, templateColorScheme, templateCustomColor, templateRadiusScale, templateCardStyle, templateFontFamily])

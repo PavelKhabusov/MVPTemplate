@@ -41,22 +41,21 @@ export function applyCardStyle(style: CardStyle) {
   updateTheme({ name: 'light', theme: { ...CARD_STYLES[style].light, ...(!CARD_STYLES[style].light.cardBackground ? { cardBackground: DEFAULT_CARD_BG.light } : {}) } })
   updateTheme({ name: 'dark', theme: { ...CARD_STYLES[style].dark, ...(!CARD_STYLES[style].dark.cardBackground ? { cardBackground: DEFAULT_CARD_BG.dark } : {}) } })
 
-  // Glass backdrop-filter via CSS injection
+  // Glass backdrop-filter via CSS injection (web-only)
+  if (typeof document === 'undefined') return
   const id = 'mvp-card-glass-css'
-  let el = typeof document !== 'undefined' ? document.getElementById(id) as HTMLStyleElement | null : null
+  let el = document.getElementById(id) as HTMLStyleElement | null
   if (style === 'glass') {
-    if (!el && typeof document !== 'undefined') {
+    if (!el) {
       el = document.createElement('style')
       el.id = id
       document.head.appendChild(el)
     }
-    if (el) {
-      el.textContent = '[data-mvp-glass] { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }'
-    }
-    document.documentElement?.setAttribute('data-mvp-glass', '')
+    el.textContent = '[data-mvp-glass] { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }'
+    document.documentElement.setAttribute('data-mvp-glass', '')
   } else {
     el?.remove()
-    document.documentElement?.removeAttribute('data-mvp-glass')
+    document.documentElement.removeAttribute('data-mvp-glass')
   }
 }
 
