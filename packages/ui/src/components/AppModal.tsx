@@ -1,8 +1,10 @@
-import { type ReactNode, useEffect } from 'react'
-import { Modal, Platform, Pressable, ScrollView, View, useWindowDimensions } from 'react-native'
-import { H4, Text, XStack, YStack, useTheme } from 'tamagui'
+import React, { type ReactNode, useEffect } from 'react'
+import { Modal, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native'
+import { H4, Text, YStack, XStack, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Portal } from '@tamagui/portal'
+
+// Shorthand to avoid JSX HTML-element TypeScript errors in RN project
+const el = React.createElement
 
 export function AppModal({
   visible,
@@ -22,6 +24,7 @@ export function AppModal({
   const theme = useTheme()
   const isWide = screenWidth > 600
 
+  // Escape key — web only
   useEffect(() => {
     if (!visible || Platform.OS !== 'web') return
     const handler = (e: KeyboardEvent) => {
@@ -61,101 +64,98 @@ export function AppModal({
   }
 
   // ── Web ───────────────────────────────────────────────────────────────
-  if (!visible) return null
+  if (!visible || typeof document === 'undefined') return null
+
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createPortal } = require('react-dom') as typeof import('react-dom')
 
   const modalWidth = isWide ? Math.min(maxWidth, screenWidth - 48) : screenWidth - 32
   const modalMaxHeight = screenHeight - insets.top - insets.bottom - 48
 
-  // RNW forwards unknown props to the underlying DOM element.
-  // We use native DOM onClick so that stopPropagation works reliably —
-  // RN Pressable's responder system ignores CSS z-index on web.
-  const backdropProps = { onClick: onClose } as object
-  const stopProps = { onClick: (e: Event) => e.stopPropagation() } as object
-
-  return (
-    <Portal>
-      {/* Full-screen wrapper that centers the modal via flexbox */}
-      <View
-        style={{
+  // We use React.createElement('div'/'button') instead of JSX to avoid
+  // TypeScript errors from the React Native JSX type environment.
+  // Native DOM onClick / stopPropagation is 100% reliable — unlike
+  // RNW Pressable which ignores CSS z-index in its responder system.
+  return createPortal(
+    el('div', {
+      style: {
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+    },
+      // Backdrop
+      el('div', {
+        onClick: onClose,
+        style: {
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 10000,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {/* Backdrop — DOM onClick, no z-index → sits behind modal */}
-        <View
-          {...backdropProps}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-          }}
-        />
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          cursor: 'pointer',
+        },
+      }),
 
-        {/* Modal panel — z-index:1 above backdrop; DOM stopPropagation on click */}
-        <View
-          {...stopProps}
-          style={{
-            zIndex: 1,
-            width: modalWidth,
-            maxHeight: modalMaxHeight,
-            backgroundColor: theme.background.val,
-            borderRadius: 16,
-            overflow: 'hidden',
-            // shadow
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.15,
-            shadowRadius: 24,
-            elevation: 8,
-          }}
-        >
-          {/* Header */}
-          <XStack
-            alignItems="center"
-            justifyContent="space-between"
-            padding="$4"
-            paddingBottom="$3"
-            borderBottomWidth={1}
-            borderBottomColor="$borderColor"
-          >
-            <H4 color="$color" fontFamily="$body" flex={1} numberOfLines={1} paddingRight="$3">
-              {title}
-            </H4>
-            <Pressable
-              onPress={onClose}
-              style={({ pressed }) => ({
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: pressed ? 0.5 : 1,
-              })}
-            >
-              <Text fontSize={22} color="$mutedText" lineHeight={22}>×</Text>
-            </Pressable>
-          </XStack>
+      // Modal panel — rendered after backdrop in DOM → same stacking context,
+      // higher paint order → receives pointer events first.
+      el('div', {
+        onClick: (e: MouseEvent) => e.stopPropagation(),
+        style: {
+          position: 'relative',
+          zIndex: 1,
+          width: modalWidth,
+          maxHeight: modalMaxHeight,
+          backgroundColor: theme.background.val,
+          borderRadius: 16,
+          overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      },
+        // Header
+        el('div', {
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px',
+            paddingBottom: '12px',
+            borderBottom: `1px solid ${theme.borderColor.val}`,
+            flexShrink: 0,
+          },
+        },
+          el(H4, { color: '$color', fontFamily: '$body', flex: 1, numberOfLines: 1, paddingRight: '$3' } as object, title),
+          el('button', {
+            onClick: onClose,
+            style: {
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 24,
+              lineHeight: 1,
+              color: theme.mutedText.val,
+              padding: '4px 8px',
+              borderRadius: 8,
+              flexShrink: 0,
+            },
+          }, '×'),
+        ),
 
-          {/* Scrollable content */}
-          <ScrollView
-            style={{ maxHeight: modalMaxHeight - 64 }}
-            showsVerticalScrollIndicator={false}
-          >
-            <YStack padding="$4">
-              {children}
-            </YStack>
-          </ScrollView>
-        </View>
-      </View>
-    </Portal>
+        // Scrollable content
+        el('div', {
+          style: {
+            overflowY: 'auto',
+            flex: 1,
+            maxHeight: modalMaxHeight - 65,
+          },
+        },
+          el(YStack, { padding: '$4' } as object, children),
+        ),
+      ),
+    ),
+    document.body,
   )
 }
