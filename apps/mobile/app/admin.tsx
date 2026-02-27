@@ -755,6 +755,8 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             <XStack gap="$2">
               {PAYMENT_PROVIDERS.map((provider) => {
                 const isActive = activeProvider === provider.key
+                const providerEnabledEntry = keys[provider.enabledKey]
+                const isEnabled = providerEnabledEntry ? providerEnabledEntry.value === 'true' : true
                 return (
                   <ScalePress key={provider.key} onPress={() => setActiveProvider(provider.key)}>
                     <XStack
@@ -764,15 +766,9 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
                       borderRadius="$3"
                       borderWidth={1}
                       borderColor={isActive ? provider.color : '$borderColor'}
-                      gap="$1.5"
+                      gap="$2"
                       alignItems="center"
                     >
-                      <YStack
-                        width={8}
-                        height={8}
-                        borderRadius={4}
-                        backgroundColor={isActive ? 'white' : provider.color}
-                      />
                       <Text
                         color={isActive ? 'white' : '$color'}
                         fontWeight="700"
@@ -780,25 +776,27 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
                       >
                         {provider.label}
                       </Text>
+                      {providerEnabledEntry && (
+                        <Pressable
+                          onPress={(e) => {
+                            e.stopPropagation()
+                            onUpdate(provider.enabledKey, String(!isEnabled))
+                          }}
+                          hitSlop={8}
+                        >
+                          <AppSwitch
+                            checked={isEnabled}
+                            onCheckedChange={(checked) => onUpdate(provider.enabledKey, String(checked))}
+                            size="$1"
+                          />
+                        </Pressable>
+                      )}
                     </XStack>
                   </ScalePress>
                 )
               })}
             </XStack>
           </ScrollView>
-
-          {/* Per-provider enable toggle */}
-          {enabledEntry && (
-            <XStack alignItems="center" justifyContent="space-between" paddingVertical="$1">
-              <Text fontSize="$3" color="$color" flex={1}>
-                {t('admin.providerEnabled', { provider: activeProviderData.label })}
-              </Text>
-              <AppSwitch
-                checked={isProviderEnabled}
-                onCheckedChange={(checked) => onUpdate(activeProviderData.enabledKey, String(checked))}
-              />
-            </XStack>
-          )}
 
           {/* Provider env fields */}
           {providerKeys.map(([key, entry]) => (
