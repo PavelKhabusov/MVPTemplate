@@ -1,12 +1,20 @@
-import { useMemo } from 'react'
-import { Platform, ScrollView, Pressable } from 'react-native'
+import { useMemo, useState, useEffect } from 'react'
+import { Platform, ScrollView, Pressable, useWindowDimensions } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { MotiView } from 'moti'
 import { useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
-import { useIsMobileWeb } from '@mvp/ui'
 import { useCookieConsentStore, useThemeStore } from '@mvp/store'
+
+function useIsMobileWeb() {
+  const { width } = useWindowDimensions()
+  const [isMobile, setIsMobile] = useState(() => Platform.OS === 'web' && width <= 768)
+  useEffect(() => {
+    setIsMobile(Platform.OS === 'web' && width <= 768)
+  }, [width])
+  return isMobile
+}
 import type { ThemeMode } from '@mvp/store'
 import { useTemplateConfigStore } from './store'
 import type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, SearchPlacement, RadiusScale, FontScale, FontFamily, CardStyle } from './store'
