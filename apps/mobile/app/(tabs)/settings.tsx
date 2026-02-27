@@ -192,16 +192,6 @@ function UnauthenticatedSettingsView() {
               onPress={() => router.push('/sign-in')}
             />
           )}
-          <SettingsGroupItem
-            icon="shield-outline"
-            label={t('settings.privacy')}
-            onPress={() => router.push('/privacy')}
-          />
-          <SettingsGroupItem
-            icon="document-text-outline"
-            label={t('settings.terms')}
-            onPress={() => router.push('/terms')}
-          />
           {docsEnabled && (
             <SettingsGroupItem
               icon="book-outline"
@@ -213,6 +203,27 @@ function UnauthenticatedSettingsView() {
             icon="information-circle-outline"
             label={t('settings.about')}
             value="1.0.0"
+          />
+        </SettingsGroup>
+      </SlideIn>
+
+      {/* Documents */}
+      <SlideIn from="bottom" delay={300}>
+        <SettingsGroup header={t('settings.documents')}>
+          <SettingsGroupItem
+            icon="shield-outline"
+            label={t('settings.privacy')}
+            onPress={() => router.push('/privacy')}
+          />
+          <SettingsGroupItem
+            icon="document-text-outline"
+            label={t('settings.terms')}
+            onPress={() => router.push('/terms')}
+          />
+          <SettingsGroupItem
+            icon="newspaper-outline"
+            label={t('settings.offer')}
+            onPress={() => router.push('/offer')}
           />
         </SettingsGroup>
       </SlideIn>
@@ -387,16 +398,6 @@ function AuthenticatedSettingsView() {
                 onPress={() => setShowNotifications(true)}
               />
             )}
-            <SettingsGroupItem
-              icon="shield-outline"
-              label={t('settings.privacy')}
-              onPress={() => router.push('/privacy')}
-            />
-            <SettingsGroupItem
-              icon="document-text-outline"
-              label={t('settings.terms')}
-              onPress={() => router.push('/terms')}
-            />
             {docsEnabled && (
               <SettingsGroupItem
                 icon="book-outline"
@@ -408,6 +409,27 @@ function AuthenticatedSettingsView() {
               icon="information-circle-outline"
               label={t('settings.about')}
               value="1.0.0"
+            />
+          </SettingsGroup>
+        </StaggerGroup>
+
+        {/* Documents */}
+        <StaggerGroup index={groupIndex++}>
+          <SettingsGroup header={t('settings.documents')}>
+            <SettingsGroupItem
+              icon="shield-outline"
+              label={t('settings.privacy')}
+              onPress={() => router.push('/privacy')}
+            />
+            <SettingsGroupItem
+              icon="document-text-outline"
+              label={t('settings.terms')}
+              onPress={() => router.push('/terms')}
+            />
+            <SettingsGroupItem
+              icon="newspaper-outline"
+              label={t('settings.offer')}
+              onPress={() => router.push('/offer')}
             />
           </SettingsGroup>
         </StaggerGroup>
@@ -592,16 +614,6 @@ function WebSettingsView() {
                 onPress={() => isAuthenticated ? setShowNotifications(true) : router.push('/sign-in')}
               />
             )}
-            <SettingsGroupItem
-              icon="shield-outline"
-              label={t('settings.privacy')}
-              onPress={() => router.push('/privacy')}
-            />
-            <SettingsGroupItem
-              icon="document-text-outline"
-              label={t('settings.terms')}
-              onPress={() => router.push('/terms')}
-            />
             {docsEnabled && (
               <SettingsGroupItem
                 icon="book-outline"
@@ -617,11 +629,32 @@ function WebSettingsView() {
           </SettingsGroup>
         </StaggerGroup>
 
+        {/* Documents */}
+        <StaggerGroup index={isAuthenticated ? 3 : 2}>
+          <SettingsGroup header={t('settings.documents')}>
+            <SettingsGroupItem
+              icon="shield-outline"
+              label={t('settings.privacy')}
+              onPress={() => router.push('/privacy')}
+            />
+            <SettingsGroupItem
+              icon="document-text-outline"
+              label={t('settings.terms')}
+              onPress={() => router.push('/terms')}
+            />
+            <SettingsGroupItem
+              icon="newspaper-outline"
+              label={t('settings.offer')}
+              onPress={() => router.push('/offer')}
+            />
+          </SettingsGroup>
+        </StaggerGroup>
+
         {pushEnabled && isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
 
         {/* Admin */}
         {userRole === 'admin' && (
-          <StaggerGroup index={3}>
+          <StaggerGroup index={isAuthenticated ? 4 : 3}>
             <SettingsGroup header={t('admin.title')}>
               <SettingsGroupItem
                 icon="shield-checkmark-outline"
@@ -634,7 +667,7 @@ function WebSettingsView() {
 
         {/* Sign Out */}
         {isAuthenticated && (
-          <StaggerGroup index={userRole === 'admin' ? 4 : 3}>
+          <StaggerGroup index={userRole === 'admin' ? 5 : 4}>
             <SettingsGroup>
               <SettingsGroupItem
                 icon="log-out-outline"

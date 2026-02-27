@@ -66,6 +66,8 @@ const PAGE_META: Record<string, { titleKey: string; descKey: string }> = {
   '/verify-email':   { titleKey: 'auth.verifyEmailTitle',    descKey: 'meta.verifyEmailDesc' },
   '/docs':           { titleKey: 'docs.title',               descKey: 'meta.docsDesc' },
   '/privacy':        { titleKey: 'settings.privacy',         descKey: 'meta.privacyDesc' },
+  '/terms':          { titleKey: 'settings.terms',           descKey: 'meta.termsDesc' },
+  '/offer':          { titleKey: 'settings.offer',           descKey: 'meta.offerDesc' },
   '/admin':          { titleKey: 'admin.title',              descKey: 'meta.adminDesc' },
   '/edit-profile':   { titleKey: 'profile.editProfile',      descKey: 'meta.editProfileDesc' },
   '/landing':        { titleKey: 'landing.heroTitle',        descKey: 'landing.heroSubtitle' },
@@ -128,6 +130,7 @@ function RootNavigator() {
       <Stack.Screen name="docs" options={{ headerShown: false }} />
       <Stack.Screen name="privacy" options={{ title: t('settings.privacy'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="terms" options={{ title: t('settings.terms'), headerBackTitle: t('common.back') }} />
+      <Stack.Screen name="offer" options={{ title: t('settings.offer'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="admin" options={{ title: t('admin.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="pricing" options={{ title: t('payments.title'), headerBackTitle: t('common.back') }} />
       <Stack.Screen name="landing" options={{ headerShown: false }} />

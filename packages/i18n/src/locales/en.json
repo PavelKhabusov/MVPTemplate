@@ -76,6 +76,9 @@
     "notifications": "Notifications",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
+    "offer": "Public Offer",
+    "documents": "Documents",
+    "downloadPDF": "Download PDF",
     "about": "About",
     "version": "Version",
     "signOut": "Sign Out"
@@ -428,6 +431,8 @@
     "verifyEmailDesc": "Verify your email address",
     "docsDesc": "Project documentation and guides",
     "privacyDesc": "Privacy policy",
+    "termsDesc": "Terms of service",
+    "offerDesc": "Public offer agreement",
     "adminDesc": "Admin dashboard for user and feature management",
     "editProfileDesc": "Update your profile information"
   },
