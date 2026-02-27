@@ -52,6 +52,22 @@ export const paymentsRepository = {
     return result[0] ?? null
   },
 
+  async deletePlan(id: string) {
+    const result = await db
+      .delete(plans)
+      .where(eq(plans.id, id))
+      .returning({ id: plans.id })
+    return result[0] ?? null
+  },
+
+  async getPlanSubscriptionCount(planId: string): Promise<number> {
+    const result = await db
+      .select({ count: count() })
+      .from(subscriptions)
+      .where(eq(subscriptions.planId, planId))
+    return result[0]?.count ?? 0
+  },
+
   // --- Subscriptions ---
   async getActiveSubscription(userId: string) {
     const result = await db

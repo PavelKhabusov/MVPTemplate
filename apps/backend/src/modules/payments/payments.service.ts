@@ -193,10 +193,18 @@ export const paymentsService = {
     return paymentsRepository.updatePlan(planId, input)
   },
 
-  async deactivatePlan(planId: string) {
+  async deletePlan(planId: string) {
     const plan = await paymentsRepository.getPlanById(planId)
     if (!plan) throw AppError.notFound('Plan not found')
-    return paymentsRepository.deactivatePlan(planId)
+
+    const subCount = await paymentsRepository.getPlanSubscriptionCount(planId)
+    if (subCount > 0) {
+      throw AppError.conflict(
+        `Cannot delete plan "${plan.name}" — it has ${subCount} associated subscription(s). Deactivate it instead.`,
+      )
+    }
+
+    return paymentsRepository.deletePlan(planId)
   },
 
   async getAdminStats(days: number) {

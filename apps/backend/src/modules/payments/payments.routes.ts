@@ -164,8 +164,8 @@ export async function paymentsRoutes(app: FastifyInstance) {
     { preHandler: [authenticate, requireAdmin] },
     async (request, reply) => {
       const { id } = request.params as { id: string }
-      await paymentsService.deactivatePlan(id)
-      return sendSuccess(reply, { message: 'Plan deactivated' })
+      await paymentsService.deletePlan(id)
+      return sendSuccess(reply, { message: 'Plan deleted' })
     },
   )
 }
