@@ -310,11 +310,14 @@ export default function PricingScreen() {
               paddingHorizontal={24}
               flexWrap="wrap"
               maxWidth={1100}
+              width="100%"
             >
               {filteredPlans.map((plan) => (
                 <YStack
                   key={plan.id}
-                  flex={1}
+                  flexGrow={1}
+                  flexShrink={1}
+                  flexBasis={280}
                   minWidth={260}
                   maxWidth={360}
                   style={plan.id === highlightedPlanId ? { transform: [{ translateY: -8 }] } as any : {}}
