@@ -622,12 +622,11 @@ function PaymentsAdminTab() {
                       borderColor="$borderColor"
                       overflow="hidden"
                       opacity={plan.isActive ? 1 : 0.6}
-                      flex={1}
                     >
                       {/* Top accent strip */}
                       <YStack height={3} backgroundColor={plan.isActive ? '$accent' : '$borderColor'} />
 
-                      <YStack padding="$4" gap="$3" backgroundColor="$background" flex={1}>
+                      <YStack padding="$4" gap="$3" backgroundColor="$background">
                         {/* Name + action buttons */}
                         <XStack justifyContent="space-between" alignItems="flex-start" gap="$3">
                           <YStack flex={1} gap="$0.5">
