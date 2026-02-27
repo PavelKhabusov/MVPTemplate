@@ -433,37 +433,62 @@ export function TemplateConfigSidebar() {
         </Text>
 
         {/* Border Radius */}
-        <YStack paddingHorizontal="$3" gap="$1.5" marginBottom="$3">
-          <Text fontSize="$2" color="$color">{t('templateConfig.borderRadius')}</Text>
-          <XStack gap="$2">
-            {([
-              { value: 'sharp' as RadiusScale, label: t('templateConfig.radiusSharp'), radius: 2 },
-              { value: 'default' as RadiusScale, label: t('templateConfig.radiusDefault'), radius: 8 },
-              { value: 'rounded' as RadiusScale, label: t('templateConfig.radiusRounded'), radius: 14 },
-              { value: 'pill' as RadiusScale, label: t('templateConfig.radiusPill'), radius: 50 },
-            ]).map((opt) => (
-              <Pressable
-                key={opt.value}
-                onPress={() => { setRadiusScale(opt.value); applyRadiusScale(opt.value) }}
-              >
-                <YStack alignItems="center" gap="$1">
-                  <YStack
-                    width={36}
-                    height={36}
-                    borderRadius={opt.radius}
-                    borderWidth={2}
-                    borderColor={radiusScale === opt.value ? '$accent' : '$borderColor'}
-                    backgroundColor={radiusScale === opt.value ? '$accent' : '$cardBackground'}
-                    opacity={radiusScale === opt.value ? 1 : 0.6}
-                  />
-                  <Text fontSize={10} color={radiusScale === opt.value ? '$accent' : '$mutedText'}>
+        {(() => {
+          const RADIUS_OPTS = [
+            { value: 'sharp' as RadiusScale, label: t('templateConfig.radiusSharp'), radius: 2 },
+            { value: 'default' as RadiusScale, label: t('templateConfig.radiusDefault'), radius: 8 },
+            { value: 'rounded' as RadiusScale, label: t('templateConfig.radiusRounded'), radius: 14 },
+            { value: 'pill' as RadiusScale, label: t('templateConfig.radiusPill'), radius: 50 },
+          ]
+          const idx = RADIUS_OPTS.findIndex((o) => o.value === radiusScale)
+          const current = RADIUS_OPTS[idx] ?? RADIUS_OPTS[1]
+          return (
+            <YStack paddingHorizontal="$3" gap="$2" marginBottom="$3">
+              <XStack justifyContent="space-between" alignItems="center">
+                <Text fontSize="$2" color="$color">{t('templateConfig.borderRadius')}</Text>
+                <YStack
+                  width={24}
+                  height={24}
+                  borderRadius={current.radius}
+                  borderWidth={2}
+                  borderColor="$accent"
+                  backgroundColor="$accent"
+                  opacity={0.8}
+                />
+              </XStack>
+              {/* @ts-ignore — web-only native input */}
+              <input
+                type="range"
+                min={0}
+                max={3}
+                step={1}
+                value={idx < 0 ? 1 : idx}
+                list="radius-ticks"
+                onChange={(e: any) => {
+                  const opt = RADIUS_OPTS[parseInt(e.target.value)]
+                  if (opt) { setRadiusScale(opt.value); applyRadiusScale(opt.value) }
+                }}
+                style={{ width: '100%', accentColor: theme.accent.val, cursor: 'pointer' }}
+              />
+              {/* @ts-ignore */}
+              <datalist id="radius-ticks">
+                <option value="0" /><option value="1" /><option value="2" /><option value="3" />
+              </datalist>
+              <XStack justifyContent="space-between">
+                {RADIUS_OPTS.map((opt, i) => (
+                  <Text
+                    key={opt.value}
+                    fontSize={9}
+                    color={i === idx ? '$accent' : '$mutedText'}
+                    fontWeight={i === idx ? '600' : '400'}
+                  >
                     {opt.label}
                   </Text>
-                </YStack>
-              </Pressable>
-            ))}
-          </XStack>
-        </YStack>
+                ))}
+              </XStack>
+            </YStack>
+          )
+        })()}
 
         {/* Card Style */}
         <YStack paddingHorizontal="$3" gap="$1.5" marginBottom="$3">

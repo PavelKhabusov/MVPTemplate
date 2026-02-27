@@ -4,8 +4,9 @@
  * 1. Убиваем процессы на порту 3000
  * 2. Запускаем Docker (postgres + redis) с ожиданием healthcheck
  * 3. Применяем схему БД (drizzle-kit push)
- * 4. Обновляем IP в .env мобильного
- * 5. Запускаем backend в текущем терминале
+ * 4. Сидируем дефолтные тарифы (идемпотентно — пропускает если уже есть)
+ * 5. Обновляем IP в .env мобильного
+ * 6. Запускаем backend в текущем терминале
  */
 
 import { execSync, spawn } from 'child_process'
@@ -58,7 +59,15 @@ try {
   fatal('Ошибка db:push: ' + e.message)
 }
 
-// 4. Update IP
+// 4. Seed default plans (idempotent — skips if plans already exist)
+info('Сидируем дефолтные тарифы (если ещё нет)...')
+try {
+  execSync('npm run db:seed -w apps/backend', { stdio: 'inherit', cwd: ROOT })
+} catch (e) {
+  warn('Ошибка db:seed: ' + e.message)
+}
+
+// 5. Update IP
 info('Обновляем IP...')
 try {
   execSync('node scripts/update-ip.mjs', { stdio: 'inherit', cwd: ROOT })
@@ -67,7 +76,7 @@ try {
   warn('Ошибка update-ip: ' + e.message)
 }
 
-// 5. Start backend
+// 6. Start backend
 console.log()
 console.log(`${c.bold}${c.green}▶ Запускаем backend...${c.reset}`)
 console.log()
