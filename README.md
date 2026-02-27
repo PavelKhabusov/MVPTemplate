@@ -110,6 +110,7 @@ MVPTemplate/
 │   ├── template-config/        # Feature flags, color schemes
 │   ├── config/                 # Shared configuration
 │   ├── analytics/              # PostHog abstraction
+│   ├── onboarding/             # Onboarding wizard + CoachMark tour
 │   ├── ai/                     # AI provider types + config (Gemini, OpenAI)
 │   └── proxy/                  # Proxy management types
 │
@@ -399,6 +400,65 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports three prov
 | `ROBOKASSA_PASSWORD2` | — | Robokassa password #2 (webhook verification) |
 | `ROBOKASSA_TEST_MODE` | `true` | Enable Robokassa test mode |
 
+## Onboarding Tour (Optional)
+
+The onboarding system is enabled by default (`EXPO_PUBLIC_ONBOARDING_ENABLED=true`). It runs on native (iOS/Android); on web, the wizard appears as a centered dialog.
+
+### How It Works
+
+- **Welcome Wizard** — full-screen multi-step modal on first launch (4 animated slides). Disabled after completion
+- **CoachMark Tour** — spotlight-style interactive tour highlighting key UI elements after the wizard. Can be replayed from **Settings → App Tour**
+- **Feature flag** — set `EXPO_PUBLIC_ONBOARDING_ENABLED=false` in `apps/mobile/.env` to remove all onboarding UI
+
+### Customization
+
+Edit wizard steps and tour stops in `apps/mobile/src/onboarding/steps.ts`.
+
+### Onboarding Environment Variable
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EXPO_PUBLIC_ONBOARDING_ENABLED` | `true` | Enable/disable onboarding wizard and tour |
+
+## File Storage (Optional)
+
+File storage defaults to **local filesystem**. Switch to **S3-compatible storage** (AWS S3, MinIO, Cloudflare R2) via admin panel without code changes.
+
+### Setup
+
+Configure in **Admin Panel → Storage** tab:
+
+1. Select **S3** storage mode
+2. Fill in endpoint, bucket, access key, secret key, region, and public URL
+3. Save — changes persist to `.env` immediately
+
+**Migrate existing files**: Admin Panel → Storage → Migrate to S3 uploads all local files to S3 and switches the provider.
+
+### Storage Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `STORAGE_TYPE` | `local` | `local` or `s3` |
+| `S3_ENDPOINT` | — | S3-compatible endpoint URL |
+| `S3_BUCKET` | — | Bucket name |
+| `S3_ACCESS_KEY` | — | Access key |
+| `S3_SECRET_KEY` | — | Secret key |
+| `S3_REGION` | — | Region (e.g. `us-east-1`) |
+| `S3_PUBLIC_URL` | — | Public base URL for serving files |
+
+## Template Config
+
+The **Template Config** panel (accessible via the ⚙️ button on the landing page) lets you visually preview different feature combinations without touching code.
+
+### What You Can Toggle
+
+- Enable/disable features: docs, email, email verification, Google auth, analytics, PostHog, cookie banner, push notifications, payments, onboarding tour
+- Switch color schemes (12 presets + custom hex) and border radius styles
+- Choose web layout (sidebar / header / both), font family, and font scale
+- Place language/theme toggles, search bar, and user badge anywhere in the navigation
+
+Changes generate the corresponding `.env` snippet which you can copy and paste.
+
 ## AI Providers (Optional)
 
 Supports **Google Gemini** and **OpenAI** with tab switching in the admin panel. Configure API keys via Admin → API Settings → AI Providers.
@@ -443,6 +503,10 @@ Full CRUD proxy management with testing, status tracking, and priority-based sel
 - **Payments**: Stripe + YooKassa + Robokassa, subscriptions & one-time, admin stats
 - **AI Providers**: Gemini + OpenAI with tab switching, model selection
 - **Proxy Management**: CRUD with testing (HTTPS, TCP, diagnostics), priority, status tracking
+- **File Storage**: local filesystem or S3-compatible (MinIO, Cloudflare R2), live migration in admin
+- **Onboarding**: welcome wizard + interactive CoachMark spotlight tour, feature-flag-controlled
+- **Template Config**: visual feature-flag panel with live preview and `.env` code export
+- **Company Settings**: app name, tagline, company info — editable in admin, shown in footer/docs
 - **Security**: Helmet, CORS, Zod validation, rate limiting, no PII leaks
 
 ## Deployment

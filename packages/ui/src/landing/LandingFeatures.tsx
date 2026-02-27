@@ -357,34 +357,68 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Analytics (wide) ── */}
-              <View style={{ gridColumn: 'span 2', animation: 'bentoFadeUp 0.5s ease-out both 0.35s' } as any}>
-                <BentoCard theme={theme}>
-                  <XStack flexWrap="wrap" gap="$5" alignItems="center">
-                    <YStack gap="$1" style={{ flex: 1, minWidth: 160 } as any}>
-                      <Text fontWeight="bold" fontSize="$5" color="$color">
-                        {t('landing.featureAnalytics' as any)}
-                      </Text>
-                      <Text fontSize="$3" color="$mutedText" lineHeight={22}>
-                        {t('landing.featureAnalyticsDesc' as any)}
-                      </Text>
+              {/* ── Onboarding ── */}
+              <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.33s' } as any}>
+                <BentoCard theme={theme} fullHeight>
+                  <YStack justifyContent="center" alignItems="center" height={120} gap="$4">
+                    <YStack
+                      width={72} height={72} borderRadius={36}
+                      alignItems="center" justifyContent="center"
+                      style={{ background: `linear-gradient(135deg, ${gs}25, ${ge}25)` } as any}
+                    >
+                      <Ionicons name="compass" size={36} color={acc} />
                     </YStack>
-                    {/* Animated bar chart */}
-                    <XStack gap={6} alignItems="flex-end" height={80} style={{ flex: 1, minWidth: 160, justifyContent: 'center' } as any}>
-                      {BAR_HEIGHTS.map((h, i) => (
+                    {/* Progress dots */}
+                    <XStack gap="$2" alignItems="center">
+                      {[0, 1, 2, 3].map((i) => (
                         <View
                           key={i}
                           style={{
-                            width: 14,
-                            height: barAnimate ? h : 0,
+                            width: i === 0 ? 24 : 8,
+                            height: 8,
                             borderRadius: 4,
-                            background: `linear-gradient(180deg, ${gs}, ${ge})`,
-                            transition: `height 0.6s ease-out ${i * 0.05}s`,
+                            backgroundColor: i === 0 ? acc : `${acc}40`,
                           } as any}
                         />
                       ))}
                     </XStack>
+                  </YStack>
+                  <YStack gap="$1">
+                    <Text fontWeight="bold" fontSize="$5" color="$color">
+                      {t('landing.featureOnboarding' as any)}
+                    </Text>
+                    <Text fontSize="$3" color="$mutedText" lineHeight={22}>
+                      {t('landing.featureOnboardingDesc' as any)}
+                    </Text>
+                  </YStack>
+                </BentoCard>
+              </View>
+
+              {/* ── Analytics ── */}
+              <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.35s' } as any}>
+                <BentoCard theme={theme} fullHeight>
+                  <XStack gap={5} alignItems="flex-end" height={120} justifyContent="center">
+                    {BAR_HEIGHTS.map((h, i) => (
+                      <View
+                        key={i}
+                        style={{
+                          width: 14,
+                          height: barAnimate ? h : 0,
+                          borderRadius: 4,
+                          background: `linear-gradient(180deg, ${gs}, ${ge})`,
+                          transition: `height 0.6s ease-out ${i * 0.05}s`,
+                        } as any}
+                      />
+                    ))}
                   </XStack>
+                  <YStack gap="$1">
+                    <Text fontWeight="bold" fontSize="$5" color="$color">
+                      {t('landing.featureAnalytics' as any)}
+                    </Text>
+                    <Text fontSize="$3" color="$mutedText" lineHeight={22}>
+                      {t('landing.featureAnalyticsDesc' as any)}
+                    </Text>
+                  </YStack>
                 </BentoCard>
               </View>
             </>
@@ -397,9 +431,10 @@ export function LandingFeatures() {
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
-              {/* Row 3: 1 + span2 */}
+              {/* Row 3: 1+1+1 */}
               <View style={{ height: 280, opacity: 0 } as any} />
-              <View style={{ gridColumn: 'span 2', height: 280, opacity: 0 } as any} />
+              <View style={{ height: 280, opacity: 0 } as any} />
+              <View style={{ height: 280, opacity: 0 } as any} />
             </>
           )}
         </View>
