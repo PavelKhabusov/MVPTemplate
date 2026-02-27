@@ -129,6 +129,8 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/auth/refresh` | — | Refresh tokens |
 | `POST` | `/auth/logout` | Yes | Sign out |
 | `GET` | `/auth/me` | Yes | Current user |
+| `POST` | `/auth/send-phone-code` | — | Send 6-digit SMS OTP |
+| `POST` | `/auth/verify-phone` | — | Verify phone with OTP |
 | `POST` | `/auth/verify-email` | — | Verify email token |
 | `POST` | `/auth/request-password-reset` | — | Request password reset |
 | `POST` | `/auth/reset-password` | — | Reset password with token |
@@ -247,6 +249,53 @@ Google sign-in is a **feature flag** — the button only appears when `EXPO_PUBL
 6. Run `npm run db:push -w apps/backend` to update the schema (passwordHash is now nullable for OAuth users)
 
 For production builds (EAS), create additional OAuth clients for iOS and Android and pass `iosClientId` / `androidClientId` to `useIdTokenAuthRequest` in `GoogleSignInButton.tsx`.
+
+## SMS Verification (Optional)
+
+Phone number verification via SMS OTP (6-digit code). Disabled by default. Supports two providers: **Twilio** (international) and **SMSC.ru** (Russia/CIS).
+
+### Setup
+
+1. Choose a provider and set credentials in `apps/backend/.env`:
+
+   **Twilio:**
+   ```env
+   SMS_PROVIDER=twilio
+   TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxx
+   TWILIO_AUTH_TOKEN=your-auth-token
+   TWILIO_PHONE_NUMBER=+1234567890
+   ```
+   > Get credentials from [Twilio Console](https://console.twilio.com)
+
+   **SMSC.ru:**
+   ```env
+   SMS_PROVIDER=smsc
+   SMSC_LOGIN=your-login
+   SMSC_PASSWORD=your-password
+   SMSC_SENDER=YourApp
+   ```
+   > Get credentials from [SMSC.ru API](https://smsc.ru/api/)
+
+2. Optionally enable phone verification requirement in **Admin → API Settings → SMS**
+
+### How It Works
+
+- User enters phone number → `POST /api/auth/send-phone-code` sends a 6-digit OTP
+- User submits the code → `POST /api/auth/verify-phone` validates and marks phone as verified
+- Codes are stored in `phone_verification_codes` table with a 10-minute expiry
+- Admin panel → SMS tab: toggle required verification, switch active provider
+
+### SMS Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SMS_PROVIDER` | — | `twilio` or `smsc` (enables SMS feature) |
+| `TWILIO_ACCOUNT_SID` | — | Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | — | Twilio Auth Token |
+| `TWILIO_PHONE_NUMBER` | — | Twilio sender phone number |
+| `SMSC_LOGIN` | — | SMSC.ru login |
+| `SMSC_PASSWORD` | — | SMSC.ru password |
+| `SMSC_SENDER` | — | Sender name displayed on SMS |
 
 ## Email (Optional)
 
@@ -488,7 +537,7 @@ Full CRUD proxy management with testing, status tracking, and priority-based sel
 
 ## Features
 
-- **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in
+- **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in, SMS OTP (Twilio + SMSC.ru)
 - **Admin Panel**: role/feature management, user stats, proxy management, AI providers, protected by middleware
 - **Profile**: name, bio, phone, location — inline editing
 - **Navigation**: animated tab bar (mobile), collapsible sidebar with gradient indicator (web)

@@ -261,7 +261,7 @@ export function LandingFeatures() {
                     >
                       <Ionicons name="shield-checkmark" size={32} color={acc} />
                     </YStack>
-                    <XStack gap="$2">
+                    <XStack gap="$2" flexWrap="wrap" justifyContent="center">
                       <YStack
                         paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
                         borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
@@ -273,6 +273,12 @@ export function LandingFeatures() {
                         borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
                       >
                         <Text fontSize={11} color="$mutedText">Google SSO</Text>
+                      </YStack>
+                      <YStack
+                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
+                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
+                      >
+                        <Text fontSize={11} color="$mutedText">SMS OTP</Text>
                       </YStack>
                     </XStack>
                   </YStack>
