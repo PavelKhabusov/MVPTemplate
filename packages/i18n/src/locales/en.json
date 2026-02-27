@@ -582,6 +582,7 @@
     "searchPlacement": "Search Bar",
     "themeSection": "Theme",
     "borderRadius": "Border Radius",
+    "radiusSquare": "Square",
     "radiusSharp": "Sharp",
     "radiusDefault": "Default",
     "radiusRounded": "Rounded",

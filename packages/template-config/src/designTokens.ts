@@ -2,6 +2,7 @@ import { updateTheme } from '@tamagui/theme'
 import type { RadiusScale, FontScale, FontFamily, CardStyle } from './store'
 
 const RADIUS_VALUES: Record<RadiusScale, { sm: number; md: number; lg: number }> = {
+  square:  { sm: 0, md: 0, lg: 0 },
   sharp:   { sm: 2, md: 4, lg: 6 },
   default: { sm: 8, md: 12, lg: 16 },
   rounded: { sm: 12, md: 20, lg: 28 },

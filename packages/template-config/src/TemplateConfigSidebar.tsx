@@ -238,6 +238,7 @@ function IconButtonGroup<T extends string>({
 }
 
 const RADIUS_OUTPUT: Record<RadiusScale, string> = {
+  square:  'radiusSm: 0, radiusMd: 0, radiusLg: 0',
   sharp:   'radiusSm: 2, radiusMd: 4, radiusLg: 6',
   default: 'radiusSm: 8, radiusMd: 12, radiusLg: 16',
   rounded: 'radiusSm: 12, radiusMd: 20, radiusLg: 28',
@@ -435,6 +436,7 @@ export function TemplateConfigSidebar() {
         {/* Border Radius */}
         {(() => {
           const RADIUS_OPTS = [
+            { value: 'square' as RadiusScale, label: t('templateConfig.radiusSquare'), radius: 0 },
             { value: 'sharp' as RadiusScale, label: t('templateConfig.radiusSharp'), radius: 2 },
             { value: 'default' as RadiusScale, label: t('templateConfig.radiusDefault'), radius: 8 },
             { value: 'rounded' as RadiusScale, label: t('templateConfig.radiusRounded'), radius: 14 },
@@ -460,7 +462,7 @@ export function TemplateConfigSidebar() {
               <input
                 type="range"
                 min={0}
-                max={3}
+                max={4}
                 step={1}
                 value={idx < 0 ? 1 : idx}
                 list="radius-ticks"
@@ -472,7 +474,7 @@ export function TemplateConfigSidebar() {
               />
               {/* @ts-ignore */}
               <datalist id="radius-ticks">
-                <option value="0" /><option value="1" /><option value="2" /><option value="3" />
+                <option value="0" /><option value="1" /><option value="2" /><option value="3" /><option value="4" />
               </datalist>
               <XStack justifyContent="space-between">
                 {RADIUS_OPTS.map((opt, i) => (
