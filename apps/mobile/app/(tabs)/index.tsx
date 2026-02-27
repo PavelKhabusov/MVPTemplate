@@ -95,7 +95,7 @@ export default function HomeScreen() {
 
         {/* Stats */}
         <SlideIn from="bottom" delay={100}>
-          <CoachMark stepId="home-stats">
+          <CoachMark stepId="home-stats" scrollRef={scrollRef}>
             <XStack gap="$3">
               <StatCard value="12" label={t('home.activeProjects')} icon="folder-outline" color={theme.accent.val} />
               <StatCard value="48" label={t('home.completedTasks')} icon="checkmark-circle-outline" color={theme.success.val} />
@@ -106,7 +106,7 @@ export default function HomeScreen() {
 
         {/* Quick Actions */}
         <SlideIn from="bottom" delay={200}>
-          <CoachMark stepId="home-actions">
+          <CoachMark stepId="home-actions" scrollRef={scrollRef}>
             <YStack gap="$3">
               <Text fontWeight="600" fontSize="$4" color="$color">{t('home.quickActions')}</Text>
               <XStack gap="$3" flexWrap="wrap">

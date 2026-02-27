@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal } from 'react-native'
+import { Modal, Platform } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { AnimatePresence, MotiView } from 'moti'
@@ -37,6 +37,7 @@ export function OnboardingWizard({
 
   const { skip = 'Skip', next = 'Next', complete = 'Get Started' } = labels
   const isLast = currentIndex === steps.length - 1
+  const isWeb = Platform.OS === 'web'
 
   const handleNext = () => {
     if (isLast) {
@@ -53,6 +54,117 @@ export function OnboardingWizard({
 
   if (!visible) return null
 
+  // ── Bottom bar (shared between native and web) ─────────────────────────────
+  const bottomBar = (
+    <YStack gap="$4" alignItems="center">
+      {/* Progress dots */}
+      <XStack gap="$2" alignItems="center">
+        {steps.map((_, idx) => (
+          <ProgressDot key={idx} active={idx === currentIndex} />
+        ))}
+      </XStack>
+
+      {/* CTA */}
+      <ScalePress onPress={handleNext} style={{ width: '100%' as any }}>
+        <XStack
+          backgroundColor="$accent"
+          borderRadius="$5"
+          paddingVertical="$4"
+          alignItems="center"
+          justifyContent="center"
+          gap="$2"
+        >
+          <Text color="white" fontWeight="700" fontSize="$4">
+            {isLast ? complete : next}
+          </Text>
+          {!isLast && <Ionicons name="arrow-forward" size={18} color="white" />}
+        </XStack>
+      </ScalePress>
+    </YStack>
+  )
+
+  // ── Animated step area (shared) ────────────────────────────────────────────
+  const stepArea = (insetTop: number) => (
+    <YStack flex={1} overflow="hidden">
+      <AnimatePresence>
+        <MotiView
+          key={currentIndex}
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ type: 'timing', duration: 200 }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          <StepContent step={steps[currentIndex]} insetTop={insetTop} />
+        </MotiView>
+      </AnimatePresence>
+    </YStack>
+  )
+
+  // ── Web: centered dialog ───────────────────────────────────────────────────
+  if (isWeb) {
+    return (
+      <Modal visible animationType="fade" transparent statusBarTranslucent>
+        <YStack
+          flex={1}
+          backgroundColor="rgba(0,0,0,0.55)"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <YStack
+            width={480}
+            backgroundColor="$background"
+            borderRadius="$6"
+            overflow="hidden"
+            shadowColor="rgba(0,0,0,0.35)"
+            shadowRadius={40}
+            shadowOpacity={1}
+            shadowOffset={{ width: 0, height: 12 }}
+          >
+            {/* Skip */}
+            <XStack position="absolute" top={16} right={16} zIndex={10}>
+              <ScalePress onPress={onSkip}>
+                <XStack padding="$2">
+                  <Text color="$mutedText" fontSize="$3">{skip}</Text>
+                </XStack>
+              </ScalePress>
+            </XStack>
+
+            {/* Step content area */}
+            <YStack height={320} overflow="hidden">
+              <AnimatePresence>
+                <MotiView
+                  key={currentIndex}
+                  from={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ type: 'timing', duration: 200 }}
+                  style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                >
+                  <StepContent step={steps[currentIndex]} insetTop={0} />
+                </MotiView>
+              </AnimatePresence>
+            </YStack>
+
+            {/* Bottom bar */}
+            <YStack
+              paddingHorizontal="$5"
+              paddingTop="$4"
+              paddingBottom="$5"
+              gap="$4"
+              alignItems="center"
+              borderTopWidth={1}
+              borderTopColor="$borderColor"
+            >
+              {bottomBar}
+            </YStack>
+          </YStack>
+        </YStack>
+      </Modal>
+    )
+  }
+
+  // ── Native: full-screen ────────────────────────────────────────────────────
   return (
     <Modal visible animationType="fade" statusBarTranslucent>
       <YStack flex={1} backgroundColor="$background">
@@ -65,21 +177,7 @@ export function OnboardingWizard({
           </ScalePress>
         </XStack>
 
-        {/* Animated step content — pure crossfade prevents layout jumps */}
-        <YStack flex={1} overflow="hidden">
-          <AnimatePresence>
-            <MotiView
-              key={currentIndex}
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: 'timing', duration: 200 }}
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-            >
-              <StepContent step={steps[currentIndex]} insetTop={insets.top} />
-            </MotiView>
-          </AnimatePresence>
-        </YStack>
+        {stepArea(insets.top)}
 
         {/* Bottom bar */}
         <YStack
@@ -88,29 +186,7 @@ export function OnboardingWizard({
           gap="$5"
           alignItems="center"
         >
-          {/* Progress dots */}
-          <XStack gap="$2" alignItems="center">
-            {steps.map((_, idx) => (
-              <ProgressDot key={idx} active={idx === currentIndex} />
-            ))}
-          </XStack>
-
-          {/* CTA */}
-          <ScalePress onPress={handleNext} style={{ width: '100%' as any }}>
-            <XStack
-              backgroundColor="$accent"
-              borderRadius="$5"
-              paddingVertical="$4"
-              alignItems="center"
-              justifyContent="center"
-              gap="$2"
-            >
-              <Text color="white" fontWeight="700" fontSize="$4">
-                {isLast ? complete : next}
-              </Text>
-              {!isLast && <Ionicons name="arrow-forward" size={18} color="white" />}
-            </XStack>
-          </ScalePress>
+          {bottomBar}
         </YStack>
       </YStack>
     </Modal>

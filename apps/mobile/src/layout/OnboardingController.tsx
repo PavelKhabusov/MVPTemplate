@@ -1,4 +1,3 @@
-import { Platform } from 'react-native'
 import { OnboardingWizard, useCoachMark } from '@mvp/ui'
 import { useAppStore, useCompanyStore } from '@mvp/store'
 import { useTranslation } from '@mvp/i18n'
@@ -11,7 +10,7 @@ export function OnboardingController() {
   const setOnboardingComplete = useAppStore((s) => s.setOnboardingComplete)
   const { startTour } = useCoachMark()
 
-  if (Platform.OS === 'web' || hasCompleted) return null
+  if (hasCompleted) return null
 
   return (
     <OnboardingWizard
