@@ -11,7 +11,7 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-rean
 import { tamaguiConfig, WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, ToastProvider, AppAvatar, ScalePress, SearchModal } from '@mvp/ui'
 import { AnimatePresence, MotiView } from 'moti'
 import { TemplateConfigSidebar, applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag, applyRadiusScale, applyCardStyle, applyFontFamily, getFontZoom } from '@mvp/template-config'
-import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
+import { useThemeStore, useLanguageStore, useAuthStore, useCompanyStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { initI18n, useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
@@ -595,6 +595,13 @@ export default function RootLayout() {
   useEffect(() => {
     initI18n(savedLanguage)
     setI18nReady(true)
+  }, [])
+
+  // Fetch public company info on startup
+  useEffect(() => {
+    api.get('/config/company')
+      .then((res) => useCompanyStore.getState().setInfo(res.data.data))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
