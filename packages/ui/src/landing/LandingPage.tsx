@@ -6,15 +6,29 @@ import { LandingHero } from './LandingHero'
 import { LandingFeatures } from './LandingFeatures'
 import { LandingTerminal } from './LandingTerminal'
 import { LandingShowcase } from './LandingShowcase'
+import { LandingPricing } from './LandingPricing'
 import { LandingCTA } from './LandingCTA'
 import { LandingFooter } from './LandingFooter'
 import { CookieBanner } from '../components/CookieBanner'
 
-interface LandingPageProps {
-  logo?: any
+interface LandingPlan {
+  id: string
+  name: string
+  description?: string
+  priceAmount: number
+  currency: string
+  interval: string
+  features: string[]
+  sortOrder: number
 }
 
-export function LandingPage({ logo }: LandingPageProps) {
+interface LandingPageProps {
+  logo?: any
+  paymentsEnabled?: boolean
+  plans?: LandingPlan[]
+}
+
+export function LandingPage({ logo, paymentsEnabled = false, plans = [] }: LandingPageProps) {
   if (Platform.OS !== 'web') return null
 
   const navigate = (href: string) => {
@@ -23,12 +37,15 @@ export function LandingPage({ logo }: LandingPageProps) {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <LandingNav onNavigate={navigate} logo={logo} />
+      <LandingNav onNavigate={navigate} logo={logo} paymentsEnabled={paymentsEnabled} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <LandingHero onNavigate={navigate} />
         <LandingFeatures />
         <LandingTerminal />
         <LandingShowcase />
+        {paymentsEnabled && (
+          <LandingPricing onNavigate={navigate} plans={plans} />
+        )}
         <LandingCTA onNavigate={navigate} />
         <LandingFooter onNavigate={navigate} logo={logo} />
       </ScrollView>

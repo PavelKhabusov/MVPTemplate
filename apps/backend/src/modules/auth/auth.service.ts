@@ -5,8 +5,9 @@ import { env } from '../../config/env'
 import { AppError } from '../../common/errors/app-error'
 import { hashToken } from '../../common/utils/crypto'
 import { emailService } from '../email/email.service'
+import { smsService } from '../sms/sms.service'
 import { authRepository } from './auth.repository'
-import type { RegisterInput, LoginInput, GoogleAuthInput } from './auth.schema'
+import type { RegisterInput, LoginInput, GoogleAuthInput, SendPhoneCodeInput, VerifyPhoneInput } from './auth.schema'
 
 const SALT_ROUNDS = 12
 
@@ -148,14 +149,8 @@ export const authService = {
     const tokenHash = hashToken(token)
     const stored = await authRepository.findEmailVerificationToken(tokenHash)
 
-    if (!stored) {
-      throw AppError.badRequest('Invalid verification token')
-    }
-    if (stored.verifiedAt) {
-      throw AppError.badRequest('Email already verified')
-    }
-    if (stored.expiresAt < new Date()) {
-      throw AppError.badRequest('Verification token has expired')
+    if (!stored || stored.verifiedAt || stored.expiresAt < new Date()) {
+      throw AppError.badRequest('Invalid or expired verification token')
     }
 
     await authRepository.markEmailVerified(tokenHash, stored.userId)
@@ -201,14 +196,8 @@ export const authService = {
     const tokenHash = hashToken(token)
     const stored = await authRepository.findPasswordResetToken(tokenHash)
 
-    if (!stored) {
-      throw AppError.badRequest('Invalid reset token')
-    }
-    if (stored.usedAt) {
-      throw AppError.badRequest('This reset link has already been used')
-    }
-    if (stored.expiresAt < new Date()) {
-      throw AppError.badRequest('Reset token has expired')
+    if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
+      throw AppError.badRequest('Invalid or expired reset token')
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS)
@@ -269,7 +258,59 @@ export const authService = {
     if (!user) throw AppError.notFound('User not found')
 
     const { passwordHash, ...profile } = user
-    return { ...profile, emailEnabled: env.EMAIL_ENABLED }
+    return { ...profile, emailEnabled: env.EMAIL_ENABLED, smsEnabled: env.SMS_ENABLED }
+  },
+
+  async sendPhoneCode(userId: string, input: SendPhoneCodeInput): Promise<{ message: string }> {
+    if (!env.SMS_ENABLED) {
+      throw AppError.badRequest('SMS is not enabled')
+    }
+
+    const user = await authRepository.findUserById(userId)
+    if (!user) throw AppError.notFound('User not found')
+
+    if (user.phoneVerified && user.phone === input.phone) {
+      throw AppError.badRequest('Phone number is already verified')
+    }
+
+    // Generate 6-digit OTP
+    const code = String(Math.floor(100000 + Math.random() * 900000))
+    const codeHash = hashToken(code)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+
+    await authRepository.savePhoneVerificationCode(userId, input.phone, codeHash, expiresAt)
+
+    await smsService.send({
+      to: input.phone,
+      text: `Your verification code: ${code}. Valid for 10 minutes.`,
+    })
+
+    return { message: 'Verification code sent' }
+  },
+
+  async verifyPhone(userId: string, input: VerifyPhoneInput): Promise<{ message: string }> {
+    if (!env.SMS_ENABLED) {
+      throw AppError.badRequest('SMS is not enabled')
+    }
+
+    const stored = await authRepository.findPhoneVerificationCode(userId)
+
+    if (!stored || stored.expiresAt < new Date()) {
+      throw AppError.badRequest('Verification code expired. Please request a new one.')
+    }
+
+    if (stored.phone !== input.phone) {
+      throw AppError.badRequest('Phone number does not match')
+    }
+
+    const codeHash = hashToken(input.code)
+    if (stored.codeHash !== codeHash) {
+      throw AppError.badRequest('Invalid verification code')
+    }
+
+    await authRepository.markPhoneVerified(userId, input.phone)
+
+    return { message: 'Phone verified successfully' }
   },
 
   verifyAccessToken(token: string): JwtPayload {

@@ -33,3 +33,12 @@ export type { Subscription, NewSubscription } from './subscriptions'
 
 export { payments } from './payments'
 export type { Payment, NewPayment } from './payments'
+
+export { proxies } from './proxies'
+export type { ProxyRecord, NewProxy } from './proxies'
+
+export { phoneVerificationCodes } from './phone-verification-codes'
+export type { PhoneVerificationCode, NewPhoneVerificationCode } from './phone-verification-codes'
+
+export { companyInfo } from './company-info'
+export type { CompanyInfo, NewCompanyInfo } from './company-info'

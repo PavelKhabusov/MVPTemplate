@@ -2,9 +2,9 @@ import { ScrollView } from 'react-native'
 import { useLocalSearchParams, Stack } from 'expo-router'
 import { YStack, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
-import { MarkdownView, getPageById } from '@mvp/docs'
+import { MarkdownView, getPageById, DocFeedback } from '@mvp/docs'
 import { useTemplateFlag } from '@mvp/template-config'
-import { DocFeedback } from '../../src/features/docs/DocFeedback'
+import { api } from '../../src/services/api'
 
 export default function DocsPageScreen() {
   const { page } = useLocalSearchParams<{ page: string }>()
@@ -29,7 +29,7 @@ export default function DocsPageScreen() {
             <MarkdownView content={t(docPage.contentKey)} embedded />
           )}
           {docPage && feedbackEnabled && (
-            <DocFeedback pageId={docPage.id} />
+            <DocFeedback pageId={docPage.id} http={api} />
           )}
         </YStack>
       </ScrollView>

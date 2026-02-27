@@ -5,6 +5,7 @@ import type {
   CheckoutResult,
   WebhookEvent,
   CancelSubscriptionParams,
+  RefundResult,
 } from './payment-provider'
 
 export class StripeProvider implements PaymentProvider {
@@ -157,6 +158,19 @@ export class StripeProvider implements PaymentProvider {
       status: sub.status,
       currentPeriodEnd: item ? new Date(item.current_period_end * 1000) : new Date(),
       cancelAtPeriodEnd: sub.cancel_at_period_end,
+    }
+  }
+
+  async refundPayment(providerPaymentId: string, amountMinorUnits?: number): Promise<RefundResult> {
+    const refund = await this.stripe.refunds.create({
+      payment_intent: providerPaymentId,
+      ...(amountMinorUnits !== undefined ? { amount: amountMinorUnits } : {}),
+    })
+    return {
+      refundId: refund.id,
+      amount: refund.amount,
+      currency: refund.currency,
+      status: refund.status ?? 'pending',
     }
   }
 }

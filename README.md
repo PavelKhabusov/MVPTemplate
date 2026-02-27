@@ -95,7 +95,7 @@ MVPTemplate/
 │   │   └── src/features/       # auth, settings, search, onboarding
 │   │
 │   └── backend/                # Fastify API
-│       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, ...
+│       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, proxy, ...
 │       ├── src/database/       # Drizzle schema + migrations
 │       └── docker/             # Dockerfile + docker-compose
 │
@@ -109,7 +109,10 @@ MVPTemplate/
 │   ├── docs/                   # In-app documentation engine
 │   ├── template-config/        # Feature flags, color schemes
 │   ├── config/                 # Shared configuration
-│   └── analytics/              # PostHog abstraction
+│   ├── analytics/              # PostHog abstraction
+│   ├── onboarding/             # Onboarding wizard + CoachMark tour
+│   ├── ai/                     # AI provider types + config (Gemini, OpenAI)
+│   └── proxy/                  # Proxy management types
 │
 └── scripts/                    # PowerShell setup scripts
 ```
@@ -126,6 +129,8 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/auth/refresh` | — | Refresh tokens |
 | `POST` | `/auth/logout` | Yes | Sign out |
 | `GET` | `/auth/me` | Yes | Current user |
+| `POST` | `/auth/send-phone-code` | — | Send 6-digit SMS OTP |
+| `POST` | `/auth/verify-phone` | — | Verify phone with OTP |
 | `POST` | `/auth/verify-email` | — | Verify email token |
 | `POST` | `/auth/request-password-reset` | — | Request password reset |
 | `POST` | `/auth/reset-password` | — | Reset password with token |
@@ -153,9 +158,20 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/payments/cancel` | Yes | Cancel subscription |
 | `GET` | `/payments/history` | Yes | Payment history (paginated) |
 | `POST` | `/payments/webhook/stripe` | — | Stripe webhook |
+| `POST` | `/payments/webhook/paypal` | — | PayPal webhook |
 | `POST` | `/payments/webhook/yookassa` | — | YooKassa webhook |
+| `POST` | `/payments/webhook/robokassa` | — | Robokassa webhook |
 | `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
 | `POST` | `/payments/admin/plans` | Admin | Create a plan |
+| `GET` | `/admin/proxies` | Admin | List all proxies |
+| `GET` | `/admin/proxies/:id` | Admin | Get proxy details |
+| `POST` | `/admin/proxies` | Admin | Create proxy |
+| `PUT` | `/admin/proxies/:id` | Admin | Update proxy |
+| `DELETE` | `/admin/proxies/:id` | Admin | Delete proxy |
+| `PATCH` | `/admin/proxies/:id/toggle` | Admin | Toggle proxy active state |
+| `POST` | `/admin/proxies/:id/test` | Admin | Full HTTPS proxy test |
+| `POST` | `/admin/proxies/:id/test-tcp` | Admin | TCP connectivity test |
+| `GET` | `/admin/proxies/:id/diagnose` | Admin | Network diagnostics |
 | `GET` | `/health` | — | Health check |
 
 ## Database Schema
@@ -172,6 +188,7 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `plans` | name, price_amount, currency, interval, features (JSONB), provider, provider_price_id |
 | `subscriptions` | user_id, plan_id, status, provider, provider_subscription_id, current_period_start/end |
 | `payments` | user_id, amount, currency, status, type, provider, provider_payment_id |
+| `proxies` | name, host, protocol, http_port, socks5_port, username, password, is_active, priority, last_check_status |
 
 Roles: `user` (default) | `moderator` | `admin`
 
@@ -193,6 +210,10 @@ HOST=0.0.0.0
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:8081
 GOOGLE_CLIENT_ID=                                # optional — enables Google sign-in
+GEMINI_API_KEY=                                  # optional — Gemini AI provider
+GEMINI_MODEL=gemini-2.5-flash
+OPENAI_API_KEY=                                  # optional — OpenAI provider
+OPENAI_MODEL=gpt-4o-mini
 ```
 
 ### Mobile (`apps/mobile/.env`)
@@ -229,6 +250,53 @@ Google sign-in is a **feature flag** — the button only appears when `EXPO_PUBL
 6. Run `npm run db:push -w apps/backend` to update the schema (passwordHash is now nullable for OAuth users)
 
 For production builds (EAS), create additional OAuth clients for iOS and Android and pass `iosClientId` / `androidClientId` to `useIdTokenAuthRequest` in `GoogleSignInButton.tsx`.
+
+## SMS Verification (Optional)
+
+Phone number verification via SMS OTP (6-digit code). Disabled by default. Supports two providers: **Twilio** (international) and **SMSC.ru** (Russia/CIS).
+
+### Setup
+
+1. Choose a provider and set credentials in `apps/backend/.env`:
+
+   **Twilio:**
+   ```env
+   SMS_PROVIDER=twilio
+   TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxx
+   TWILIO_AUTH_TOKEN=your-auth-token
+   TWILIO_PHONE_NUMBER=+1234567890
+   ```
+   > Get credentials from [Twilio Console](https://console.twilio.com)
+
+   **SMSC.ru:**
+   ```env
+   SMS_PROVIDER=smsc
+   SMSC_LOGIN=your-login
+   SMSC_PASSWORD=your-password
+   SMSC_SENDER=YourApp
+   ```
+   > Get credentials from [SMSC.ru API](https://smsc.ru/api/)
+
+2. Optionally enable phone verification requirement in **Admin → API Settings → SMS**
+
+### How It Works
+
+- User enters phone number → `POST /api/auth/send-phone-code` sends a 6-digit OTP
+- User submits the code → `POST /api/auth/verify-phone` validates and marks phone as verified
+- Codes are stored in `phone_verification_codes` table with a 10-minute expiry
+- Admin panel → SMS tab: toggle required verification, switch active provider
+
+### SMS Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SMS_PROVIDER` | — | `twilio` or `smsc` (enables SMS feature) |
+| `TWILIO_ACCOUNT_SID` | — | Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | — | Twilio Auth Token |
+| `TWILIO_PHONE_NUMBER` | — | Twilio sender phone number |
+| `SMSC_LOGIN` | — | SMSC.ru login |
+| `SMSC_PASSWORD` | — | SMSC.ru password |
+| `SMSC_SENDER` | — | Sender name displayed on SMS |
 
 ## Email (Optional)
 
@@ -323,7 +391,7 @@ Push notifications are disabled by default. Enabling requires an Expo access tok
 
 ## Payments (Optional)
 
-Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two providers: **Stripe** (international) and **YooKassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
+Payments are disabled by default. Supports four providers: **Stripe** (international), **PayPal** (international), **YooKassa** (Russia), and **Robokassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
 
 ### Setup
 
@@ -346,15 +414,35 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
    ```
    > Get keys from [YooKassa Dashboard](https://yookassa.ru/my). Set webhook URL to `https://your-domain.com/api/payments/webhook/yookassa`.
 
+   **PayPal:**
+   ```env
+   PAYMENTS_ENABLED=true
+   PAYPAL_CLIENT_ID=your-client-id
+   PAYPAL_CLIENT_SECRET=your-client-secret
+   PAYPAL_WEBHOOK_ID=your-webhook-id
+   PAYPAL_MODE=sandbox
+   ```
+   > Get credentials from [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). Set `PAYPAL_MODE=live` for production.
+
+   **Robokassa:**
+   ```env
+   PAYMENTS_ENABLED=true
+   ROBOKASSA_MERCHANT_LOGIN=your-merchant-login
+   ROBOKASSA_PASSWORD1=your-password1
+   ROBOKASSA_PASSWORD2=your-password2
+   ROBOKASSA_TEST_MODE=true
+   ```
+   > Get credentials from [Robokassa Dashboard](https://partner.robokassa.ru/). Set Result URL to `https://your-domain.com/api/payments/webhook/robokassa`.
+
 3. Run `npm run db:push -w apps/backend` to create the `plans`, `subscriptions`, and `payments` tables
 4. Restart the backend — the `payments` feature flag activates automatically
 5. Create plans via the admin panel or `POST /api/payments/admin/plans`
 
 ### How It Works
 
-- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe and YooKassa into a unified API
-- **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa) → webhook confirms payment
-- **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa)
+- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe, YooKassa, and Robokassa into a unified API
+- **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa / Robokassa) → webhook confirms payment
+- **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa, Robokassa)
 - **Admin panel**: Payments tab shows revenue stats, active subscriptions count, and recent payments
 - **User-facing**: pricing page at `/pricing`, subscription management in Settings → Manage Plan
 
@@ -365,13 +453,107 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
 | `PAYMENTS_ENABLED` | `false` | Enable/disable payments module |
 | `STRIPE_SECRET_KEY` | — | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret |
+| `PAYPAL_CLIENT_ID` | — | PayPal client ID |
+| `PAYPAL_CLIENT_SECRET` | — | PayPal client secret |
+| `PAYPAL_WEBHOOK_ID` | — | PayPal webhook ID |
+| `PAYPAL_MODE` | `sandbox` | `sandbox` or `live` |
 | `YOOKASSA_SHOP_ID` | — | YooKassa shop ID |
 | `YOOKASSA_SECRET_KEY` | — | YooKassa secret key |
+| `ROBOKASSA_MERCHANT_LOGIN` | — | Robokassa merchant login |
+| `ROBOKASSA_PASSWORD1` | — | Robokassa password #1 (checkout signature) |
+| `ROBOKASSA_PASSWORD2` | — | Robokassa password #2 (webhook verification) |
+| `ROBOKASSA_TEST_MODE` | `true` | Enable Robokassa test mode |
+
+## Onboarding Tour (Optional)
+
+The onboarding system is enabled by default (`EXPO_PUBLIC_ONBOARDING_ENABLED=true`). It runs on native (iOS/Android); on web, the wizard appears as a centered dialog.
+
+### How It Works
+
+- **Welcome Wizard** — full-screen multi-step modal on first launch (4 animated slides). Disabled after completion
+- **CoachMark Tour** — spotlight-style interactive tour highlighting key UI elements after the wizard. Can be replayed from **Settings → App Tour**
+- **Feature flag** — set `EXPO_PUBLIC_ONBOARDING_ENABLED=false` in `apps/mobile/.env` to remove all onboarding UI
+
+### Customization
+
+Edit wizard steps and tour stops in `apps/mobile/src/onboarding/steps.ts`.
+
+### Onboarding Environment Variable
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EXPO_PUBLIC_ONBOARDING_ENABLED` | `true` | Enable/disable onboarding wizard and tour |
+
+## File Storage (Optional)
+
+File storage defaults to **local filesystem**. Switch to **S3-compatible storage** (AWS S3, MinIO, Cloudflare R2) via admin panel without code changes.
+
+### Setup
+
+Configure in **Admin Panel → Storage** tab:
+
+1. Select **S3** storage mode
+2. Fill in endpoint, bucket, access key, secret key, region, and public URL
+3. Save — changes persist to `.env` immediately
+
+**Migrate existing files**: Admin Panel → Storage → Migrate to S3 uploads all local files to S3 and switches the provider.
+
+### Storage Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `STORAGE_TYPE` | `local` | `local` or `s3` |
+| `S3_ENDPOINT` | — | S3-compatible endpoint URL |
+| `S3_BUCKET` | — | Bucket name |
+| `S3_ACCESS_KEY` | — | Access key |
+| `S3_SECRET_KEY` | — | Secret key |
+| `S3_REGION` | — | Region (e.g. `us-east-1`) |
+| `S3_PUBLIC_URL` | — | Public base URL for serving files |
+
+## Template Config
+
+The **Template Config** panel (accessible via the ⚙️ button on the landing page) lets you visually preview different feature combinations without touching code.
+
+### What You Can Toggle
+
+- Enable/disable features: docs, email, email verification, Google auth, analytics, PostHog, cookie banner, push notifications, payments, onboarding tour
+- Switch color schemes (12 presets + custom hex) and border radius styles
+- Choose web layout (sidebar / header / both), font family, and font scale
+- Place language/theme toggles, search bar, and user badge anywhere in the navigation
+
+Changes generate the corresponding `.env` snippet which you can copy and paste.
+
+## AI Providers (Optional)
+
+Supports **Google Gemini** and **OpenAI** with tab switching in the admin panel. Configure API keys via Admin → API Settings → AI Providers.
+
+### AI Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GEMINI_API_KEY` | — | Google Gemini API key |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model (flash, pro, 3-pro-image, 2.0-flash) |
+| `GEMINI_CONCURRENT_LIMIT` | `5` | Max concurrent AI requests |
+| `OPENAI_API_KEY` | — | OpenAI API key |
+| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model (gpt-4o, gpt-4o-mini, o3-mini) |
+| `OPENAI_MAX_TOKENS` | `4096` | Max tokens per response |
+
+## Proxy Management (Optional)
+
+Full CRUD proxy management with testing, status tracking, and priority-based selection. Proxies are stored in the database (not `.env`) and managed via Admin → Proxies tab.
+
+### Features
+
+- **Add/edit/delete** proxies with name, host, protocol (HTTP/SOCKS5), ports, authentication
+- **Priority-based** selection (lower value = higher priority)
+- **Three test methods**: full HTTPS test (curl), TCP connectivity test, network diagnostics (DNS + TCP)
+- **Status tracking**: last check time, status (success/failed/pending), error messages
+- **Toggle active state** per proxy
 
 ## Features
 
-- **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in
-- **Admin Panel**: role/feature management, user stats, protected by middleware
+- **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in, SMS OTP (Twilio + SMSC.ru)
+- **Admin Panel**: role/feature management, user stats, proxy management, AI providers, protected by middleware
 - **Profile**: name, bio, phone, location — inline editing
 - **Navigation**: animated tab bar (mobile), collapsible sidebar with gradient indicator (web)
 - **Animations**: bounce, rotate, pop, wiggle, bell tab icons + FadeIn, SlideIn, ScalePress
@@ -382,7 +564,13 @@ Payments are disabled by default (`PAYMENTS_ENABLED=false`). Supports two provid
 - **SSE**: real-time events with auto-reconnect
 - **Analytics**: PostHog abstraction with feature flags
 - **SEO**: meta tags, OG/Twitter cards, sitemap
-- **Payments**: Stripe + YooKassa, subscriptions & one-time, admin stats
+- **Payments**: Stripe + PayPal + YooKassa + Robokassa, subscriptions & one-time, admin stats
+- **AI Providers**: Gemini + OpenAI with tab switching, model selection
+- **Proxy Management**: CRUD with testing (HTTPS, TCP, diagnostics), priority, status tracking
+- **File Storage**: local filesystem or S3-compatible (MinIO, Cloudflare R2), live migration in admin
+- **Onboarding**: welcome wizard + interactive CoachMark spotlight tour, feature-flag-controlled
+- **Template Config**: visual feature-flag panel with live preview and `.env` code export
+- **Company Settings**: app name, tagline, company info — editable in admin, shown in footer/docs
 - **Security**: Helmet, CORS, Zod validation, rate limiting, no PII leaks
 
 ## Deployment

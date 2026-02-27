@@ -22,6 +22,10 @@ import { docFeedbackRoutes } from './modules/doc-feedback/doc-feedback.routes'
 import { sseRoutes } from './realtime/sse'
 import { configRoutes } from './modules/config/config.routes'
 import { paymentsRoutes } from './modules/payments/payments.routes'
+import { StorageService } from './modules/storage/storage.service'
+import { storageRoutes } from './modules/storage/storage.routes'
+import { proxyRoutes } from './modules/proxy/proxy.routes'
+import { emailRoutes } from './modules/email/email.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -43,7 +47,9 @@ export async function buildApp() {
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
   await app.register(cors, {
-    origin: env.NODE_ENV === 'development' ? true : env.CORS_ORIGIN,
+    origin: env.NODE_ENV === 'development'
+      ? ['http://localhost:8081', 'http://localhost:3000', 'http://localhost:19006']
+      : env.CORS_ORIGIN,
     credentials: true,
   })
 
@@ -55,32 +61,34 @@ export async function buildApp() {
     keyGenerator: (request) => request.ip,
   })
 
-  // Documentation
-  await app.register(swagger, {
-    openapi: {
-      info: {
-        title: 'MVP Template API',
-        version: '1.0.0',
-        description: 'API documentation for MVP Template',
-      },
-      servers: [
-        { url: `http://${env.HOST}:${env.PORT}`, description: 'Development' },
-      ],
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
+  // Documentation (development only — disabled in production)
+  if (env.NODE_ENV !== 'production') {
+    await app.register(swagger, {
+      openapi: {
+        info: {
+          title: 'MVP Template API',
+          version: '1.0.0',
+          description: 'API documentation for MVP Template',
+        },
+        servers: [
+          { url: `http://${env.HOST}:${env.PORT}`, description: 'Development' },
+        ],
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+            },
           },
         },
       },
-    },
-  })
-  await app.register(swaggerUi, {
-    routePrefix: '/docs',
-    uiConfig: { docExpansion: 'list' },
-  })
+    })
+    await app.register(swaggerUi, {
+      routePrefix: '/docs',
+      uiConfig: { docExpansion: 'list' },
+    })
+  }
 
   // File uploads
   await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024 } })
@@ -91,6 +99,10 @@ export async function buildApp() {
     prefix: '/uploads/',
     decorateReply: false,
   })
+
+  // Storage service (local / S3)
+  const storageService = new StorageService()
+  app.decorate('storageService', storageService)
 
   // Error handler
   app.setErrorHandler(errorHandler)
@@ -116,6 +128,12 @@ export async function buildApp() {
   if (env.PAYMENTS_ENABLED) {
     await app.register(paymentsRoutes, { prefix: '/api/payments' })
   }
+
+  if (env.EMAIL_ENABLED) {
+    await app.register(emailRoutes, { prefix: '/api/email' })
+  }
+  await app.register(storageRoutes, { prefix: '/api/admin/storage' })
+  await app.register(proxyRoutes, { prefix: '/api/admin/proxies' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

@@ -20,7 +20,7 @@ fi
 
 # Commit and push
 git add -A
-git commit -m "auto: Claude changes $(date '+%H:%M:%S')" --no-verify 2>/dev/null || exit 0
-git push -u origin "$BRANCH" --no-verify 2>/dev/null || true
+git commit -m "auto: Claude changes $(date '+%H:%M:%S')" 2>/dev/null || exit 0
+git push -u origin "$BRANCH" 2>/dev/null || true
 
 exit 0

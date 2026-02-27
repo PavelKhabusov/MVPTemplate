@@ -36,6 +36,18 @@ export const resendVerificationSchema = z.object({
   locale: z.enum(['en', 'ru', 'es', 'ja']).optional().default('en'),
 })
 
+export const sendPhoneCodeSchema = z.object({
+  phone: z.string().min(7).max(20).regex(/^\+?[0-9\s\-().]+$/, 'Invalid phone number'),
+})
+
+export const verifyPhoneSchema = z.object({
+  phone: z.string().min(7).max(20),
+  code: z.string().length(6).regex(/^\d{6}$/, 'Code must be 6 digits'),
+})
+
+export type SendPhoneCodeInput = z.infer<typeof sendPhoneCodeSchema>
+export type VerifyPhoneInput = z.infer<typeof verifyPhoneSchema>
+
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type RefreshInput = z.infer<typeof refreshSchema>

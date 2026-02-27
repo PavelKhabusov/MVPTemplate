@@ -4,8 +4,7 @@ import { XStack, YStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from '@mvp/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS, type SupportedLanguage } from '@mvp/i18n'
-import { useThemeStore, useLanguageStore, useAuthStore } from '@mvp/store'
-import { useTemplateFlag } from '@mvp/template-config'
+import { useThemeStore, useLanguageStore, useAuthStore, useCompanyStore } from '@mvp/store'
 import { MotiView, AnimatePresence } from 'moti'
 import { AppAvatar } from '../components/AppAvatar'
 import { ScalePress } from '../animations/ScalePress'
@@ -13,18 +12,19 @@ import { ScalePress } from '../animations/ScalePress'
 interface LandingNavProps {
   onNavigate: (href: string) => void
   logo?: any
+  paymentsEnabled?: boolean
 }
 
-export function LandingNav({ onNavigate, logo }: LandingNavProps) {
+export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: LandingNavProps) {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const user = useAuthStore((s) => s.user)
+  const appName = useCompanyStore((s) => s.info.appName) || 'MVPTemplate'
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const paymentsEnabled = useTemplateFlag('payments', false)
 
   // Inject responsive CSS
   useEffect(() => {
@@ -101,7 +101,7 @@ export function LandingNav({ onNavigate, logo }: LandingNavProps) {
                 <Text color="white" fontWeight="bold" fontSize={16}>M</Text>
               </YStack>
             )}
-            <Text fontWeight="bold" fontSize="$4" color="$color">MVP Template</Text>
+            <Text fontWeight="bold" fontSize="$4" color="$color">{appName}</Text>
           </XStack>
         </ScalePress>
 

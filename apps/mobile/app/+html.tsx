@@ -24,9 +24,31 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta name="twitter:description" content="Universal MVP template powered by Expo + Tamagui" />
 
         {/* Favicon */}
-        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="icon" type="image/png" href="/favicon.png?v=2" />
 
         <ScrollViewStyleReset />
+
+        {/* Thin scrollbars for web */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(150,150,150,0.3) transparent;
+          }
+          *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+          *::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          *::-webkit-scrollbar-thumb {
+            background: rgba(150,150,150,0.3);
+            border-radius: 3px;
+          }
+          *::-webkit-scrollbar-thumb:hover {
+            background: rgba(150,150,150,0.5);
+          }
+        `}} />
       </head>
       <body>{children}</body>
     </html>

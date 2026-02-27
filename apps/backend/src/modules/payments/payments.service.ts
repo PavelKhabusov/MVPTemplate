@@ -19,7 +19,7 @@ export const paymentsService = {
     const plan = await paymentsRepository.getPlanById(input.planId)
     if (!plan || !plan.isActive) throw AppError.notFound('Plan not found')
 
-    const provider = getPaymentProvider(plan.provider as 'stripe' | 'yookassa')
+    const provider = getPaymentProvider(plan.provider as 'stripe' | 'yookassa' | 'robokassa')
 
     const result = await provider.createCheckoutSession({
       userId,
@@ -61,6 +61,14 @@ export const paymentsService = {
 
       case 'subscription.created': {
         if (event.userId && event.planId) {
+          // Idempotency guard: skip if this subscription was already processed
+          if (event.providerSubscriptionId) {
+            const existing = await paymentsRepository.findSubscriptionByProviderId(
+              event.providerSubscriptionId,
+            )
+            if (existing) break
+          }
+
           const plan = await paymentsRepository.getPlanById(event.planId)
           if (plan) {
             const now = new Date()
@@ -79,6 +87,14 @@ export const paymentsService = {
               currentPeriodEnd: event.currentPeriodEnd ?? periodEnd,
               cancelAtPeriodEnd: false,
             })
+
+            // Also mark the payment as succeeded (needed for providers like Robokassa
+            // that emit a single webhook for both payment and subscription)
+            if (event.providerPaymentId) {
+              await paymentsRepository.updatePaymentByProviderId(event.providerPaymentId, {
+                status: 'succeeded',
+              })
+            }
           }
         }
         break
@@ -154,7 +170,7 @@ export const paymentsService = {
 
     if (sub.subscription.providerSubscriptionId) {
       try {
-        const provider = getPaymentProvider(sub.subscription.provider as 'stripe' | 'yookassa')
+        const provider = getPaymentProvider(sub.subscription.provider as 'stripe' | 'yookassa' | 'robokassa')
         await provider.cancelSubscription({
           providerSubscriptionId: sub.subscription.providerSubscriptionId,
         })
@@ -185,13 +201,53 @@ export const paymentsService = {
     return paymentsRepository.updatePlan(planId, input)
   },
 
-  async deactivatePlan(planId: string) {
+  async deletePlan(planId: string) {
     const plan = await paymentsRepository.getPlanById(planId)
     if (!plan) throw AppError.notFound('Plan not found')
-    return paymentsRepository.deactivatePlan(planId)
+
+    const subCount = await paymentsRepository.getPlanSubscriptionCount(planId)
+    if (subCount > 0) {
+      throw AppError.conflict(
+        `Cannot delete plan "${plan.name}" — it has ${subCount} associated subscription(s). Deactivate it instead.`,
+      )
+    }
+
+    return paymentsRepository.deletePlan(planId)
   },
 
   async getAdminStats(days: number) {
     return paymentsRepository.getRevenueStats(days)
+  },
+
+  async refundPayment(paymentId: string, amountMinorUnits?: number) {
+    const payment = await paymentsRepository.getPaymentById(paymentId)
+    if (!payment) throw AppError.notFound('Payment not found')
+
+    if (payment.status === 'refunded') {
+      throw AppError.conflict('Payment has already been refunded')
+    }
+
+    if (payment.status !== 'succeeded') {
+      throw AppError.badRequest('Only succeeded payments can be refunded')
+    }
+
+    if (!payment.providerPaymentId) {
+      throw AppError.badRequest('Payment has no provider payment ID — cannot refund')
+    }
+
+    const provider = getPaymentProvider(payment.provider as 'stripe' | 'yookassa' | 'robokassa' | 'paypal')
+    const refund = await provider.refundPayment(payment.providerPaymentId, amountMinorUnits)
+
+    await paymentsRepository.updatePaymentByProviderId(payment.providerPaymentId, {
+      status: 'refunded',
+    })
+
+    return {
+      refundId: refund.refundId,
+      paymentId: payment.id,
+      amount: refund.amount,
+      currency: refund.currency,
+      status: refund.status,
+    }
   },
 }

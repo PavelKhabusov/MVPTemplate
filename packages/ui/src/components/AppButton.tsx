@@ -1,4 +1,4 @@
-import { Button, Spinner, type ButtonProps } from 'tamagui'
+import { Button, Spinner, useTheme, type ButtonProps } from 'tamagui'
 import { ScalePress } from '../animations'
 
 const variantStyles = {
@@ -58,13 +58,14 @@ export function AppButton({
   size = 'md',
   ...props
 }: AppButtonProps) {
+  const theme = useTheme()
   const isDisabled = disabled || loading
 
   return (
     <ScalePress disabled={isDisabled} scale={animated ? undefined : 1}>
       <Button
         size={sizeToToken[size]}
-        borderRadius="$3"
+        borderRadius={Number(theme.radiusSm?.val) ?? 8}
         disabled={isDisabled}
         opacity={isDisabled ? 0.5 : 1}
         role="button"

@@ -1,7 +1,8 @@
 import nodemailer from 'nodemailer'
 import type { Transporter } from 'nodemailer'
 import { env } from '../../config/env'
-import { getEmailTemplate } from './email.templates'
+import { getEmailTemplate, buildAnnouncementEmail, type AnnouncementVars } from './email.templates'
+import { withRetry } from '../../common/utils/retry'
 
 type EmailLocale = 'en' | 'ru' | 'es' | 'ja'
 
@@ -61,14 +62,48 @@ export const emailService = {
     return this.send(to, subject, html)
   },
 
+  // Broadcast an announcement to a list of users (batched, max 10 concurrent)
+  async broadcastAnnouncement(
+    recipients: Array<{ email: string; name: string; locale?: string }>,
+    vars: AnnouncementVars,
+  ): Promise<{ sent: number; failed: number; total: number }> {
+    const { subject, html } = buildAnnouncementEmail(vars)
+    return this._broadcast(recipients.map((r) => ({ to: r.email, subject, html })))
+  },
+
+  // Re-broadcast the welcome email to all given users (uses their locale)
+  async broadcastWelcome(
+    recipients: Array<{ email: string; name: string; locale?: string }>,
+  ): Promise<{ sent: number; failed: number; total: number }> {
+    const jobs = recipients.map((r) => {
+      const locale = (r.locale ?? 'en') as 'en' | 'ru' | 'es' | 'ja'
+      const { subject, html } = getEmailTemplate('welcome', locale, { userName: r.name, appUrl: env.APP_URL })
+      return { to: r.email, subject, html }
+    })
+    return this._broadcast(jobs)
+  },
+
+  async _broadcast(
+    jobs: Array<{ to: string; subject: string; html: string }>,
+  ): Promise<{ sent: number; failed: number; total: number }> {
+    const CONCURRENCY = 10
+    let sent = 0
+    let failed = 0
+    for (let i = 0; i < jobs.length; i += CONCURRENCY) {
+      const batch = jobs.slice(i, i + CONCURRENCY)
+      const results = await Promise.allSettled(batch.map((j) => this.send(j.to, j.subject, j.html)))
+      results.forEach((r) => { if (r.status === 'fulfilled') sent++; else failed++ })
+    }
+    return { sent, failed, total: jobs.length }
+  },
+
   async send(to: string, subject: string, html: string) {
     const transport = await getTransporter()
-    const info = await transport.sendMail({
-      from: env.SMTP_FROM,
-      to,
-      subject,
-      html,
-    })
+    const info = await withRetry(
+      () => transport.sendMail({ from: env.SMTP_FROM, to, subject, html }),
+      3,
+      300,
+    )
 
     if (env.NODE_ENV !== 'production' && !env.SMTP_HOST) {
       const previewUrl = nodemailer.getTestMessageUrl(info)

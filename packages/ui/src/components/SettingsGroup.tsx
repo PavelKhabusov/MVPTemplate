@@ -27,7 +27,7 @@ export function SettingsGroup({ header, footer, children }: SettingsGroupProps) 
 
       <YStack
         backgroundColor="$cardBackground"
-        borderRadius="$4"
+        borderRadius={Number(theme.radiusMd?.val) ?? 12}
         borderWidth={0.5}
         borderColor={theme.cardBorder.val}
         overflow="hidden"

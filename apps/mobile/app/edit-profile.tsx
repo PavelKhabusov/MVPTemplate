@@ -6,7 +6,7 @@ import { useTranslation } from '@mvp/i18n'
 import { useAuthStore, useThemeStore } from '@mvp/store'
 import { AppAvatar, SettingsGroup, SettingsGroupItem, ScalePress, PhoneInput, LocationInput } from '@mvp/ui'
 import * as ImagePicker from 'expo-image-picker'
-import { api, getAccessToken } from '../src/services/api'
+import { api } from '../src/services/api'
 import { useLocationSearch } from '@mvp/lib'
 import { authApi } from '../src/services/auth'
 
@@ -71,20 +71,10 @@ export default function EditProfileScreen() {
         } as any)
       }
 
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
-      const token = getAccessToken()
-      console.log('Uploading avatar to', `${apiUrl}/api/users/avatar`, 'token:', !!token)
-      const uploadRes = await fetch(`${apiUrl}/api/users/avatar`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
+      const uploadRes = await api.post('/api/users/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       })
-      if (!uploadRes.ok) {
-        const errBody = await uploadRes.text()
-        console.error('Avatar upload failed:', uploadRes.status, errBody)
-        throw new Error(errBody)
-      }
-      const { data: profile } = await uploadRes.json()
+      const profile = uploadRes.data?.data
       if (profile) {
         setAvatarUri(profile.avatarUrl)
         if (user) setUser({ ...user, avatarUrl: profile.avatarUrl })

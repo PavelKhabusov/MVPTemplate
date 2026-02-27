@@ -1,5 +1,6 @@
 export { DocTreeView } from './DocTreeView'
 export { MarkdownView } from './MarkdownView'
 export { DocsRenderer } from './DocsRenderer'
+export { DocFeedback } from './DocFeedback'
 export { DOC_GROUPS, getPageById } from './docData'
 export type { DocPage, DocGroup } from './docData'

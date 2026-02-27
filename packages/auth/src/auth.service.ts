@@ -48,6 +48,9 @@ export function createAuthService(deps: AuthServiceDeps) {
     },
 
     async initialize() {
+      // Skip if already initialized — happens on HMR re-mount when Zustand state survives
+      if (useAuthStore.getState().isInitialized) return
+
       try {
         const refreshToken = await secureStorage.get('refreshToken')
         if (!refreshToken) {
@@ -57,9 +60,15 @@ export function createAuthService(deps: AuthServiceDeps) {
 
         const { data } = await http.post('/auth/refresh', { refreshToken })
         await handleAuthResponse((data as any).data)
-      } catch {
+      } catch (err: any) {
         setAccessToken(null)
-        await secureStorage.remove('refreshToken')
+        // Only delete refresh token on explicit auth rejection (401/403).
+        // Network errors (backend restarting, timeout) should NOT clear the token —
+        // otherwise the user gets logged out every time the backend restarts in dev.
+        const status = err?.response?.status
+        if (status === 401 || status === 403) {
+          await secureStorage.remove('refreshToken')
+        }
       } finally {
         useAuthStore.getState().setInitialized()
       }

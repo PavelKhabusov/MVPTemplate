@@ -6,7 +6,7 @@ import { router } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
-import { useAuthStore, useThemeStore, useLanguageStore } from '@mvp/store'
+import { useAuthStore, useThemeStore, useLanguageStore, useCompanyStore, useAppStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import {
   FadeIn,
@@ -29,7 +29,9 @@ import Animated, {
   useAnimatedScrollHandler,
 } from 'react-native-reanimated'
 import { authApi } from '../../src/services/auth'
-import { NotificationCenter } from '../../src/features/notifications/NotificationCenter'
+import { NotificationCenter } from '@mvp/notifications'
+import { api } from '../../src/services/api'
+import { APP_CONFIG } from '../../src/config/app'
 
 const THEME_LABELS: Record<ThemeMode, string> = {
   system: 'settings.themeSystem',
@@ -55,6 +57,7 @@ export default function SettingsScreen() {
 
 function NotificationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const theme = useTheme()
+  const emailEnabled = useTemplateFlag('email', false)
 
   useEffect(() => {
     if (Platform.OS === 'web' && visible) {
@@ -77,7 +80,7 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
             <Ionicons name="close" size={24} color={theme.color.val} />
           </ScalePress>
         </XStack>
-        <NotificationCenter />
+        <NotificationCenter http={api} emailEnabled={emailEnabled} />
       </YStack>
     )
   }
@@ -90,7 +93,139 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
             <Ionicons name="close" size={24} color={theme.color.val} />
           </ScalePress>
         </XStack>
-        <NotificationCenter />
+        <NotificationCenter http={api} emailEnabled={emailEnabled} />
+      </YStack>
+    </Modal>
+  )
+}
+
+function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const company = useCompanyStore((s) => s.info)
+
+  const displayName = company.appName || APP_CONFIG.name
+  const displayCompany = company.companyName || APP_CONFIG.developer
+
+  const content = (
+    <YStack alignItems="center" gap="$5" paddingHorizontal="$5" paddingVertical="$6">
+      <YStack alignItems="center" gap="$2">
+        <YStack
+          width={72}
+          height={72}
+          borderRadius="$5"
+          backgroundColor="$subtleBackground"
+          borderWidth={1}
+          borderColor="$borderColor"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
+        </YStack>
+        <Text fontSize="$6" fontWeight="700" color="$color">{displayName}</Text>
+        {company.tagline ? (
+          <Text fontSize="$2" color="$mutedText" textAlign="center">{company.tagline}</Text>
+        ) : null}
+        <Text fontSize="$2" color="$mutedText">v{APP_CONFIG.version}</Text>
+      </YStack>
+
+      <YStack width="100%" gap="$2">
+        <XStack
+          paddingVertical="$3"
+          paddingHorizontal="$4"
+          backgroundColor="$subtleBackground"
+          borderRadius="$3"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Text fontSize="$3" color="$mutedText">{t('settings.version')}</Text>
+          <Text fontSize="$3" color="$color" fontWeight="500">{APP_CONFIG.version}</Text>
+        </XStack>
+        <XStack
+          paddingVertical="$3"
+          paddingHorizontal="$4"
+          backgroundColor="$subtleBackground"
+          borderRadius="$3"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Text fontSize="$3" color="$mutedText">{t('settings.developer')}</Text>
+          <Text fontSize="$3" color="$color" fontWeight="500">{displayCompany}</Text>
+        </XStack>
+        {company.website ? (
+          <XStack
+            paddingVertical="$3"
+            paddingHorizontal="$4"
+            backgroundColor="$subtleBackground"
+            borderRadius="$3"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text fontSize="$3" color="$mutedText">{t('admin.companyWebsite')}</Text>
+            <Text fontSize="$3" color="$accent" fontWeight="500">{company.website}</Text>
+          </XStack>
+        ) : null}
+        {company.supportEmail ? (
+          <XStack
+            paddingVertical="$3"
+            paddingHorizontal="$4"
+            backgroundColor="$subtleBackground"
+            borderRadius="$3"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text fontSize="$3" color="$mutedText">{t('admin.companySupportEmail')}</Text>
+            <Text fontSize="$3" color="$accent" fontWeight="500">{company.supportEmail}</Text>
+          </XStack>
+        ) : null}
+      </YStack>
+
+      <Text fontSize="$2" color="$mutedText" textAlign="center">
+        {t('settings.madeWith')} · © {APP_CONFIG.year}
+      </Text>
+    </YStack>
+  )
+
+  if (!visible) return null
+
+  if (Platform.OS === 'web') {
+    return (
+      <YStack
+        // @ts-ignore
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' }}
+        onPress={onClose}
+      >
+        <YStack
+          backgroundColor="$background"
+          borderRadius="$5"
+          borderWidth={1}
+          borderColor="$borderColor"
+          maxWidth={400}
+          width="90%"
+          // @ts-ignore
+          onPress={(e: any) => e.stopPropagation()}
+        >
+          <XStack justifyContent="flex-end" padding="$3">
+            <ScalePress onPress={onClose}>
+              <Ionicons name="close" size={22} color={theme.mutedText.val} />
+            </ScalePress>
+          </XStack>
+          {content}
+        </YStack>
+      </YStack>
+    )
+  }
+
+  return (
+    <Modal visible animationType="slide" presentationStyle="formSheet" onRequestClose={onClose}>
+      <YStack flex={1} backgroundColor="$background" paddingTop={insets.top}>
+        <XStack justifyContent="flex-end" padding="$3">
+          <ScalePress onPress={onClose}>
+            <Ionicons name="close" size={24} color={theme.color.val} />
+          </ScalePress>
+        </XStack>
+        {content}
       </YStack>
     </Modal>
   )
@@ -103,8 +238,16 @@ function UnauthenticatedSettingsView() {
   const { mode, setMode } = useThemeStore()
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
+  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
+
+  const handleReplayTour = () => {
+    resetOnboarding()
+    router.push('/')
+  }
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -190,6 +333,32 @@ function UnauthenticatedSettingsView() {
               onPress={() => router.push('/sign-in')}
             />
           )}
+          {docsEnabled && (
+            <SettingsGroupItem
+              icon="book-outline"
+              label={t('docs.title')}
+              onPress={() => router.push('/docs')}
+            />
+          )}
+          {onboardingEnabled && (
+            <SettingsGroupItem
+              icon="compass-outline"
+              label={t('settings.replayTour')}
+              onPress={handleReplayTour}
+            />
+          )}
+          <SettingsGroupItem
+            icon="information-circle-outline"
+            label={t('settings.about')}
+            value={APP_CONFIG.version}
+            onPress={() => setShowAbout(true)}
+          />
+        </SettingsGroup>
+      </SlideIn>
+
+      {/* Documents */}
+      <SlideIn from="bottom" delay={300}>
+        <SettingsGroup header={t('settings.documents')}>
           <SettingsGroupItem
             icon="shield-outline"
             label={t('settings.privacy')}
@@ -200,20 +369,15 @@ function UnauthenticatedSettingsView() {
             label={t('settings.terms')}
             onPress={() => router.push('/terms')}
           />
-          {docsEnabled && (
-            <SettingsGroupItem
-              icon="book-outline"
-              label={t('docs.title')}
-              onPress={() => router.push('/docs')}
-            />
-          )}
           <SettingsGroupItem
-            icon="information-circle-outline"
-            label={t('settings.about')}
-            value="1.0.0"
+            icon="newspaper-outline"
+            label={t('settings.offer')}
+            onPress={() => router.push('/offer')}
           />
         </SettingsGroup>
       </SlideIn>
+
+      <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
     </ScrollView>
   )
 }
@@ -228,10 +392,17 @@ function AuthenticatedSettingsView() {
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
-  const paymentsEnabled = useTemplateFlag('payments', false)
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
+
+  const handleReplayTour = () => {
+    resetOnboarding()
+    router.push('/')
+  }
 
   const scrollY = useSharedValue(0)
   const scrollHandler = useAnimatedScrollHandler({
@@ -371,13 +542,11 @@ function AuthenticatedSettingsView() {
         {/* General */}
         <StaggerGroup index={groupIndex++}>
           <SettingsGroup header={t('settings.title')}>
-            {paymentsEnabled && (
-              <SettingsGroupItem
-                icon="card-outline"
-                label={t('payments.managePlan')}
-                onPress={() => router.push('/pricing')}
-              />
-            )}
+            <SettingsGroupItem
+              icon="pricetags-outline"
+              label={t('payments.title')}
+              onPress={() => router.push('/pricing')}
+            />
             {pushEnabled && (
               <SettingsGroupItem
                 icon="notifications-outline"
@@ -385,6 +554,32 @@ function AuthenticatedSettingsView() {
                 onPress={() => setShowNotifications(true)}
               />
             )}
+            {docsEnabled && (
+              <SettingsGroupItem
+                icon="book-outline"
+                label={t('docs.title')}
+                onPress={() => router.push('/docs')}
+              />
+            )}
+            {onboardingEnabled && (
+              <SettingsGroupItem
+                icon="compass-outline"
+                label={t('settings.replayTour')}
+                onPress={handleReplayTour}
+              />
+            )}
+            <SettingsGroupItem
+              icon="information-circle-outline"
+              label={t('settings.about')}
+              value={APP_CONFIG.version}
+              onPress={() => setShowAbout(true)}
+            />
+          </SettingsGroup>
+        </StaggerGroup>
+
+        {/* Documents */}
+        <StaggerGroup index={groupIndex++}>
+          <SettingsGroup header={t('settings.documents')}>
             <SettingsGroupItem
               icon="shield-outline"
               label={t('settings.privacy')}
@@ -395,22 +590,16 @@ function AuthenticatedSettingsView() {
               label={t('settings.terms')}
               onPress={() => router.push('/terms')}
             />
-            {docsEnabled && (
-              <SettingsGroupItem
-                icon="book-outline"
-                label={t('docs.title')}
-                onPress={() => router.push('/docs')}
-              />
-            )}
             <SettingsGroupItem
-              icon="information-circle-outline"
-              label={t('settings.about')}
-              value="1.0.0"
+              icon="newspaper-outline"
+              label={t('settings.offer')}
+              onPress={() => router.push('/offer')}
             />
           </SettingsGroup>
         </StaggerGroup>
 
         {pushEnabled && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
+        <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
 
         {/* Admin */}
         {userRole === 'admin' && (
@@ -451,8 +640,16 @@ function WebSettingsView() {
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
+  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
+
+  const handleReplayTour = () => {
+    resetOnboarding()
+    router.push('/')
+  }
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -583,6 +780,11 @@ function WebSettingsView() {
         {/* General */}
         <StaggerGroup index={isAuthenticated ? 2 : 1}>
           <SettingsGroup header={t('settings.title')}>
+            <SettingsGroupItem
+              icon="pricetags-outline"
+              label={t('payments.title')}
+              onPress={() => router.push('/pricing')}
+            />
             {pushEnabled && (
               <SettingsGroupItem
                 icon="notifications-outline"
@@ -590,6 +792,32 @@ function WebSettingsView() {
                 onPress={() => isAuthenticated ? setShowNotifications(true) : router.push('/sign-in')}
               />
             )}
+            {docsEnabled && (
+              <SettingsGroupItem
+                icon="book-outline"
+                label={t('docs.title')}
+                onPress={() => router.push('/docs')}
+              />
+            )}
+            {onboardingEnabled && (
+              <SettingsGroupItem
+                icon="compass-outline"
+                label={t('settings.replayTour')}
+                onPress={handleReplayTour}
+              />
+            )}
+            <SettingsGroupItem
+              icon="information-circle-outline"
+              label={t('settings.about')}
+              value={APP_CONFIG.version}
+              onPress={() => setShowAbout(true)}
+            />
+          </SettingsGroup>
+        </StaggerGroup>
+
+        {/* Documents */}
+        <StaggerGroup index={isAuthenticated ? 3 : 2}>
+          <SettingsGroup header={t('settings.documents')}>
             <SettingsGroupItem
               icon="shield-outline"
               label={t('settings.privacy')}
@@ -600,26 +828,20 @@ function WebSettingsView() {
               label={t('settings.terms')}
               onPress={() => router.push('/terms')}
             />
-            {docsEnabled && (
-              <SettingsGroupItem
-                icon="book-outline"
-                label={t('docs.title')}
-                onPress={() => router.push('/docs')}
-              />
-            )}
             <SettingsGroupItem
-              icon="information-circle-outline"
-              label={t('settings.about')}
-              value="1.0.0"
+              icon="newspaper-outline"
+              label={t('settings.offer')}
+              onPress={() => router.push('/offer')}
             />
           </SettingsGroup>
         </StaggerGroup>
 
         {pushEnabled && isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
+        <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
 
         {/* Admin */}
         {userRole === 'admin' && (
-          <StaggerGroup index={3}>
+          <StaggerGroup index={isAuthenticated ? 4 : 3}>
             <SettingsGroup header={t('admin.title')}>
               <SettingsGroupItem
                 icon="shield-checkmark-outline"
@@ -632,7 +854,7 @@ function WebSettingsView() {
 
         {/* Sign Out */}
         {isAuthenticated && (
-          <StaggerGroup index={userRole === 'admin' ? 4 : 3}>
+          <StaggerGroup index={userRole === 'admin' ? 5 : 4}>
             <SettingsGroup>
               <SettingsGroupItem
                 icon="log-out-outline"

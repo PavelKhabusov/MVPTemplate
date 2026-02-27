@@ -1,5 +1,6 @@
 import { Platform } from 'react-native'
 import Head from 'expo-router/head'
+import { useCompanyStore } from '@mvp/store'
 
 interface SEOProps {
   title: string
@@ -10,14 +11,18 @@ interface SEOProps {
 export function SEO({ title, description, ogImage }: SEOProps) {
   if (Platform.OS !== 'web') return null
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const appName = useCompanyStore((s) => s.info.appName) || 'MVPTemplate'
+  const fullTitle = `${title} | ${appName}`
+
   return (
     <Head>
-      <title>{title} | MVPTemplate</title>
+      <title>{fullTitle}</title>
       {description && <meta name="description" content={description} />}
-      <meta property="og:title" content={title} />
+      <meta property="og:title" content={fullTitle} />
       {description && <meta property="og:description" content={description} />}
       {ogImage && <meta property="og:image" content={ogImage} />}
-      <meta name="twitter:title" content={title} />
+      <meta name="twitter:title" content={fullTitle} />
       {description && <meta name="twitter:description" content={description} />}
       {ogImage && <meta name="twitter:image" content={ogImage} />}
     </Head>

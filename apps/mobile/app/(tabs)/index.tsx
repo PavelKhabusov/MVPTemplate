@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { ScrollView, Platform, RefreshControl, View } from 'react-native'
 import { YStack, XStack, Text, H2, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -6,6 +6,7 @@ import { useTranslation } from '@mvp/i18n'
 import { useAuthStore, useNotesStore } from '@mvp/store'
 import { router } from 'expo-router'
 import { FadeIn, SlideIn, AnimatedListItem, AppCard, AppButton, ScalePress, RefreshSpinner } from '@mvp/ui'
+import { CoachMark } from '@mvp/onboarding'
 import { Ionicons } from '@expo/vector-icons'
 
 function StatCard({ value, label, icon, color }: { value: string; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }) {
@@ -48,6 +49,7 @@ export default function HomeScreen() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const theme = useTheme()
   const [refreshing, setRefreshing] = useState(false)
+  const scrollRef = useRef<ScrollView>(null)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -61,6 +63,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={{ flex: 1, backgroundColor: theme.background.val }}
       contentContainerStyle={{ paddingBottom: 40 }}
       refreshControl={
@@ -93,38 +96,42 @@ export default function HomeScreen() {
 
         {/* Stats */}
         <SlideIn from="bottom" delay={100}>
-          <XStack gap="$3">
-            <StatCard value="12" label={t('home.activeProjects')} icon="folder-outline" color={theme.accent.val} />
-            <StatCard value="48" label={t('home.completedTasks')} icon="checkmark-circle-outline" color={theme.success.val} />
-            <StatCard value="8" label={t('home.teamMembers')} icon="people-outline" color={theme.secondary.val} />
-          </XStack>
+          <CoachMark stepId="home-stats" scrollRef={scrollRef}>
+            <XStack gap="$3">
+              <StatCard value="12" label={t('home.activeProjects')} icon="folder-outline" color={theme.accent.val} />
+              <StatCard value="48" label={t('home.completedTasks')} icon="checkmark-circle-outline" color={theme.success.val} />
+              <StatCard value="8" label={t('home.teamMembers')} icon="people-outline" color={theme.secondary.val} />
+            </XStack>
+          </CoachMark>
         </SlideIn>
 
         {/* Quick Actions */}
         <SlideIn from="bottom" delay={200}>
-          <YStack gap="$3">
-            <Text fontWeight="600" fontSize="$4" color="$color">{t('home.quickActions')}</Text>
-            <XStack gap="$3" flexWrap="wrap">
-              <AppButton variant="accent" size="sm" onPress={() => {}}>
-                <XStack gap="$2" alignItems="center">
-                  <Ionicons name="add" size={16} color={theme.background.val} />
-                  <Text color="$background" fontWeight="600" fontSize="$2">{t('home.newProject')}</Text>
-                </XStack>
-              </AppButton>
-              <AppButton variant="outline" size="sm" onPress={() => {}}>
-                <XStack gap="$2" alignItems="center">
-                  <Ionicons name="list-outline" size={16} color={theme.color.val} />
-                  <Text color="$color" fontSize="$2">{t('home.viewTasks')}</Text>
-                </XStack>
-              </AppButton>
-              <AppButton variant="outline" size="sm" onPress={() => {}}>
-                <XStack gap="$2" alignItems="center">
-                  <Ionicons name="bar-chart-outline" size={16} color={theme.color.val} />
-                  <Text color="$color" fontSize="$2">{t('home.analytics')}</Text>
-                </XStack>
-              </AppButton>
-            </XStack>
-          </YStack>
+          <CoachMark stepId="home-actions" scrollRef={scrollRef}>
+            <YStack gap="$3">
+              <Text fontWeight="600" fontSize="$4" color="$color">{t('home.quickActions')}</Text>
+              <XStack gap="$3" flexWrap="wrap">
+                <AppButton variant="accent" size="sm" onPress={() => {}}>
+                  <XStack gap="$2" alignItems="center">
+                    <Ionicons name="add" size={16} color={theme.background.val} />
+                    <Text color="$background" fontWeight="600" fontSize="$2">{t('home.newProject')}</Text>
+                  </XStack>
+                </AppButton>
+                <AppButton variant="outline" size="sm" onPress={() => {}}>
+                  <XStack gap="$2" alignItems="center">
+                    <Ionicons name="list-outline" size={16} color={theme.color.val} />
+                    <Text color="$color" fontSize="$2">{t('home.viewTasks')}</Text>
+                  </XStack>
+                </AppButton>
+                <AppButton variant="outline" size="sm" onPress={() => {}}>
+                  <XStack gap="$2" alignItems="center">
+                    <Ionicons name="bar-chart-outline" size={16} color={theme.color.val} />
+                    <Text color="$color" fontSize="$2">{t('home.analytics')}</Text>
+                  </XStack>
+                </AppButton>
+              </XStack>
+            </YStack>
+          </CoachMark>
         </SlideIn>
 
         {/* Recent Activity */}
@@ -147,7 +154,11 @@ export default function HomeScreen() {
         </SlideIn>
 
         {/* Notes — authenticated users */}
-        {isAuthenticated && <NotesSection />}
+        {isAuthenticated && (
+          <CoachMark stepId="home-notes" scrollRef={scrollRef}>
+            <NotesSection />
+          </CoachMark>
+        )}
 
         {/* Sign in CTA for guests */}
         {!isAuthenticated && (

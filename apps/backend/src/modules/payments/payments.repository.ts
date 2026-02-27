@@ -52,6 +52,22 @@ export const paymentsRepository = {
     return result[0] ?? null
   },
 
+  async deletePlan(id: string) {
+    const result = await db
+      .delete(plans)
+      .where(eq(plans.id, id))
+      .returning({ id: plans.id })
+    return result[0] ?? null
+  },
+
+  async getPlanSubscriptionCount(planId: string): Promise<number> {
+    const result = await db
+      .select({ count: count() })
+      .from(subscriptions)
+      .where(eq(subscriptions.planId, planId))
+    return result[0]?.count ?? 0
+  },
+
   // --- Subscriptions ---
   async getActiveSubscription(userId: string) {
     const result = await db
@@ -89,6 +105,20 @@ export const paymentsRepository = {
       .set({ cancelAtPeriodEnd: true, updatedAt: new Date() })
       .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')))
       .returning()
+    return result[0] ?? null
+  },
+
+  async findSubscriptionByProviderId(providerSubscriptionId: string) {
+    const result = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.providerSubscriptionId, providerSubscriptionId))
+      .limit(1)
+    return result[0] ?? null
+  },
+
+  async getPaymentById(id: string) {
+    const result = await db.select().from(payments).where(eq(payments.id, id)).limit(1)
     return result[0] ?? null
   },
 

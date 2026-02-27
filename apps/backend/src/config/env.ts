@@ -39,11 +39,72 @@ const envSchema = z.object({
 
   // Payments
   PAYMENTS_ENABLED: envBoolean,
+
+  // Stripe
+  STRIPE_ENABLED: envBoolean.default(true),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+
+  // YooKassa
+  YOOKASSA_ENABLED: envBoolean.default(true),
   YOOKASSA_SHOP_ID: z.string().optional(),
   YOOKASSA_SECRET_KEY: z.string().optional(),
   YOOKASSA_WEBHOOK_SECRET: z.string().optional(),
+
+  // Robokassa
+  ROBOKASSA_ENABLED: envBoolean.default(true),
+  ROBOKASSA_MERCHANT_LOGIN: z.string().optional(),
+  ROBOKASSA_PASSWORD1: z.string().optional(),
+  ROBOKASSA_PASSWORD2: z.string().optional(),
+  ROBOKASSA_TEST_MODE: envBoolean.default(true),
+
+  // PayPal
+  PAYPAL_ENABLED: envBoolean,
+  PAYPAL_CLIENT_ID: z.string().optional(),
+  PAYPAL_CLIENT_SECRET: z.string().optional(),
+  PAYPAL_WEBHOOK_ID: z.string().optional(),
+  PAYPAL_MODE: z.enum(['sandbox', 'live']).default('sandbox'),
+
+  // SMS
+  SMS_ENABLED: envBoolean,
+  SMS_VERIFICATION_REQUIRED: envBoolean,
+  SMS_PROVIDER: z.enum(['twilio', 'smsc']).default('twilio'),
+
+  // Twilio
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_PHONE_NUMBER: z.string().optional(),
+
+  // SMSC.ru
+  SMSC_LOGIN: z.string().optional(),
+  SMSC_PASSWORD: z.string().optional(),
+  SMSC_SENDER: z.string().optional(),
+
+  // AI / Gemini
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  GEMINI_CONCURRENT_LIMIT: z.coerce.number().default(3),
+
+  // AI / OpenAI
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+  OPENAI_MAX_TOKENS: z.coerce.number().default(4096),
+
+  // AI → Proxy: route AI requests through managed proxies
+  AI_PROXY_ENABLED: envBoolean,
+
+  // Proxy (legacy env vars — proxy is now managed via DB)
+  PROXY_ENABLED: envBoolean,
+  PROXY_URL: z.string().optional(),
+
+  // Storage
+  STORAGE_TYPE: z.enum(['local', 's3']).default('local'),
+  S3_ENDPOINT: z.string().optional(),
+  S3_BUCKET: z.string().optional(),
+  S3_ACCESS_KEY: z.string().optional(),
+  S3_SECRET_KEY: z.string().optional(),
+  S3_REGION: z.string().default('us-east-1'),
+  S3_PUBLIC_URL: z.string().optional(),
 })
 
 function loadEnv() {

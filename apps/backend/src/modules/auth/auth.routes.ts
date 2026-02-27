@@ -4,6 +4,7 @@ import { authService } from './auth.service'
 import {
   registerSchema, loginSchema, refreshSchema, googleAuthSchema,
   verifyEmailSchema, requestPasswordResetSchema, resetPasswordSchema, resendVerificationSchema,
+  sendPhoneCodeSchema, verifyPhoneSchema,
 } from './auth.schema'
 import { authenticate } from '../../common/middleware/authenticate'
 import { sendSuccess } from '../../common/utils/response'
@@ -86,6 +87,20 @@ export async function authRoutes(app: FastifyInstance) {
   app.post('/resend-verification', { preHandler: [authenticate] }, async (request, reply) => {
     const { locale } = resendVerificationSchema.parse(request.body)
     const result = await authService.resendVerification(request.userId, locale)
+    return sendSuccess(reply, result)
+  })
+
+  // POST /api/auth/send-phone-code (authenticated)
+  app.post('/send-phone-code', { preHandler: [authenticate] }, async (request, reply) => {
+    const input = sendPhoneCodeSchema.parse(request.body)
+    const result = await authService.sendPhoneCode(request.userId, input)
+    return sendSuccess(reply, result)
+  })
+
+  // POST /api/auth/verify-phone (authenticated)
+  app.post('/verify-phone', { preHandler: [authenticate] }, async (request, reply) => {
+    const input = verifyPhoneSchema.parse(request.body)
+    const result = await authService.verifyPhone(request.userId, input)
     return sendSuccess(reply, result)
   })
 }

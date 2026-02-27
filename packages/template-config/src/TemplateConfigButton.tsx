@@ -7,12 +7,13 @@ import { useTemplateConfigStore } from './store'
 export function TemplateConfigButton() {
   const { t } = useTranslation()
   const theme = useTheme()
+  const sidebarOpen = useTemplateConfigStore((s) => s.sidebarOpen)
   const setSidebarOpen = useTemplateConfigStore((s) => s.setSidebarOpen)
 
   if (Platform.OS !== 'web') return null
 
   return (
-    <Pressable onPress={() => setSidebarOpen(true)}>
+    <Pressable onPress={() => setSidebarOpen(!sidebarOpen)}>
       <XStack
         backgroundColor="$accent"
         paddingHorizontal="$3"

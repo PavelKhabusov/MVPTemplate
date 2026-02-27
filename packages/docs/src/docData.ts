@@ -32,6 +32,7 @@ export const DOC_GROUPS: DocGroup[] = [
       { id: 'env-vars', titleKey: 'docs.pageEnvVars', contentKey: 'docs.contentEnvVars' },
       { id: 'database-setup', titleKey: 'docs.pageDatabaseSetup', contentKey: 'docs.contentDatabaseSetup' },
       { id: 'auth', titleKey: 'docs.pageAuth', contentKey: 'docs.contentAuth' },
+      { id: 'sms', titleKey: 'docs.pageSms', contentKey: 'docs.contentSms' },
     ],
   },
   {
@@ -44,6 +45,7 @@ export const DOC_GROUPS: DocGroup[] = [
       { id: 'push-notifications', titleKey: 'docs.pagePushNotifications', contentKey: 'docs.contentPushNotifications' },
       { id: 'email', titleKey: 'docs.pageEmail', contentKey: 'docs.contentEmail' },
       { id: 'payments', titleKey: 'docs.pagePayments', contentKey: 'docs.contentPayments' },
+      { id: 'onboarding', titleKey: 'docs.pageOnboarding', contentKey: 'docs.contentOnboarding' },
     ],
   },
   {

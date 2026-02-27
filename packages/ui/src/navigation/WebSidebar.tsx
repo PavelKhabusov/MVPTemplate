@@ -27,9 +27,11 @@ interface WebSidebarProps {
   items: NavItem[]
   currentPath: string
   onNavigate: (href: string) => void
+  topContent?: React.ReactNode | ((collapsed: boolean) => React.ReactNode)
   footer?: React.ReactNode | ((collapsed: boolean) => React.ReactNode)
   logo?: any // Image source (require() or { uri })
   title?: string
+  hideLogo?: boolean
 }
 
 export function useIsMobileWeb() {
@@ -50,7 +52,7 @@ export function useIsMobileWeb() {
   return isMobile
 }
 
-export function WebSidebar({ items, currentPath, onNavigate, footer, logo, title = 'MVP Template' }: WebSidebarProps) {
+export function WebSidebar({ items, currentPath, onNavigate, topContent, footer, logo, title = 'MVP Template', hideLogo = false }: WebSidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const theme = useTheme()
   const isMobile = useIsMobileWeb()
@@ -125,40 +127,49 @@ export function WebSidebar({ items, currentPath, onNavigate, footer, logo, title
     >
       <YStack flex={1} paddingVertical="$3">
         {/* Logo / Brand */}
-        <XStack
-          paddingHorizontal="$3"
-          paddingVertical="$3"
-          marginBottom="$2"
-          alignItems="center"
-          gap="$3"
-          cursor="pointer"
-          hoverStyle={{ opacity: 0.8 }}
-          onPress={() => onNavigate('/landing')}
-        >
-          {logo ? (
-            <Image source={logo} style={{ width: 36, height: 36, borderRadius: 10 }} />
-          ) : (
-            <YStack
-              width={36}
-              height={36}
-              borderRadius={10}
-              alignItems="center"
-              justifyContent="center"
-              style={{
-                background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
-              }}
-            >
-              <Text color="white" fontWeight="bold" fontSize="$4">
-                M
+        {!hideLogo && (
+          <XStack
+            paddingHorizontal="$3"
+            paddingVertical="$3"
+            marginBottom="$2"
+            alignItems="center"
+            gap="$3"
+            cursor="pointer"
+            hoverStyle={{ opacity: 0.8 }}
+            onPress={() => onNavigate('/landing')}
+          >
+            {logo ? (
+              <Image source={logo} style={{ width: 36, height: 36, borderRadius: 10 }} />
+            ) : (
+              <YStack
+                width={36}
+                height={36}
+                borderRadius={10}
+                alignItems="center"
+                justifyContent="center"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
+                }}
+              >
+                <Text color="white" fontWeight="bold" fontSize="$4">
+                  M
+                </Text>
+              </YStack>
+            )}
+            {!collapsed && (
+              <Text fontWeight="bold" fontSize="$4" color="$color" numberOfLines={1}>
+                {title}
               </Text>
-            </YStack>
-          )}
-          {!collapsed && (
-            <Text fontWeight="bold" fontSize="$4" color="$color" numberOfLines={1}>
-              {title}
-            </Text>
-          )}
-        </XStack>
+            )}
+          </XStack>
+        )}
+
+        {/* Top Content (e.g. search) */}
+        {topContent && (
+          <YStack paddingHorizontal="$2" marginBottom="$2">
+            {typeof topContent === 'function' ? topContent(collapsed) : topContent}
+          </YStack>
+        )}
 
         {/* Navigation Items */}
         <YStack gap="$1" paddingHorizontal="$2" flex={1} role="navigation" aria-label="Main navigation">

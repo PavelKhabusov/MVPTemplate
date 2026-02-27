@@ -6,6 +6,7 @@ interface AppState {
   hasCompletedOnboarding: boolean
   lastRoute: string | null
   setOnboardingComplete: () => void
+  resetOnboarding: () => void
   setLastRoute: (route: string) => void
 }
 
@@ -16,6 +17,7 @@ export const useAppStore = create<AppState>()(
       lastRoute: null,
 
       setOnboardingComplete: () => set({ hasCompletedOnboarding: true }),
+      resetOnboarding: () => set({ hasCompletedOnboarding: false }),
       setLastRoute: (route: string) => set({ lastRoute: route }),
     }),
     {

@@ -20,13 +20,19 @@ export function sendSSE(userId: string, event: string, data: unknown) {
 }
 
 /**
- * Authenticate SSE — supports both Authorization header and ?token= query param
- * (EventSource API doesn't support custom headers)
+ * Authenticate SSE — supports both Authorization header and ?token= query param.
+ * Note: native EventSource API does not support custom headers, so query param
+ * is the only option for browser clients. The token appears in the URL path and
+ * may be captured in proxy/CDN access logs — use short-lived tokens if possible,
+ * and ensure your infrastructure log sanitization strips the token parameter.
  */
 async function authenticateSSE(request: FastifyRequest, reply: FastifyReply) {
   const queryToken = (request.query as Record<string, string>).token
   if (!request.headers.authorization && queryToken) {
+    // Move token from query to header so it is not processed further as URL param
     request.headers.authorization = `Bearer ${queryToken}`
+    // Mask the token in the URL visible to downstream logging by clearing it from query
+    ;(request.query as Record<string, string>).token = '[REDACTED]'
   }
   return authenticate(request, reply)
 }

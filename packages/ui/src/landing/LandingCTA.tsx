@@ -38,7 +38,7 @@ export function LandingCTA({ onNavigate }: LandingCTAProps) {
     >
       <SlideIn from="bottom">
         <YStack maxWidth={600} alignItems="center" gap="$4">
-          <Text nativeID="cta-title" fontWeight="bold" fontSize={36} color="white" textAlign="center">
+          <Text nativeID="cta-title" fontWeight="bold" fontSize={36} color="white" textAlign="center" lineHeight={48}>
             {t('landing.ctaTitle')}
           </Text>
           <Text fontSize="$4" color="white" textAlign="center" opacity={0.85}>

@@ -1,7 +1,7 @@
 const policies: Record<string, string> = {
   en: `# Privacy Policy
 
-**Last Updated: January 1, 2025**
+**Last Updated: February 1, 2026**
 
 ## 1. Information We Collect
 
@@ -62,7 +62,7 @@ If you have questions about this Privacy Policy, please contact us at:
 
   ru: `# Политика конфиденциальности
 
-**Последнее обновление: 1 января 2025 г.**
+**Последнее обновление: 1 февраля 2026 г.**
 
 ## 1. Какую информацию мы собираем
 
@@ -123,7 +123,7 @@ If you have questions about this Privacy Policy, please contact us at:
 
   es: `# Política de Privacidad
 
-**Última actualización: 1 de enero de 2025**
+**Última actualización: 1 de febrero de 2026**
 
 ## 1. Información que recopilamos
 
@@ -184,7 +184,7 @@ Si tienes preguntas sobre esta Política de Privacidad, contáctanos en:
 
   ja: `# プライバシーポリシー
 
-**最終更新日: 2025年1月1日**
+**最終更新日: 2026年2月1日**
 
 ## 1. 収集する情報
 

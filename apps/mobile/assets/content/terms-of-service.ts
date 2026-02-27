@@ -1,7 +1,7 @@
 const terms: Record<string, string> = {
   en: `# Terms of Service
 
-**Last Updated: January 1, 2025**
+**Last Updated: February 1, 2026**
 
 ## 1. Acceptance of Terms
 
@@ -58,7 +58,7 @@ If you have questions about these Terms of Service, please contact us at:
 
   ru: `# Условия использования
 
-**Последнее обновление: 1 января 2025 г.**
+**Последнее обновление: 1 февраля 2026 г.**
 
 ## 1. Принятие условий
 
@@ -115,7 +115,7 @@ If you have questions about these Terms of Service, please contact us at:
 
   es: `# Términos de Servicio
 
-**Última actualización: 1 de enero de 2025**
+**Última actualización: 1 de febrero de 2026**
 
 ## 1. Aceptación de los términos
 
@@ -172,7 +172,7 @@ Si tiene preguntas sobre estos Términos de Servicio, contáctenos en:
 
   ja: `# 利用規約
 
-**最終更新日: 2025年1月1日**
+**最終更新日: 2026年2月1日**
 
 ## 1. 規約への同意
 
