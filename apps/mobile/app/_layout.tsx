@@ -465,6 +465,7 @@ function WebRootLayout() {
   const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
   const fontScale = useTemplateConfigStore((s) => s.fontScale)
   const fontZoom = getFontZoom(fontScale)
+  const appName = useCompanyStore((s) => s.info.appName) || 'MVPTemplate'
   const [searchOpen, setSearchOpen] = useState(false)
 
   const showHeader = webLayout === 'header' || webLayout === 'both'
@@ -522,7 +523,7 @@ function WebRootLayout() {
           currentPath={pathname}
           onNavigate={(href) => router.push(href as any)}
           logo={require('../assets/icon.png')}
-          title="MVP Template"
+          title={appName}
           navAlign={headerNavAlign}
           rightContent={
             <>
@@ -552,7 +553,7 @@ function WebRootLayout() {
               </>
             )}
             logo={require('../assets/icon.png')}
-            title="MVP Template"
+            title={appName}
           />
         )}
         <YStack flex={1} style={{ overflow: 'auto', paddingBottom: isMobile ? 64 : 0 } as any}>
