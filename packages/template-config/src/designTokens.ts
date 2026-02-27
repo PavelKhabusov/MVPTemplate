@@ -65,7 +65,7 @@ const FONT_FAMILY_CONFIG: Record<FontFamily, { label: string; googleUrl: string 
   system: {
     label: 'System',
     googleUrl: null,
-    cssStack: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssStack: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
   },
   inter: {
     label: 'Inter',
@@ -74,70 +74,87 @@ const FONT_FAMILY_CONFIG: Record<FontFamily, { label: string; googleUrl: string 
   },
   roboto: {
     label: 'Roboto',
-    googleUrl: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap',
-    cssStack: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700;800;900&display=swap',
+    cssStack: '"Roboto", -apple-system, sans-serif',
   },
   'open-sans': {
     label: 'Open Sans',
-    googleUrl: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap',
-    cssStack: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap',
+    cssStack: '"Open Sans", -apple-system, sans-serif',
   },
   nunito: {
     label: 'Nunito',
-    googleUrl: 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap',
-    cssStack: '"Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap',
+    cssStack: '"Nunito", -apple-system, sans-serif',
   },
   'dm-sans': {
     label: 'DM Sans',
-    googleUrl: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap',
-    cssStack: '"DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap',
+    cssStack: '"DM Sans", -apple-system, sans-serif',
   },
   'space-grotesk': {
     label: 'Space Grotesk',
-    googleUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap',
-    cssStack: '"Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap',
+    cssStack: '"Space Grotesk", -apple-system, sans-serif',
   },
   montserrat: {
     label: 'Montserrat',
-    googleUrl: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap',
-    cssStack: '"Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap',
+    cssStack: '"Montserrat", -apple-system, sans-serif',
+  },
+  monospace: {
+    label: 'Monospace',
+    googleUrl: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap',
+    cssStack: '"JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, "Courier New", monospace',
   },
 }
 
 export { FONT_FAMILY_CONFIG }
 
-export function applyFontFamily(family: FontFamily) {
+// How font switching works:
+// expo-font loads Inter via CSS @font-face injected into a managed <style> tag.
+// All Tamagui/RNW Text components render with fontFamily:'Inter'.
+// Per CSS spec, the LAST @font-face rule for a given font-family+weight wins.
+// We fetch the Google Fonts CSS and re-inject it with font-family:'Inter',
+// so our rule comes last and overrides expo-font's Inter declaration.
+// Icon fonts (Ionicons, MaterialIcons, etc.) use different font-family names — unaffected.
+export async function applyFontFamily(family: FontFamily): Promise<void> {
   if (typeof document === 'undefined') return
 
+  const OVERRIDE_ID = 'mvp-font-family-css'
+
+  // Remove previous override so expo-font's Inter is active again
+  document.getElementById(OVERRIDE_ID)?.remove()
+
+  if (family === 'inter') return
+
   const config = FONT_FAMILY_CONFIG[family]
+  const styleEl = document.createElement('style')
+  styleEl.id = OVERRIDE_ID
+  document.head.appendChild(styleEl)
 
-  // Manage Google Fonts <link> tag
-  const linkId = 'mvp-google-font-link'
-  let linkEl = document.getElementById(linkId) as HTMLLinkElement | null
-  if (config.googleUrl) {
-    if (!linkEl) {
-      linkEl = document.createElement('link')
-      linkEl.id = linkId
-      linkEl.rel = 'stylesheet'
-      document.head.appendChild(linkEl)
-    }
-    linkEl.href = config.googleUrl
-  } else {
-    linkEl?.remove()
+  if (family === 'system') {
+    styleEl.textContent = [
+      `@font-face { font-family: 'Inter'; src: local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Helvetica Neue'), local('Arial'); font-weight: 100 900; font-style: normal; }`,
+      `@font-face { font-family: 'Inter'; src: local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Helvetica Neue'), local('Arial'); font-weight: 100 900; font-style: italic; }`,
+    ].join('\n')
+    return
   }
 
-  // Apply font-family via CSS injection
-  const styleId = 'mvp-font-family-css'
-  let styleEl = document.getElementById(styleId) as HTMLStyleElement | null
-  if (!styleEl) {
-    styleEl = document.createElement('style')
-    styleEl.id = styleId
-    document.head.appendChild(styleEl)
+  if (!config.googleUrl) return
+
+  try {
+    // Google Fonts returns browser-appropriate @font-face rules with woff2 src URLs
+    const res = await fetch(config.googleUrl, { mode: 'cors' })
+    const css = await res.text()
+    // Rewrite every font-family declaration to 'Inter'.
+    // Elements using fontFamily:'Inter' (Tamagui/RNW) now render with the chosen font.
+    // Icon fonts use 'Ionicons', 'MaterialIcons', etc. — their @font-face is untouched.
+    styleEl.textContent = css.replace(/font-family:\s*['"][^'"]+['"]/g, "font-family: 'Inter'")
+  } catch {
+    // Fallback on network error
+    styleEl.textContent = `body { font-family: ${config.cssStack}; }`
   }
-  // Apply font to body only — React Native Web uses atomic CSS classes (not inline styles)
-  // for fontFamily, so !important overrides on `body *` would break icon fonts (Ionicons etc.)
-  // Inheriting from body is sufficient; RNW's own CSS classes will override for icon elements.
-  styleEl.textContent = `body { font-family: ${config.cssStack}; }`
 }
 
 const FONT_ZOOM: Record<FontScale, number> = {

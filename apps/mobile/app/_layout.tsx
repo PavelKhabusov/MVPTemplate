@@ -690,7 +690,7 @@ export default function RootLayout() {
       }
       applyRadiusScale(templateRadiusScale)
       applyCardStyle(templateCardStyle)
-      applyFontFamily(templateFontFamily)
+      applyFontFamily(templateFontFamily).catch(() => {})
     }
   }, [resolvedTheme, templateColorScheme, templateCustomColor, templateRadiusScale, templateCardStyle, templateFontFamily])
 

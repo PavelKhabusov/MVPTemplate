@@ -556,7 +556,7 @@ export function TemplateConfigSidebar() {
               return (
                 <Pressable
                   key={key}
-                  onPress={() => { setFontFamily(key); applyFontFamily(key) }}
+                  onPress={() => { setFontFamily(key); applyFontFamily(key).catch(() => {}) }}
                 >
                   <XStack
                     alignItems="center"
@@ -826,7 +826,7 @@ export function TemplateConfigSidebar() {
         {/* Reset Button */}
         {hasOverrides && (
           <YStack paddingHorizontal="$3" marginTop="$3">
-            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY); applyRadiusScale('default'); applyCardStyle('elevated'); applyFontFamily('inter') }}>
+            <Pressable onPress={() => { resetAll(); applyColorScheme(DEFAULT_SCHEME_KEY); applyRadiusScale('default'); applyCardStyle('elevated'); applyFontFamily('inter').catch(() => {}) }}>
               <XStack
                 alignItems="center"
                 justifyContent="center"

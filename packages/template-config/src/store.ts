@@ -10,7 +10,7 @@ export type SearchPlacement = 'sidebar' | 'header' | 'nowhere'
 export type RadiusScale = 'square' | 'sharp' | 'default' | 'rounded' | 'pill'
 export type FontScale = 'compact' | 'default' | 'large'
 export type CardStyle = 'flat' | 'bordered' | 'elevated' | 'glass'
-export type FontFamily = 'system' | 'inter' | 'roboto' | 'open-sans' | 'nunito' | 'dm-sans' | 'space-grotesk' | 'montserrat'
+export type FontFamily = 'system' | 'inter' | 'roboto' | 'open-sans' | 'nunito' | 'dm-sans' | 'space-grotesk' | 'montserrat' | 'monospace'
 
 interface TemplateConfigState {
   sidebarOpen: boolean
