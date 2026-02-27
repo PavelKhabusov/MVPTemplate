@@ -306,7 +306,7 @@ export default function PricingScreen() {
             <XStack
               gap="$4"
               justifyContent="center"
-              alignItems="stretch"
+              alignItems="flex-start"
               paddingHorizontal={24}
               flexWrap="wrap"
               maxWidth={1100}
