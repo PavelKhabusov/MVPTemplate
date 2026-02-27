@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { Platform, LogBox, AppState } from 'react-native'
+import { Platform, LogBox, AppState, Pressable } from 'react-native'
 import { Stack, Slot, SplashScreen, usePathname, router } from 'expo-router'
 import { TamaguiProvider, XStack, YStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
@@ -18,7 +18,7 @@ import type { SupportedLanguage } from '@mvp/i18n'
 import { analytics, useScreenTracking } from '@mvp/analytics'
 import { storage } from '@mvp/lib'
 import { SEO } from '@mvp/ui'
-import { getPageById } from '@mvp/docs'
+import { getPageById, DOC_GROUPS } from '@mvp/docs'
 import { queryClient } from '../src/services/query-client'
 import { AuthProvider } from '@mvp/auth'
 import { authApi } from '../src/services/auth'
@@ -452,6 +452,7 @@ function UserBadge({ collapsed, compact, dropdownDirection = 'up' }: { collapsed
 
 function WebRootLayout() {
   const { t } = useTranslation()
+  const theme = useTheme()
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin'
@@ -479,6 +480,17 @@ function WebRootLayout() {
   const showSearchInSidebar = searchPlacement === 'sidebar'
   const showSearchInHeader = searchPlacement === 'header'
   const cookieBannerEnabled = useTemplateFlag('cookieBanner', true)
+  const docsEnabled = useTemplateFlag('docs', true)
+
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const docMatches = docsEnabled && searchQuery.trim()
+    ? DOC_GROUPS.flatMap((group) =>
+        group.pages
+          .filter((page) => t(page.titleKey).toLowerCase().includes(searchQuery.trim().toLowerCase()))
+          .map((page) => ({ pageId: page.id, title: t(page.titleKey) }))
+      )
+    : []
 
   // Global Cmd+K / Ctrl+K hotkey
   useEffect(() => {
@@ -571,7 +583,49 @@ function WebRootLayout() {
         )}
         {isTemplateConfigEnabled && isAdmin && <TemplateConfigSidebar />}
       </XStack>
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchModal
+        open={searchOpen}
+        onClose={() => { setSearchOpen(false); setSearchQuery('') }}
+        onSearch={setSearchQuery}
+        results={searchQuery.trim() ? (
+          <YStack width="100%" gap="$2">
+            {docMatches.length > 0 && (
+              <YStack gap="$1">
+                <Text fontSize={11} fontWeight="700" color="$mutedText" textTransform="uppercase" letterSpacing={0.5} paddingBottom="$1">
+                  {t('docs.title')}
+                </Text>
+                {docMatches.map((match) => (
+                  <Pressable
+                    key={match.pageId}
+                    onPress={() => {
+                      router.push(`/docs/${match.pageId}` as any)
+                      setSearchOpen(false)
+                      setSearchQuery('')
+                    }}
+                  >
+                    <XStack
+                      paddingHorizontal="$3"
+                      paddingVertical="$2.5"
+                      borderRadius="$3"
+                      alignItems="center"
+                      gap="$3"
+                      hoverStyle={{ backgroundColor: '$subtleBackground' } as any}
+                    >
+                      <Ionicons name="document-text-outline" size={16} color={theme.mutedText.val} />
+                      <Text fontSize="$3" color="$color">{match.title}</Text>
+                    </XStack>
+                  </Pressable>
+                ))}
+              </YStack>
+            )}
+            {docMatches.length === 0 && (
+              <YStack alignItems="center" gap="$3" paddingVertical="$4">
+                <Text color="$mutedText" fontSize="$3">{t('common.noResults')}</Text>
+              </YStack>
+            )}
+          </YStack>
+        ) : undefined}
+      />
       <CookieBanner enabled={cookieBannerEnabled} />
     </YStack>
   )
