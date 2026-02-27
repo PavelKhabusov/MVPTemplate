@@ -1,9 +1,8 @@
-import { type ReactNode } from 'react'
-import { Pressable, ScrollView, useWindowDimensions } from 'react-native'
-import { H4, XStack, YStack } from 'tamagui'
+import { type ReactNode, useEffect } from 'react'
+import { Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native'
+import { H4, Text, XStack, YStack } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Portal } from '@tamagui/portal'
-import { ScalePress } from '../animations'
 
 export function AppModal({
   visible,
@@ -21,6 +20,15 @@ export function AppModal({
   const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const isWide = screenWidth > 600
+
+  useEffect(() => {
+    if (!visible || Platform.OS !== 'web') return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [visible, onClose])
 
   if (!visible) return null
 
@@ -61,19 +69,22 @@ export function AppModal({
               borderBottomWidth={1}
               borderBottomColor="$borderColor"
             >
-              <H4 color="$color" fontFamily="$body">{title}</H4>
-              <ScalePress onPress={onClose}>
-                <YStack
-                  width={32}
-                  height={32}
-                  borderRadius={16}
-                  backgroundColor="$subtleBackground"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <H4 color="$mutedText" fontSize={18} lineHeight={18}>×</H4>
-                </YStack>
-              </ScalePress>
+              <H4 color="$color" fontFamily="$body" flex={1} numberOfLines={1} paddingRight="$3">
+                {title}
+              </H4>
+              <Pressable
+                onPress={onClose}
+                style={({ pressed }) => ({
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <Text fontSize={22} color="$mutedText" lineHeight={22}>×</Text>
+              </Pressable>
             </XStack>
             <ScrollView
               style={{ maxHeight: screenHeight - insets.top - insets.bottom - 140 }}
