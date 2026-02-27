@@ -39,3 +39,6 @@ export type { ProxyRecord, NewProxy } from './proxies'
 
 export { phoneVerificationCodes } from './phone-verification-codes'
 export type { PhoneVerificationCode, NewPhoneVerificationCode } from './phone-verification-codes'
+
+export { companyInfo } from './company-info'
+export type { CompanyInfo, NewCompanyInfo } from './company-info'

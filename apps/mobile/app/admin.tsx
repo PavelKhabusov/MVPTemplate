@@ -196,6 +196,63 @@ function AdminModal({
   )
 }
 
+/* ─── Bottom Sheet ─────────────────────────────────────────────────── */
+function BottomSheet({
+  visible,
+  onClose,
+  title,
+  children,
+}: {
+  visible: boolean
+  onClose: () => void
+  title: string
+  children: ReactNode
+}) {
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const { height } = useWindowDimensions()
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      presentationStyle="overFullScreen"
+      onRequestClose={onClose}
+    >
+      <Pressable
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' }}
+        onPress={onClose}
+      >
+        <Pressable
+          onPress={(e) => e.stopPropagation()}
+          style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' }}
+        >
+          <YStack backgroundColor="$background" style={{ maxHeight: height * 0.92 }}>
+            <YStack alignItems="center" paddingTop="$3" paddingBottom="$1">
+              <YStack width={36} height={4} borderRadius={2} backgroundColor="$borderColor" />
+            </YStack>
+            <XStack paddingHorizontal="$4" paddingVertical="$3" justifyContent="space-between" alignItems="center">
+              <Text fontWeight="700" fontSize="$5" color="$color">{title}</Text>
+              <ScalePress onPress={onClose}>
+                <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
+              </ScalePress>
+            </XStack>
+            <YStack height={1} backgroundColor="$borderColor" />
+            <ScrollView
+              contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
+              keyboardShouldPersistTaps="handled"
+            >
+              {children}
+            </ScrollView>
+          </YStack>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  )
+}
+
+
 function ScreensBarChart({ data }: { data: Array<{ screenName: string; views: number }> }) {
   const theme = useTheme()
   const { width: screenWidth } = useWindowDimensions()
@@ -2411,6 +2468,121 @@ function StorageAdminTab() {
   )
 }
 
+interface CompanyInfoData {
+  appName: string
+  companyName: string
+  tagline: string
+  supportEmail: string
+  website: string
+  phone: string
+  address: string
+}
+
+function CompanyInfoTab() {
+  const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
+  const toast = useToast()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState<CompanyInfoData>({
+    appName: '',
+    companyName: '',
+    tagline: '',
+    supportEmail: '',
+    website: '',
+    phone: '',
+    address: '',
+  })
+
+  useEffect(() => {
+    api.get('/admin/company-info')
+      .then((res) => setForm(res.data.data))
+      .catch(() => toast.error(t('admin.loadError')))
+      .finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await api.put('/admin/company-info', form)
+      toast.success(t('admin.companySaved'))
+    } catch {
+      toast.error(t('admin.companySaveError'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const field = (labelKey: string, key: keyof CompanyInfoData, opts?: { placeholder?: string; multiline?: boolean }) => (
+    <YStack gap="$1.5">
+      <Text fontSize="$2" color="$mutedText" fontWeight="500">{t(labelKey)}</Text>
+      <Input
+        value={form[key]}
+        onChangeText={(v) => setForm((f) => ({ ...f, [key]: v }))}
+        placeholder={opts?.placeholder ?? ''}
+        placeholderTextColor={'$placeholderColor' as any}
+        backgroundColor="$subtleBackground"
+        borderColor="$borderColor"
+        color="$color"
+        size="$3"
+        multiline={opts?.multiline}
+        numberOfLines={opts?.multiline ? 3 : 1}
+        textAlignVertical={opts?.multiline ? 'top' : undefined}
+      />
+    </YStack>
+  )
+
+  if (loading) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" padding="$6">
+        <Text color="$mutedText">{t('common.loading')}</Text>
+      </YStack>
+    )
+  }
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
+      <FadeIn>
+        <YStack gap="$3">
+          <Text color="$mutedText" fontSize="$2" lineHeight={18}>
+            {t('admin.companyDesc')}
+          </Text>
+
+          {/* App Info */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('admin.companyAppSection')}
+            </Text>
+            <YStack gap="$3">
+              {field('admin.companyAppName', 'appName', { placeholder: 'MVPTemplate' })}
+              {field('admin.companyTagline', 'tagline', { placeholder: t('admin.companyTaglinePlaceholder') })}
+            </YStack>
+          </AppCard>
+
+          {/* Company Details */}
+          <AppCard animated={false}>
+            <Text fontWeight="600" color="$color" fontSize="$4" marginBottom="$3">
+              {t('admin.companyDetailsSection')}
+            </Text>
+            <YStack gap="$3">
+              {field('admin.companyName', 'companyName')}
+              {field('admin.companyWebsite', 'website', { placeholder: 'https://' })}
+              {field('admin.companySupportEmail', 'supportEmail', { placeholder: 'support@example.com' })}
+              {field('admin.companyPhone', 'phone', { placeholder: '+1 234 567 8900' })}
+              {field('admin.companyAddress', 'address', { multiline: true })}
+            </YStack>
+          </AppCard>
+
+          <AppButton onPress={handleSave} disabled={saving}>
+            {saving ? t('common.saving') : t('admin.companySave')}
+          </AppButton>
+        </YStack>
+      </FadeIn>
+    </ScrollView>
+  )
+}
+
 function TemplateConfigTab() {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -2832,7 +3004,7 @@ export default function AdminScreen() {
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config'>(analyticsEnabled ? 'analytics' : 'users')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'feedback' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -3135,6 +3307,21 @@ export default function AdminScreen() {
                 </XStack>
               </ScalePress>
             )}
+            <ScalePress onPress={() => setActiveTab('company')}>
+              <XStack
+                backgroundColor={activeTab === 'company' ? '$accent' : '$subtleBackground'}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+                gap="$1.5"
+                alignItems="center"
+              >
+                <Ionicons name="business-outline" size={16} color={activeTab === 'company' ? 'white' : theme.accent.val} />
+                <Text color={activeTab === 'company' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
+                  {t('admin.companyTab')}
+                </Text>
+              </XStack>
+            </ScalePress>
           </XStack>
         </ScrollView>
 
@@ -3472,6 +3659,11 @@ export default function AdminScreen() {
       {/* Template Config Tab */}
       {isTemplateConfigEnabled && activeTab === 'config' && (
         <TemplateConfigTab />
+      )}
+
+      {/* Company Info Tab */}
+      {activeTab === 'company' && (
+        <CompanyInfoTab />
       )}
 
       {/* Edit User Modal */}

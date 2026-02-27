@@ -1,6 +1,7 @@
 {
   "common": {
     "loading": "Загрузка...",
+    "saving": "Сохранение...",
     "error": "Что-то пошло не так",
     "retry": "Повторить",
     "cancel": "Отмена",
@@ -296,7 +297,23 @@
     "proxyEmpty": "Прокси не настроены",
     "proxyHttpOnly": "Для ИИ-запросов используются только HTTP прокси. SOCKS5 можно тестировать, но они не будут использоваться.",
     "proxySave": "Сохранить",
-    "proxyCancel": "Отмена"
+    "proxyCancel": "Отмена",
+    "companyTab": "Компания",
+    "companyDesc": "Информация о компании и приложении, отображаемая в приложении и на публичных страницах.",
+    "companyAppSection": "Приложение",
+    "companyDetailsSection": "Компания",
+    "companyAppName": "Название приложения",
+    "companyTagline": "Слоган",
+    "companyTaglinePlaceholder": "Краткое описание приложения",
+    "companyName": "Название компании",
+    "companyWebsite": "Сайт",
+    "companySupportEmail": "Email поддержки",
+    "companyPhone": "Телефон",
+    "companyAddress": "Адрес",
+    "companySave": "Сохранить",
+    "companySaved": "Информация о компании сохранена",
+    "companySaveError": "Не удалось сохранить информацию",
+    "loadError": "Не удалось загрузить данные"
   },
   "notifications": {
     "title": "Уведомления",

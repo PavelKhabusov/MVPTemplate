@@ -1,5 +1,20 @@
 import { FastifyInstance } from 'fastify'
 import { env } from '../../config/env'
+import { db } from '../../config/database'
+import { companyInfo } from '../../database/schema/index'
+import { eq } from 'drizzle-orm'
+
+const DEFAULT_COMPANY_INFO = {
+  id: 1,
+  appName: 'MVPTemplate',
+  companyName: '',
+  tagline: '',
+  supportEmail: '',
+  website: '',
+  phone: '',
+  address: '',
+  updatedAt: new Date(0),
+}
 
 /**
  * Public config endpoint — tells the frontend which backend-controlled
@@ -18,5 +33,11 @@ export async function configRoutes(app: FastifyInstance) {
         payments: env.PAYMENTS_ENABLED,
       },
     })
+  })
+
+  // GET /api/config/company — public company info for the app
+  app.get('/company', async (_request, reply) => {
+    const [info] = await db.select().from(companyInfo).where(eq(companyInfo.id, 1))
+    return reply.send({ data: info ?? DEFAULT_COMPANY_INFO })
   })
 }

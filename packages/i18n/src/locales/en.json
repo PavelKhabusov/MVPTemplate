@@ -1,6 +1,7 @@
 {
   "common": {
     "loading": "Loading...",
+    "saving": "Saving...",
     "error": "Something went wrong",
     "retry": "Retry",
     "cancel": "Cancel",
@@ -296,7 +297,23 @@
     "proxyEmpty": "No proxies configured",
     "proxyHttpOnly": "Only HTTP proxies are used for AI API requests. SOCKS5 proxies can be tested but won't be used.",
     "proxySave": "Save",
-    "proxyCancel": "Cancel"
+    "proxyCancel": "Cancel",
+    "companyTab": "Company",
+    "companyDesc": "Company and app information displayed in the app and on public pages.",
+    "companyAppSection": "App",
+    "companyDetailsSection": "Company",
+    "companyAppName": "App Name",
+    "companyTagline": "Tagline",
+    "companyTaglinePlaceholder": "Your short app description",
+    "companyName": "Company Name",
+    "companyWebsite": "Website",
+    "companySupportEmail": "Support Email",
+    "companyPhone": "Phone",
+    "companyAddress": "Address",
+    "companySave": "Save",
+    "companySaved": "Company info saved",
+    "companySaveError": "Failed to save company info",
+    "loadError": "Failed to load data"
   },
   "notifications": {
     "title": "Notifications",

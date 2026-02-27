@@ -12,6 +12,20 @@ import { sendSuccess, sendPaginated } from '../../common/utils/response'
 import { AppError } from '../../common/errors/app-error'
 import { env } from '../../config/env'
 import { getEnvFilePath, parseEnvFile, updateEnvFile } from '../../common/utils/env-file'
+import { db } from '../../config/database'
+import { companyInfo } from '../../database/schema/index'
+import { eq } from 'drizzle-orm'
+import { z } from 'zod'
+
+const companyInfoSchema = z.object({
+  appName: z.string().min(1).max(255),
+  companyName: z.string().max(255).default(''),
+  tagline: z.string().max(500).default(''),
+  supportEmail: z.string().max(255).default(''),
+  website: z.string().max(500).default(''),
+  phone: z.string().max(50).default(''),
+  address: z.string().default(''),
+})
 
 // Keys exposed via the admin env API, grouped by category
 const ENV_GROUPS = {
@@ -159,5 +173,25 @@ export async function adminRoutes(app: FastifyInstance) {
     } catch (err: any) {
       throw AppError.internal('Failed to update environment file')
     }
+  })
+
+  // GET /api/admin/company-info — read company info
+  app.get('/company-info', async (_request, reply) => {
+    const [info] = await db.select().from(companyInfo).where(eq(companyInfo.id, 1))
+    return sendSuccess(reply, info ?? { id: 1, appName: 'MVPTemplate', companyName: '', tagline: '', supportEmail: '', website: '', phone: '', address: '', updatedAt: new Date() })
+  })
+
+  // PUT /api/admin/company-info — upsert company info
+  app.put('/company-info', async (request, reply) => {
+    const body = companyInfoSchema.parse(request.body)
+    const [info] = await db
+      .insert(companyInfo)
+      .values({ id: 1, ...body })
+      .onConflictDoUpdate({
+        target: companyInfo.id,
+        set: { ...body, updatedAt: new Date() },
+      })
+      .returning()
+    return sendSuccess(reply, info)
   })
 }
