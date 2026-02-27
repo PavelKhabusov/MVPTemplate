@@ -777,19 +777,11 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
                         {provider.label}
                       </Text>
                       {providerEnabledEntry && (
-                        <Pressable
-                          onPress={(e) => {
-                            e.stopPropagation()
-                            onUpdate(provider.enabledKey, String(!isEnabled))
-                          }}
-                          hitSlop={8}
-                        >
-                          <AppSwitch
-                            checked={isEnabled}
-                            onCheckedChange={(checked) => onUpdate(provider.enabledKey, String(checked))}
-                            size="$1"
-                          />
-                        </Pressable>
+                        <AppSwitch
+                          checked={isEnabled}
+                          onCheckedChange={(checked) => onUpdate(provider.enabledKey, String(checked))}
+                          size="sm"
+                        />
                       )}
                     </XStack>
                   </ScalePress>
