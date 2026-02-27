@@ -213,6 +213,55 @@ function BottomSheet({
   const insets = useSafeAreaInsets()
   const { height } = useWindowDimensions()
 
+  const sheetContent = (
+    <>
+      {/* Drag handle */}
+      <YStack alignItems="center" paddingTop="$3" paddingBottom="$1">
+        <YStack width={36} height={4} borderRadius={2} backgroundColor="$borderColor" />
+      </YStack>
+      {/* Header */}
+      <XStack paddingHorizontal="$4" paddingVertical="$3" justifyContent="space-between" alignItems="center">
+        <Text fontWeight="700" fontSize="$5" color="$color">{title}</Text>
+        <ScalePress onPress={onClose}>
+          <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
+        </ScalePress>
+      </XStack>
+      <YStack height={1} backgroundColor="$borderColor" />
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {children}
+      </ScrollView>
+    </>
+  )
+
+  if (Platform.OS === 'web') {
+    if (!visible) return null
+    return (
+      <YStack
+        position="absolute"
+        top={0} left={0} right={0} bottom={0}
+        zIndex={10000}
+        justifyContent="flex-end"
+      >
+        <Pressable
+          onPress={onClose}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.55)' }}
+        />
+        <YStack
+          backgroundColor="$background"
+          borderTopLeftRadius={20}
+          borderTopRightRadius={20}
+          overflow="hidden"
+          style={{ maxHeight: height * 0.92 }}
+        >
+          {sheetContent}
+        </YStack>
+      </YStack>
+    )
+  }
+
   return (
     <Modal
       visible={visible}
@@ -220,6 +269,7 @@ function BottomSheet({
       transparent
       presentationStyle="overFullScreen"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
       <Pressable
         style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' }}
@@ -227,25 +277,10 @@ function BottomSheet({
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
-          style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' }}
+          style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden', backgroundColor: theme.background.val }}
         >
-          <YStack backgroundColor="$background" style={{ maxHeight: height * 0.92 }}>
-            <YStack alignItems="center" paddingTop="$3" paddingBottom="$1">
-              <YStack width={36} height={4} borderRadius={2} backgroundColor="$borderColor" />
-            </YStack>
-            <XStack paddingHorizontal="$4" paddingVertical="$3" justifyContent="space-between" alignItems="center">
-              <Text fontWeight="700" fontSize="$5" color="$color">{title}</Text>
-              <ScalePress onPress={onClose}>
-                <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
-              </ScalePress>
-            </XStack>
-            <YStack height={1} backgroundColor="$borderColor" />
-            <ScrollView
-              contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
-              keyboardShouldPersistTaps="handled"
-            >
-              {children}
-            </ScrollView>
+          <YStack style={{ maxHeight: height * 0.92 }}>
+            {sheetContent}
           </YStack>
         </Pressable>
       </Pressable>
