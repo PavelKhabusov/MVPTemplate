@@ -24,7 +24,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta name="twitter:description" content="Universal MVP template powered by Expo + Tamagui" />
 
         {/* Favicon */}
-        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="icon" type="image/png" href="/favicon.png?v=2" />
 
         <ScrollViewStyleReset />
 
