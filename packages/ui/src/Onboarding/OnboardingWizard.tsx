@@ -65,15 +65,15 @@ export function OnboardingWizard({
           </ScalePress>
         </XStack>
 
-        {/* Animated step content */}
-        <AnimatePresence mode="wait">
+        {/* Animated step content — pure crossfade prevents layout jumps */}
+        <AnimatePresence>
           <MotiView
             key={currentIndex}
-            from={{ opacity: 0, translateX: 40 }}
-            animate={{ opacity: 1, translateX: 0 }}
-            exit={{ opacity: 0, translateX: -40 }}
-            transition={{ type: 'timing', duration: 280 }}
-            style={{ flex: 1 }}
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ type: 'timing', duration: 200 }}
+            style={{ flex: 1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
           >
             <StepContent step={steps[currentIndex]} insetTop={insets.top} />
           </MotiView>

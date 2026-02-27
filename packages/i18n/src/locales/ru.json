@@ -85,7 +85,8 @@
     "version": "Версия",
     "developer": "Разработчик",
     "madeWith": "Сделано с ❤️",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "replayTour": "Тур по приложению"
   },
   "profile": {
     "title": "Профиль",

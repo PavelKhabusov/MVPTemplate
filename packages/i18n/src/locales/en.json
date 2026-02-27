@@ -85,7 +85,8 @@
     "version": "Version",
     "developer": "Developer",
     "madeWith": "Made with ❤️",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "replayTour": "App Tour"
   },
   "profile": {
     "title": "Profile",

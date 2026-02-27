@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { ScrollView, Platform, RefreshControl, View } from 'react-native'
 import { YStack, XStack, Text, H2, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -48,6 +48,7 @@ export default function HomeScreen() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const theme = useTheme()
   const [refreshing, setRefreshing] = useState(false)
+  const scrollRef = useRef<ScrollView>(null)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -61,6 +62,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={{ flex: 1, backgroundColor: theme.background.val }}
       contentContainerStyle={{ paddingBottom: 40 }}
       refreshControl={
@@ -152,7 +154,7 @@ export default function HomeScreen() {
 
         {/* Notes — authenticated users */}
         {isAuthenticated && (
-          <CoachMark stepId="home-notes">
+          <CoachMark stepId="home-notes" scrollRef={scrollRef}>
             <NotesSection />
           </CoachMark>
         )}

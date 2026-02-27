@@ -17,6 +17,8 @@ import { useCoachMarkContext } from './CoachMarkContext'
 const PAD = 10
 const BORDER_RADIUS = 12
 const TOOLTIP_MAX_WIDTH = 300
+/** Conservative estimated max tooltip height — used for boundary clamping */
+const TOOLTIP_HEIGHT_EST = 190
 
 /**
  * Rendered automatically by CoachMarkProvider when a tour step is active.
@@ -60,6 +62,10 @@ function OverlayContent({
   const { width: W, height: H } = useWindowDimensions()
   const theme = useTheme()
 
+  // If spotlight is entirely off-screen, don't render (CoachMarkContext handles
+  // the invisible-element case, but this is a safety net after scroll animations)
+  if (r.y + r.height < -PAD || r.y > H + PAD) return null
+
   const isLast = stepIndex === totalSteps - 1
   const TOOLTIP_W = Math.min(TOOLTIP_MAX_WIDTH, W - 32)
 
@@ -69,13 +75,16 @@ function OverlayContent({
     Math.min(W - 16 - TOOLTIP_W, r.x + r.width / 2 - TOOLTIP_W / 2),
   )
 
-  // Place tooltip above if spotlight is in the bottom half of screen
+  // Place tooltip above spotlight if center is in the bottom half of screen
   const spotlightCenterY = r.y + r.height / 2
   const isAbove = spotlightCenterY > H / 2
 
-  const tooltipStyle = isAbove
-    ? { bottom: H - (r.y - PAD - 16) }
-    : { top: r.y + r.height + PAD + 16 }
+  // Compute preferred Y, then clamp so tooltip never leaves the screen
+  const MARGIN = 16
+  const preferredTop = isAbove
+    ? r.y - PAD - MARGIN - TOOLTIP_HEIGHT_EST  // above element
+    : r.y + r.height + PAD + MARGIN             // below element
+  const tooltipTop = Math.max(MARGIN, Math.min(H - TOOLTIP_HEIGHT_EST - MARGIN, preferredTop))
 
   return (
     <Modal transparent visible animationType="fade">
@@ -123,7 +132,7 @@ function OverlayContent({
           activeOpacity={1}
         />
 
-        {/* Tooltip */}
+        {/* Tooltip — always within screen bounds */}
         <MotiView
           from={{ opacity: 0, translateY: isAbove ? 8 : -8 }}
           animate={{ opacity: 1, translateY: 0 }}
@@ -131,8 +140,8 @@ function OverlayContent({
           style={{
             position: 'absolute',
             left: tooltipLeft,
+            top: tooltipTop,
             width: TOOLTIP_W,
-            ...tooltipStyle,
           }}
         >
           <YStack

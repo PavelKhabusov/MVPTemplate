@@ -26,6 +26,8 @@ interface CoachMarkContextValue {
   dismissTour: () => void
   registerRef: (id: string, ref: React.RefObject<View>) => void
   unregisterRef: (id: string) => void
+  registerScrollTo: (id: string, fn: () => void) => void
+  unregisterScrollTo: (id: string) => void
   // Internal — used by CoachMarkOverlay rendered inside Provider
   _state: CoachMarkState
 }
@@ -36,6 +38,8 @@ const CoachMarkContext = createContext<CoachMarkContextValue>({
   dismissTour: () => {},
   registerRef: () => {},
   unregisterRef: () => {},
+  registerScrollTo: () => {},
+  unregisterScrollTo: () => {},
   _state: { steps: [], activeIndex: null, spotlightRect: null },
 })
 
@@ -54,6 +58,7 @@ interface CoachMarkProviderProps {
 
 export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
   const refsMap = useRef(new Map<string, React.RefObject<View>>())
+  const scrollersMap = useRef(new Map<string, () => void>())
   const [state, setState] = useState<CoachMarkState>({
     steps: [],
     activeIndex: null,
@@ -76,8 +81,7 @@ export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
       return
     }
 
-    // Wait one frame for layout to settle (important after screen transitions)
-    const rafId = requestAnimationFrame(() => {
+    const measure = () => {
       ref.current?.measureInWindow((x, y, width, height) => {
         if (width === 0 && height === 0) {
           // Element not visible — advance to next
@@ -90,8 +94,19 @@ export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
         }
         setState((s) => ({ ...s, spotlightRect: { x, y, width, height } }))
       })
-    })
+    }
 
+    // If this step has a registered scroll handler, call it first and wait for the
+    // scroll animation to complete before measuring the element's screen position.
+    const scroller = scrollersMap.current.get(stepId)
+    if (scroller) {
+      scroller()
+      const tid = setTimeout(() => { measure() }, 400)
+      return () => clearTimeout(tid)
+    }
+
+    // Wait one frame for layout to settle (important after screen transitions)
+    const rafId = requestAnimationFrame(measure)
     return () => cancelAnimationFrame(rafId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.activeIndex, state.steps])
@@ -122,9 +137,17 @@ export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
     refsMap.current.delete(id)
   }, [])
 
+  const registerScrollTo = useCallback((id: string, fn: () => void) => {
+    scrollersMap.current.set(id, fn)
+  }, [])
+
+  const unregisterScrollTo = useCallback((id: string) => {
+    scrollersMap.current.delete(id)
+  }, [])
+
   return (
     <CoachMarkContext.Provider
-      value={{ startTour, nextStep, dismissTour, registerRef, unregisterRef, _state: state }}
+      value={{ startTour, nextStep, dismissTour, registerRef, unregisterRef, registerScrollTo, unregisterScrollTo, _state: state }}
     >
       {children}
     </CoachMarkContext.Provider>

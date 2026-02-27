@@ -8,6 +8,8 @@ import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
 import { useAuthStore, useThemeStore, useLanguageStore, useCompanyStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
+import { useCoachMark } from '@mvp/ui'
+import { createHomeCoachSteps } from '../../src/onboarding/steps'
 import {
   FadeIn,
   SlideIn,
@@ -241,6 +243,12 @@ function UnauthenticatedSettingsView() {
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
+  const { startTour } = useCoachMark()
+
+  const handleReplayTour = () => {
+    router.push('/')
+    setTimeout(() => startTour(createHomeCoachSteps(t)), 500)
+  }
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -334,6 +342,11 @@ function UnauthenticatedSettingsView() {
             />
           )}
           <SettingsGroupItem
+            icon="compass-outline"
+            label={t('settings.replayTour')}
+            onPress={handleReplayTour}
+          />
+          <SettingsGroupItem
             icon="information-circle-outline"
             label={t('settings.about')}
             value={APP_CONFIG.version}
@@ -382,6 +395,12 @@ function AuthenticatedSettingsView() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const { startTour } = useCoachMark()
+
+  const handleReplayTour = () => {
+    router.push('/')
+    setTimeout(() => startTour(createHomeCoachSteps(t)), 500)
+  }
 
   const scrollY = useSharedValue(0)
   const scrollHandler = useAnimatedScrollHandler({
@@ -540,6 +559,11 @@ function AuthenticatedSettingsView() {
                 onPress={() => router.push('/docs')}
               />
             )}
+            <SettingsGroupItem
+              icon="compass-outline"
+              label={t('settings.replayTour')}
+              onPress={handleReplayTour}
+            />
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
