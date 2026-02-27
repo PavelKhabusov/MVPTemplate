@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer'
 import type { Transporter } from 'nodemailer'
 import { env } from '../../config/env'
 import { getEmailTemplate, buildAnnouncementEmail, type AnnouncementVars } from './email.templates'
+import { withRetry } from '../../common/utils/retry'
 
 type EmailLocale = 'en' | 'ru' | 'es' | 'ja'
 
@@ -98,12 +99,11 @@ export const emailService = {
 
   async send(to: string, subject: string, html: string) {
     const transport = await getTransporter()
-    const info = await transport.sendMail({
-      from: env.SMTP_FROM,
-      to,
-      subject,
-      html,
-    })
+    const info = await withRetry(
+      () => transport.sendMail({ from: env.SMTP_FROM, to, subject, html }),
+      3,
+      300,
+    )
 
     if (env.NODE_ENV !== 'production' && !env.SMTP_HOST) {
       const previewUrl = nodemailer.getTestMessageUrl(info)

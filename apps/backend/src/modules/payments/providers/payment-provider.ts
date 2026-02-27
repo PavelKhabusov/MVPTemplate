@@ -44,6 +44,13 @@ export interface CancelSubscriptionParams {
   cancelImmediately?: boolean
 }
 
+export interface RefundResult {
+  refundId: string
+  amount: number
+  currency: string
+  status: string
+}
+
 export interface PaymentProvider {
   readonly name: 'stripe' | 'yookassa' | 'robokassa' | 'paypal'
 
@@ -58,4 +65,7 @@ export interface PaymentProvider {
     currentPeriodEnd: Date
     cancelAtPeriodEnd: boolean
   }>
+
+  /** Refund a payment by provider payment ID. Amount is in minor units (cents). */
+  refundPayment(providerPaymentId: string, amountMinorUnits?: number): Promise<RefundResult>
 }

@@ -5,6 +5,7 @@ import type {
   CheckoutResult,
   WebhookEvent,
   CancelSubscriptionParams,
+  RefundResult,
 } from './payment-provider'
 
 export class StripeProvider implements PaymentProvider {
