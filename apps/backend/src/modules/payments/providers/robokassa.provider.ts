@@ -148,4 +148,8 @@ export class RobokassaProvider implements PaymentProvider {
     // Robokassa subscriptions are managed locally in our database.
     throw new Error('Robokassa subscriptions are managed locally')
   }
+
+  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number) {
+    throw new Error('Robokassa refunds are not yet implemented')
+  }
 }

@@ -168,4 +168,15 @@ export async function paymentsRoutes(app: FastifyInstance) {
       return sendSuccess(reply, { message: 'Plan deleted' })
     },
   )
+
+  app.post(
+    '/admin/refund/:paymentId',
+    { preHandler: [authenticate, requireAdmin] },
+    async (request, reply) => {
+      const { paymentId } = request.params as { paymentId: string }
+      const { amount } = (request.body ?? {}) as { amount?: number }
+      const result = await paymentsService.refundPayment(paymentId, amount)
+      return sendSuccess(reply, result)
+    },
+  )
 }

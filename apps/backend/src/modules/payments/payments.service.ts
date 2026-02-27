@@ -218,4 +218,36 @@ export const paymentsService = {
   async getAdminStats(days: number) {
     return paymentsRepository.getRevenueStats(days)
   },
+
+  async refundPayment(paymentId: string, amountMinorUnits?: number) {
+    const payment = await paymentsRepository.getPaymentById(paymentId)
+    if (!payment) throw AppError.notFound('Payment not found')
+
+    if (payment.status === 'refunded') {
+      throw AppError.conflict('Payment has already been refunded')
+    }
+
+    if (payment.status !== 'succeeded') {
+      throw AppError.badRequest('Only succeeded payments can be refunded')
+    }
+
+    if (!payment.providerPaymentId) {
+      throw AppError.badRequest('Payment has no provider payment ID — cannot refund')
+    }
+
+    const provider = getPaymentProvider(payment.provider as 'stripe' | 'yookassa' | 'robokassa' | 'paypal')
+    const refund = await provider.refundPayment(payment.providerPaymentId, amountMinorUnits)
+
+    await paymentsRepository.updatePaymentByProviderId(payment.providerPaymentId, {
+      status: 'refunded',
+    })
+
+    return {
+      refundId: refund.refundId,
+      paymentId: payment.id,
+      amount: refund.amount,
+      currency: refund.currency,
+      status: refund.status,
+    }
+  },
 }

@@ -307,6 +307,10 @@ export class PayPalProvider implements PaymentProvider {
     }
   }
 
+  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number) {
+    throw new Error('PayPal refunds are not yet implemented')
+  }
+
   private parseMeta(raw: string): { userId?: string; planId?: string } {
     try {
       return JSON.parse(raw)

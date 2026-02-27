@@ -129,4 +129,8 @@ export class YooKassaProvider implements PaymentProvider {
     // YooKassa subscriptions are managed locally in our database.
     throw new Error('YooKassa subscriptions are managed locally')
   }
+
+  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number) {
+    throw new Error('YooKassa refunds are not yet implemented')
+  }
 }
