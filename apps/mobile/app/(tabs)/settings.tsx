@@ -238,6 +238,7 @@ function UnauthenticatedSettingsView() {
   const { mode, setMode } = useThemeStore()
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
@@ -339,11 +340,13 @@ function UnauthenticatedSettingsView() {
               onPress={() => router.push('/docs')}
             />
           )}
-          <SettingsGroupItem
-            icon="compass-outline"
-            label={t('settings.replayTour')}
-            onPress={handleReplayTour}
-          />
+          {onboardingEnabled && (
+            <SettingsGroupItem
+              icon="compass-outline"
+              label={t('settings.replayTour')}
+              onPress={handleReplayTour}
+            />
+          )}
           <SettingsGroupItem
             icon="information-circle-outline"
             label={t('settings.about')}
@@ -389,6 +392,7 @@ function AuthenticatedSettingsView() {
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
@@ -557,11 +561,13 @@ function AuthenticatedSettingsView() {
                 onPress={() => router.push('/docs')}
               />
             )}
-            <SettingsGroupItem
-              icon="compass-outline"
-              label={t('settings.replayTour')}
-              onPress={handleReplayTour}
-            />
+            {onboardingEnabled && (
+              <SettingsGroupItem
+                icon="compass-outline"
+                label={t('settings.replayTour')}
+                onPress={handleReplayTour}
+              />
+            )}
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
@@ -634,6 +640,7 @@ function WebSettingsView() {
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const docsEnabled = useTemplateFlag('docs', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
@@ -792,11 +799,13 @@ function WebSettingsView() {
                 onPress={() => router.push('/docs')}
               />
             )}
-            <SettingsGroupItem
-              icon="compass-outline"
-              label={t('settings.replayTour')}
-              onPress={handleReplayTour}
-            />
+            {onboardingEnabled && (
+              <SettingsGroupItem
+                icon="compass-outline"
+                label={t('settings.replayTour')}
+                onPress={handleReplayTour}
+              />
+            )}
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}
