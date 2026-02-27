@@ -388,6 +388,8 @@ function PaymentsAdminTab() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const { width: screenWidth } = useWindowDimensions()
+  const isWide = screenWidth > 768
   const [stats, setStats] = useState<{
     totalRevenue: Array<{ total: number; currency: string }>
     activeSubscriptions: number
@@ -606,99 +608,112 @@ function PaymentsAdminTab() {
                     </ScalePress>
                   </YStack>
                 </AppCard>
-              ) : (
-                <YStack gap="$3">
-                  {adminPlans.map((plan) => {
-                    const pCfg = PROVIDER_CFG[plan.provider] ?? { label: plan.provider, color: '#6B7280' }
-                    const intervalLabel = plan.interval === 'month' ? t('payments.perMonth')
-                      : plan.interval === 'year' ? t('payments.perYear')
-                      : t('payments.one_time')
-                    return (
-                      <YStack
-                        key={plan.id}
-                        borderRadius="$4"
-                        borderWidth={1}
-                        borderColor="$borderColor"
-                        overflow="hidden"
-                        opacity={plan.isActive ? 1 : 0.6}
-                      >
-                        {/* Top accent strip */}
-                        <YStack height={3} backgroundColor={plan.isActive ? '$accent' : '$borderColor'} />
+              ) : (() => {
+                const planCards = adminPlans.map((plan) => {
+                  const pCfg = PROVIDER_CFG[plan.provider] ?? { label: plan.provider, color: '#6B7280' }
+                  const intervalLabel = plan.interval === 'month' ? t('payments.perMonth')
+                    : plan.interval === 'year' ? t('payments.perYear')
+                    : t('payments.one_time')
+                  return (
+                    <YStack
+                      key={plan.id}
+                      borderRadius="$4"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      overflow="hidden"
+                      opacity={plan.isActive ? 1 : 0.6}
+                      flex={1}
+                    >
+                      {/* Top accent strip */}
+                      <YStack height={3} backgroundColor={plan.isActive ? '$accent' : '$borderColor'} />
 
-                        <YStack padding="$4" gap="$3" backgroundColor="$background">
-                          {/* Name + action buttons */}
-                          <XStack justifyContent="space-between" alignItems="flex-start" gap="$3">
-                            <YStack flex={1} gap="$0.5">
-                              <Text fontWeight="700" fontSize="$5" color="$color" numberOfLines={2}>{plan.name}</Text>
-                              {plan.description ? (
-                                <Text fontSize="$2" color="$mutedText" numberOfLines={2}>{plan.description}</Text>
-                              ) : null}
-                            </YStack>
-                            <XStack gap="$1.5" alignItems="center">
-                              <ScalePress onPress={() => openEditModal(plan)}>
-                                <YStack width={34} height={34} borderRadius={17} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
-                                  <Ionicons name="create-outline" size={16} color={theme.accent.val} />
-                                </YStack>
-                              </ScalePress>
-                              <ScalePress onPress={() => handleDeletePlan(plan)}>
-                                <YStack width={34} height={34} borderRadius={17} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
-                                  <Ionicons name="trash-outline" size={16} color="#EF4444" />
-                                </YStack>
-                              </ScalePress>
-                            </XStack>
+                      <YStack padding="$4" gap="$3" backgroundColor="$background" flex={1}>
+                        {/* Name + action buttons */}
+                        <XStack justifyContent="space-between" alignItems="flex-start" gap="$3">
+                          <YStack flex={1} gap="$0.5">
+                            <Text fontWeight="700" fontSize="$5" color="$color" numberOfLines={2}>{plan.name}</Text>
+                            {plan.description ? (
+                              <Text fontSize="$2" color="$mutedText" numberOfLines={2}>{plan.description}</Text>
+                            ) : null}
+                          </YStack>
+                          <XStack gap="$1.5" alignItems="center">
+                            <ScalePress onPress={() => openEditModal(plan)}>
+                              <YStack width={34} height={34} borderRadius={17} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
+                                <Ionicons name="create-outline" size={16} color={theme.accent.val} />
+                              </YStack>
+                            </ScalePress>
+                            <ScalePress onPress={() => handleDeletePlan(plan)}>
+                              <YStack width={34} height={34} borderRadius={17} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
+                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                              </YStack>
+                            </ScalePress>
                           </XStack>
+                        </XStack>
 
-                          {/* Price */}
-                          <XStack alignItems="baseline" gap="$1">
-                            <Text fontSize={28} fontWeight="800" color="$accent" lineHeight={32}>
-                              {formatPrice(plan.priceAmount, plan.currency)}
-                            </Text>
-                            {plan.interval !== 'one_time' ? (
-                              <Text fontSize="$3" color="$mutedText">/{plan.interval}</Text>
+                        {/* Price */}
+                        <XStack alignItems="baseline" gap="$1">
+                          <Text fontSize={28} fontWeight="800" color="$accent" lineHeight={32}>
+                            {formatPrice(plan.priceAmount, plan.currency)}
+                          </Text>
+                          {plan.interval !== 'one_time' ? (
+                            <Text fontSize="$3" color="$mutedText">/{plan.interval}</Text>
+                          ) : null}
+                        </XStack>
+
+                        {/* Provider + interval badges + active toggle */}
+                        <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$2">
+                          <XStack gap="$2" flexWrap="wrap" flex={1}>
+                            <XStack
+                              paddingHorizontal="$2.5" paddingVertical="$1" borderRadius="$2"
+                              style={{ backgroundColor: pCfg.color + '18', borderWidth: 1, borderColor: pCfg.color + '55' } as any}
+                            >
+                              <Text fontSize="$1" fontWeight="700" style={{ color: pCfg.color } as any}>{pCfg.label}</Text>
+                            </XStack>
+                            <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2.5" paddingVertical="$1" borderRadius="$2" borderWidth={1} borderColor="$borderColor">
+                              <Text fontSize="$1" color="$mutedText" fontWeight="500">{intervalLabel}</Text>
+                            </XStack>
+                            {plan.providerPriceId ? (
+                              <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2.5" paddingVertical="$1" borderRadius="$2">
+                                <Text fontSize="$1" color="$mutedText" numberOfLines={1}>{plan.providerPriceId}</Text>
+                              </XStack>
                             ) : null}
                           </XStack>
+                          <AppSwitch checked={plan.isActive} onCheckedChange={() => handleToggleActive(plan)} />
+                        </XStack>
 
-                          {/* Provider + interval badges + active toggle */}
-                          <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$2">
-                            <XStack gap="$2" flexWrap="wrap" flex={1}>
-                              <XStack
-                                paddingHorizontal="$2.5" paddingVertical="$1" borderRadius="$2"
-                                style={{ backgroundColor: pCfg.color + '18', borderWidth: 1, borderColor: pCfg.color + '55' } as any}
-                              >
-                                <Text fontSize="$1" fontWeight="700" style={{ color: pCfg.color } as any}>{pCfg.label}</Text>
-                              </XStack>
-                              <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2.5" paddingVertical="$1" borderRadius="$2" borderWidth={1} borderColor="$borderColor">
-                                <Text fontSize="$1" color="$mutedText" fontWeight="500">{intervalLabel}</Text>
-                              </XStack>
-                              {plan.providerPriceId ? (
-                                <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2.5" paddingVertical="$1" borderRadius="$2">
-                                  <Text fontSize="$1" color="$mutedText" numberOfLines={1}>{plan.providerPriceId}</Text>
+                        {/* Features */}
+                        {plan.features.length > 0 && (
+                          <>
+                            <YStack height={1} backgroundColor="$borderColor" />
+                            <YStack gap="$1.5">
+                              {plan.features.map((f) => (
+                                <XStack key={f} gap="$2" alignItems="center">
+                                  <Ionicons name="checkmark-circle" size={14} color={theme.accent.val} />
+                                  <Text fontSize="$2" color="$color" flex={1}>{f}</Text>
                                 </XStack>
-                              ) : null}
-                            </XStack>
-                            <AppSwitch checked={plan.isActive} onCheckedChange={() => handleToggleActive(plan)} />
-                          </XStack>
-
-                          {/* Features */}
-                          {plan.features.length > 0 && (
-                            <>
-                              <YStack height={1} backgroundColor="$borderColor" />
-                              <YStack gap="$1.5">
-                                {plan.features.map((f) => (
-                                  <XStack key={f} gap="$2" alignItems="center">
-                                    <Ionicons name="checkmark-circle" size={14} color={theme.accent.val} />
-                                    <Text fontSize="$2" color="$color" flex={1}>{f}</Text>
-                                  </XStack>
-                                ))}
-                              </YStack>
-                            </>
-                          )}
-                        </YStack>
+                              ))}
+                            </YStack>
+                          </>
+                        )}
                       </YStack>
-                    )
-                  })}
-                </YStack>
-              )}
+                    </YStack>
+                  )
+                })
+
+                if (isWide) {
+                  const col1: React.ReactNode[] = []
+                  const col2: React.ReactNode[] = []
+                  planCards.forEach((card, i) => { if (i % 2 === 0) col1.push(card); else col2.push(card) })
+                  return (
+                    <XStack gap="$3" alignItems="flex-start">
+                      <YStack flex={1} gap="$3">{col1}</YStack>
+                      <YStack flex={1} gap="$3">{col2}</YStack>
+                    </XStack>
+                  )
+                }
+
+                return <YStack gap="$3">{planCards}</YStack>
+              })()}
 
               {/* Recent Payments */}
               <AppCard animated={false}>
