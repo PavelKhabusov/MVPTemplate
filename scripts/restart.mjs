@@ -57,6 +57,17 @@ function startDocker() {
   }
 }
 
+// ─── Шаг 3: обновляем схему БД ───────────────────────────────────────────────
+function pushDb() {
+  info('Применяем схему БД (drizzle-kit push)...')
+  try {
+    execSync('npm run db:push -w apps/backend', { stdio: 'inherit', cwd: ROOT })
+    ok('Схема БД обновлена')
+  } catch (e) {
+    fatal('Ошибка обновления схемы БД: ' + e.message)
+  }
+}
+
 // ─── Шаг 4: обновляем IP ─────────────────────────────────────────────────────
 function updateIp() {
   info('Обновляем IP адрес...')
@@ -98,6 +109,7 @@ async function main() {
 
   killOldProcesses()
   startDocker()
+  pushDb()
   updateIp()
 
   console.log()
