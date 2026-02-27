@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { db } from '../../config/database'
-import { users, refreshTokens, emailVerificationTokens, passwordResetTokens } from '../../database/schema/index'
+import { users, refreshTokens, emailVerificationTokens, passwordResetTokens, phoneVerificationCodes } from '../../database/schema/index'
 import type { NewUser } from '../../database/schema/index'
 
 export const authRepository = {
@@ -102,6 +102,29 @@ export const authRepository = {
     await db
       .update(users)
       .set({ passwordHash, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+  },
+
+  // Phone verification codes
+  async savePhoneVerificationCode(userId: string, phone: string, codeHash: string, expiresAt: Date) {
+    await db.delete(phoneVerificationCodes).where(eq(phoneVerificationCodes.userId, userId))
+    await db.insert(phoneVerificationCodes).values({ userId, phone, codeHash, expiresAt })
+  },
+
+  async findPhoneVerificationCode(userId: string) {
+    const result = await db
+      .select()
+      .from(phoneVerificationCodes)
+      .where(eq(phoneVerificationCodes.userId, userId))
+      .limit(1)
+    return result[0] ?? null
+  },
+
+  async markPhoneVerified(userId: string, phone: string) {
+    await db.delete(phoneVerificationCodes).where(eq(phoneVerificationCodes.userId, userId))
+    await db
+      .update(users)
+      .set({ phone, phoneVerified: true, updatedAt: new Date() })
       .where(eq(users.id, userId))
   },
 }

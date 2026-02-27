@@ -6,16 +6,29 @@ import { LandingHero } from './LandingHero'
 import { LandingFeatures } from './LandingFeatures'
 import { LandingTerminal } from './LandingTerminal'
 import { LandingShowcase } from './LandingShowcase'
+import { LandingPricing } from './LandingPricing'
 import { LandingCTA } from './LandingCTA'
 import { LandingFooter } from './LandingFooter'
 import { CookieBanner } from '../components/CookieBanner'
 
+interface LandingPlan {
+  id: string
+  name: string
+  description?: string
+  priceAmount: number
+  currency: string
+  interval: string
+  features: string[]
+  sortOrder: number
+}
+
 interface LandingPageProps {
   logo?: any
   paymentsEnabled?: boolean
+  plans?: LandingPlan[]
 }
 
-export function LandingPage({ logo, paymentsEnabled = false }: LandingPageProps) {
+export function LandingPage({ logo, paymentsEnabled = false, plans = [] }: LandingPageProps) {
   if (Platform.OS !== 'web') return null
 
   const navigate = (href: string) => {
@@ -30,6 +43,9 @@ export function LandingPage({ logo, paymentsEnabled = false }: LandingPageProps)
         <LandingFeatures />
         <LandingTerminal />
         <LandingShowcase />
+        {paymentsEnabled && (
+          <LandingPricing onNavigate={navigate} plans={plans} />
+        )}
         <LandingCTA onNavigate={navigate} />
         <LandingFooter onNavigate={navigate} logo={logo} />
       </ScrollView>

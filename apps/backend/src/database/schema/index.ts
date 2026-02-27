@@ -36,3 +36,6 @@ export type { Payment, NewPayment } from './payments'
 
 export { proxies } from './proxies'
 export type { ProxyRecord, NewProxy } from './proxies'
+
+export { phoneVerificationCodes } from './phone-verification-codes'
+export type { PhoneVerificationCode, NewPhoneVerificationCode } from './phone-verification-codes'

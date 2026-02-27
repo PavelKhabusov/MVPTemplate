@@ -65,6 +65,21 @@ const envSchema = z.object({
   PAYPAL_WEBHOOK_ID: z.string().optional(),
   PAYPAL_MODE: z.enum(['sandbox', 'live']).default('sandbox'),
 
+  // SMS
+  SMS_ENABLED: envBoolean,
+  SMS_VERIFICATION_REQUIRED: envBoolean,
+  SMS_PROVIDER: z.enum(['twilio', 'smsc']).default('twilio'),
+
+  // Twilio
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_PHONE_NUMBER: z.string().optional(),
+
+  // SMSC.ru
+  SMSC_LOGIN: z.string().optional(),
+  SMSC_PASSWORD: z.string().optional(),
+  SMSC_SENDER: z.string().optional(),
+
   // AI / Gemini
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default('gemini-2.5-flash'),

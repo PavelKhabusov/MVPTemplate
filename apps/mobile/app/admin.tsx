@@ -704,6 +704,7 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   analytics: { icon: 'bar-chart-outline', labelKey: 'admin.apiAnalytics', mainToggle: 'ANALYTICS_ENABLED', hintKey: 'admin.hintPosthog', hintUrl: 'https://app.posthog.com/project/settings' },
   email: { icon: 'mail-outline', labelKey: 'admin.apiEmail', mainToggle: 'EMAIL_ENABLED' },
   auth: { icon: 'logo-google', labelKey: 'admin.apiAuth', mainToggle: 'GOOGLE_CLIENT_ID', hintKey: 'admin.hintGoogle', hintUrl: 'https://console.cloud.google.com/apis/credentials' },
+  sms: { icon: 'chatbubble-ellipses-outline', labelKey: 'admin.apiSMS', mainToggle: 'SMS_ENABLED' },
   pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN', hintKey: 'admin.hintExpo', hintUrl: 'https://expo.dev/settings/access-tokens' },
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
   frontend: { icon: 'color-palette-outline', labelKey: 'admin.apiFrontend' },
@@ -834,6 +835,121 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               />
             </XStack>
           )}
+        </YStack>
+      )}
+    </AppCard>
+  )
+}
+
+const SMS_PROVIDERS = [
+  { key: 'twilio' as const, label: 'Twilio', color: '#F22F46', keys: ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_PHONE_NUMBER'], hintKey: 'admin.hintTwilio', hintUrl: 'https://console.twilio.com/' },
+  { key: 'smsc' as const, label: 'SMSC.ru', color: '#0078D4', keys: ['SMSC_LOGIN', 'SMSC_PASSWORD', 'SMSC_SENDER'], hintKey: 'admin.hintSmsc', hintUrl: 'https://smsc.ru/api/' },
+] as const
+
+function SMSEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
+  keys: Record<string, EnvEntry>
+  isGroupOn: boolean
+  onToggle: (checked: boolean) => void
+  onUpdate: (key: string, value: string | boolean | null) => void
+}) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const [activeProvider, setActiveProvider] = useState<'twilio' | 'smsc'>('twilio')
+
+  const providerData = SMS_PROVIDERS.find((p) => p.key === activeProvider)!
+  const currentProviderKey = keys['SMS_PROVIDER']?.value ?? 'twilio'
+  const providerKeys = providerData.keys
+    .filter((k) => k in keys)
+    .map((k) => [k, keys[k]] as [string, EnvEntry])
+
+  return (
+    <AppCard animated={false}>
+      <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
+        <XStack alignItems="center" gap="$2" flex={1}>
+          <Ionicons name="chatbubble-ellipses-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <Text fontWeight="600" color="$color" fontSize="$4">
+            {t('admin.apiSMS')}
+          </Text>
+        </XStack>
+        <AppSwitch checked={isGroupOn} onCheckedChange={onToggle} />
+      </XStack>
+
+      {isGroupOn && (
+        <YStack gap="$3">
+          {/* SMS verification required toggle */}
+          <XStack alignItems="center" justifyContent="space-between" backgroundColor="$subtleBackground" paddingHorizontal="$3" paddingVertical="$2.5" borderRadius="$3">
+            <YStack flex={1}>
+              <Text fontSize="$3" color="$color">{t('admin.smsVerificationRequired')}</Text>
+              <Text fontSize="$1" color="$mutedText">{t('admin.smsVerificationRequiredDesc')}</Text>
+            </YStack>
+            <AppSwitch
+              checked={keys['SMS_VERIFICATION_REQUIRED']?.value === 'true'}
+              onCheckedChange={(checked) => onUpdate('SMS_VERIFICATION_REQUIRED', String(checked))}
+            />
+          </XStack>
+
+          {/* Provider tabs */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <XStack gap="$2">
+              {SMS_PROVIDERS.map((provider) => {
+                const isActive = activeProvider === provider.key
+                const isSelected = currentProviderKey === provider.key
+                return (
+                  <ScalePress key={provider.key} onPress={() => setActiveProvider(provider.key)}>
+                    <XStack
+                      backgroundColor={isActive ? provider.color : '$subtleBackground'}
+                      paddingHorizontal="$3"
+                      paddingVertical="$2"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={isActive ? provider.color : '$borderColor'}
+                      gap="$2"
+                      alignItems="center"
+                    >
+                      <Text color={isActive ? 'white' : '$color'} fontWeight="700" fontSize="$2">
+                        {provider.label}
+                      </Text>
+                      {isSelected && (
+                        <XStack backgroundColor={isActive ? 'rgba(255,255,255,0.25)' : provider.color} paddingHorizontal="$1.5" paddingVertical="$0.5" borderRadius="$1">
+                          <Text fontSize="$1" color="white" fontWeight="600">{t('admin.smsActive')}</Text>
+                        </XStack>
+                      )}
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </ScrollView>
+
+          {/* Set as active provider button */}
+          {currentProviderKey !== activeProvider && (
+            <ScalePress onPress={() => onUpdate('SMS_PROVIDER', activeProvider)}>
+              <XStack backgroundColor="$accentBackground" paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" borderWidth={1} borderColor="$accent" justifyContent="center">
+                <Text fontSize="$2" color="$accent" fontWeight="600">
+                  {t('admin.smsSetActive', { provider: providerData.label })}
+                </Text>
+              </XStack>
+            </ScalePress>
+          )}
+
+          {/* Provider credentials */}
+          {providerKeys.map(([key, entry]) => (
+            <EnvStringField
+              key={key}
+              envKey={key}
+              label={t(`admin.envLabel_${key}`, { defaultValue: key })}
+              value={entry.value}
+              isSecret={entry.type === 'secret'}
+              onSave={onUpdate}
+            />
+          ))}
+
+          {/* Provider link */}
+          <ScalePress onPress={() => Linking.openURL(providerData.hintUrl)}>
+            <Text fontSize="$2" color="$accent">
+              {t(providerData.hintKey)}
+            </Text>
+          </ScalePress>
         </YStack>
       )}
     </AppCard>
@@ -1168,6 +1284,18 @@ function ApiSettingsTab() {
           keys={keys}
           onUpdate={handleUpdate}
           onBatchUpdate={handleBatchUpdate}
+        />
+      )
+    }
+
+    if (group === 'sms') {
+      return (
+        <SMSEnvCard
+          key={group}
+          keys={keys}
+          isGroupOn={isGroupOn}
+          onToggle={handleMainToggle}
+          onUpdate={handleUpdate}
         />
       )
     }

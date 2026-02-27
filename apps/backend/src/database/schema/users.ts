@@ -13,6 +13,7 @@ export const users = pgTable('users', {
   role: varchar('role', { length: 50 }).default('user').notNull(),
   features: jsonb('features').$type<string[]>().default([]).notNull(),
   emailVerified: boolean('email_verified').default(false).notNull(),
+  phoneVerified: boolean('phone_verified').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
