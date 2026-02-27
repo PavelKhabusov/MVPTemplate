@@ -637,6 +637,12 @@ function WebSettingsView() {
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
+  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
+
+  const handleReplayTour = () => {
+    resetOnboarding()
+    router.push('/')
+  }
 
   const cycleTheme = () => {
     const currentIdx = THEME_CYCLE.indexOf(mode)
@@ -786,6 +792,11 @@ function WebSettingsView() {
                 onPress={() => router.push('/docs')}
               />
             )}
+            <SettingsGroupItem
+              icon="compass-outline"
+              label={t('settings.replayTour')}
+              onPress={handleReplayTour}
+            />
             <SettingsGroupItem
               icon="information-circle-outline"
               label={t('settings.about')}

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { AnimatePresence, MotiView } from 'moti'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ScalePress } from '../animations/ScalePress'
+import { AppModal } from '../components/AppModal'
 
 export interface WizardStep {
   id: string
@@ -56,7 +57,7 @@ export function OnboardingWizard({
 
   // ── Bottom bar (shared between native and web) ─────────────────────────────
   const bottomBar = (
-    <YStack gap="$4" alignItems="center">
+    <YStack gap="$4" alignItems="center" alignSelf="stretch">
       {/* Progress dots */}
       <XStack gap="$2" alignItems="center">
         {steps.map((_, idx) => (
@@ -101,66 +102,57 @@ export function OnboardingWizard({
     </YStack>
   )
 
-  // ── Web: centered dialog ───────────────────────────────────────────────────
+  // ── Web: centered dialog via AppModal ─────────────────────────────────────
   if (isWeb) {
     return (
-      <Modal visible animationType="fade" transparent statusBarTranslucent>
-        <YStack
-          flex={1}
-          backgroundColor="rgba(0,0,0,0.55)"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <YStack
-            width={480}
-            backgroundColor="$background"
-            borderRadius="$6"
-            overflow="hidden"
-            shadowColor="rgba(0,0,0,0.35)"
-            shadowRadius={40}
-            shadowOpacity={1}
-            shadowOffset={{ width: 0, height: 12 }}
-          >
-            {/* Skip */}
-            <XStack position="absolute" top={16} right={16} zIndex={10}>
-              <ScalePress onPress={onSkip}>
-                <XStack padding="$2">
-                  <Text color="$mutedText" fontSize="$3">{skip}</Text>
-                </XStack>
-              </ScalePress>
-            </XStack>
-
-            {/* Step content area */}
-            <YStack height={320} overflow="hidden">
-              <AnimatePresence>
-                <MotiView
-                  key={currentIndex}
-                  from={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ type: 'timing', duration: 200 }}
-                  style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-                >
-                  <StepContent step={steps[currentIndex]} insetTop={0} />
-                </MotiView>
-              </AnimatePresence>
-            </YStack>
-
-            {/* Bottom bar */}
-            <YStack
-              paddingHorizontal="$5"
-              paddingTop="$4"
-              paddingBottom="$5"
-              gap="$4"
-              alignItems="center"
-              borderTopWidth={1}
-              borderTopColor="$borderColor"
+      <AppModal visible onClose={onSkip} title="" maxWidth={480}>
+        <YStack gap="$5" alignItems="center" paddingVertical="$2">
+          {/* Icon */}
+          <AnimatePresence>
+            <MotiView
+              key={`icon-${currentIndex}`}
+              from={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'timing', duration: 200 }}
             >
-              {bottomBar}
-            </YStack>
-          </YStack>
+              <YStack width={100} height={100} alignItems="center" justifyContent="center">
+                <YStack
+                  position="absolute"
+                  width={100}
+                  height={100}
+                  borderRadius={50}
+                  backgroundColor="$accent"
+                  opacity={0.12}
+                />
+                <Ionicons name={steps[currentIndex].icon as any} size={44} color={theme.accent.val} />
+              </YStack>
+            </MotiView>
+          </AnimatePresence>
+
+          {/* Title + description */}
+          <AnimatePresence>
+            <MotiView
+              key={`text-${currentIndex}`}
+              from={{ opacity: 0, translateY: 8 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'timing', duration: 200 }}
+            >
+              <YStack gap="$2" alignItems="center">
+                <Text fontSize="$6" fontWeight="700" color="$color" textAlign="center">
+                  {steps[currentIndex].title}
+                </Text>
+                <Text fontSize="$3" color="$mutedText" textAlign="center" lineHeight={22}>
+                  {steps[currentIndex].description}
+                </Text>
+              </YStack>
+            </MotiView>
+          </AnimatePresence>
+
+          {bottomBar}
         </YStack>
-      </Modal>
+      </AppModal>
     )
   }
 
