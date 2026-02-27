@@ -386,7 +386,12 @@
     "goToApp": "Open App",
     "navFeatures": "Features",
     "navShowcase": "Showcase",
-    "navPricing": "Pricing"
+    "navPricing": "Pricing",
+    "pricingTitle": "Simple, transparent pricing",
+    "pricingSubtitle": "Start for free. Scale as you grow. No surprises, no hidden fees.",
+    "pricingCta": "View All Plans",
+    "pricingMonthly": "Monthly",
+    "pricingYearly": "Yearly"
   },
   "interactive": {
     "notes": "Notes",
@@ -485,7 +490,13 @@
     "successTitle": "Payment Successful!",
     "successMessage": "Thank you for your purchase. Your subscription is now active.",
     "noPlans": "No plans available yet. Check back later!",
-    "popular": "Most Popular"
+    "popular": "Most Popular",
+    "getStarted": "Get Started",
+    "savePercent": "Save {{percent}}%",
+    "billedYearly": "billed annually",
+    "guarantee": "30-day money back guarantee",
+    "securePayments": "Secure payments",
+    "cancelAnytime": "Cancel anytime"
   },
   "cookies": {
     "message": "We use cookies and local storage to improve your experience and analyze usage.",
