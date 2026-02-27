@@ -3156,101 +3156,50 @@ export default function AdminScreen() {
           <XStack gap="$2">
             {analyticsEnabled && (
               <ScalePress onPress={() => setActiveTab('analytics')}>
-                <XStack
-                  backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'}
-                  paddingHorizontal="$3"
-                  paddingVertical="$2"
-                  borderRadius="$3"
-                >
-                  <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                    {t('admin.analytics')}
-                  </Text>
+                <XStack backgroundColor={activeTab === 'analytics' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                  <Ionicons name="bar-chart-outline" size={16} color={activeTab === 'analytics' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'analytics' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.analytics')}</Text>
                 </XStack>
               </ScalePress>
             )}
             <ScalePress onPress={() => setActiveTab('users')}>
-              <XStack
-                backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-              >
-                <Text color={activeTab === 'users' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.users')}
-                </Text>
+              <XStack backgroundColor={activeTab === 'users' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                <Ionicons name="people-outline" size={16} color={activeTab === 'users' ? 'white' : theme.accent.val} />
+                <Text color={activeTab === 'users' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.users')}</Text>
               </XStack>
             </ScalePress>
-            {pushEnabled && (
-              <ScalePress onPress={() => setActiveTab('notify')}>
-                <XStack
-                  backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'}
-                  paddingHorizontal="$3"
-                  paddingVertical="$2"
-                  borderRadius="$3"
-                >
-                  <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                    {t('admin.sendNotification')}
-                  </Text>
-                </XStack>
-              </ScalePress>
-            )}
             {paymentsEnabled && (
               <ScalePress onPress={() => setActiveTab('payments')}>
-                <XStack
-                  backgroundColor={activeTab === 'payments' ? '$accent' : '$subtleBackground'}
-                  paddingHorizontal="$3"
-                  paddingVertical="$2"
-                  borderRadius="$3"
-                >
-                  <Text color={activeTab === 'payments' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                    {t('admin.payments')}
-                  </Text>
+                <XStack backgroundColor={activeTab === 'payments' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                  <Ionicons name="card-outline" size={16} color={activeTab === 'payments' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'payments' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.payments')}</Text>
                 </XStack>
               </ScalePress>
             )}
+            {pushEnabled && (
+              <ScalePress onPress={() => setActiveTab('notify')}>
+                <XStack backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                  <Ionicons name="notifications-outline" size={16} color={activeTab === 'notify' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'notify' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.sendNotification')}</Text>
+                </XStack>
+              </ScalePress>
+            )}
+            <ScalePress onPress={() => setActiveTab('api')}>
+              <XStack backgroundColor={activeTab === 'api' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                <Ionicons name="key-outline" size={16} color={activeTab === 'api' ? 'white' : theme.accent.val} />
+                <Text color={activeTab === 'api' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.apiSettings')}</Text>
+              </XStack>
+            </ScalePress>
             <ScalePress onPress={() => setActiveTab('storage')}>
-              <XStack
-                backgroundColor={activeTab === 'storage' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-                gap="$1.5"
-                alignItems="center"
-              >
+              <XStack backgroundColor={activeTab === 'storage' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
                 <Ionicons name="cloud-outline" size={16} color={activeTab === 'storage' ? 'white' : theme.accent.val} />
-                <Text color={activeTab === 'storage' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.storage')}
-                </Text>
+                <Text color={activeTab === 'storage' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.storage')}</Text>
               </XStack>
             </ScalePress>
             <ScalePress onPress={() => setActiveTab('proxy')}>
-              <XStack
-                backgroundColor={activeTab === 'proxy' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-                gap="$1.5"
-                alignItems="center"
-              >
-                <Ionicons name="globe-outline" size={16} color={activeTab === 'proxy' ? 'white' : theme.accent.val} />
-                <Text color={activeTab === 'proxy' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.proxyTab')}
-                </Text>
-              </XStack>
-            </ScalePress>
-            <ScalePress onPress={() => setActiveTab('api')}>
-              <XStack
-                backgroundColor={activeTab === 'api' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-                gap="$1.5"
-                alignItems="center"
-              >
-                <Ionicons name="settings-outline" size={16} color={activeTab === 'api' ? 'white' : theme.accent.val} />
-                <Text color={activeTab === 'api' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.apiSettings')}
-                </Text>
+              <XStack backgroundColor={activeTab === 'proxy' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                <Ionicons name="git-network-outline" size={16} color={activeTab === 'proxy' ? 'white' : theme.accent.val} />
+                <Text color={activeTab === 'proxy' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.proxyTab')}</Text>
               </XStack>
             </ScalePress>
             {isTemplateConfigEnabled && (
@@ -3262,34 +3211,16 @@ export default function AdminScreen() {
                   setActiveTab('config')
                 }
               }}>
-                <XStack
-                  backgroundColor={activeTab === 'config' ? '$accent' : '$subtleBackground'}
-                  paddingHorizontal="$3"
-                  paddingVertical="$2"
-                  borderRadius="$3"
-                  gap="$1.5"
-                  alignItems="center"
-                >
-                  <Ionicons name="construct-outline" size={16} color={activeTab === 'config' ? 'white' : theme.accent.val} />
-                  <Text color={activeTab === 'config' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                    {t('templateConfig.title')}
-                  </Text>
+                <XStack backgroundColor={activeTab === 'config' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                  <Ionicons name="color-palette-outline" size={16} color={activeTab === 'config' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'config' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('templateConfig.title')}</Text>
                 </XStack>
               </ScalePress>
             )}
             <ScalePress onPress={() => setActiveTab('company')}>
-              <XStack
-                backgroundColor={activeTab === 'company' ? '$accent' : '$subtleBackground'}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-                gap="$1.5"
-                alignItems="center"
-              >
+              <XStack backgroundColor={activeTab === 'company' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
                 <Ionicons name="business-outline" size={16} color={activeTab === 'company' ? 'white' : theme.accent.val} />
-                <Text color={activeTab === 'company' ? 'white' : '$color'} fontWeight="600" fontSize="$3">
-                  {t('admin.companyTab')}
-                </Text>
+                <Text color={activeTab === 'company' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.companyTab')}</Text>
               </XStack>
             </ScalePress>
           </XStack>
