@@ -1,7 +1,7 @@
 const offers: Record<string, string> = {
   en: `# Public Offer Agreement
 
-**Last Updated: January 1, 2025**
+**Last Updated: February 1, 2026**
 
 This document constitutes a public offer (hereinafter "Offer") to enter into a User Agreement on the terms set forth below. The Offer is addressed to an unlimited number of persons.
 
@@ -90,7 +90,7 @@ For questions regarding this Offer, please contact us via the feedback form in t
 
   ru: `# Договор публичной оферты
 
-**Последнее обновление: 1 января 2025 г.**
+**Последнее обновление: 1 февраля 2026 г.**
 
 Настоящий документ является публичной офертой (далее — «Оферта») на заключение Пользовательского соглашения на изложенных ниже условиях. Оферта адресована неограниченному кругу лиц.
 
