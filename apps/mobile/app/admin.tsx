@@ -3013,16 +3013,17 @@ export default function AdminScreen() {
   const docFeedbackEnabled = useTemplateFlag('docFeedback', true)
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
+  const emailEnabled = useTemplateFlag('email', false)
   const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
       setActiveTab('users')
     }
-    if (!pushEnabled && activeTab === 'notify') {
+    if (!pushEnabled && !emailEnabled && activeTab === 'notify') {
       setActiveTab('users')
     }
-  }, [analyticsEnabled, pushEnabled, activeTab])
+  }, [analyticsEnabled, pushEnabled, emailEnabled, activeTab])
 
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
@@ -3041,6 +3042,14 @@ export default function AdminScreen() {
   const [sending, setSending] = useState(false)
   const [sendResult, setSendResult] = useState<string | null>(null)
   const [notifyHistory, setNotifyHistory] = useState<Array<{ title: string; body: string | null; createdAt: string; recipientCount: number }>>([])
+  const [emailTemplate, setEmailTemplate] = useState<'welcome' | 'announcement'>('announcement')
+  const [emailSubject, setEmailSubject] = useState('')
+  const [emailTitle, setEmailTitle] = useState('')
+  const [emailBody, setEmailBody] = useState('')
+  const [emailButtonText, setEmailButtonText] = useState('')
+  const [emailButtonUrl, setEmailButtonUrl] = useState('')
+  const [emailSending, setEmailSending] = useState(false)
+  const [emailResult, setEmailResult] = useState<string | null>(null)
   const [historyLoading, setHistoryLoading] = useState(false)
 
   const fetchHistory = useCallback(async () => {
@@ -3199,7 +3208,7 @@ export default function AdminScreen() {
                 </XStack>
               </ScalePress>
             )}
-            {pushEnabled && (
+            {(pushEnabled || emailEnabled) && (
               <ScalePress onPress={() => setActiveTab('notify')}>
                 <XStack backgroundColor={activeTab === 'notify' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
                   <Ionicons name="notifications-outline" size={16} color={activeTab === 'notify' ? 'white' : theme.accent.val} />
@@ -3433,7 +3442,7 @@ export default function AdminScreen() {
       )}
 
       {/* Notify Tab */}
-      {pushEnabled && activeTab === 'notify' && (
+      {(pushEnabled || emailEnabled) && activeTab === 'notify' && (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20, gap: 12 }}>
           <FadeIn>
             <YStack gap="$3">
@@ -3544,6 +3553,131 @@ export default function AdminScreen() {
                 )}
               </AppCard>
             </YStack>
+
+            {/* Email Broadcast */}
+            {emailEnabled && (
+              <AppCard animated={false}>
+                <YStack gap="$3">
+                  <XStack alignItems="center" gap="$2">
+                    <Ionicons name="mail-outline" size={20} color={theme.accent.val} />
+                    <Text fontWeight="600" color="$color" fontSize="$4">{t('admin.emailBroadcast')}</Text>
+                  </XStack>
+
+                  {/* Template selector */}
+                  <XStack gap="$2">
+                    {(['announcement', 'welcome'] as const).map((tpl) => (
+                      <ScalePress key={tpl} onPress={() => setEmailTemplate(tpl)}>
+                        <XStack
+                          backgroundColor={emailTemplate === tpl ? '$accent' : '$subtleBackground'}
+                          paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3"
+                          borderWidth={1} borderColor={emailTemplate === tpl ? '$accent' : '$borderColor'}
+                        >
+                          <Text color={emailTemplate === tpl ? 'white' : '$color'} fontWeight="600" fontSize="$2">
+                            {t(tpl === 'announcement' ? 'admin.emailTemplateAnnouncement' : 'admin.emailTemplateWelcome')}
+                          </Text>
+                        </XStack>
+                      </ScalePress>
+                    ))}
+                  </XStack>
+
+                  {emailTemplate === 'announcement' ? (
+                    <>
+                      <Input
+                        value={emailSubject}
+                        onChangeText={setEmailSubject}
+                        placeholder={t('admin.emailSubject')}
+                        placeholderTextColor={theme.mutedText.val as any}
+                        backgroundColor="$subtleBackground"
+                        borderWidth={1} borderColor="$borderColor" borderRadius="$3"
+                        paddingHorizontal="$3" height={42} fontSize="$3" color="$color"
+                      />
+                      <Input
+                        value={emailTitle}
+                        onChangeText={setEmailTitle}
+                        placeholder={t('admin.emailTitle')}
+                        placeholderTextColor={theme.mutedText.val as any}
+                        backgroundColor="$subtleBackground"
+                        borderWidth={1} borderColor="$borderColor" borderRadius="$3"
+                        paddingHorizontal="$3" height={42} fontSize="$3" color="$color"
+                      />
+                      <Input
+                        value={emailBody}
+                        onChangeText={setEmailBody}
+                        placeholder={t('admin.emailBody')}
+                        placeholderTextColor={theme.mutedText.val as any}
+                        backgroundColor="$subtleBackground"
+                        borderWidth={1} borderColor="$borderColor" borderRadius="$3"
+                        paddingHorizontal="$3" paddingVertical="$2"
+                        fontSize="$3" color="$color"
+                        multiline numberOfLines={4}
+                        style={{ minHeight: 80 } as any}
+                      />
+                      <Input
+                        value={emailButtonText}
+                        onChangeText={setEmailButtonText}
+                        placeholder={t('admin.emailButtonText')}
+                        placeholderTextColor={theme.mutedText.val as any}
+                        backgroundColor="$subtleBackground"
+                        borderWidth={1} borderColor="$borderColor" borderRadius="$3"
+                        paddingHorizontal="$3" height={42} fontSize="$3" color="$color"
+                      />
+                      {emailButtonText.trim() !== '' && (
+                        <Input
+                          value={emailButtonUrl}
+                          onChangeText={setEmailButtonUrl}
+                          placeholder={t('admin.emailButtonUrl')}
+                          placeholderTextColor={theme.mutedText.val as any}
+                          backgroundColor="$subtleBackground"
+                          borderWidth={1} borderColor="$borderColor" borderRadius="$3"
+                          paddingHorizontal="$3" height={42} fontSize="$3" color="$color"
+                          autoCapitalize="none" keyboardType="url"
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <Text color="$mutedText" fontSize="$2" lineHeight={18}>
+                      {t('admin.emailTemplateWelcomeDesc')}
+                    </Text>
+                  )}
+
+                  <AppButton
+                    onPress={async () => {
+                      if (emailTemplate === 'announcement' && (!emailSubject.trim() || !emailTitle.trim() || !emailBody.trim())) return
+                      setEmailSending(true)
+                      setEmailResult(null)
+                      try {
+                        const payload: Record<string, string> = { template: emailTemplate }
+                        if (emailTemplate === 'announcement') {
+                          payload.subject = emailSubject.trim()
+                          payload.title = emailTitle.trim()
+                          payload.body = emailBody.trim()
+                          if (emailButtonText.trim()) payload.buttonText = emailButtonText.trim()
+                          if (emailButtonUrl.trim()) payload.buttonUrl = emailButtonUrl.trim()
+                        }
+                        const res = await api.post('/email/broadcast', payload)
+                        const d = res.data.data
+                        setEmailResult(t('admin.emailSent', { sent: d.sent, failed: d.failed, total: d.total }))
+                        if (emailTemplate === 'announcement') {
+                          setEmailSubject(''); setEmailTitle(''); setEmailBody('')
+                          setEmailButtonText(''); setEmailButtonUrl('')
+                        }
+                      } catch (err: any) {
+                        setEmailResult(err.response?.data?.message ?? t('common.error'))
+                      } finally {
+                        setEmailSending(false)
+                      }
+                    }}
+                    disabled={emailSending || (emailTemplate === 'announcement' && (!emailSubject.trim() || !emailTitle.trim() || !emailBody.trim()))}
+                  >
+                    {emailSending ? t('common.loading') : t('admin.emailSend')}
+                  </AppButton>
+
+                  {emailResult && (
+                    <Text color="$mutedText" fontSize="$2" textAlign="center">{emailResult}</Text>
+                  )}
+                </YStack>
+              </AppCard>
+            )}
           </FadeIn>
         </ScrollView>
       )}

@@ -1,6 +1,21 @@
 type EmailLocale = 'en' | 'ru' | 'es' | 'ja'
 type TemplateType = 'verification' | 'passwordReset' | 'welcome'
 
+export interface AnnouncementVars {
+  subject: string
+  title: string
+  body: string
+  footer?: string
+  buttonText?: string
+  buttonUrl?: string
+}
+
+export function buildAnnouncementEmail(vars: AnnouncementVars): { subject: string; html: string } {
+  const footer = vars.footer ?? ''
+  const html = buildHtml(vars.title, vars.body, vars.buttonText ?? '', vars.buttonUrl, footer)
+  return { subject: vars.subject, html }
+}
+
 interface TemplateStrings {
   subject: string
   title: string

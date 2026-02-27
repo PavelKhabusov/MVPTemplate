@@ -25,6 +25,7 @@ import { paymentsRoutes } from './modules/payments/payments.routes'
 import { StorageService } from './modules/storage/storage.service'
 import { storageRoutes } from './modules/storage/storage.routes'
 import { proxyRoutes } from './modules/proxy/proxy.routes'
+import { emailRoutes } from './modules/email/email.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -128,6 +129,9 @@ export async function buildApp() {
     await app.register(paymentsRoutes, { prefix: '/api/payments' })
   }
 
+  if (env.EMAIL_ENABLED) {
+    await app.register(emailRoutes, { prefix: '/api/email' })
+  }
   await app.register(storageRoutes, { prefix: '/api/admin/storage' })
   await app.register(proxyRoutes, { prefix: '/api/admin/proxies' })
 
