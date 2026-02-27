@@ -61,6 +61,14 @@ export const paymentsService = {
 
       case 'subscription.created': {
         if (event.userId && event.planId) {
+          // Idempotency guard: skip if this subscription was already processed
+          if (event.providerSubscriptionId) {
+            const existing = await paymentsRepository.findSubscriptionByProviderId(
+              event.providerSubscriptionId,
+            )
+            if (existing) break
+          }
+
           const plan = await paymentsRepository.getPlanById(event.planId)
           if (plan) {
             const now = new Date()

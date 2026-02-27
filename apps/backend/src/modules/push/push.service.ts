@@ -68,7 +68,10 @@ async function sendPushToUser(userId: string, payload: NotificationPayload) {
   }
 }
 
-/** Send notification to multiple users (or all users) */
+/** Send notification to multiple users (or all users).
+ * Uses batch INSERT for notifications and a single query for push tokens,
+ * reducing N+1 queries to 2 database operations regardless of user count.
+ */
 export async function sendToUsers(userIds: string[] | null, payload: NotificationPayload) {
   let targetUserIds: string[]
 
@@ -76,19 +79,57 @@ export async function sendToUsers(userIds: string[] | null, payload: Notificatio
     targetUserIds = userIds
   } else {
     // Send to ALL users — push delivery happens only for those with tokens
-    const rows = await db
-      .select({ id: users.id })
-      .from(users)
-
+    const rows = await db.select({ id: users.id }).from(users)
     targetUserIds = rows.map((r) => r.id)
   }
 
-  const results = await Promise.allSettled(
-    targetUserIds.map((userId) => createNotification(userId, payload))
-  )
+  if (targetUserIds.length === 0) return { sent: 0, failed: 0, total: 0 }
 
-  const sent = results.filter((r) => r.status === 'fulfilled').length
-  const failed = results.filter((r) => r.status === 'rejected').length
+  // Batch insert all notification records in a single query
+  const inserted = await db
+    .insert(notifications)
+    .values(
+      targetUserIds.map((userId) => ({
+        userId,
+        title: payload.title,
+        body: payload.body ?? null,
+        type: payload.type ?? 'general',
+        data: payload.data ?? null,
+      })),
+    )
+    .returning()
 
-  return { sent, failed, total: targetUserIds.length }
+  // Emit SSE events for each user based on inserted records
+  for (const notif of inserted) {
+    sendSSE(notif.userId, 'notification', { id: notif.id, title: payload.title })
+  }
+
+  // Fetch all push tokens for target users in a single query
+  const allTokens = await db
+    .select({ token: pushTokens.token })
+    .from(pushTokens)
+    .where(inArray(pushTokens.userId, targetUserIds))
+
+  const messages: ExpoPushMessage[] = allTokens
+    .filter((t) => Expo.isExpoPushToken(t.token))
+    .map((t) => ({
+      to: t.token,
+      title: payload.title,
+      body: payload.body,
+      data: payload.data,
+      sound: 'default' as const,
+    }))
+
+  if (messages.length > 0) {
+    const chunks = expo.chunkPushNotifications(messages)
+    for (const chunk of chunks) {
+      try {
+        await expo.sendPushNotificationsAsync(chunk)
+      } catch (err) {
+        console.error('Failed to send push chunk:', err)
+      }
+    }
+  }
+
+  return { sent: inserted.length, failed: 0, total: targetUserIds.length }
 }

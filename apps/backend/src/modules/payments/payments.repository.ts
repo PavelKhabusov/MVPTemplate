@@ -108,6 +108,15 @@ export const paymentsRepository = {
     return result[0] ?? null
   },
 
+  async findSubscriptionByProviderId(providerSubscriptionId: string) {
+    const result = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.providerSubscriptionId, providerSubscriptionId))
+      .limit(1)
+    return result[0] ?? null
+  },
+
   // --- Payments ---
   async createPayment(data: typeof payments.$inferInsert) {
     const result = await db.insert(payments).values(data).returning()
