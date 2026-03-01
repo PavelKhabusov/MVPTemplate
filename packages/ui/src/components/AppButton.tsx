@@ -3,8 +3,8 @@ import { ScalePress } from '../animations'
 
 const variantStyles = {
   primary: {
-    backgroundColor: '$primary' as const,
-    color: '$background' as const,
+    backgroundColor: '$accent' as const,
+    color: 'white' as const,
   },
   secondary: {
     backgroundColor: '$secondary' as const,

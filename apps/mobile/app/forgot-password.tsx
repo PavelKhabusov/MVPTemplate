@@ -29,7 +29,7 @@ export default function ForgotPasswordScreen() {
 
       <SlideIn from="bottom" delay={200}>
         <Link href="/sign-in">
-          <Text color="$primary" fontWeight="bold">
+          <Text color="$accent" fontWeight="bold">
             {t('auth.backToSignIn')}
           </Text>
         </Link>

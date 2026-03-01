@@ -20,19 +20,20 @@ function StatCard({ value, label, icon, color }: { value: string; label: string;
   )
 }
 
-function ActivityItem({ text, time, icon }: { text: string; time: string; icon: keyof typeof Ionicons.glyphMap }) {
+function ActivityItem({ text, time, icon, color }: { text: string; time: string; icon: keyof typeof Ionicons.glyphMap; color?: string }) {
   const theme = useTheme()
+  const iconColor = color ?? theme.mutedText.val
   return (
     <XStack gap="$3" alignItems="center" paddingVertical="$2">
       <YStack
         width={36}
         height={36}
         borderRadius={18}
-        backgroundColor="$subtleBackground"
+        backgroundColor={color ? (color + '18') : '$subtleBackground'}
         alignItems="center"
         justifyContent="center"
       >
-        <Ionicons name={icon} size={16} color={theme.mutedText.val} />
+        <Ionicons name={icon} size={16} color={iconColor} />
       </YStack>
       <YStack flex={1}>
         <Text fontSize="$2" color="$color">{text}</Text>
@@ -139,16 +140,16 @@ export default function HomeScreen() {
           <AppCard>
             <Text fontWeight="600" fontSize="$4" color="$color" marginBottom="$3">{t('home.recentActivity')}</Text>
             <AnimatedListItem index={0}>
-              <ActivityItem text={t('home.activity1')} time="2m ago" icon="folder-outline" />
+              <ActivityItem text={t('home.activity1')} time="2m ago" icon="folder-outline" color={theme.accent.val} />
             </AnimatedListItem>
             <AnimatedListItem index={1}>
-              <ActivityItem text={t('home.activity2')} time="1h ago" icon="person-add-outline" />
+              <ActivityItem text={t('home.activity2')} time="1h ago" icon="person-add-outline" color={theme.secondary.val} />
             </AnimatedListItem>
             <AnimatedListItem index={2}>
-              <ActivityItem text={t('home.activity3')} time="3h ago" icon="checkmark-done-outline" />
+              <ActivityItem text={t('home.activity3')} time="3h ago" icon="checkmark-done-outline" color={theme.accent.val} />
             </AnimatedListItem>
             <AnimatedListItem index={3}>
-              <ActivityItem text={t('home.activity4')} time="5h ago" icon="rocket-outline" />
+              <ActivityItem text={t('home.activity4')} time="5h ago" icon="rocket-outline" color={theme.secondary.val} />
             </AnimatedListItem>
           </AppCard>
         </SlideIn>

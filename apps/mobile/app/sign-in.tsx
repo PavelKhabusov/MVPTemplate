@@ -41,7 +41,7 @@ export default function SignInScreen() {
         <Text color="$mutedText" textAlign="center">
           {t('auth.noAccount')}{' '}
           <Link href="/sign-up">
-            <Text color="$primary" fontWeight="bold">
+            <Text color="$accent" fontWeight="bold">
               {t('auth.createAccount')}
             </Text>
           </Link>

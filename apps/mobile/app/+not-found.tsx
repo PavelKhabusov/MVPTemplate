@@ -15,7 +15,7 @@ export default function NotFoundScreen() {
         </FadeIn>
 
         <Link href="/">
-          <Text color="$primary" fontWeight="bold">
+          <Text color="$accent" fontWeight="bold">
             Go to Home
           </Text>
         </Link>

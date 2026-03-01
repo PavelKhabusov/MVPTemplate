@@ -33,7 +33,7 @@ export function Breadcrumbs({ pathname }: BreadcrumbsProps) {
               // @ts-expect-error — web-only tag prop
               tag="a"
               href={crumb.href}
-              color="$primary"
+              color="$accent"
               fontSize="$2"
               cursor="pointer"
               hoverStyle={{ textDecorationLine: 'underline' }}

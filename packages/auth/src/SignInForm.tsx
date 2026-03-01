@@ -62,7 +62,7 @@ export function SignInForm() {
           />
           {useAuthStore.getState().user?.emailEnabled !== false && (
             <Text
-              color="$primary"
+              color="$accent"
               fontSize="$2"
               textAlign="right"
               cursor="pointer"

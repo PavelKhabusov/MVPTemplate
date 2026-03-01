@@ -10,17 +10,17 @@ import { useSearch } from '@mvp/lib'
 import { api } from '../../src/services/api'
 
 const CATEGORIES = [
-  { key: 'catDesign', icon: 'color-palette-outline' as const, gradient: ['#FF6B35', '#FF8F66'] },
-  { key: 'catDev', icon: 'code-slash-outline' as const, gradient: ['#0891B2', '#06B6D4'] },
-  { key: 'catMarketing', icon: 'megaphone-outline' as const, gradient: ['#A855F7', '#C084FC'] },
-  { key: 'catAnalytics', icon: 'bar-chart-outline' as const, gradient: ['#10B981', '#34D399'] },
+  { key: 'catDesign', icon: 'color-palette-outline' as const, colorKey: 'accent' as const },
+  { key: 'catDev', icon: 'code-slash-outline' as const, colorKey: 'secondary' as const },
+  { key: 'catMarketing', icon: 'megaphone-outline' as const, colorKey: 'accent' as const },
+  { key: 'catAnalytics', icon: 'bar-chart-outline' as const, colorKey: 'secondary' as const },
 ]
 
 const FEATURED = [
-  { titleKey: 'item1Title', descKey: 'item1Desc', icon: 'layers-outline' as const, accent: '#0891B2' },
-  { titleKey: 'item2Title', descKey: 'item2Desc', icon: 'analytics-outline' as const, accent: '#7C3AED' },
-  { titleKey: 'item3Title', descKey: 'item3Desc', icon: 'lock-closed-outline' as const, accent: '#E5541A' },
-  { titleKey: 'item4Title', descKey: 'item4Desc', icon: 'server-outline' as const, accent: '#059669' },
+  { titleKey: 'item1Title', descKey: 'item1Desc', icon: 'layers-outline' as const, colorKey: 'accent' as const },
+  { titleKey: 'item2Title', descKey: 'item2Desc', icon: 'analytics-outline' as const, colorKey: 'secondary' as const },
+  { titleKey: 'item3Title', descKey: 'item3Desc', icon: 'lock-closed-outline' as const, colorKey: 'accent' as const },
+  { titleKey: 'item4Title', descKey: 'item4Desc', icon: 'server-outline' as const, colorKey: 'secondary' as const },
 ]
 
 export default function ExploreScreen() {
@@ -142,34 +142,32 @@ export default function ExploreScreen() {
           <YStack gap="$3">
             <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.categories')}</Text>
             <XStack gap="$3" flexWrap="wrap">
-              {CATEGORIES.map((cat) => (
-                <ScalePress key={cat.key} onPress={() => {}}>
-                  <YStack
-                    width={80}
-                    alignItems="center"
-                    gap="$2"
-                  >
-                    <YStack
-                      width={56}
-                      height={56}
-                      borderRadius={16}
-                      alignItems="center"
-                      justifyContent="center"
-                      style={{
-                        background: Platform.OS === 'web'
-                          ? `linear-gradient(135deg, ${cat.gradient[0]}, ${cat.gradient[1]})`
-                          : undefined,
-                        backgroundColor: Platform.OS !== 'web' ? cat.gradient[0] : undefined,
-                      }}
-                    >
-                      <Ionicons name={cat.icon} size={24} color="white" />
+              {CATEGORIES.map((cat) => {
+                const color = cat.colorKey === 'accent' ? theme.accent.val : theme.secondary.val
+                const colorEnd = cat.colorKey === 'accent' ? theme.accentGradientEnd.val : theme.accent.val
+                return (
+                  <ScalePress key={cat.key} onPress={() => {}}>
+                    <YStack width={80} alignItems="center" gap="$2">
+                      <YStack
+                        width={56}
+                        height={56}
+                        borderRadius={16}
+                        alignItems="center"
+                        justifyContent="center"
+                        style={Platform.OS === 'web'
+                          ? { background: `linear-gradient(135deg, ${color}, ${colorEnd})` }
+                          : { backgroundColor: color }
+                        }
+                      >
+                        <Ionicons name={cat.icon} size={24} color="white" />
+                      </YStack>
+                      <Text fontSize="$1" color="$mutedText" textAlign="center" numberOfLines={1}>
+                        {t(`explore.${cat.key}`)}
+                      </Text>
                     </YStack>
-                    <Text fontSize="$1" color="$mutedText" textAlign="center" numberOfLines={1}>
-                      {t(`explore.${cat.key}`)}
-                    </Text>
-                  </YStack>
-                </ScalePress>
-              ))}
+                  </ScalePress>
+                )
+              })}
             </XStack>
           </YStack>
         </SlideIn>
@@ -184,6 +182,7 @@ export default function ExploreScreen() {
             <YStack gap="$3">
               {FEATURED.map((item, idx) => {
                 const isBookmarked = bookmarkedIds.includes(item.titleKey)
+                const itemColor = item.colorKey === 'accent' ? theme.accent.val : theme.secondary.val
                 return (
                   <AnimatedListItem key={item.titleKey} index={idx}>
                     <AppCard animated={false}>
@@ -196,7 +195,7 @@ export default function ExploreScreen() {
                           alignItems="center"
                           justifyContent="center"
                         >
-                          <Ionicons name={item.icon} size={22} color={item.accent} />
+                          <Ionicons name={item.icon} size={22} color={itemColor} />
                         </YStack>
                         <YStack flex={1} gap="$1">
                           <Text fontWeight="600" fontSize="$3" color="$color">
@@ -231,19 +230,23 @@ export default function ExploreScreen() {
                 <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.trending')}</Text>
               </XStack>
               <XStack gap="$2" flexWrap="wrap">
-                {['React Native', 'TypeScript', 'Tamagui', 'Expo', 'Fastify', 'Drizzle'].map((tag) => (
-                  <YStack
-                    key={tag}
-                    backgroundColor="$subtleBackground"
-                    paddingHorizontal="$3"
-                    paddingVertical="$1.5"
-                    borderRadius="$2"
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                  >
-                    <Text fontSize="$2" color="$color">{tag}</Text>
-                  </YStack>
-                ))}
+                {['React Native', 'TypeScript', 'Tamagui', 'Expo', 'Fastify', 'Drizzle'].map((tag, i) => {
+                  const isAccented = i % 3 === 0
+                  const isSecondary = i % 3 === 1
+                  return (
+                    <YStack
+                      key={tag}
+                      backgroundColor={isAccented ? (theme.accent.val + '18') : isSecondary ? (theme.secondary.val + '18') : '$subtleBackground'}
+                      paddingHorizontal="$3"
+                      paddingVertical="$1.5"
+                      borderRadius="$2"
+                      borderWidth={1}
+                      borderColor={isAccented ? '$accent' : isSecondary ? '$secondary' : '$borderColor'}
+                    >
+                      <Text fontSize="$2" color={isAccented ? '$accent' : isSecondary ? '$secondary' : '$color'}>{tag}</Text>
+                    </YStack>
+                  )
+                })}
               </XStack>
             </YStack>
           </AppCard>
