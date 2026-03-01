@@ -143,18 +143,27 @@ export function TemplateConfigTab() {
                         alignItems="center"
                         justifyContent="center"
                       >
-                        <YStack
-                          width={28}
-                          height={28}
-                          borderRadius={14}
-                          style={{ backgroundColor: scheme.swatch } as any}
-                          alignItems="center"
-                          justifyContent="center"
-                        >
-                          {isSelected && (
-                            <Ionicons name="checkmark" size={14} color="white" />
-                          )}
-                        </YStack>
+                        {scheme.swatch2 ? (
+                          <XStack width={28} height={28} borderRadius={14} overflow="hidden" alignItems="center" justifyContent="center">
+                            <YStack flex={1} height={28} style={{ backgroundColor: scheme.swatch } as any} alignItems="center" justifyContent="center">
+                              {isSelected && <Ionicons name="checkmark" size={12} color="white" />}
+                            </YStack>
+                            <YStack flex={1} height={28} style={{ backgroundColor: scheme.swatch2 } as any} />
+                          </XStack>
+                        ) : (
+                          <YStack
+                            width={28}
+                            height={28}
+                            borderRadius={14}
+                            style={{ backgroundColor: scheme.swatch } as any}
+                            alignItems="center"
+                            justifyContent="center"
+                          >
+                            {isSelected && (
+                              <Ionicons name="checkmark" size={14} color="white" />
+                            )}
+                          </YStack>
+                        )}
                       </YStack>
                       <Text
                         fontSize={10}

@@ -13,6 +13,8 @@ export interface ColorScheme {
   light: ColorSchemeValues
   dark: ColorSchemeValues
   swatch: string
+  /** Second accent color for dual-tone themes — shown as split swatch */
+  swatch2?: string
 }
 
 export const COLOR_SCHEMES: ColorScheme[] = [
@@ -218,6 +220,117 @@ export const COLOR_SCHEMES: ColorScheme[] = [
       accentGradientStart: '#64748B',
       accentGradientEnd: '#818CF8',
       secondary: '#CBD5E1',
+    },
+  },
+
+  // ── Dual-accent themes ──────────────────────────────────────────────────────
+
+  {
+    key: 'aurora',
+    labelKey: 'templateConfig.schemeAurora',
+    swatch: '#0284C7',
+    swatch2: '#7C3AED',
+    light: {
+      accent: '#0284C7',
+      accentGradientStart: '#0284C7',
+      accentGradientEnd: '#7C3AED',
+      secondary: '#7C3AED',
+    },
+    dark: {
+      accent: '#38BDF8',
+      accentGradientStart: '#38BDF8',
+      accentGradientEnd: '#A78BFA',
+      secondary: '#A78BFA',
+    },
+  },
+  {
+    key: 'sunset',
+    labelKey: 'templateConfig.schemeSunset',
+    swatch: '#EA580C',
+    swatch2: '#E11D48',
+    light: {
+      accent: '#EA580C',
+      accentGradientStart: '#EA580C',
+      accentGradientEnd: '#E11D48',
+      secondary: '#BE185D',
+    },
+    dark: {
+      accent: '#FB923C',
+      accentGradientStart: '#FB923C',
+      accentGradientEnd: '#FB7185',
+      secondary: '#F472B6',
+    },
+  },
+  {
+    key: 'forest',
+    labelKey: 'templateConfig.schemeForest',
+    swatch: '#16A34A',
+    swatch2: '#B45309',
+    light: {
+      accent: '#16A34A',
+      accentGradientStart: '#16A34A',
+      accentGradientEnd: '#D97706',
+      secondary: '#B45309',
+    },
+    dark: {
+      accent: '#4ADE80',
+      accentGradientStart: '#4ADE80',
+      accentGradientEnd: '#FCD34D',
+      secondary: '#FBBF24',
+    },
+  },
+  {
+    key: 'galaxy',
+    labelKey: 'templateConfig.schemeGalaxy',
+    swatch: '#4338CA',
+    swatch2: '#CA8A04',
+    light: {
+      accent: '#4338CA',
+      accentGradientStart: '#4338CA',
+      accentGradientEnd: '#D97706',
+      secondary: '#CA8A04',
+    },
+    dark: {
+      accent: '#818CF8',
+      accentGradientStart: '#818CF8',
+      accentGradientEnd: '#FDE68A',
+      secondary: '#FDE047',
+    },
+  },
+  {
+    key: 'neon',
+    labelKey: 'templateConfig.schemeNeon',
+    swatch: '#65A30D',
+    swatch2: '#DB2777',
+    light: {
+      accent: '#65A30D',
+      accentGradientStart: '#65A30D',
+      accentGradientEnd: '#DB2777',
+      secondary: '#BE185D',
+    },
+    dark: {
+      accent: '#A3E635',
+      accentGradientStart: '#A3E635',
+      accentGradientEnd: '#F472B6',
+      secondary: '#EC4899',
+    },
+  },
+  {
+    key: 'coral',
+    labelKey: 'templateConfig.schemeCoral',
+    swatch: '#0F766E',
+    swatch2: '#C2410C',
+    light: {
+      accent: '#0F766E',
+      accentGradientStart: '#0F766E',
+      accentGradientEnd: '#C2410C',
+      secondary: '#B45309',
+    },
+    dark: {
+      accent: '#2DD4BF',
+      accentGradientStart: '#2DD4BF',
+      accentGradientEnd: '#FB923C',
+      secondary: '#FDBA74',
     },
   },
 ]

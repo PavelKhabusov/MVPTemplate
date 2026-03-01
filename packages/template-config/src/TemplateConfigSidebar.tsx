@@ -408,12 +408,19 @@ export function TemplateConfigSidebar() {
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <YStack
-                    width={24}
-                    height={24}
-                    borderRadius={12}
-                    style={{ backgroundColor: scheme.swatch } as any}
-                  />
+                  {scheme.swatch2 ? (
+                    <XStack width={24} height={24} borderRadius={12} overflow="hidden">
+                      <YStack flex={1} style={{ backgroundColor: scheme.swatch } as any} />
+                      <YStack flex={1} style={{ backgroundColor: scheme.swatch2 } as any} />
+                    </XStack>
+                  ) : (
+                    <YStack
+                      width={24}
+                      height={24}
+                      borderRadius={12}
+                      style={{ backgroundColor: scheme.swatch } as any}
+                    />
+                  )}
                 </YStack>
               </Pressable>
             )
