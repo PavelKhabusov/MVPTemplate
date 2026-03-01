@@ -1,31 +1,24 @@
 import { config } from '@tamagui/config/v3'
 import { createTamagui, createTokens } from 'tamagui'
 
-const brandColors = {
-  // Accent — electric cyan
+// Static palette — only keys that do NOT exist as theme tokens go into tokens.color.
+// Keys like accent/secondary/success/warning/error/info are defined as theme tokens
+// (themes.light/dark) so they must NOT also be color tokens — otherwise Tamagui
+// generates conflicting --c-accent / --c-secondary static CSS vars that shadow the
+// dynamic theme vars updated by updateTheme().
+const palette = {
   primary: '#00D4FF',
   primaryLight: '#38E8FF',
   primaryDark: '#00A3CC',
-  // Secondary — violet/purple
-  secondary: '#A855F7',
   secondaryLight: '#C084FC',
   secondaryDark: '#7C3AED',
-  // Accent warm — neon orange
-  accent: '#FF6B35',
-  accentLight: '#FF8F66',
-  accentDark: '#E5541A',
-  // Semantic
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
 }
 
 const tokens = createTokens({
   ...config.tokens,
   color: {
     ...config.tokens.color,
-    ...brandColors,
+    ...palette,
   },
 })
 
@@ -49,11 +42,11 @@ const tamaguiConfig = createTamagui({
       placeholderColor: '#A3A3A3',
       primary: '#0A0A0A',
       primaryLight: '#404040',
-      secondary: brandColors.secondaryDark,
+      secondary: '#7C3AED',
       accent: '#0891B2',
       success: '#059669',
       warning: '#D97706',
-      error: brandColors.error,
+      error: '#EF4444',
       info: '#2563EB',
       cardBackground: '#FFFFFF',
       subtleBackground: '#F5F5F5',
@@ -64,7 +57,7 @@ const tamaguiConfig = createTamagui({
       cardBorder: 'rgba(0,0,0,0.06)',
       cardShadow: 'rgba(0,0,0,0.04)',
       accentGradientStart: '#0891B2',
-      accentGradientEnd: brandColors.secondaryDark,
+      accentGradientEnd: '#7C3AED',
       radiusSm: 8,
       radiusMd: 12,
       radiusLg: 16,
@@ -84,10 +77,10 @@ const tamaguiConfig = createTamagui({
       placeholderColor: '#71717A',
       primary: '#FAFAFA',
       primaryLight: '#D4D4D8',
-      secondary: brandColors.secondaryLight,
-      accent: brandColors.primaryLight,
-      success: brandColors.success,
-      warning: brandColors.warning,
+      secondary: '#C084FC',
+      accent: '#38E8FF',
+      success: '#10B981',
+      warning: '#F59E0B',
       error: '#F87171',
       info: '#60A5FA',
       cardBackground: '#18181B',
@@ -98,8 +91,8 @@ const tamaguiConfig = createTamagui({
       sidebarBorder: '#27272A',
       cardBorder: '#27272A',
       cardShadow: 'rgba(0,0,0,0.3)',
-      accentGradientStart: brandColors.primary,
-      accentGradientEnd: brandColors.secondary,
+      accentGradientStart: '#00D4FF',
+      accentGradientEnd: '#A855F7',
       radiusSm: 8,
       radiusMd: 12,
       radiusLg: 16,
