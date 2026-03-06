@@ -353,7 +353,7 @@ export function WebRootLayout() {
   const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
   const fontScale = useTemplateConfigStore((s) => s.fontScale)
   const fontZoom = getFontZoom(fontScale)
-  const appName = useCompanyStore((s) => s.info.appName) || 'MVPTemplate'
+  const appName = useCompanyStore((s) => s.info.appName) || 'CallSheet'
   const [searchOpen, setSearchOpen] = useState(false)
 
   const showHeader = webLayout === 'header' || webLayout === 'both'

@@ -2,12 +2,12 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'MVPTemplate',
-  slug: 'mvp-template',
+  name: 'CallSheet',
+  slug: 'callsheet',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
-  scheme: 'mvptemplate',
+  scheme: 'callsheet',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
   splash: {
@@ -19,14 +19,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   // expo-splash-screen plugin in plugins[] handles dev/production builds
   ios: {
     supportsTablet: true,
-    bundleIdentifier: 'com.mvptemplate.app',
+    bundleIdentifier: 'com.callsheet.app',
   },
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#ffffff',
     },
-    package: 'com.mvptemplate.app',
+    package: 'com.callsheet.app',
     edgeToEdgeEnabled: true,
   },
   web: {

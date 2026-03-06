@@ -52,7 +52,7 @@ export default function App() {
   }
 
   if (!authed) {
-    return <AuthScreen onAuth={() => setAuthed(true)} googleAuthEnabled={flags.googleAuth} />
+    return <AuthScreen onAuth={() => setAuthed(true)} googleAuthEnabled={flags.googleAuth} theme={theme} setTheme={setTheme} />
   }
 
   if (!onboardingDone) {

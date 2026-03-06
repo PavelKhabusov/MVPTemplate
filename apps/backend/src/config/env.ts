@@ -20,6 +20,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:8081'),
   EXPO_ACCESS_TOKEN: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 
   // Analytics
   ANALYTICS_ENABLED: envBoolean.default(true),
@@ -102,6 +103,13 @@ const envSchema = z.object({
   // Proxy (legacy env vars — proxy is now managed via DB)
   PROXY_ENABLED: envBoolean,
   PROXY_URL: z.string().optional(),
+
+  // Voximplant
+  VOXIMPLANT_ACCOUNT_ID: z.string().optional(),
+  VOXIMPLANT_API_KEY: z.string().optional(),
+
+  // Encryption (for AES-256-GCM, 32-byte hex key)
+  ENCRYPTION_KEY: z.string().optional(),
 
   // Storage
   STORAGE_TYPE: z.enum(['local', 's3']).default('local'),

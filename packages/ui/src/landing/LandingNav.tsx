@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from '@mvp/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS, type SupportedLanguage } from '@mvp/i18n'
 import { useThemeStore, useLanguageStore, useAuthStore, useCompanyStore } from '@mvp/store'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
 import { MotiView, AnimatePresence } from 'moti'
 import { AppAvatar } from '../components/AppAvatar'
 import { ScalePress } from '../animations/ScalePress'
@@ -21,7 +22,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
   const { mode, setMode } = useThemeStore()
   const setLanguage = useLanguageStore((s) => s.setLanguage)
   const user = useAuthStore((s) => s.user)
-  const appName = useCompanyStore((s) => s.info.appName) || 'MVPTemplate'
+  const appName = useCompanyStore((s) => s.info.appName) || APP_BRAND.name
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

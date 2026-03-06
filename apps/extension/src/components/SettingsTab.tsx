@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { Sun, Moon, Monitor, LogOut, Globe, ExternalLink } from 'lucide-react'
 import type { ThemeMode } from '../types'
+import { extensionConfig } from '../config'
 
-type Lang = 'en' | 'ru'
+type Lang = 'en' | 'ru' | 'es' | 'ja'
 
 interface UserInfo {
   email: string
@@ -17,23 +19,24 @@ interface SettingsTabProps {
   onLogout: () => void
 }
 
-const THEME_OPTIONS: { value: ThemeMode; label: Record<Lang, string>; icon: typeof Sun }[] = [
-  { value: 'system', label: { en: 'System', ru: 'Система' }, icon: Monitor },
-  { value: 'light', label: { en: 'Light', ru: 'Светлая' }, icon: Sun },
-  { value: 'dark', label: { en: 'Dark', ru: 'Тёмная' }, icon: Moon },
+const THEME_OPTIONS: { value: ThemeMode; label: Partial<Record<Lang, string>>; icon: typeof Sun }[] = [
+  { value: 'system', label: { en: 'System', ru: 'Система', es: 'Sistema', ja: 'システム' }, icon: Monitor },
+  { value: 'light', label: { en: 'Light', ru: 'Светлая', es: 'Claro', ja: 'ライト' }, icon: Sun },
+  { value: 'dark', label: { en: 'Dark', ru: 'Тёмная', es: 'Oscuro', ja: 'ダーク' }, icon: Moon },
 ]
 
 const LANG_OPTIONS: { value: Lang; label: string }[] = [
   { value: 'en', label: 'EN' },
   { value: 'ru', label: 'RU' },
+  { value: 'es', label: 'ES' },
+  { value: 'ja', label: 'JA' },
 ]
 
-const labels = {
-  theme: { en: 'Theme', ru: 'Тема' },
-  language: { en: 'Language', ru: 'Язык' },
-  account: { en: 'Account', ru: 'Аккаунт' },
-  openApp: { en: 'Open in app', ru: 'Открыть в приложении' },
-  signOut: { en: 'Sign Out', ru: 'Выход' },
+const labels: Record<string, Partial<Record<Lang, string>>> = {
+  theme: { en: 'Theme', ru: 'Тема', es: 'Tema', ja: 'テーマ' },
+  language: { en: 'Language', ru: 'Язык', es: 'Idioma', ja: '言語' },
+  openApp: { en: 'Open in app', ru: 'Открыть в приложении', es: 'Abrir en app', ja: 'アプリで開く' },
+  signOut: { en: 'Sign Out', ru: 'Выход', es: 'Cerrar sesión', ja: 'ログアウト' },
 }
 
 export default function SettingsTab({ theme, setTheme, lang, setLang, user, onLogout }: SettingsTabProps) {
@@ -54,16 +57,25 @@ export default function SettingsTab({ theme, setTheme, lang, setLang, user, onLo
             target="_blank"
             rel="noopener noreferrer"
             className="text-text-muted hover:text-brand transition"
-            title={labels.openApp[lang]}
+            title={labels.openApp[lang] || labels.openApp.en}
           >
             <ExternalLink size={14} />
           </a>
         </div>
       )}
 
+      {/* Custom settings sections from config (app-specific — shown first) */}
+      {extensionConfig.settingsSections.length > 0 && (
+        <Suspense fallback={<div className="bg-bg-secondary border border-bg-tertiary rounded-xl p-4 animate-pulse h-20" />}>
+          {extensionConfig.settingsSections.map((Section, i) => (
+            <Section key={i} lang={lang} />
+          ))}
+        </Suspense>
+      )}
+
       {/* Theme */}
       <div className="bg-bg-secondary border border-bg-tertiary rounded-xl p-4">
-        <div className="text-[13px] font-medium mb-3">{labels.theme[lang]}</div>
+        <div className="text-[13px] font-medium mb-3">{labels.theme[lang] || labels.theme.en}</div>
         <div className="flex gap-2">
           {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
             <button
@@ -76,7 +88,7 @@ export default function SettingsTab({ theme, setTheme, lang, setLang, user, onLo
               }`}
             >
               <Icon size={16} />
-              {label[lang]}
+              {label[lang] || label.en}
             </button>
           ))}
         </div>
@@ -86,7 +98,7 @@ export default function SettingsTab({ theme, setTheme, lang, setLang, user, onLo
       <div className="bg-bg-secondary border border-bg-tertiary rounded-xl p-4">
         <div className="text-[13px] font-medium mb-3 flex items-center gap-2">
           <Globe size={14} />
-          {labels.language[lang]}
+          {labels.language[lang] || labels.language.en}
         </div>
         <div className="flex gap-2">
           {LANG_OPTIONS.map(({ value, label }) => (
@@ -111,7 +123,7 @@ export default function SettingsTab({ theme, setTheme, lang, setLang, user, onLo
         className="flex items-center justify-center gap-2 bg-bg-secondary border border-bg-tertiary text-error rounded-xl py-2.5 text-[12px] cursor-pointer font-sans hover:bg-error/5 transition"
       >
         <LogOut size={13} />
-        {labels.signOut[lang]}
+        {labels.signOut[lang] || labels.signOut.en}
       </button>
     </div>
   )

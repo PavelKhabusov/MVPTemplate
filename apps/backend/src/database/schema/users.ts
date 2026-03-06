@@ -14,6 +14,9 @@ export const users = pgTable('users', {
   features: jsonb('features').$type<string[]>().default([]).notNull(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   phoneVerified: boolean('phone_verified').default(false).notNull(),
+  voximplantLogin: varchar('voximplant_login', { length: 255 }),
+  voximplantPassword: text('voximplant_password'), // AES-256-GCM encrypted
+  voximplantAppId: varchar('voximplant_app_id', { length: 255 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

@@ -26,6 +26,8 @@ import { StorageService } from './modules/storage/storage.service'
 import { storageRoutes } from './modules/storage/storage.routes'
 import { proxyRoutes } from './modules/proxy/proxy.routes'
 import { emailRoutes } from './modules/email/email.routes'
+import { callsRoutes } from './modules/calls/calls.routes'
+import { voximplantRoutes } from './modules/voximplant/voximplant.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -74,9 +76,9 @@ export async function buildApp() {
     await app.register(swagger, {
       openapi: {
         info: {
-          title: 'MVP Template API',
+          title: 'CallSheet API',
           version: '1.0.0',
-          description: 'API documentation for MVP Template',
+          description: 'API documentation for CallSheet',
         },
         servers: [
           { url: `http://${env.HOST}:${env.PORT}`, description: 'Development' },
@@ -142,6 +144,10 @@ export async function buildApp() {
   }
   await app.register(storageRoutes, { prefix: '/api/admin/storage' })
   await app.register(proxyRoutes, { prefix: '/api/admin/proxies' })
+
+  // CallSheet business logic
+  await app.register(callsRoutes, { prefix: '/api/calls' })
+  await app.register(voximplantRoutes, { prefix: '/api/voximplant' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

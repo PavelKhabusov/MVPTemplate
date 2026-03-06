@@ -9,19 +9,19 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
         {/* Primary Meta Tags */}
-        <title>MVPTemplate</title>
-        <meta name="title" content="MVPTemplate" />
-        <meta name="description" content="Universal MVP template powered by Expo + Tamagui" />
+        <title>CallSheet</title>
+        <meta name="title" content="CallSheet" />
+        <meta name="description" content="Call clients directly from Google Sheets" />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="MVPTemplate" />
-        <meta property="og:description" content="Universal MVP template powered by Expo + Tamagui" />
+        <meta property="og:title" content="CallSheet" />
+        <meta property="og:description" content="Call clients directly from Google Sheets" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="MVPTemplate" />
-        <meta name="twitter:description" content="Universal MVP template powered by Expo + Tamagui" />
+        <meta name="twitter:title" content="CallSheet" />
+        <meta name="twitter:description" content="Call clients directly from Google Sheets" />
 
         {/* Favicon */}
         <link rel="icon" type="image/png" href="/favicon.png?v=2" />

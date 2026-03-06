@@ -38,8 +38,8 @@ const ENV_GROUPS = {
     types: { EMAIL_ENABLED: 'boolean', EMAIL_VERIFICATION_REQUIRED: 'boolean', SMTP_HOST: 'string', SMTP_PORT: 'string', SMTP_USER: 'string', SMTP_PASS: 'secret', SMTP_FROM: 'string' } as Record<string, string>,
   },
   auth: {
-    keys: ['GOOGLE_CLIENT_ID'],
-    types: { GOOGLE_CLIENT_ID: 'secret' } as Record<string, string>,
+    keys: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+    types: { GOOGLE_CLIENT_ID: 'secret', GOOGLE_CLIENT_SECRET: 'secret' } as Record<string, string>,
   },
   pushNotifications: {
     keys: ['EXPO_ACCESS_TOKEN'],
@@ -68,6 +68,10 @@ const ENV_GROUPS = {
   ai: {
     keys: ['GEMINI_API_KEY', 'GEMINI_MODEL', 'GEMINI_CONCURRENT_LIMIT', 'OPENAI_API_KEY', 'OPENAI_MODEL', 'OPENAI_MAX_TOKENS', 'AI_PROXY_ENABLED'],
     types: { GEMINI_API_KEY: 'secret', GEMINI_MODEL: 'string', GEMINI_CONCURRENT_LIMIT: 'string', OPENAI_API_KEY: 'secret', OPENAI_MODEL: 'string', OPENAI_MAX_TOKENS: 'string', AI_PROXY_ENABLED: 'boolean' } as Record<string, string>,
+  },
+  voximplant: {
+    keys: ['VOXIMPLANT_ACCOUNT_ID', 'VOXIMPLANT_API_KEY', 'ENCRYPTION_KEY'],
+    types: { VOXIMPLANT_ACCOUNT_ID: 'secret', VOXIMPLANT_API_KEY: 'secret', ENCRYPTION_KEY: 'secret' } as Record<string, string>,
   },
 } as const
 
@@ -182,7 +186,7 @@ export async function adminRoutes(app: FastifyInstance) {
   // GET /api/admin/company-info — read company info
   app.get('/company-info', async (_request, reply) => {
     const [info] = await db.select().from(companyInfo).where(eq(companyInfo.id, 1))
-    return sendSuccess(reply, info ?? { id: 1, appName: 'MVPTemplate', companyName: '', tagline: '', supportEmail: '', website: '', phone: '', address: '', updatedAt: new Date() })
+    return sendSuccess(reply, info ?? { id: 1, appName: 'CallSheet', companyName: '', tagline: '', supportEmail: '', website: '', phone: '', address: '', updatedAt: new Date() })
   })
 
   // PUT /api/admin/company-info — upsert company info

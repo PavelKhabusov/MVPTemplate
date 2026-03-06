@@ -4,19 +4,13 @@ import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from '@mvp/i18n'
 
-const GREETINGS = [
-  { text: 'Hello', lang: 'EN' },
-  { text: 'Привет', lang: 'RU' },
-  { text: 'Hola', lang: 'ES' },
-  { text: '今日は', lang: 'JA' },
+const SHEET_ROWS = [
+  { name: 'Ivan P.', phone: '+7 999 123-45-67', status: 'call', highlight: true },
+  { name: 'Anna S.', phone: '+7 903 456-78-90', status: 'done', highlight: false },
+  { name: 'Dmitry K.', phone: '+7 916 789-01-23', status: 'empty', highlight: false },
 ]
 
-const API_ROUTES = [
-  { method: 'POST', color: '#f0883e', path: '/api/auth/login' },
-  { method: 'GET', color: '#7ee787', path: '/api/users' },
-  { method: 'POST', color: '#f0883e', path: '/api/payments/checkout' },
-  { method: 'WS', color: '#d2a8ff', path: '/api/events/sse' },
-]
+const WAVEFORM = [12, 24, 18, 36, 28, 42, 20, 38, 26, 44, 16, 32, 40, 22, 34, 30, 46, 18, 28, 36]
 
 const BAR_HEIGHTS = [40, 65, 35, 80, 55, 70, 50, 90, 45, 75, 60, 85]
 
@@ -25,8 +19,10 @@ export function LandingFeatures() {
   const theme = useTheme()
   const gridRef = useRef<View>(null)
   const [isInView, setIsInView] = useState(false)
-  const [greetIdx, setGreetIdx] = useState(0)
   const [barAnimate, setBarAnimate] = useState(false)
+  const [callTimer, setCallTimer] = useState(0)
+  const [wavePhase, setWavePhase] = useState(0)
+  const [saveStep, setSaveStep] = useState(0)
 
   // Intersection observer
   useEffect(() => {
@@ -46,13 +42,6 @@ export function LandingFeatures() {
     return () => observer.disconnect()
   }, [])
 
-  // Cycling greeting
-  useEffect(() => {
-    if (!isInView) return
-    const interval = setInterval(() => setGreetIdx((i) => (i + 1) % GREETINGS.length), 2200)
-    return () => clearInterval(interval)
-  }, [isInView])
-
   // Animate chart bars
   useEffect(() => {
     if (!isInView) return
@@ -60,7 +49,30 @@ export function LandingFeatures() {
     return () => clearTimeout(timer)
   }, [isInView])
 
-  // Inject CSS for responsive grid, hover, animations
+  // Call timer animation (0→2:47)
+  useEffect(() => {
+    if (!isInView) return
+    const interval = setInterval(() => {
+      setCallTimer((t) => (t + 1) % 168)
+    }, 300)
+    return () => clearInterval(interval)
+  }, [isInView])
+
+  // Waveform phase
+  useEffect(() => {
+    if (!isInView) return
+    const interval = setInterval(() => setWavePhase((p) => (p + 1) % WAVEFORM.length), 120)
+    return () => clearInterval(interval)
+  }, [isInView])
+
+  // Auto-save step animation
+  useEffect(() => {
+    if (!isInView) return
+    const interval = setInterval(() => setSaveStep((s) => (s + 1) % 5), 900)
+    return () => clearInterval(interval)
+  }, [isInView])
+
+  // Inject CSS
   useEffect(() => {
     if (Platform.OS !== 'web') return
     const style = document.createElement('style')
@@ -102,15 +114,13 @@ export function LandingFeatures() {
         from { opacity: 0; transform: translateY(24px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      @keyframes greetCycle {
-        0% { opacity: 0; transform: translateY(10px); }
-        12% { opacity: 1; transform: translateY(0); }
-        88% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-10px); }
+      @keyframes phonePulse {
+        0%, 100% { box-shadow: 0 0 0 0px rgba(99,102,241,0.4); }
+        50% { box-shadow: 0 0 0 6px rgba(99,102,241,0.1); }
       }
-      @keyframes deviceGlow {
-        0%, 100% { opacity: 0.7; }
-        50% { opacity: 1; }
+      @keyframes callblink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
       }
     `
     document.head.appendChild(style)
@@ -122,6 +132,12 @@ export function LandingFeatures() {
   const gs = theme.accentGradientStart.val
   const ge = theme.accentGradientEnd.val
   const acc = theme.accent.val
+
+  const callMinutes = Math.floor(callTimer / 60)
+  const callSeconds = callTimer % 60
+  const callTimeStr = `${callMinutes}:${callSeconds.toString().padStart(2, '0')}`
+
+  const saveText = ['', 'A', 'An', 'Ans', 'Answ'][saveStep]
 
   return (
     <YStack id="features" paddingVertical="$10" paddingHorizontal="$5" alignItems="center">
@@ -147,38 +163,84 @@ export function LandingFeatures() {
         >
           {isInView ? (
             <>
-              {/* ── Cross-Platform (wide) ── */}
+              {/* ── Phone Detection (wide) ── */}
               <View style={{ gridColumn: 'span 2', animation: 'bentoFadeUp 0.5s ease-out both' } as any}>
-                <BentoCard theme={theme}>
-                  <XStack gap="$4" justifyContent="center" alignItems="flex-end" height={120}>
-                    {/* Phone */}
-                    <YStack
-                      width={48} height={80} borderRadius={8}
-                      borderWidth={2} borderColor={`${acc}40`}
-                      alignItems="center" justifyContent="center"
-                      style={{ animation: 'deviceGlow 3s ease-in-out infinite', background: `linear-gradient(180deg, ${gs}15, ${ge}15)` } as any}
+                <BentoCard>
+                  {/* Mini spreadsheet */}
+                  <YStack
+                    borderRadius={10}
+                    overflow="hidden"
+                    borderWidth={1}
+                    borderColor="$borderColor"
+                    height={130}
+                    style={{ backgroundColor: '#0d1117' } as any}
+                  >
+                    {/* Header */}
+                    <XStack
+                      paddingHorizontal="$3"
+                      paddingVertical="$1.5"
+                      style={{ backgroundColor: '#161b22', borderBottom: '1px solid #30363d' } as any}
                     >
-                      <YStack width={28} height={50} borderRadius={4} style={{ background: `linear-gradient(135deg, ${gs}40, ${ge}40)` } as any} />
-                    </YStack>
-                    {/* Tablet */}
-                    <YStack
-                      width={80} height={100} borderRadius={10}
-                      borderWidth={2} borderColor={`${acc}40`}
-                      alignItems="center" justifyContent="center"
-                      style={{ animation: 'deviceGlow 3s ease-in-out infinite 0.5s', background: `linear-gradient(180deg, ${gs}15, ${ge}15)` } as any}
-                    >
-                      <YStack width={60} height={72} borderRadius={4} style={{ background: `linear-gradient(135deg, ${gs}40, ${ge}40)` } as any} />
-                    </YStack>
-                    {/* Desktop */}
-                    <YStack
-                      width={130} height={90} borderRadius={8}
-                      borderWidth={2} borderColor={`${acc}40`}
-                      alignItems="center" justifyContent="center"
-                      style={{ animation: 'deviceGlow 3s ease-in-out infinite 1s', background: `linear-gradient(180deg, ${gs}15, ${ge}15)` } as any}
-                    >
-                      <YStack width={110} height={65} borderRadius={4} style={{ background: `linear-gradient(135deg, ${gs}40, ${ge}40)` } as any} />
-                    </YStack>
-                  </XStack>
+                      {['Name', 'Phone', 'Status'].map((h) => (
+                        <Text key={h} flex={1} fontSize={11} color="#8b949e" fontWeight="600" style={{ fontFamily: 'monospace' } as any}>
+                          {h}
+                        </Text>
+                      ))}
+                    </XStack>
+                    {/* Rows */}
+                    {SHEET_ROWS.map((row, i) => (
+                      <XStack
+                        key={i}
+                        paddingHorizontal="$3"
+                        paddingVertical="$1.5"
+                        alignItems="center"
+                        style={{
+                          borderBottom: i < 2 ? '1px solid #21262d' : undefined,
+                          backgroundColor: row.highlight ? `${acc}10` : undefined,
+                        } as any}
+                      >
+                        <Text flex={1} fontSize={11} color={row.highlight ? '#e6edf3' : '#8b949e'} style={{ fontFamily: 'monospace' } as any}>
+                          {row.name}
+                        </Text>
+                        <XStack flex={1} gap="$2" alignItems="center">
+                          <Text
+                            fontSize={11}
+                            style={{
+                              fontFamily: 'monospace',
+                              color: row.highlight ? acc : '#8b949e',
+                              ...(row.highlight ? { animation: 'callblink 1.8s ease-in-out infinite' } : {}),
+                            } as any}
+                          >
+                            {row.phone}
+                          </Text>
+                        </XStack>
+                        <XStack flex={1} alignItems="center" gap="$1.5">
+                          {row.status === 'call' && (
+                            <XStack
+                              paddingHorizontal="$2"
+                              paddingVertical="$0.5"
+                              borderRadius={6}
+                              alignItems="center"
+                              gap="$1"
+                              style={{ backgroundColor: `${acc}20`, animation: 'phonePulse 2s ease-in-out infinite' } as any}
+                            >
+                              <Ionicons name="call" size={10} color={acc} />
+                              <Text fontSize={10} color={acc} fontWeight="600">Call</Text>
+                            </XStack>
+                          )}
+                          {row.status === 'done' && (
+                            <XStack paddingHorizontal="$2" paddingVertical="$0.5" borderRadius={6} alignItems="center" gap="$1" style={{ backgroundColor: '#16803120' } as any}>
+                              <Ionicons name="checkmark" size={10} color="#4ade80" />
+                              <Text fontSize={10} color="#4ade80" fontWeight="600">Done</Text>
+                            </XStack>
+                          )}
+                          {row.status === 'empty' && (
+                            <Text fontSize={11} color="#484f58">—</Text>
+                          )}
+                        </XStack>
+                      </XStack>
+                    ))}
+                  </YStack>
                   <YStack gap="$1">
                     <Text fontWeight="bold" fontSize="$5" color="$color">
                       {t('landing.featureCrossPlatform' as any)}
@@ -190,33 +252,52 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Theming ── */}
+              {/* ── WebRTC Call Widget ── */}
               <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.1s' } as any}>
-                <BentoCard theme={theme} fullHeight>
-                  <XStack justifyContent="center" alignItems="center" height={120} gap="$3">
-                    {/* Light card */}
+                <BentoCard fullHeight>
+                  <YStack justifyContent="center" alignItems="center" height={130} gap="$3">
+                    {/* Call popup */}
                     <YStack
-                      width={60} height={80} borderRadius={12}
-                      borderWidth={1} borderColor="#e0e0e0"
-                      backgroundColor="white" padding="$2" gap="$1.5"
+                      borderRadius={16}
+                      padding="$3"
+                      gap="$2"
+                      alignItems="center"
+                      style={{ background: `linear-gradient(135deg, ${gs}15, ${ge}15)`, border: `1px solid ${acc}30`, width: 160 } as any}
                     >
-                      <YStack height={8} borderRadius={4} style={{ background: '#e0e0e0' } as any} />
-                      <YStack height={8} borderRadius={4} width="70%" style={{ background: '#e0e0e0' } as any} />
-                      <YStack flex={1} borderRadius={6} style={{ background: `linear-gradient(135deg, ${gs}30, ${ge}30)` } as any} />
+                      {/* Avatar */}
+                      <YStack
+                        width={36} height={36} borderRadius={18}
+                        alignItems="center" justifyContent="center"
+                        style={{ background: `linear-gradient(135deg, ${gs}, ${ge})` } as any}
+                      >
+                        <Text fontSize={16}>И</Text>
+                      </YStack>
+                      <YStack alignItems="center" gap="$0.5">
+                        <Text fontSize={12} color="$color" fontWeight="600">Ivan P.</Text>
+                        <Text fontSize={11} color="$accent" fontWeight="700" style={{ fontVariantNumeric: 'tabular-nums' } as any}>
+                          {callTimeStr}
+                        </Text>
+                      </YStack>
+                      {/* Waveform */}
+                      <XStack gap={2} alignItems="center" height={20}>
+                        {WAVEFORM.slice(0, 12).map((h, i) => {
+                          const animated = (i + wavePhase) % 4 === 0
+                          return (
+                            <View
+                              key={i}
+                              style={{
+                                width: 3,
+                                height: animated ? h * 0.45 : h * 0.2,
+                                borderRadius: 2,
+                                backgroundColor: animated ? acc : `${acc}50`,
+                                transition: 'height 0.12s ease',
+                              } as any}
+                            />
+                          )
+                        })}
+                      </XStack>
                     </YStack>
-                    <Ionicons name="swap-horizontal" size={20} color={acc} />
-                    {/* Dark card */}
-                    <YStack
-                      width={60} height={80} borderRadius={12}
-                      borderWidth={1} borderColor="#333"
-                      padding="$2" gap="$1.5"
-                      style={{ backgroundColor: '#1a1a2e' } as any}
-                    >
-                      <YStack height={8} borderRadius={4} style={{ background: '#333' } as any} />
-                      <YStack height={8} borderRadius={4} width="70%" style={{ background: '#333' } as any} />
-                      <YStack flex={1} borderRadius={6} style={{ background: `linear-gradient(135deg, ${gs}50, ${ge}50)` } as any} />
-                    </YStack>
-                  </XStack>
+                  </YStack>
                   <YStack gap="$1">
                     <Text fontWeight="bold" fontSize="$5" color="$color">
                       {t('landing.featureTheming' as any)}
@@ -228,25 +309,55 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── i18n ── */}
+              {/* ── Callback Mode ── */}
               <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.2s' } as any}>
-                <BentoCard theme={theme} fullHeight>
-                  <YStack justifyContent="center" alignItems="center" height={120}>
-                    <YStack
-                      borderRadius={16} paddingHorizontal="$5" paddingVertical="$3"
-                      style={{ background: `linear-gradient(135deg, ${gs}12, ${ge}12)` } as any}
-                    >
-                      <Text
-                        key={greetIdx}
-                        fontSize={28} fontWeight="bold" color="$accent" textAlign="center"
-                        style={{ animation: 'greetCycle 2.2s ease-in-out' } as any}
-                      >
-                        {GREETINGS[greetIdx].text}
-                      </Text>
-                      <Text fontSize="$2" color="$mutedText" textAlign="center" marginTop="$1">
-                        {GREETINGS[greetIdx].lang}
-                      </Text>
-                    </YStack>
+                <BentoCard fullHeight>
+                  <YStack justifyContent="center" alignItems="center" height={130}>
+                    <XStack gap="$3" alignItems="center">
+                      {/* Your phone */}
+                      <YStack alignItems="center" gap="$1.5">
+                        <YStack
+                          width={44} height={44} borderRadius={14}
+                          alignItems="center" justifyContent="center"
+                          style={{ background: `linear-gradient(135deg, ${gs}20, ${ge}20)`, border: `1px solid ${acc}40` } as any}
+                        >
+                          <Ionicons name="phone-portrait-outline" size={22} color={acc} />
+                        </YStack>
+                        <Text fontSize={9} color="$mutedText" textAlign="center">Your{'\n'}phone</Text>
+                      </YStack>
+                      {/* Arrow */}
+                      <YStack gap="$0.5" alignItems="center">
+                        <Ionicons name="arrow-forward" size={14} color={`${acc}70`} />
+                        <Ionicons name="arrow-forward" size={14} color={`${acc}70`} />
+                      </YStack>
+                      {/* Cloud */}
+                      <YStack alignItems="center" gap="$1.5">
+                        <YStack
+                          width={44} height={44} borderRadius={14}
+                          alignItems="center" justifyContent="center"
+                          style={{ background: `linear-gradient(135deg, ${gs}, ${ge})` } as any}
+                        >
+                          <Ionicons name="cloud-outline" size={22} color="white" />
+                        </YStack>
+                        <Text fontSize={9} color="$mutedText" textAlign="center">CallSheet{'\n'}Cloud</Text>
+                      </YStack>
+                      {/* Arrow */}
+                      <YStack gap="$0.5" alignItems="center">
+                        <Ionicons name="arrow-forward" size={14} color={`${acc}70`} />
+                        <Ionicons name="arrow-forward" size={14} color={`${acc}70`} />
+                      </YStack>
+                      {/* Client */}
+                      <YStack alignItems="center" gap="$1.5">
+                        <YStack
+                          width={44} height={44} borderRadius={14}
+                          alignItems="center" justifyContent="center"
+                          style={{ background: `linear-gradient(135deg, ${gs}20, ${ge}20)`, border: `1px solid ${acc}40` } as any}
+                        >
+                          <Ionicons name="person-outline" size={22} color={acc} />
+                        </YStack>
+                        <Text fontSize={9} color="$mutedText" textAlign="center">Client{'\n'}phone</Text>
+                      </YStack>
+                    </XStack>
                   </YStack>
                   <YStack gap="$1">
                     <Text fontWeight="bold" fontSize="$5" color="$color">
@@ -259,25 +370,27 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Backend API ── */}
+              {/* ── Auto-Save Results ── */}
               <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.3s' } as any}>
-                <BentoCard theme={theme} fullHeight>
+                <BentoCard fullHeight>
                   <YStack
-                    borderRadius={12} padding="$3" gap="$1.5"
-                    height={120} justifyContent="center"
+                    borderRadius={12} padding="$3" gap="$2"
+                    height={130} justifyContent="center"
                     style={{ backgroundColor: '#0d1117' } as any}
                   >
-                    {API_ROUTES.map((route) => (
-                      <XStack key={route.path} gap="$2" alignItems="center">
-                        <Text
-                          fontSize={11} fontWeight="bold" color={route.color}
-                          style={{ fontFamily: 'monospace', width: 36 } as any}
-                        >
-                          {route.method}
-                        </Text>
-                        <Text fontSize={11} color="#8b949e" style={{ fontFamily: 'monospace' } as any}>
-                          {route.path}
-                        </Text>
+                    <Text fontSize={10} color="#8b949e" style={{ fontFamily: 'monospace' } as any}>
+                      Row 4 — updating...
+                    </Text>
+                    {[
+                      { col: 'E', label: 'Status', value: saveStep >= 1 ? `${saveText}${saveStep < 4 ? '|' : ''}` : '|', color: acc },
+                      { col: 'F', label: 'Duration', value: saveStep >= 2 ? '2:47' : '—', color: '#4ade80' },
+                      { col: 'G', label: 'Note', value: saveStep >= 3 ? '"Interested, call back"' : '—', color: '#e6edf3' },
+                      { col: 'H', label: 'Date', value: saveStep >= 4 ? '07.03.2026' : '—', color: '#8b949e' },
+                    ].map(({ col, label, value, color }) => (
+                      <XStack key={col} gap="$2" alignItems="center">
+                        <Text fontSize={10} color="#484f58" style={{ fontFamily: 'monospace', width: 14 } as any}>{col}</Text>
+                        <Text fontSize={10} color="#484f58" style={{ fontFamily: 'monospace', width: 60 } as any}>{label}</Text>
+                        <Text fontSize={10} style={{ fontFamily: 'monospace', color } as any} numberOfLines={1}>{value}</Text>
                       </XStack>
                     ))}
                   </YStack>
@@ -292,30 +405,39 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Onboarding ── */}
+              {/* ── Call Recording ── */}
               <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.33s' } as any}>
-                <BentoCard theme={theme} fullHeight>
-                  <YStack justifyContent="center" alignItems="center" height={120} gap="$4">
-                    <YStack
-                      width={72} height={72} borderRadius={36}
-                      alignItems="center" justifyContent="center"
-                      style={{ background: `linear-gradient(135deg, ${gs}25, ${ge}25)` } as any}
-                    >
-                      <Ionicons name="compass" size={36} color={acc} />
-                    </YStack>
-                    {/* Progress dots */}
-                    <XStack gap="$2" alignItems="center">
-                      {[0, 1, 2, 3].map((i) => (
-                        <View
-                          key={i}
-                          style={{
-                            width: i === 0 ? 24 : 8,
-                            height: 8,
-                            borderRadius: 4,
-                            backgroundColor: i === 0 ? acc : `${acc}40`,
-                          } as any}
-                        />
-                      ))}
+                <BentoCard fullHeight>
+                  <YStack justifyContent="center" alignItems="center" height={130} gap="$3">
+                    {/* Waveform visualization */}
+                    <XStack gap={3} alignItems="center" height={50}>
+                      {WAVEFORM.map((h, i) => {
+                        const animated = Math.abs(i - wavePhase % WAVEFORM.length) < 3
+                        return (
+                          <View
+                            key={i}
+                            style={{
+                              width: 4,
+                              height: animated ? h * 0.9 : h * 0.35,
+                              borderRadius: 3,
+                              background: animated
+                                ? `linear-gradient(180deg, ${gs}, ${ge})`
+                                : `${acc}30`,
+                              transition: 'height 0.12s ease',
+                            } as any}
+                          />
+                        )
+                      })}
+                    </XStack>
+                    <XStack gap="$3" alignItems="center">
+                      <YStack
+                        width={36} height={36} borderRadius={18}
+                        alignItems="center" justifyContent="center"
+                        style={{ background: `linear-gradient(135deg, ${gs}, ${ge})` } as any}
+                      >
+                        <Ionicons name="play" size={16} color="white" />
+                      </YStack>
+                      <Text fontSize="$3" color="$mutedText">2:47 / 2:47</Text>
                     </XStack>
                   </YStack>
                   <YStack gap="$1">
@@ -329,9 +451,9 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Analytics (wide) ── */}
+              {/* ── Call History (wide) ── */}
               <View style={{ gridColumn: 'span 3', animation: 'bentoFadeUp 0.5s ease-out both 0.35s' } as any}>
-                <BentoCard theme={theme}>
+                <BentoCard>
                   <XStack gap="$4" alignItems="flex-end">
                     <YStack gap="$1" flex={1}>
                       <Text fontWeight="bold" fontSize="$5" color="$color">
@@ -340,6 +462,16 @@ export function LandingFeatures() {
                       <Text fontSize="$3" color="$mutedText" lineHeight={22}>
                         {t('landing.featureAnalyticsDesc' as any)}
                       </Text>
+                      <XStack gap="$4" marginTop="$2">
+                        <XStack gap="$1.5" alignItems="center">
+                          <View style={{ width: 10, height: 10, borderRadius: 3, background: `linear-gradient(135deg, ${gs}, ${ge})` } as any} />
+                          <Text fontSize="$2" color="$mutedText">Answered</Text>
+                        </XStack>
+                        <XStack gap="$1.5" alignItems="center">
+                          <View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: `${acc}30` } as any} />
+                          <Text fontSize="$2" color="$mutedText">Missed</Text>
+                        </XStack>
+                      </XStack>
                     </YStack>
                     <XStack gap={4} alignItems="flex-end" height={70}>
                       {BAR_HEIGHTS.map((h, i) => (
@@ -349,7 +481,9 @@ export function LandingFeatures() {
                             width: 18,
                             height: barAnimate ? h * 0.75 : 0,
                             borderRadius: 4,
-                            background: `linear-gradient(180deg, ${gs}, ${ge})`,
+                            background: i % 5 === 3
+                              ? `${acc}35`
+                              : `linear-gradient(180deg, ${gs}, ${ge})`,
                             transition: `height 0.6s ease-out ${i * 0.05}s`,
                           } as any}
                         />
@@ -361,20 +495,17 @@ export function LandingFeatures() {
             </>
           ) : (
             <>
-              {/* Row 1: span2 + 1 */}
               <View style={{ gridColumn: 'span 2', height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
-              {/* Row 2: 1+1+1 */}
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
-              {/* Row 3: span3 analytics */}
               <View style={{ gridColumn: 'span 3', height: 120, opacity: 0 } as any} />
             </>
           )}
         </View>
 
-        {/* ── Also included: Auth · Payments · Extension ── */}
+        {/* ── Feature bar ── */}
         {isInView && (
           <View
             style={{
@@ -388,9 +519,9 @@ export function LandingFeatures() {
             nativeID="feature-bar"
           >
             {[
-              { icon: 'shield-checkmark' as const, titleKey: 'landing.featureAuth', tags: 'Email · Google · SMS OTP' },
-              { icon: 'card' as const, titleKey: 'landing.featurePayments', tags: 'Stripe · PayPal · Polar · YooKassa' },
-              { icon: 'extension-puzzle' as const, titleKey: 'landing.featureExtension', tags: 'Sidebar · Popup · Auth · Themes' },
+              { icon: 'save-outline' as const, titleKey: 'landing.featureAuth', tags: 'Status · Duration · Notes · Date' },
+              { icon: 'gift-outline' as const, titleKey: 'landing.featurePayments', tags: '30 free calls/month · PRO unlimited' },
+              { icon: 'grid-outline' as const, titleKey: 'landing.featureExtension', tags: 'Any Google Sheet · Auto-detect columns' },
             ].map((item, idx) => (
               <XStack key={item.titleKey} gap="$3" alignItems="center">
                 {idx > 0 && (
@@ -423,11 +554,9 @@ export function LandingFeatures() {
 /* ── Reusable bento card wrapper ── */
 function BentoCard({
   children,
-  theme,
   fullHeight,
 }: {
   children: React.ReactNode
-  theme: ReturnType<typeof useTheme>
   fullHeight?: boolean
 }) {
   return (

@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* JetBrains Mono — matching template-config default (monospace) */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
-
 @theme {
   /* Default accent: slate scheme (matches template-config DEFAULT_SCHEME_KEY) */
   --color-bg-primary: var(--ext-bg-primary, #ffffff);
@@ -32,8 +29,15 @@
 
 html, body, #root {
   margin: 0;
-  width: 380px;
+  width: 100%;
+  min-width: 0;
   min-height: 540px;
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+  font-family: var(--ext-font-family, monospace);
   -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: border-box;
+  min-width: 0;
 }

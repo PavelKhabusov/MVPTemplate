@@ -1,5 +1,5 @@
 {
-  "name": "mvp-template",
+  "name": "callsheet",
   "private": true,
   "workspaces": [
     "apps/*",

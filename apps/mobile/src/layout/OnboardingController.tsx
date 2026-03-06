@@ -6,7 +6,7 @@ import { createWizardSteps, createHomeCoachSteps } from '../onboarding/steps'
 
 export function OnboardingController() {
   const { t } = useTranslation()
-  const appName = useCompanyStore((s) => s.info.appName) || 'MVPTemplate'
+  const appName = useCompanyStore((s) => s.info.appName) || 'CallSheet'
   const hasCompleted = useAppStore((s) => s.hasCompletedOnboarding)
   const setOnboardingComplete = useAppStore((s) => s.setOnboardingComplete)
   const { startTour } = useCoachMark()

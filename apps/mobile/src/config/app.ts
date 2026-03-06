@@ -1,10 +1,13 @@
+import { APP_BRAND } from '@mvp/template-config'
+
 /**
- * Centralized app configuration constants.
- * Change these values when adapting the template for a new project.
+ * Runtime app configuration.
+ * Product name and branding come from APP_BRAND
+ * (packages/template-config/src/brand.ts).
  */
 
 export const APP_CONFIG = {
-  name: 'MVPTemplate',
+  name: APP_BRAND.name,
   version: '1.0.0',
   developer: 'Pavel Khabusov',
   year: '2026',

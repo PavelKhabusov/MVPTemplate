@@ -42,3 +42,6 @@ export type { PhoneVerificationCode, NewPhoneVerificationCode } from './phone-ve
 
 export { companyInfo } from './company-info'
 export type { CompanyInfo, NewCompanyInfo } from './company-info'
+
+export { calls } from './calls'
+export type { Call, NewCall, CallStatus } from './calls'
