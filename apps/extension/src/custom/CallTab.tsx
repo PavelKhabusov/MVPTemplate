@@ -67,6 +67,11 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     getVoximplantConfig().then((config) => {
       setVoxConnected(!!config?.login)
       if (config?.login && config?.password) {
+        if (!config.node) {
+          setSdkStatus('failed')
+          setSdkInitError(t('ext.sdkNodeRequired'))
+          return
+        }
         setSdkStatus('connecting')
         setSdkInitError(null)
         initSDK(config.login, config.password, config.node)
