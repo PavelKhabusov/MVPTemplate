@@ -23,5 +23,4 @@ export const TEMPLATE_FLAGS: TemplateFlag[] = [
   { key: 'pushNotifications', labelKey: 'templateConfig.pushNotifications', icon: 'notifications-outline', defaultValue: false, scope: 'backend', envVar: 'EXPO_ACCESS_TOKEN', envType: 'secret' },
   { key: 'payments', labelKey: 'templateConfig.payments', icon: 'card-outline', defaultValue: false, scope: 'both', envVar: 'PAYMENTS_ENABLED', envType: 'boolean' },
   { key: 'onboarding', labelKey: 'templateConfig.onboarding', icon: 'compass-outline', defaultValue: true, scope: 'frontend', envVar: 'EXPO_PUBLIC_ONBOARDING_ENABLED', envType: 'boolean' },
-  { key: 'chromeExtension', labelKey: 'templateConfig.chromeExtension', icon: 'extension-puzzle-outline', defaultValue: false, scope: 'frontend', envVar: 'EXPO_PUBLIC_CHROME_EXTENSION', envType: 'boolean' },
 ]

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import { ScrollView } from 'react-native'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -23,122 +23,6 @@ import {
 import { api } from '../services/api'
 
 const AdminModal = AppModal
-
-function ExtensionSettingsCard({ syncEnv }: { syncEnv: (patch: Record<string, string | boolean | null>) => void }) {
-  const { t } = useTranslation()
-  const theme = useTheme()
-  const toast = useToast()
-  const [mode, setMode] = useState<'sidebar' | 'popup'>('sidebar')
-  const [extensionId, setExtensionId] = useState('')
-  const [idDirty, setIdDirty] = useState(false)
-
-  useEffect(() => {
-    api.get('/admin/env').then((res) => {
-      const frontend = res.data?.data?.frontend
-      const modeVal = frontend?.EXPO_PUBLIC_EXTENSION_MODE?.value
-      if (modeVal === 'popup' || modeVal === 'sidebar') setMode(modeVal)
-      const idVal = frontend?.EXPO_PUBLIC_EXTENSION_ID?.value
-      if (idVal) setExtensionId(idVal)
-    }).catch(() => {})
-  }, [])
-
-  const handleSelectMode = (m: 'sidebar' | 'popup') => {
-    setMode(m)
-    syncEnv({ EXPO_PUBLIC_EXTENSION_MODE: m })
-  }
-
-  const handleSaveId = () => {
-    syncEnv({ EXPO_PUBLIC_EXTENSION_ID: extensionId || null })
-    setIdDirty(false)
-    toast.success(t('admin.envSaved'))
-  }
-
-  const storeUrl = extensionId
-    ? `https://chrome.google.com/webstore/detail/${extensionId}`
-    : null
-
-  return (
-    <YStack gap="$3" paddingLeft="$7" paddingTop="$1">
-      {/* Mode selector */}
-      <YStack gap="$1.5">
-        <Text fontSize="$2" color="$mutedText" fontWeight="500">
-          {t('templateConfig.extensionMode')}
-        </Text>
-        <XStack gap="$2">
-          {(['sidebar', 'popup'] as const).map((m) => {
-            const active = mode === m
-            return (
-              <ScalePress key={m} onPress={() => handleSelectMode(m)}>
-                <XStack
-                  paddingHorizontal="$3"
-                  paddingVertical="$1.5"
-                  borderRadius="$3"
-                  borderWidth={1}
-                  borderColor={active ? '$accent' : '$borderColor'}
-                  backgroundColor={active ? '$accentBackground' : '$subtleBackground'}
-                  gap="$1.5"
-                  alignItems="center"
-                >
-                  <Ionicons
-                    name={m === 'sidebar' ? 'tablet-landscape-outline' : 'browsers-outline'}
-                    size={14}
-                    color={active ? theme.accent.val : theme.mutedText.val}
-                  />
-                  <Text
-                    fontSize="$2"
-                    color={active ? '$accent' : '$mutedText'}
-                    fontWeight={active ? '600' : '400'}
-                  >
-                    {t(`templateConfig.extensionMode_${m}`)}
-                  </Text>
-                </XStack>
-              </ScalePress>
-            )
-          })}
-        </XStack>
-      </YStack>
-
-      {/* Extension ID for Chrome Web Store */}
-      <YStack gap="$1.5">
-        <Text fontSize="$2" color="$mutedText" fontWeight="500">
-          {t('templateConfig.extensionId')}
-        </Text>
-        <XStack gap="$2" alignItems="center">
-          <Input
-            flex={1}
-            size="$3"
-            value={extensionId}
-            onChangeText={(text: string) => {
-              setExtensionId(text)
-              setIdDirty(true)
-            }}
-            placeholder="abcdefghijklmnop..."
-            backgroundColor="$subtleBackground"
-            borderColor="$borderColor"
-            color="$color"
-          />
-          {idDirty && (
-            <ScalePress onPress={handleSaveId}>
-              <XStack
-                backgroundColor="$accent"
-                paddingHorizontal="$2.5"
-                paddingVertical="$1.5"
-                borderRadius="$2"
-              >
-                <Ionicons name="checkmark" size={18} color="white" />
-              </XStack>
-            </ScalePress>
-          )}
-        </XStack>
-        {storeUrl && (
-          <Text fontSize="$1" color="$accent" numberOfLines={1}>
-            {storeUrl}
-          </Text>
-        )}
-      </YStack>
-    </YStack>
-  )
-}
 
 export function TemplateConfigTab() {
   const { t } = useTranslation()
@@ -524,27 +408,22 @@ export function TemplateConfigTab() {
                 const value = getFlagValue(flag.key, flag.defaultValue)
                 if (flag.key === 'docFeedback' && !getFlagValue('docs', true)) return null
                 return (
-                  <React.Fragment key={flag.key}>
-                    <XStack alignItems="center" justifyContent="space-between">
-                      <XStack alignItems="center" gap="$2" flex={1}>
-                        <Ionicons
-                          name={flag.icon}
-                          size={18}
-                          color={value ? theme.accent.val : theme.mutedText.val}
-                        />
-                        <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
-                          {t(flag.labelKey)}
-                        </Text>
-                      </XStack>
-                      <AppSwitch
-                        checked={value}
-                        onCheckedChange={() => handleToggleFlag(flag, !value)}
+                  <XStack key={flag.key} alignItems="center" justifyContent="space-between">
+                    <XStack alignItems="center" gap="$2" flex={1}>
+                      <Ionicons
+                        name={flag.icon}
+                        size={18}
+                        color={value ? theme.accent.val : theme.mutedText.val}
                       />
+                      <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                        {t(flag.labelKey)}
+                      </Text>
                     </XStack>
-                    {flag.key === 'chromeExtension' && value && (
-                      <ExtensionSettingsCard syncEnv={syncEnv} />
-                    )}
-                  </React.Fragment>
+                    <AppSwitch
+                      checked={value}
+                      onCheckedChange={() => handleToggleFlag(flag, !value)}
+                    />
+                  </XStack>
                 )
               })}
             </YStack>

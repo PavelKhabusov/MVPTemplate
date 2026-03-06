@@ -24,6 +24,7 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   pushNotifications: { icon: 'notifications-outline', labelKey: 'admin.apiPush', mainToggle: 'EXPO_ACCESS_TOKEN', hintKey: 'admin.hintExpo', hintUrl: 'https://expo.dev/settings/access-tokens' },
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
   ai: { icon: 'sparkles-outline', labelKey: 'admin.apiAI', mainToggle: 'GEMINI_API_KEY' },
+  extension: { icon: 'extension-puzzle-outline', labelKey: 'admin.apiExtension', mainToggle: 'CHROME_EXTENSION_ENABLED' },
 }
 
 const PAYMENT_PROVIDERS = [
@@ -513,6 +514,96 @@ function AIEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
   )
 }
 
+function ExtensionEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
+  keys: Record<string, EnvEntry>
+  isGroupOn: boolean
+  onToggle: (checked: boolean) => void
+  onUpdate: (key: string, value: string | boolean | null) => void
+}) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+
+  const modeValue = keys['CHROME_EXTENSION_MODE']?.value || 'sidebar'
+  const extensionId = keys['CHROME_EXTENSION_ID']?.value || ''
+  const storeUrl = extensionId
+    ? `https://chrome.google.com/webstore/detail/${extensionId}`
+    : null
+
+  return (
+    <AppCard animated={false}>
+      <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
+        <XStack alignItems="center" gap="$2" flex={1}>
+          <Ionicons name="extension-puzzle-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <Text fontWeight="600" color="$color" fontSize="$4">
+            {t('admin.apiExtension')}
+          </Text>
+        </XStack>
+        <AppSwitch checked={isGroupOn} onCheckedChange={onToggle} />
+      </XStack>
+
+      {isGroupOn && (
+        <YStack gap="$3">
+          {/* Mode selector */}
+          <YStack gap="$1.5">
+            <Text fontSize="$2" color="$mutedText" fontWeight="500">
+              {t('admin.extensionMode')}
+            </Text>
+            <XStack gap="$2">
+              {(['sidebar', 'popup'] as const).map((m) => {
+                const active = modeValue === m
+                return (
+                  <ScalePress key={m} onPress={() => onUpdate('CHROME_EXTENSION_MODE', m)}>
+                    <XStack
+                      paddingHorizontal="$3"
+                      paddingVertical="$1.5"
+                      borderRadius="$3"
+                      borderWidth={1}
+                      borderColor={active ? '$accent' : '$borderColor'}
+                      backgroundColor={active ? '$accentBackground' : '$subtleBackground'}
+                      gap="$1.5"
+                      alignItems="center"
+                    >
+                      <Ionicons
+                        name={m === 'sidebar' ? 'tablet-landscape-outline' : 'browsers-outline'}
+                        size={14}
+                        color={active ? theme.accent.val : theme.mutedText.val}
+                      />
+                      <Text
+                        fontSize="$2"
+                        color={active ? '$accent' : '$mutedText'}
+                        fontWeight={active ? '600' : '400'}
+                      >
+                        {t(`admin.extensionMode_${m}`)}
+                      </Text>
+                    </XStack>
+                  </ScalePress>
+                )
+              })}
+            </XStack>
+          </YStack>
+
+          {/* Extension ID */}
+          <EnvStringField
+            envKey="CHROME_EXTENSION_ID"
+            label={t('admin.extensionId')}
+            value={extensionId || null}
+            isSecret={false}
+            onSave={onUpdate}
+          />
+
+          {storeUrl && (
+            <ScalePress onPress={() => Linking.openURL(storeUrl)}>
+              <Text fontSize="$2" color="$accent" numberOfLines={1}>
+                {t('admin.extensionStoreLink')} ↗
+              </Text>
+            </ScalePress>
+          )}
+        </YStack>
+      )}
+    </AppCard>
+  )
+}
+
 export function ApiSettingsTab() {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -662,6 +753,18 @@ export function ApiSettingsTab() {
     if (group === 'ai') {
       return (
         <AIEnvCard
+          key={group}
+          keys={keys}
+          isGroupOn={isGroupOn}
+          onToggle={handleMainToggle}
+          onUpdate={handleUpdate}
+        />
+      )
+    }
+
+    if (group === 'extension') {
+      return (
+        <ExtensionEnvCard
           key={group}
           keys={keys}
           isGroupOn={isGroupOn}
