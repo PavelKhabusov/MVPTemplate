@@ -23,7 +23,7 @@ export const createPlanSchema = z.object({
   interval: z.enum(['month', 'year', 'one_time']),
   features: z.array(z.string()).default([]),
   providerPriceId: z.string().optional(),
-  provider: z.enum(['stripe', 'yookassa', 'robokassa', 'paypal']),
+  provider: z.enum(['stripe', 'yookassa', 'robokassa', 'paypal', 'polar']),
   sortOrder: z.number().int().optional().default(0),
 })
 

@@ -12,7 +12,8 @@ import postgres from 'postgres'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { eq } from 'drizzle-orm'
 import * as dotenv from 'dotenv'
-import { plans } from './schema/index'
+import bcrypt from 'bcrypt'
+import { plans, users } from './schema/index'
 
 // Load .env from backend root
 dotenv.config({ path: new URL('../../.env', import.meta.url).pathname })
@@ -39,7 +40,7 @@ type PlanSeed = {
   currency: string
   interval: 'month' | 'year' | 'one_time'
   features: string[]
-  provider: 'stripe' | 'yookassa' | 'robokassa' | 'paypal'
+  provider: 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar'
   sortOrder: number
 }
 
@@ -148,35 +149,63 @@ async function seed() {
   const existing = await db.select().from(plans).where(eq(plans.isActive, true)).limit(1)
 
   if (existing.length > 0) {
-    console.log('✅ Plans already exist — skipping seed. Delete existing plans first if you want to re-seed.')
-    await connection.end()
-    return
+    console.log('✅ Plans already exist — skipping plan seed.')
+  } else {
+    console.log(`📋 Inserting ${defaultPlans.length} default plans...`)
+
+    for (const plan of defaultPlans) {
+      const inserted = await db
+        .insert(plans)
+        .values({
+          name: plan.name,
+          description: plan.description,
+          priceAmount: plan.priceAmount,
+          currency: plan.currency,
+          interval: plan.interval,
+          features: plan.features,
+          provider: plan.provider,
+          sortOrder: plan.sortOrder,
+          isActive: true,
+        })
+        .returning({ id: plans.id, name: plans.name, interval: plans.interval, priceAmount: plans.priceAmount })
+
+      const p = inserted[0]
+      const price = p.priceAmount === 0 ? 'Free' : `$${(p.priceAmount / 100).toFixed(2)}/${p.interval}`
+      console.log(`  ✓ ${p.name} — ${price} (id: ${p.id})`)
+    }
   }
 
-  console.log(`📋 Inserting ${defaultPlans.length} default plans...`)
+  // ---------------------------------------------------------------------------
+  // Default users (always upsert — update password if already exists)
+  // ---------------------------------------------------------------------------
+  console.log('\n👤 Seeding test accounts...')
 
-  for (const plan of defaultPlans) {
-    const inserted = await db
-      .insert(plans)
-      .values({
-        name: plan.name,
-        description: plan.description,
-        priceAmount: plan.priceAmount,
-        currency: plan.currency,
-        interval: plan.interval,
-        features: plan.features,
-        provider: plan.provider,
-        sortOrder: plan.sortOrder,
-        isActive: true,
-      })
-      .returning({ id: plans.id, name: plans.name, interval: plans.interval, priceAmount: plans.priceAmount })
+  const SALT_ROUNDS = 12
 
-    const p = inserted[0]
-    const price = p.priceAmount === 0 ? 'Free' : `$${(p.priceAmount / 100).toFixed(2)}/${p.interval}`
-    console.log(`  ✓ ${p.name} — ${price} (id: ${p.id})`)
+  const seedUsers = [
+    { email: 'admin@example.com', password: 'admin123', name: 'Admin', role: 'admin' as const },
+    { email: 'user@example.com', password: 'user123', name: 'Test User', role: 'user' as const },
+  ]
+
+  for (const u of seedUsers) {
+    const hash = await bcrypt.hash(u.password, SALT_ROUNDS)
+    const [result] = await db.insert(users).values({
+      email: u.email,
+      passwordHash: hash,
+      name: u.name,
+      role: u.role,
+      emailVerified: true,
+    }).onConflictDoUpdate({
+      target: users.email,
+      set: { passwordHash: hash, name: u.name, role: u.role, emailVerified: true },
+    }).returning({ id: users.id, email: users.email, role: users.role })
+    console.log(`  ✓ ${result.role}: ${result.email} (password: ${u.password})`)
   }
 
   console.log('\n✅ Seed complete!')
+  console.log('\nDefault credentials:')
+  console.log('  Admin: admin@example.com / admin123')
+  console.log('  User:  user@example.com / user123')
   console.log('\nNext steps:')
   console.log('  1. Configure your payment provider (Stripe / YooKassa / etc.) in apps/backend/.env')
   console.log('  2. Create matching products in your provider dashboard')

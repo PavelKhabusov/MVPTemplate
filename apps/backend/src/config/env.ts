@@ -65,6 +65,12 @@ const envSchema = z.object({
   PAYPAL_WEBHOOK_ID: z.string().optional(),
   PAYPAL_MODE: z.enum(['sandbox', 'live']).default('sandbox'),
 
+  // Polar
+  POLAR_ENABLED: envBoolean,
+  POLAR_ACCESS_TOKEN: z.string().optional(),
+  POLAR_WEBHOOK_SECRET: z.string().optional(),
+  POLAR_ORGANIZATION_ID: z.string().optional(),
+
   // SMS
   SMS_ENABLED: envBoolean,
   SMS_VERIFICATION_REQUIRED: envBoolean,

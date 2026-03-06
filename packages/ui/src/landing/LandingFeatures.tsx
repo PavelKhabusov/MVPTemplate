@@ -72,6 +72,9 @@ export function LandingFeatures() {
         #bento-features > * {
           grid-column: span 1 !important;
         }
+        #bento-features > *:last-child {
+          grid-column: span 2 !important;
+        }
       }
       @media (max-width: 600px) {
         #bento-features {
@@ -81,6 +84,12 @@ export function LandingFeatures() {
           grid-column: span 1 !important;
         }
         #features-title { font-size: 26px !important; }
+        #feature-bar {
+          flex-direction: column !important;
+          gap: 20px !important;
+          align-items: flex-start !important;
+          padding-left: 8px !important;
+        }
       }
       .bento-card {
         transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
@@ -250,92 +259,6 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Auth ── */}
-              <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.25s' } as any}>
-                <BentoCard theme={theme} fullHeight>
-                  <YStack justifyContent="center" alignItems="center" height={120} gap="$2.5">
-                    <YStack
-                      width={64} height={64} borderRadius={32}
-                      alignItems="center" justifyContent="center"
-                      style={{ background: `linear-gradient(135deg, ${gs}25, ${ge}25)` } as any}
-                    >
-                      <Ionicons name="shield-checkmark" size={32} color={acc} />
-                    </YStack>
-                    <XStack gap="$2" flexWrap="wrap" justifyContent="center">
-                      <YStack
-                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
-                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
-                      >
-                        <Text fontSize={11} color="$mutedText">Email + JWT</Text>
-                      </YStack>
-                      <YStack
-                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
-                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
-                      >
-                        <Text fontSize={11} color="$mutedText">Google SSO</Text>
-                      </YStack>
-                      <YStack
-                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
-                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
-                      >
-                        <Text fontSize={11} color="$mutedText">SMS OTP</Text>
-                      </YStack>
-                    </XStack>
-                  </YStack>
-                  <YStack gap="$1">
-                    <Text fontWeight="bold" fontSize="$5" color="$color">
-                      {t('landing.featureAuth' as any)}
-                    </Text>
-                    <Text fontSize="$3" color="$mutedText" lineHeight={22}>
-                      {t('landing.featureAuthDesc' as any)}
-                    </Text>
-                  </YStack>
-                </BentoCard>
-              </View>
-
-              {/* ── Payments ── */}
-              <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.28s' } as any}>
-                <BentoCard theme={theme} fullHeight>
-                  <YStack justifyContent="center" alignItems="center" height={120} gap="$2.5">
-                    <YStack
-                      width={64} height={64} borderRadius={32}
-                      alignItems="center" justifyContent="center"
-                      style={{ background: `linear-gradient(135deg, ${gs}25, ${ge}25)` } as any}
-                    >
-                      <Ionicons name="card" size={32} color={acc} />
-                    </YStack>
-                    <XStack gap="$2" flexWrap="wrap" justifyContent="center">
-                      <YStack
-                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
-                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
-                      >
-                        <Text fontSize={11} color="$mutedText">Stripe</Text>
-                      </YStack>
-                      <YStack
-                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
-                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
-                      >
-                        <Text fontSize={11} color="$mutedText">PayPal</Text>
-                      </YStack>
-                      <YStack
-                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
-                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
-                      >
-                        <Text fontSize={11} color="$mutedText">YooKassa</Text>
-                      </YStack>
-                    </XStack>
-                  </YStack>
-                  <YStack gap="$1">
-                    <Text fontWeight="bold" fontSize="$5" color="$color">
-                      {t('landing.featurePayments' as any)}
-                    </Text>
-                    <Text fontSize="$3" color="$mutedText" lineHeight={22}>
-                      {t('landing.featurePaymentsDesc' as any)}
-                    </Text>
-                  </YStack>
-                </BentoCard>
-              </View>
-
               {/* ── Backend API ── */}
               <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.3s' } as any}>
                 <BentoCard theme={theme} fullHeight>
@@ -406,31 +329,33 @@ export function LandingFeatures() {
                 </BentoCard>
               </View>
 
-              {/* ── Analytics ── */}
-              <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.35s' } as any}>
-                <BentoCard theme={theme} fullHeight>
-                  <XStack gap={5} alignItems="flex-end" height={120} justifyContent="center">
-                    {BAR_HEIGHTS.map((h, i) => (
-                      <View
-                        key={i}
-                        style={{
-                          width: 14,
-                          height: barAnimate ? h : 0,
-                          borderRadius: 4,
-                          background: `linear-gradient(180deg, ${gs}, ${ge})`,
-                          transition: `height 0.6s ease-out ${i * 0.05}s`,
-                        } as any}
-                      />
-                    ))}
+              {/* ── Analytics (wide) ── */}
+              <View style={{ gridColumn: 'span 3', animation: 'bentoFadeUp 0.5s ease-out both 0.35s' } as any}>
+                <BentoCard theme={theme}>
+                  <XStack gap="$4" alignItems="flex-end">
+                    <YStack gap="$1" flex={1}>
+                      <Text fontWeight="bold" fontSize="$5" color="$color">
+                        {t('landing.featureAnalytics' as any)}
+                      </Text>
+                      <Text fontSize="$3" color="$mutedText" lineHeight={22}>
+                        {t('landing.featureAnalyticsDesc' as any)}
+                      </Text>
+                    </YStack>
+                    <XStack gap={4} alignItems="flex-end" height={70}>
+                      {BAR_HEIGHTS.map((h, i) => (
+                        <View
+                          key={i}
+                          style={{
+                            width: 18,
+                            height: barAnimate ? h * 0.75 : 0,
+                            borderRadius: 4,
+                            background: `linear-gradient(180deg, ${gs}, ${ge})`,
+                            transition: `height 0.6s ease-out ${i * 0.05}s`,
+                          } as any}
+                        />
+                      ))}
+                    </XStack>
                   </XStack>
-                  <YStack gap="$1">
-                    <Text fontWeight="bold" fontSize="$5" color="$color">
-                      {t('landing.featureAnalytics' as any)}
-                    </Text>
-                    <Text fontSize="$3" color="$mutedText" lineHeight={22}>
-                      {t('landing.featureAnalyticsDesc' as any)}
-                    </Text>
-                  </YStack>
                 </BentoCard>
               </View>
             </>
@@ -443,13 +368,53 @@ export function LandingFeatures() {
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
-              {/* Row 3: 1+1+1 */}
-              <View style={{ height: 280, opacity: 0 } as any} />
-              <View style={{ height: 280, opacity: 0 } as any} />
-              <View style={{ height: 280, opacity: 0 } as any} />
+              {/* Row 3: span3 analytics */}
+              <View style={{ gridColumn: 'span 3', height: 120, opacity: 0 } as any} />
             </>
           )}
         </View>
+
+        {/* ── Also included: Auth · Payments · Extension ── */}
+        {isInView && (
+          <View
+            style={{
+              display: 'flex' as any,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 48,
+              paddingTop: 8,
+              animation: 'bentoFadeUp 0.5s ease-out both 0.45s',
+            } as any}
+            nativeID="feature-bar"
+          >
+            {[
+              { icon: 'shield-checkmark' as const, titleKey: 'landing.featureAuth', tags: 'Email · Google · SMS OTP' },
+              { icon: 'card' as const, titleKey: 'landing.featurePayments', tags: 'Stripe · PayPal · Polar · YooKassa' },
+              { icon: 'extension-puzzle' as const, titleKey: 'landing.featureExtension', tags: 'Sidebar · Popup · Auth · Themes' },
+            ].map((item, idx) => (
+              <XStack key={item.titleKey} gap="$3" alignItems="center">
+                {idx > 0 && (
+                  <View style={{ width: 1, height: 32, backgroundColor: `${acc}20`, marginRight: 12 } as any} />
+                )}
+                <YStack
+                  width={40} height={40} borderRadius={12}
+                  alignItems="center" justifyContent="center"
+                  style={{ background: `linear-gradient(135deg, ${gs}18, ${ge}18)` } as any}
+                >
+                  <Ionicons name={item.icon} size={20} color={acc} />
+                </YStack>
+                <YStack gap={2}>
+                  <Text fontWeight="bold" fontSize="$4" color="$color">
+                    {t(item.titleKey as any)}
+                  </Text>
+                  <Text fontSize="$2" color="$mutedText">
+                    {item.tags}
+                  </Text>
+                </YStack>
+              </XStack>
+            ))}
+          </View>
+        )}
       </YStack>
     </YStack>
   )

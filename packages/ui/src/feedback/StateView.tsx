@@ -26,7 +26,7 @@ export function StateView({ state, loadingMessage, emptyMessage }: StateViewProp
           transition={{ type: 'timing', duration: 200 }}
         >
           <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
-            <Spinner size="large" color="$primary" />
+            <Spinner size="large" color="$accent" />
             {loadingMessage && (
               <Text color="$mutedText" fontSize="$3">
                 {loadingMessage}
@@ -51,7 +51,7 @@ export function StateView({ state, loadingMessage, emptyMessage }: StateViewProp
             </Text>
             {state.onRetry && (
               <Text
-                color="$primary"
+                color="$accent"
                 fontSize="$3"
                 fontWeight="600"
                 onPress={state.onRetry}

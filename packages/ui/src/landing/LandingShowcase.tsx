@@ -16,6 +16,7 @@ const CHECKLIST = [
   { key: 'showcaseItem8', icon: 'rocket-outline' },
   { key: 'showcaseItem9', icon: 'cloud-upload-outline' },
   { key: 'showcaseItem10', icon: 'compass-outline' },
+  { key: 'showcaseItem11', icon: 'extension-puzzle-outline' },
 ] as const
 
 const CORE_STACK = [

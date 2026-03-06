@@ -94,7 +94,7 @@ export function NotificationCenter({ http, emailEnabled = false }: NotificationC
           </FadeIn>
           <ScalePress onPress={() => markAllRead.mutate()}>
             <XStack alignItems="center" gap="$1.5">
-              <Text color="$primary" fontSize="$2" fontWeight="600">
+              <Text color="$accent" fontSize="$2" fontWeight="600">
                 {t('notifications.markAllRead')}
               </Text>
             </XStack>
@@ -109,7 +109,7 @@ export function NotificationCenter({ http, emailEnabled = false }: NotificationC
               <AppCard
                 opacity={notification.isRead ? 0.6 : 1}
                 borderLeftWidth={3}
-                borderLeftColor={notification.isRead ? '$borderColor' : '$primary'}
+                borderLeftColor={notification.isRead ? '$borderColor' : '$accent'}
               >
                 <Text fontWeight="600" fontSize="$3">
                   {notification.title}

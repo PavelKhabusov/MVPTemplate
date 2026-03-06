@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {this.state.error?.message}
           </Text>
           <Text
-            color="$primary"
+            color="$accent"
             fontSize="$3"
             fontWeight="600"
             onPress={this.reset}

@@ -41,6 +41,22 @@ if (pids) {
   ok('Порт 3000 свободен')
 }
 
+// 1.5 Освобождаем порт 5432 от чужих контейнеров
+info('Проверяем порт 5432...')
+const pg = run("docker ps --filter 'publish=5432' --format '{{.Names}}'")
+if (pg) {
+  const project = run(`docker inspect ${pg} --format '{{index .Config.Labels "com.docker.compose.project"}}'`)
+  if (project !== 'docker') {
+    info(`Останавливаем чужой контейнер: ${pg} (проект: ${project})`)
+    run(`docker stop ${pg}`)
+    ok(`Контейнер ${pg} остановлен`)
+  } else {
+    ok('Порт 5432 — наш контейнер')
+  }
+} else {
+  ok('Порт 5432 свободен')
+}
+
 // 2. Docker
 info('Запускаем Docker и ждём готовности сервисов...')
 try {
