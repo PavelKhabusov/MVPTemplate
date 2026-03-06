@@ -139,7 +139,7 @@ export function AppModal({
             flexShrink: 0,
           },
         },
-          el(H4 as React.ComponentType<object>, {
+          el(H4 as React.ComponentType<any>, {
             color: '$color',
             fontFamily: '$body',
             flex: 1,
@@ -173,7 +173,7 @@ export function AppModal({
             maxHeight: modalMaxHeight - 65,
           },
         },
-          el(YStack as React.ComponentType<object>, { padding: '$4' }, children),
+          el(YStack as React.ComponentType<any>, { padding: '$4' }, children),
         ),
       ),
     ),

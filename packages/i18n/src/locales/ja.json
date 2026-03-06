@@ -59,7 +59,15 @@
       "emailRequired": "メールアドレスは必須です",
       "passwordMin": "パスワードは8文字以上必要です",
       "passwordsMismatch": "パスワードが一致しません"
-    }
+    },
+    "signInOrRegister": "ログイン / 登録",
+    "orQuickReg": "または簡単登録",
+    "signingIn": "ログイン中...",
+    "alreadyHaveAccount": "アカウントをお持ちですか？ログイン",
+    "noAccountRegister": "アカウントがない？登録",
+    "enterEmailPassword": "メールとパスワードを入力",
+    "errorPasswordFormat": "メールとパスワードを確認 (最低6文字)",
+    "errorServerDown": "サーバーに接続できません。バックエンドを起動してください。"
   },
   "tabs": {
     "home": "ホーム",

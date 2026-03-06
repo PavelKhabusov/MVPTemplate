@@ -311,15 +311,30 @@ EXPO_PUBLIC_COLOR_SCHEME=indigo   # indigo | violet | blue | green | slate | ...
 | Файл | Проблема | Статус |
 |------|----------|--------|
 | `apps/extension/src/components/AuthScreen.tsx` | `"MVP Extension"` и `"Your app — right in the browser"` — не читается из APP_BRAND | ✅ Исправлено |
-| `apps/extension/src/components/MainScreen.tsx` | Хедер содержит строку `"CallSheet"` — должен читаться из APP_BRAND | 🔧 Нужно исправить |
+| `apps/extension/src/components/MainScreen.tsx` | Хедер содержит строку вместо `APP_BRAND.name` | ✅ Исправлено |
 | `apps/extension/src/manifest.ts` | name/description — только комментарий `// BRAND`, нет автоматической подстановки | — |
 
 **Исправление AuthScreen** (уже в шаблоне):
-- Импортируется `APP_BRAND` из `@mvp/template-config`
-- `APP_BRAND.name` заменяет `"MVP Extension"`, `APP_BRAND.tagline` заменяет `"Your app — right in..."`
-- Добавлены контролы языка и темы в нижней части экрана (доступны до логина)
-- Все строки UI переведены через встроенный i18n-объект `LABELS`
-- `App.tsx` передаёт `theme`/`setTheme` в `AuthScreen`
+- `APP_BRAND.name` и `APP_BRAND.tagline` — читаются из `@mvp/template-config/src/brand`
+- `APP_BRAND` импортируется **напрямую из `src/brand`**, НЕ из `@mvp/template-config` (index.ts тянет react-native через TemplateConfigSidebar → ломает Vite-бандл расширения)
+- Все строки UI через `useTranslation()` из `@mvp/i18n/src/browser` — используется общая i18n система
+- Контролы языка и темы в нижней части экрана (доступны до логина), `i18n.changeLanguage()` синхронизируется сразу
+
+#### Расширение не могло использовать @mvp/i18n (expo-localization)
+**Проблема**: `@mvp/i18n/src/index.ts` делает `import { getLocales } from 'expo-localization'` на уровне модуля — Expo-специфичный пакет, недоступный в browser extension. Расширение было вынуждено использовать inline `LABELS` объекты вместо общей i18n.
+
+**Решение**: `packages/i18n/src/browser.ts` — browser-совместимый инит без expo-localization:
+```ts
+// packages/i18n/src/browser.ts
+export function initBrowserI18n(savedLanguage?: string | null) { ... }
+export { i18n, useTranslation, SUPPORTED_LANGUAGES, LANGUAGE_LABELS }
+```
+Использует `navigator.language` вместо `getLocales()`. Инициализируется в `main.tsx` расширения:
+```ts
+import { initBrowserI18n, i18n } from '@mvp/i18n/src/browser'
+initBrowserI18n()
+chrome.storage?.local?.get('lang').then(r => { if (r?.lang) i18n.changeLanguage(r.lang) })
+```
 
 #### Порядок секций в Settings расширения
 **Проблема**: тема и язык отображаются ПЕРЕД бизнес-настройками (Voximplant, маппинг колонок). Для пользователя важнее сначала видеть настройки самого приложения.

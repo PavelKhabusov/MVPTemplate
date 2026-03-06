@@ -59,7 +59,15 @@
       "emailRequired": "El correo es obligatorio",
       "passwordMin": "La contraseña debe tener al menos 8 caracteres",
       "passwordsMismatch": "Las contraseñas no coinciden"
-    }
+    },
+    "signInOrRegister": "Iniciar / Registrarse",
+    "orQuickReg": "o registro rápido",
+    "signingIn": "Iniciando sesión...",
+    "alreadyHaveAccount": "¿Ya tienes cuenta? Iniciar sesión",
+    "noAccountRegister": "¿No tienes cuenta? Registrarse",
+    "enterEmailPassword": "Ingresa email y contraseña",
+    "errorPasswordFormat": "Revisa email y contraseña (mín. 6 caracteres)",
+    "errorServerDown": "Servidor no disponible. Inicia el backend."
   },
   "tabs": {
     "home": "Inicio",

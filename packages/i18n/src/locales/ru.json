@@ -60,7 +60,15 @@
       "emailRequired": "Введите email",
       "passwordMin": "Пароль минимум 8 символов",
       "passwordsMismatch": "Пароли не совпадают"
-    }
+    },
+    "signInOrRegister": "Войти / Регистрация",
+    "orQuickReg": "или быстрая регистрация",
+    "signingIn": "Входим...",
+    "alreadyHaveAccount": "Уже есть аккаунт? Войти",
+    "noAccountRegister": "Нет аккаунта? Зарегистрироваться",
+    "enterEmailPassword": "Введите email и пароль",
+    "errorPasswordFormat": "Проверьте email и пароль (мин. 6 символов)",
+    "errorServerDown": "Сервер недоступен. Запустите backend."
   },
   "tabs": {
     "home": "Главная",

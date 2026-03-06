@@ -60,7 +60,15 @@
       "emailRequired": "Email is required",
       "passwordMin": "Password must be at least 8 characters",
       "passwordsMismatch": "Passwords do not match"
-    }
+    },
+    "signInOrRegister": "Sign In / Register",
+    "orQuickReg": "or quick registration",
+    "signingIn": "Signing in...",
+    "alreadyHaveAccount": "Already have an account? Sign In",
+    "noAccountRegister": "No account? Register",
+    "enterEmailPassword": "Enter email and password",
+    "errorPasswordFormat": "Check email and password (min. 6 characters)",
+    "errorServerDown": "Server unavailable. Start the backend."
   },
   "tabs": {
     "home": "Home",
