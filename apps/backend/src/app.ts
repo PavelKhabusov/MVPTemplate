@@ -48,7 +48,15 @@ export async function buildApp() {
   })
   await app.register(cors, {
     origin: env.NODE_ENV === 'development'
-      ? ['http://localhost:8081', 'http://localhost:3000', 'http://localhost:19006']
+      ? (origin, cb) => {
+          // Allow dev origins + any chrome-extension://
+          const allowed = ['http://localhost:8081', 'http://localhost:3000', 'http://localhost:19006', 'http://localhost:5174']
+          if (!origin || allowed.includes(origin) || origin.startsWith('chrome-extension://')) {
+            cb(null, true)
+          } else {
+            cb(null, false)
+          }
+        }
       : env.CORS_ORIGIN,
     credentials: true,
   })
