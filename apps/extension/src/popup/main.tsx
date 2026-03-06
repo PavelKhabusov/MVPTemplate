@@ -7,6 +7,9 @@ import { FONT_FAMILY_CONFIG } from '@mvp/template-config/src/designTokens'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
 import { COLOR_SCHEMES } from '@mvp/template-config/src/colorSchemes'
 
+// Mark as popup mode (controls width in globals.css)
+document.documentElement.classList.add('popup-mode')
+
 // Apply brand font from template-config
 const _fc = FONT_FAMILY_CONFIG[APP_BRAND.defaultFontFamily as keyof typeof FONT_FAMILY_CONFIG]
 document.documentElement.style.setProperty('--ext-font-family', _fc.cssStack)
