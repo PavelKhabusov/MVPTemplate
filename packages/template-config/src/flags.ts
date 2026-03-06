@@ -23,4 +23,5 @@ export const TEMPLATE_FLAGS: TemplateFlag[] = [
   { key: 'pushNotifications', labelKey: 'templateConfig.pushNotifications', icon: 'notifications-outline', defaultValue: false, scope: 'backend', envVar: 'EXPO_ACCESS_TOKEN', envType: 'secret' },
   { key: 'payments', labelKey: 'templateConfig.payments', icon: 'card-outline', defaultValue: false, scope: 'both', envVar: 'PAYMENTS_ENABLED', envType: 'boolean' },
   { key: 'onboarding', labelKey: 'templateConfig.onboarding', icon: 'compass-outline', defaultValue: true, scope: 'frontend', envVar: 'EXPO_PUBLIC_ONBOARDING_ENABLED', envType: 'boolean' },
+  { key: 'ai', labelKey: 'templateConfig.ai', icon: 'sparkles-outline', defaultValue: true, scope: 'backend', envVar: 'GEMINI_API_KEY', envType: 'secret' },
 ]

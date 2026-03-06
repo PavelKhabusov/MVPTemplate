@@ -43,7 +43,7 @@ export default function AdminScreen() {
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
   const emailEnabled = useTemplateFlag('email', false)
-  const [aiEnabled, setAiEnabled] = useState(true)
+  const aiEnabled = useTemplateFlag('ai', true)
   const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
@@ -86,25 +86,17 @@ export default function AdminScreen() {
       setLoading(true)
       const params: Record<string, string | number> = { page: p, limit: 20 }
       if (q) params.search = q
-      const [usersRes, statsRes, configRes, analyticsRes, envRes] = await Promise.all([
+      const [usersRes, statsRes, configRes, analyticsRes] = await Promise.all([
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
         api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null),
-        api.get('/admin/env').catch(() => null),
       ])
       setUsers(usersRes.data.data)
       setTotalPages(usersRes.data.pagination?.totalPages ?? 1)
       setStats(statsRes.data.data)
       setConfig(configRes.data.data)
       if (analyticsRes) setAnalyticsData(analyticsRes.data.data)
-      if (envRes) {
-        const ai = envRes.data?.data?.ai
-        const hasKey = ai && Object.entries(ai).some(([k, v]: [string, any]) =>
-          (k === 'GEMINI_API_KEY' || k === 'OPENAI_API_KEY') && v?.value && v.value !== '__TOGGLE_ON__'
-        )
-        setAiEnabled(!!hasKey)
-      }
     } catch (err: any) {
       Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
     } finally {
