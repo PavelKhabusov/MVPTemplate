@@ -32,6 +32,9 @@ Thumbs.db
 # Turbo
 .turbo/
 
+# Extension
+apps/extension/.env.extension
+
 # Backend
 apps/backend/dist/
 

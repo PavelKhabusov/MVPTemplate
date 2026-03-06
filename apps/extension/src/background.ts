@@ -1,9 +1,11 @@
-// Open side panel on extension icon click
-chrome.action.onClicked.addListener((tab) => {
-  if (tab.id) {
-    chrome.sidePanel.open({ tabId: tab.id })
-  }
-})
+// Open side panel on extension icon click (only in sidebar mode)
+if (chrome.sidePanel) {
+  chrome.action.onClicked.addListener((tab) => {
+    if (tab.id) {
+      chrome.sidePanel.open({ tabId: tab.id })
+    }
+  })
+}
 
 // Message routing between content script ↔ popup/sidebar
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
