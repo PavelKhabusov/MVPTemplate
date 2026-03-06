@@ -4,6 +4,7 @@ import { YStack, XStack, Text, Separator, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { ScalePress } from '../animations/ScalePress'
 import { useCompanyStore } from '@mvp/store'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
 
 interface LandingFooterProps {
   onNavigate: (href: string) => void
@@ -14,7 +15,7 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const company = useCompanyStore((s) => s.info)
-  const appName = company.appName || 'MVPTemplate'
+  const appName = company.appName || APP_BRAND.name
 
   useEffect(() => {
     if (Platform.OS !== 'web') return

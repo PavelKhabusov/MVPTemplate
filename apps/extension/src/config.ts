@@ -28,6 +28,9 @@ export interface ExtensionConfig {
   /** Enable content scripts from src/content/ */
   contentScripts: boolean
 
+  /** Register chrome.tabs listeners synchronously in background.ts to send TAB_CONTEXT_CHANGED (required for MV3 service workers) */
+  tabTracking: boolean
+
   /** Dynamic import of custom background message handlers */
   backgroundHandlers: (() => Promise<{ default: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> }>) | null
 
@@ -48,6 +51,7 @@ export const extensionConfig: ExtensionConfig = {
   settingsSections: [],
   onboardingSteps: [],
   contentScripts: false,
+  tabTracking: false,
   backgroundHandlers: null,
   permissions: [],
   hostPermissions: [],

@@ -32,4 +32,7 @@ export const APP_BRAND = {
 
   /** Primary CTA link on landing (Chrome Web Store, App Store, GitHub, etc.) */
   ctaUrl: 'https://github.com/PavelKhabusov/MVPTemplate',
+
+  /** Default font for the browser extension (must match a key in FONT_FAMILY_CONFIG) */
+  defaultFontFamily: 'monospace',
 } as const

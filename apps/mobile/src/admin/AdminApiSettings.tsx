@@ -425,27 +425,29 @@ function AIEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             </XStack>
           </ScrollView>
 
-          {/* Proxy toggle for AI requests */}
-          <XStack
-            alignItems="center"
-            justifyContent="space-between"
-            backgroundColor="$subtleBackground"
-            paddingHorizontal="$3"
-            paddingVertical="$2.5"
-            borderRadius="$3"
-          >
-            <XStack alignItems="center" gap="$2" flex={1}>
-              <Ionicons name="globe-outline" size={18} color={theme.mutedText.val} />
-              <YStack flex={1}>
-                <Text fontSize="$3" color="$color">{t('admin.aiProxyEnabled')}</Text>
-                <Text fontSize="$1" color="$mutedText">{t('admin.aiProxyEnabledDesc')}</Text>
-              </YStack>
+          {/* Proxy toggle — only when at least one provider has a real API key */}
+          {AI_PROVIDERS_UI.some(p => { const v = keys[p.apiKeyEnv]?.value; return v && v !== '__TOGGLE_ON__' }) && (
+            <XStack
+              alignItems="center"
+              justifyContent="space-between"
+              backgroundColor="$subtleBackground"
+              paddingHorizontal="$3"
+              paddingVertical="$2.5"
+              borderRadius="$3"
+            >
+              <XStack alignItems="center" gap="$2" flex={1}>
+                <Ionicons name="globe-outline" size={18} color={theme.mutedText.val} />
+                <YStack flex={1}>
+                  <Text fontSize="$3" color="$color">{t('admin.aiProxyEnabled')}</Text>
+                  <Text fontSize="$1" color="$mutedText">{t('admin.aiProxyEnabledDesc')}</Text>
+                </YStack>
+              </XStack>
+              <AppSwitch
+                checked={keys['AI_PROXY_ENABLED']?.value === 'true'}
+                onCheckedChange={(checked) => onUpdate('AI_PROXY_ENABLED', String(checked))}
+              />
             </XStack>
-            <AppSwitch
-              checked={keys['AI_PROXY_ENABLED']?.value === 'true'}
-              onCheckedChange={(checked) => onUpdate('AI_PROXY_ENABLED', String(checked))}
-            />
-          </XStack>
+          )}
 
           {/* API key */}
           <EnvStringField

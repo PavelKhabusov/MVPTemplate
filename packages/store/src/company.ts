@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
 
 export interface CompanyInfo {
   appName: string
@@ -16,7 +17,7 @@ interface CompanyStore {
 }
 
 export const DEFAULT_COMPANY_INFO: CompanyInfo = {
-  appName: 'MVPTemplate',
+  appName: APP_BRAND.name,
   companyName: '',
   tagline: '',
   supportEmail: '',

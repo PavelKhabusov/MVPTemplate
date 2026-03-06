@@ -34,6 +34,33 @@ const builtinHandlers: Record<string, (message: any, sender: chrome.runtime.Mess
   },
 }
 
+// Tab tracking — registered synchronously as required by MV3 service workers
+if (extensionConfig.tabTracking) {
+  function _notifyTabChange(url: string | undefined) {
+    const match = url?.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
+    const spreadsheetId = match?.[1] || null
+    chrome.runtime.sendMessage({
+      type: 'TAB_CONTEXT_CHANGED',
+      payload: { url: url || null, isGoogleSheets: !!spreadsheetId, spreadsheetId },
+    }).catch(() => {})
+  }
+
+  chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    try {
+      const tab = await chrome.tabs.get(activeInfo.tabId)
+      _notifyTabChange(tab.url)
+    } catch {}
+  })
+
+  chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+    if (changeInfo.url || changeInfo.status === 'complete') {
+      chrome.tabs.query({ active: true, currentWindow: true }).then(([activeTab]) => {
+        if (activeTab?.id === tab.id) _notifyTabChange(tab.url)
+      }).catch(() => {})
+    }
+  })
+}
+
 // Merge custom handlers from config
 let customHandlers: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> = {}
 
