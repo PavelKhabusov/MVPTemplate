@@ -8,7 +8,7 @@ import { useContacts } from './hooks/useContacts'
 import { useSheetColumns } from './hooks/useSheetColumns'
 import { useCall } from './hooks/useCall'
 import { writeCallResult } from './services/sheets'
-import { initiateCall } from './services/api'
+import { initiateCall, getVoximplantConfig } from './services/api'
 import CallTimer from './shared/CallTimer'
 import WaveAnimation from './shared/WaveAnimation'
 import LimitModal from './shared/LimitModal'
@@ -45,6 +45,13 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     }
     chrome.runtime.onMessage.addListener(listener)
     return () => chrome.runtime.onMessage.removeListener(listener)
+  }, [])
+
+  // Check if Voximplant is configured
+  useEffect(() => {
+    getVoximplantConfig().then((config) => {
+      setVoxConnected(!!config?.login)
+    }).catch(() => {})
   }, [])
 
   // Check for selected contact from content script
