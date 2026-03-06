@@ -20,6 +20,9 @@ export async function voximplantRoutes(app: FastifyInstance) {
 
   // POST /api/voximplant/connect
   app.post('/connect', { preHandler: authenticate }, async (request, reply) => {
+    if (!env.ENCRYPTION_KEY) {
+      throw AppError.serviceUnavailable('ENCRYPTION_KEY is not configured. Set it in Admin → API → Voximplant.')
+    }
     const body = connectSchema.parse(request.body)
     await voximplantRepository.saveCredentials(
       request.userId,

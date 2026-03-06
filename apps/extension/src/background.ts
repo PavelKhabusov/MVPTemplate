@@ -94,10 +94,13 @@ if (extensionConfig.tabTracking) {
 // Merge custom handlers from config
 let customHandlers: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> = {}
 
+// Keep a promise so we can wait for handlers if they're not ready yet
+let customHandlersReady: Promise<typeof customHandlers> = Promise.resolve({})
+
 if (extensionConfig.backgroundHandlers) {
-  extensionConfig.backgroundHandlers().then((mod) => {
-    customHandlers = mod.default
-  }).catch(() => {})
+  customHandlersReady = extensionConfig.backgroundHandlers()
+    .then((mod) => { customHandlers = mod.default; return customHandlers })
+    .catch(() => ({}))
 }
 
 // Unified message router
@@ -111,4 +114,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (customHandlers[type]) {
     return customHandlers[type](message, sender, sendResponse)
   }
+
+  // Custom handlers may still be loading — wait and retry once ready
+  customHandlersReady.then((handlers) => {
+    if (handlers[type]) {
+      handlers[type](message, sender, sendResponse)
+    }
+  })
+  return true // Keep port open while waiting
 })

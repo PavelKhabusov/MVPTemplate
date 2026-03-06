@@ -74,5 +74,5 @@ export const extensionConfig: ExtensionConfig = {
   backgroundHandlers: () => import('./custom/backgroundHandlers'),
 
   permissions: ['identity', 'tabs'],
-  hostPermissions: ['*://docs.google.com/*'],
+  hostPermissions: ['*://docs.google.com/*', 'https://sheets.googleapis.com/*'],
 }

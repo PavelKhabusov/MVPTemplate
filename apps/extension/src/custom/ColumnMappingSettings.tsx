@@ -24,8 +24,15 @@ export default function ColumnMappingSettings() {
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_CURRENT_SHEET' }, (res) => {
       if (chrome.runtime.lastError) return
-      if (res?.spreadsheetId) setSpreadsheetId(res.spreadsheetId)
+      setSpreadsheetId(res?.spreadsheetId || null)
     })
+    const listener = (message: any) => {
+      if (message.type === 'TAB_CONTEXT_CHANGED') {
+        setSpreadsheetId(message.payload?.spreadsheetId || null)
+      }
+    }
+    chrome.runtime.onMessage.addListener(listener)
+    return () => chrome.runtime.onMessage.removeListener(listener)
   }, [])
 
   useEffect(() => {

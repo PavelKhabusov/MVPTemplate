@@ -30,7 +30,7 @@ function readExtensionEnv(): Record<string, string> {
 const ext = readExtensionEnv()
 const mode = ext.VITE_EXTENSION_MODE || 'sidebar'
 const isPopup = mode === 'popup'
-const googleClientId = ext.VITE_GOOGLE_CLIENT_ID || ''
+const googleClientId = ext.CHROME_GOOGLE_CLIENT_ID || ext.VITE_GOOGLE_CLIENT_ID || ''
 
 const basePermissions = isPopup ? ['activeTab', 'storage'] : ['sidePanel', 'activeTab', 'storage']
 const allPermissions = [...new Set([...basePermissions, ...extensionConfig.permissions])]

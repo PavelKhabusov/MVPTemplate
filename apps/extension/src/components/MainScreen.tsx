@@ -3,6 +3,7 @@ import { Sparkles, Home, Settings } from 'lucide-react'
 import type { Tab, Subscription, ThemeMode } from '../types'
 import { extensionConfig } from '../config'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
+import { i18n } from '@mvp/i18n/src/browser'
 import HomeTab from './HomeTab'
 import SettingsTab from './SettingsTab'
 
@@ -68,6 +69,7 @@ export default function MainScreen({
 
   const handleSetLang = (l: Lang) => {
     setLang(l)
+    i18n.changeLanguage(l)
     chrome.storage?.local?.set({ lang: l }).catch(() => {})
   }
 

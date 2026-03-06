@@ -43,37 +43,11 @@ function prefixRange(range: string, sheetName?: string): string {
   return sheetName ? `'${sheetName}'!${range}` : range
 }
 
+// Note: OPEN_SIDEBAR, GET_SELECTED_CONTACT, GET_CURRENT_SHEET
+// are handled by builtin handlers in background.ts — not duplicated here.
+
 // Message handlers
 const handlers: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> = {
-  OPEN_SIDEBAR: (message, sender, sendResponse) => {
-    if (sender.tab?.id) {
-      chrome.storage.session.set({ selectedContact: message.payload })
-      chrome.sidePanel?.open?.({ tabId: sender.tab.id })
-    }
-    sendResponse({ ok: true })
-    return true
-  },
-
-  GET_SELECTED_CONTACT: (_message, _sender, sendResponse) => {
-    chrome.storage.session.get('selectedContact').then((result) => {
-      const contact = result.selectedContact || null
-      if (contact) chrome.storage.session.remove('selectedContact')
-      sendResponse(contact)
-    })
-    return true
-  },
-
-  GET_CURRENT_SHEET: (_message, _sender, sendResponse) => {
-    chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
-      if (tab?.url) {
-        const match = tab.url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
-        if (match) { sendResponse({ spreadsheetId: match[1] }); return }
-      }
-      sendResponse({ spreadsheetId: null })
-    })
-    return true
-  },
-
   SHEETS_GET_SHEET_LIST: (message, _sender, sendResponse) => {
     sheetsGetSheetList(message.spreadsheetId).then((sheets) => sendResponse({ sheets })).catch((e) => sendResponse({ error: e.message }))
     return true

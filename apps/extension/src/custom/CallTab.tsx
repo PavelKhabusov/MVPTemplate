@@ -39,8 +39,8 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
       if (res?.spreadsheetId) setSpreadsheetId(res.spreadsheetId)
     })
     const listener = (message: any) => {
-      if (message.type === 'TAB_CONTEXT_CHANGED' && message.payload?.spreadsheetId) {
-        setSpreadsheetId(message.payload.spreadsheetId)
+      if (message.type === 'TAB_CONTEXT_CHANGED') {
+        setSpreadsheetId(message.payload?.spreadsheetId || null)
       }
     }
     chrome.runtime.onMessage.addListener(listener)
