@@ -48,6 +48,7 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
   // Check for selected contact from content script
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_SELECTED_CONTACT' }, (contact) => {
+      if (chrome.runtime.lastError) return
       if (contact) setSelectedFromSheet(contact)
     })
   }, [])

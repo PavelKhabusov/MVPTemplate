@@ -21,6 +21,7 @@ function readExtensionEnv(): Record<string, string> {
 const ext = readExtensionEnv()
 const mode = ext.VITE_EXTENSION_MODE || 'sidebar'
 const isPopup = mode === 'popup'
+const googleClientId = ext.VITE_GOOGLE_CLIENT_ID || ''
 
 const basePermissions = isPopup ? ['activeTab', 'storage'] : ['sidePanel', 'activeTab', 'storage']
 const allPermissions = [...new Set([...basePermissions, ...extensionConfig.permissions])]
@@ -31,6 +32,14 @@ export default defineManifest({
   version: '0.1.0',
   description: 'Call clients directly from Google Sheets',
   permissions: allPermissions,
+  ...(googleClientId
+    ? {
+        oauth2: {
+          client_id: googleClientId,
+          scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        },
+      }
+    : {}),
   ...(extensionConfig.hostPermissions.length > 0
     ? { host_permissions: extensionConfig.hostPermissions }
     : {}),

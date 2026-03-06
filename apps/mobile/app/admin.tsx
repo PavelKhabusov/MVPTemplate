@@ -43,6 +43,7 @@ export default function AdminScreen() {
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
   const emailEnabled = useTemplateFlag('email', false)
+  const aiEnabled = useTemplateFlag('ai', true)
   const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
@@ -52,7 +53,10 @@ export default function AdminScreen() {
     if (!pushEnabled && !emailEnabled && activeTab === 'notify') {
       setActiveTab('users')
     }
-  }, [analyticsEnabled, pushEnabled, emailEnabled, activeTab])
+    if (!aiEnabled && activeTab === 'proxy') {
+      setActiveTab('users')
+    }
+  }, [analyticsEnabled, pushEnabled, emailEnabled, aiEnabled, activeTab])
 
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
@@ -182,12 +186,14 @@ export default function AdminScreen() {
                 <Text color={activeTab === 'storage' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.storage')}</Text>
               </XStack>
             </ScalePress>
-            <ScalePress onPress={() => setActiveTab('proxy')}>
-              <XStack backgroundColor={activeTab === 'proxy' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
-                <Ionicons name="git-network-outline" size={16} color={activeTab === 'proxy' ? 'white' : theme.accent.val} />
-                <Text color={activeTab === 'proxy' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.proxyTab')}</Text>
-              </XStack>
-            </ScalePress>
+            {aiEnabled && (
+              <ScalePress onPress={() => setActiveTab('proxy')}>
+                <XStack backgroundColor={activeTab === 'proxy' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                  <Ionicons name="git-network-outline" size={16} color={activeTab === 'proxy' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'proxy' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.proxyTab')}</Text>
+                </XStack>
+              </ScalePress>
+            )}
             {isTemplateConfigEnabled && (
               <ScalePress onPress={() => {
                 if (Platform.OS === 'web') {
@@ -313,7 +319,7 @@ export default function AdminScreen() {
       )}
 
       {/* Proxy Tab */}
-      {activeTab === 'proxy' && (
+      {aiEnabled && activeTab === 'proxy' && (
         <ProxyAdminTab />
       )}
 

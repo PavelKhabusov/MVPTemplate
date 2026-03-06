@@ -21,6 +21,7 @@ export default function ColumnMappingSettings() {
 
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_CURRENT_SHEET' }, (res) => {
+      if (chrome.runtime.lastError) return
       if (res?.spreadsheetId) setSpreadsheetId(res.spreadsheetId)
     })
   }, [])

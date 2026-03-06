@@ -44,6 +44,24 @@ const builtinHandlers: Record<string, (message: any, sender: chrome.runtime.Mess
     }).catch(() => sendResponse({ spreadsheetId: null }))
     return true
   },
+
+  OPEN_SIDEBAR: (message, sender, sendResponse) => {
+    if (sender.tab?.id) {
+      chrome.storage.session.set({ selectedContact: message.payload })
+      chrome.sidePanel?.open?.({ tabId: sender.tab.id })
+    }
+    sendResponse({ ok: true })
+    return true
+  },
+
+  GET_SELECTED_CONTACT: (_message, _sender, sendResponse) => {
+    chrome.storage.session.get('selectedContact').then((result) => {
+      const contact = result.selectedContact || null
+      if (contact) chrome.storage.session.remove('selectedContact')
+      sendResponse(contact)
+    }).catch(() => sendResponse(null))
+    return true
+  },
 }
 
 // Tab tracking — registered synchronously as required by MV3 service workers
