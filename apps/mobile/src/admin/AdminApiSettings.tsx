@@ -31,6 +31,7 @@ const PAYMENT_PROVIDERS = [
   { key: 'paypal',   label: 'PayPal',    color: '#003087', enabledKey: 'PAYPAL_ENABLED',     keys: ['PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET', 'PAYPAL_WEBHOOK_ID'],               hintKey: 'admin.hintPaypal',    hintUrl: 'https://developer.paypal.com/dashboard/' },
   { key: 'yookassa', label: 'YooKassa',  color: '#0077FF', enabledKey: 'YOOKASSA_ENABLED',   keys: ['YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YOOKASSA_WEBHOOK_SECRET'],          hintKey: 'admin.hintYookassa',  hintUrl: 'https://yookassa.ru/my/merchant/integration' },
   { key: 'robokassa', label: 'Robokassa', color: '#E5392B', enabledKey: 'ROBOKASSA_ENABLED',  keys: ['ROBOKASSA_MERCHANT_LOGIN', 'ROBOKASSA_PASSWORD1', 'ROBOKASSA_PASSWORD2'],      hintKey: 'admin.hintRobokassa', hintUrl: 'https://partner.robokassa.ru/' },
+  { key: 'polar',    label: 'Polar',     color: '#0062FF', enabledKey: 'POLAR_ENABLED',      keys: ['POLAR_ACCESS_TOKEN', 'POLAR_WEBHOOK_SECRET', 'POLAR_ORGANIZATION_ID'],         hintKey: 'admin.hintPolar',     hintUrl: 'https://dashboard.polar.sh/' },
 ] as const
 
 const SMS_PROVIDERS = [

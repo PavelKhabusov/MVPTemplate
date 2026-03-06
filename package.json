@@ -24,6 +24,8 @@
     "test:watch": "npm run test:watch -w apps/backend",
     "test:ui": "npm run test:ui -w apps/backend",
     "test:coverage": "npm run test:coverage -w apps/backend",
+    "dev:extension": "npm run dev -w apps/extension",
+    "build:extension": "npm run build -w apps/extension",
     "gitpush": "git push origin HEAD"
   },
   "devDependencies": {

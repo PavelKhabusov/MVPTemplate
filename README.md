@@ -94,6 +94,7 @@ MVPTemplate/
 │   │   │   └── sign-up.tsx
 │   │   └── src/features/       # auth, settings, search, onboarding
 │   │
+│   ├── extension/              # Chrome Extension (optional)
 │   └── backend/                # Fastify API
 │       ├── src/modules/        # auth, users, admin, push, payments, analytics, email, proxy, ...
 │       ├── src/database/       # Drizzle schema + migrations
@@ -161,6 +162,7 @@ Base: `http://localhost:3000/api` | Swagger: `http://localhost:3000/docs`
 | `POST` | `/payments/webhook/paypal` | — | PayPal webhook |
 | `POST` | `/payments/webhook/yookassa` | — | YooKassa webhook |
 | `POST` | `/payments/webhook/robokassa` | — | Robokassa webhook |
+| `POST` | `/payments/webhook/polar` | — | Polar webhook |
 | `GET` | `/payments/admin/stats` | Admin | Revenue & subscription stats |
 | `POST` | `/payments/admin/plans` | Admin | Create a plan |
 | `GET` | `/admin/proxies` | Admin | List all proxies |
@@ -391,7 +393,7 @@ Push notifications are disabled by default. Enabling requires an Expo access tok
 
 ## Payments (Optional)
 
-Payments are disabled by default. Supports four providers: **Stripe** (international), **PayPal** (international), **YooKassa** (Russia), and **Robokassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
+Payments are disabled by default. Supports five providers: **Stripe** (international), **PayPal** (international), **Polar** (OSS/dev products), **YooKassa** (Russia), and **Robokassa** (Russia). Both subscriptions and one-time payments are supported via redirect-based checkout.
 
 ### Setup
 
@@ -434,13 +436,23 @@ Payments are disabled by default. Supports four providers: **Stripe** (internati
    ```
    > Get credentials from [Robokassa Dashboard](https://partner.robokassa.ru/). Set Result URL to `https://your-domain.com/api/payments/webhook/robokassa`.
 
+   **Polar:**
+   ```env
+   PAYMENTS_ENABLED=true
+   POLAR_ENABLED=true
+   POLAR_ACCESS_TOKEN=your-access-token
+   POLAR_WEBHOOK_SECRET=your-webhook-secret
+   POLAR_ORGANIZATION_ID=your-org-id
+   ```
+   > Get credentials from [Polar Dashboard](https://dashboard.polar.sh/). Set webhook URL to `https://your-domain.com/api/payments/webhook/polar`.
+
 3. Run `npm run db:push -w apps/backend` to create the `plans`, `subscriptions`, and `payments` tables
 4. Restart the backend — the `payments` feature flag activates automatically
 5. Create plans via the admin panel or `POST /api/payments/admin/plans`
 
 ### How It Works
 
-- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe, YooKassa, and Robokassa into a unified API
+- **Provider abstraction**: common `PaymentProvider` interface normalizes Stripe, PayPal, Polar, YooKassa, and Robokassa into a unified API
 - **Checkout flow**: user selects a plan → `POST /api/payments/checkout` creates a session → redirect to hosted payment page (Stripe Checkout / YooKassa / Robokassa) → webhook confirms payment
 - **Subscriptions**: managed via Stripe Billing (native) or locally in DB (YooKassa, Robokassa)
 - **Admin panel**: Payments tab shows revenue stats, active subscriptions count, and recent payments
@@ -463,6 +475,10 @@ Payments are disabled by default. Supports four providers: **Stripe** (internati
 | `ROBOKASSA_PASSWORD1` | — | Robokassa password #1 (checkout signature) |
 | `ROBOKASSA_PASSWORD2` | — | Robokassa password #2 (webhook verification) |
 | `ROBOKASSA_TEST_MODE` | `true` | Enable Robokassa test mode |
+| `POLAR_ENABLED` | `false` | Enable Polar provider |
+| `POLAR_ACCESS_TOKEN` | — | Polar access token |
+| `POLAR_WEBHOOK_SECRET` | — | Polar webhook signing secret |
+| `POLAR_ORGANIZATION_ID` | — | Polar organization ID |
 
 ## Onboarding Tour (Optional)
 
@@ -550,6 +566,49 @@ Full CRUD proxy management with testing, status tracking, and priority-based sel
 - **Status tracking**: last check time, status (success/failed/pending), error messages
 - **Toggle active state** per proxy
 
+## Chrome Extension (Optional)
+
+A Chrome extension template at `apps/extension/` with authentication, subscriptions, theming, and onboarding — all connected to the same backend.
+
+### Build & Load
+
+```bash
+npm run build:extension
+```
+
+Then: Chrome → `chrome://extensions` → Enable Developer mode → Load unpacked → select `apps/extension/dist/`
+
+### Development
+
+```bash
+npm run dev:extension
+```
+
+### Modes
+
+- **Sidebar** (default): opens as a side panel via `chrome.sidePanel`
+- **Popup**: edit `src/manifest.ts` to set `default_popup` and remove `side_panel`
+
+### Structure
+
+```
+apps/extension/
+├── src/
+│   ├── manifest.ts           # Chrome Manifest V3
+│   ├── background.ts         # Service worker
+│   ├── popup/                # Popup entry point
+│   ├── sidebar/              # Sidebar entry point
+│   ├── components/           # AuthScreen, OnboardingScreen, MainScreen, etc.
+│   ├── services/api.ts       # JWT-authenticated API client
+│   ├── hooks/                # useAuth, useTheme, useSubscription
+│   └── styles/globals.css    # Tailwind + CSS variables (light/dark)
+└── icons/                    # Extension icons
+```
+
+### Feature Flag
+
+Set `EXPO_PUBLIC_CHROME_EXTENSION=true` in `apps/mobile/.env` to show extension-related UI in the landing page.
+
 ## Features
 
 - **Auth**: JWT with refresh rotation, rate limiting (30 req/min), optional Google sign-in, SMS OTP (Twilio + SMSC.ru)
@@ -564,7 +623,8 @@ Full CRUD proxy management with testing, status tracking, and priority-based sel
 - **SSE**: real-time events with auto-reconnect
 - **Analytics**: PostHog abstraction with feature flags
 - **SEO**: meta tags, OG/Twitter cards, sitemap
-- **Payments**: Stripe + PayPal + YooKassa + Robokassa, subscriptions & one-time, admin stats
+- **Payments**: Stripe + PayPal + Polar + YooKassa + Robokassa, subscriptions & one-time, admin stats
+- **Chrome Extension**: sidebar/popup template with auth, onboarding, subscriptions, theming
 - **AI Providers**: Gemini + OpenAI with tab switching, model selection
 - **Proxy Management**: CRUD with testing (HTTPS, TCP, diagnostics), priority, status tracking
 - **File Storage**: local filesystem or S3-compatible (MinIO, Cloudflare R2), live migration in admin

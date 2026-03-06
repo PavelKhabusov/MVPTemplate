@@ -321,6 +321,12 @@ export function LandingFeatures() {
                         paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
                         borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
                       >
+                        <Text fontSize={11} color="$mutedText">Polar</Text>
+                      </YStack>
+                      <YStack
+                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
+                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
+                      >
                         <Text fontSize={11} color="$mutedText">YooKassa</Text>
                       </YStack>
                     </XStack>
@@ -433,6 +439,43 @@ export function LandingFeatures() {
                   </YStack>
                 </BentoCard>
               </View>
+
+              {/* ── Chrome Extension ── */}
+              <View style={{ animation: 'bentoFadeUp 0.5s ease-out both 0.38s' } as any}>
+                <BentoCard theme={theme} fullHeight>
+                  <YStack justifyContent="center" alignItems="center" height={120} gap="$3">
+                    <YStack
+                      width={64} height={64} borderRadius={32}
+                      alignItems="center" justifyContent="center"
+                      style={{ background: `linear-gradient(135deg, ${gs}25, ${ge}25)` } as any}
+                    >
+                      <Ionicons name="extension-puzzle" size={32} color={acc} />
+                    </YStack>
+                    <XStack gap="$2">
+                      <YStack
+                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
+                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
+                      >
+                        <Text fontSize={11} color="$mutedText">Sidebar</Text>
+                      </YStack>
+                      <YStack
+                        paddingHorizontal="$2" paddingVertical="$1" borderRadius={8}
+                        borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground"
+                      >
+                        <Text fontSize={11} color="$mutedText">Popup</Text>
+                      </YStack>
+                    </XStack>
+                  </YStack>
+                  <YStack gap="$1">
+                    <Text fontWeight="bold" fontSize="$5" color="$color">
+                      {t('landing.featureExtension' as any)}
+                    </Text>
+                    <Text fontSize="$3" color="$mutedText" lineHeight={22}>
+                      {t('landing.featureExtensionDesc' as any)}
+                    </Text>
+                  </YStack>
+                </BentoCard>
+              </View>
             </>
           ) : (
             <>
@@ -446,6 +489,8 @@ export function LandingFeatures() {
               {/* Row 3: 1+1+1 */}
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
+              <View style={{ height: 280, opacity: 0 } as any} />
+              {/* Row 4: 1 (extension) */}
               <View style={{ height: 280, opacity: 0 } as any} />
             </>
           )}

@@ -1,4 +1,4 @@
-export type PaymentProviderType = 'stripe' | 'yookassa' | 'robokassa'
+export type PaymentProviderType = 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar'
 
 export type PlanInterval = 'month' | 'year' | 'one_time'
 

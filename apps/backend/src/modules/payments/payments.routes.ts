@@ -124,6 +124,21 @@ export async function paymentsRoutes(app: FastifyInstance) {
         return reply.status(400).send({ error: err.message })
       }
     })
+
+    webhook.post('/webhook/polar', async (request, reply) => {
+      try {
+        const provider = getPaymentProvider('polar')
+        const event = await provider.parseWebhook(
+          request.body as string,
+          request.headers as Record<string, string>,
+        )
+        await paymentsService.handleWebhookEvent(event)
+        return reply.status(200).send({ received: true })
+      } catch (err: any) {
+        request.log.error(err, 'Polar webhook error')
+        return reply.status(400).send({ error: err.message })
+      }
+    })
   })
 
   // --- Admin ---

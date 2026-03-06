@@ -46,6 +46,7 @@ export const DOC_GROUPS: DocGroup[] = [
       { id: 'email', titleKey: 'docs.pageEmail', contentKey: 'docs.contentEmail' },
       { id: 'payments', titleKey: 'docs.pagePayments', contentKey: 'docs.contentPayments' },
       { id: 'onboarding', titleKey: 'docs.pageOnboarding', contentKey: 'docs.contentOnboarding' },
+      { id: 'chrome-extension', titleKey: 'docs.pageExtension', contentKey: 'docs.contentExtension' },
     ],
   },
   {

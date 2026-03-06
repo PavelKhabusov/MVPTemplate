@@ -4,13 +4,15 @@ import { StripeProvider } from './stripe.provider'
 import { YooKassaProvider } from './yookassa.provider'
 import { RobokassaProvider } from './robokassa.provider'
 import { PayPalProvider } from './paypal.provider'
+import { PolarProvider } from './polar.provider'
 
 let stripeProvider: StripeProvider | null = null
 let yookassaProvider: YooKassaProvider | null = null
 let robokassaProvider: RobokassaProvider | null = null
 let paypalProvider: PayPalProvider | null = null
+let polarProvider: PolarProvider | null = null
 
-export type ProviderName = 'stripe' | 'yookassa' | 'robokassa' | 'paypal'
+export type ProviderName = 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar'
 
 export function getPaymentProvider(provider: ProviderName): PaymentProvider {
   if (provider === 'stripe') {
@@ -67,6 +69,17 @@ export function getPaymentProvider(provider: ProviderName): PaymentProvider {
     return paypalProvider
   }
 
+  if (provider === 'polar') {
+    if (!env.POLAR_ENABLED) throw new Error('Polar is disabled (POLAR_ENABLED=false)')
+    if (!env.POLAR_ACCESS_TOKEN) {
+      throw new Error('Polar is not configured. Set POLAR_ACCESS_TOKEN.')
+    }
+    if (!polarProvider) {
+      polarProvider = new PolarProvider(env.POLAR_ACCESS_TOKEN, env.POLAR_ORGANIZATION_ID)
+    }
+    return polarProvider
+  }
+
   throw new Error(`Unknown payment provider: ${provider}`)
 }
 
@@ -76,5 +89,6 @@ export function getEnabledProviders(): ProviderName[] {
   if (env.YOOKASSA_ENABLED && env.YOOKASSA_SHOP_ID) providers.push('yookassa')
   if (env.ROBOKASSA_ENABLED && env.ROBOKASSA_MERCHANT_LOGIN) providers.push('robokassa')
   if (env.PAYPAL_ENABLED && env.PAYPAL_CLIENT_ID) providers.push('paypal')
+  if (env.POLAR_ENABLED && env.POLAR_ACCESS_TOKEN) providers.push('polar')
   return providers
 }
