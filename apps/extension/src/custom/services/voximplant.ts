@@ -30,7 +30,7 @@ class VoximplantService {
     await new Promise<void>((resolve, reject) => {
       this.sdk!.on(sdk.Events.SDKReady, () => resolve())
       this.sdk!.on(sdk.Events.ConnectionFailed, () => reject(new Error('Connection failed')))
-      this.sdk!.init({ micRequired: true, showDebugInfo: false })
+      this.sdk!.init({ micRequired: true, showDebugInfo: false, node: 'app.voximplant.com' })
     })
     this.initialized = true
   }
