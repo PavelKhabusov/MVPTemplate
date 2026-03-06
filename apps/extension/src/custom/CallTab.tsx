@@ -58,6 +58,10 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     }).catch(() => {})
   }, [spreadsheetId])
 
+  const { callState: voxCallState, duration, error: callError, sdkReady, initSDK, makeCall: voxMakeCall, hangup: voxHangup, reset: voxReset } = useCall({
+    onCallEnded: () => setShowNoteBox(true),
+  })
+
   // Check if Voximplant is configured, then init SDK
   useEffect(() => {
     getVoximplantConfig().then((config) => {
@@ -86,10 +90,6 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
   const { columns, loading: columnsLoading } = useSheetColumns({
     spreadsheetId,
     sheetName: sheetName || undefined,
-  })
-
-  const { callState: voxCallState, duration, error: callError, sdkReady, initSDK, makeCall: voxMakeCall, hangup: voxHangup, reset: voxReset } = useCall({
-    onCallEnded: () => setShowNoteBox(true),
   })
 
   const [simCallState, setSimCallState] = useState<CallState>('idle')
