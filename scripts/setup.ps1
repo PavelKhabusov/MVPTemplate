@@ -1,4 +1,4 @@
-# MVPTemplate — Full Setup Script
+# CallSheet — Full Setup Script
 # Usage: pwsh scripts/setup.ps1
 # Runs: install deps → start Docker → configure env → push DB schema → optionally create admin
 
@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
 Set-Location $Root
 
-Write-Host "`n=== MVPTemplate Setup ===" -ForegroundColor Cyan
+Write-Host "`n=== CallSheet Setup ===" -ForegroundColor Cyan
 
 # --- 1. Install dependencies ---
 if (-not $SkipInstall) {

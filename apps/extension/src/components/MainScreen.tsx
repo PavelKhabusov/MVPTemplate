@@ -2,7 +2,6 @@ import { useState, useEffect, Suspense } from 'react'
 import { Sparkles, Home, Settings } from 'lucide-react'
 import type { Tab, Subscription, ThemeMode } from '../types'
 import { extensionConfig } from '../config'
-import { getMe } from '../services/api'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
 import HomeTab from './HomeTab'
 import SettingsTab from './SettingsTab'
@@ -16,6 +15,7 @@ interface MainScreenProps {
   setTheme: (mode: ThemeMode) => void
   onLogout: () => void
   paymentsEnabled?: boolean
+  user: { email: string; name: string } | null
 }
 
 const builtinLabels: Record<string, Partial<Record<Lang, string>>> = {
@@ -30,12 +30,12 @@ export default function MainScreen({
   setTheme,
   onLogout,
   paymentsEnabled = false,
+  user,
 }: MainScreenProps) {
   const hasCustomTabs = extensionConfig.tabs.length > 0
   const defaultTab = hasCustomTabs ? extensionConfig.tabs[0].id : 'home'
   const [tab, setTab] = useState<Tab>(defaultTab)
   const [lang, setLang] = useState<Lang>('en')
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null)
 
   const isActive = subscription?.status === 'active'
 
@@ -43,7 +43,6 @@ export default function MainScreen({
     chrome.storage?.local?.get('lang').then((r) => {
       if (['en', 'ru', 'es', 'ja'].includes(r?.lang)) setLang(r.lang)
     }).catch(() => {})
-    getMe().then(setUser).catch(() => {})
   }, [])
 
   // Auto-switch to Call tab when Google Sheets is detected
