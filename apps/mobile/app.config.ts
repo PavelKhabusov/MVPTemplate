@@ -3,7 +3,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'MVPTemplate', // BRAND: change when forking
-  slug: 'mvp-template', // BRAND: change when forking
+  slug: 'mvptemplate', // BRAND: change when forking
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
@@ -19,14 +19,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   // expo-splash-screen plugin in plugins[] handles dev/production builds
   ios: {
     supportsTablet: true,
-    bundleIdentifier: 'com.mvptemplate.app',
+    bundleIdentifier: 'com.PavelKhabusov.MVPTemplate',
   },
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#ffffff',
     },
-    package: 'com.mvptemplate.app',
+    package: 'com.PavelKhabusov.MVPTemplate',
     edgeToEdgeEnabled: true,
   },
   web: {

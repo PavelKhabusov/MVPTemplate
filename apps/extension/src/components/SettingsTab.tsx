@@ -64,6 +64,15 @@ export default function SettingsTab({ theme, setTheme, lang, setLang, user, onLo
         </div>
       )}
 
+      {/* Custom settings sections from config (app-specific — shown first) */}
+      {extensionConfig.settingsSections.length > 0 && (
+        <Suspense fallback={<div className="bg-bg-secondary border border-bg-tertiary rounded-xl p-4 animate-pulse h-20" />}>
+          {extensionConfig.settingsSections.map((Section, i) => (
+            <Section key={i} lang={lang} />
+          ))}
+        </Suspense>
+      )}
+
       {/* Theme */}
       <div className="bg-bg-secondary border border-bg-tertiary rounded-xl p-4">
         <div className="text-[13px] font-medium mb-3">{labels.theme[lang] || labels.theme.en}</div>
@@ -107,15 +116,6 @@ export default function SettingsTab({ theme, setTheme, lang, setLang, user, onLo
           ))}
         </div>
       </div>
-
-      {/* Custom settings sections from config */}
-      {extensionConfig.settingsSections.length > 0 && (
-        <Suspense fallback={<div className="bg-bg-secondary border border-bg-tertiary rounded-xl p-4 animate-pulse h-20" />}>
-          {extensionConfig.settingsSections.map((Section, i) => (
-            <Section key={i} lang={lang} />
-          ))}
-        </Suspense>
-      )}
 
       {/* Logout */}
       <button

@@ -5,23 +5,23 @@ export default function Root({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta httpEquiv="X-UA-Compatible" content="MVPTemplate" />
+        <meta name="viewport" content="MVPTemplate" />
 
         {/* Primary Meta Tags */}
         <title>MVPTemplate</title>
         <meta name="title" content="MVPTemplate" />
-        <meta name="description" content="Universal MVP template powered by Expo + Tamagui" />
+        <meta name="description" content="MVPTemplate" />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:title" content="MVPTemplate" />
-        <meta property="og:description" content="Universal MVP template powered by Expo + Tamagui" />
+        <meta property="og:description" content="MVPTemplate" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="MVPTemplate" />
-        <meta name="twitter:description" content="Universal MVP template powered by Expo + Tamagui" />
+        <meta name="twitter:description" content="MVPTemplate" />
 
         {/* Favicon */}
         <link rel="icon" type="image/png" href="/favicon.png?v=2" />

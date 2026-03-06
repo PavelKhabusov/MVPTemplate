@@ -3,6 +3,7 @@ import { Sparkles, Home, Settings } from 'lucide-react'
 import type { Tab, Subscription, ThemeMode } from '../types'
 import { extensionConfig } from '../config'
 import { getMe } from '../services/api'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
 import HomeTab from './HomeTab'
 import SettingsTab from './SettingsTab'
 
@@ -73,7 +74,7 @@ export default function MainScreen({
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center">
             <Sparkles size={14} className="text-white" />
           </div>
-          <span className="text-sm font-semibold tracking-tight">MVP Extension</span>
+          <span className="text-sm font-semibold tracking-tight">{APP_BRAND.name}</span>
         </div>
         {paymentsEnabled && subscription && (
           <span

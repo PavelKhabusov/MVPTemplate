@@ -591,6 +591,15 @@ function ExtensionEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             onSave={onUpdate}
           />
 
+          {/* Google OAuth Client ID for extension */}
+          <EnvStringField
+            envKey="CHROME_GOOGLE_CLIENT_ID"
+            label={t('admin.envLabel_CHROME_GOOGLE_CLIENT_ID', { defaultValue: 'Chrome Google Client ID' })}
+            value={keys['CHROME_GOOGLE_CLIENT_ID']?.value || null}
+            isSecret
+            onSave={onUpdate}
+          />
+
           {storeUrl && (
             <ScalePress onPress={() => Linking.openURL(storeUrl)}>
               <Text fontSize="$2" color="$accent" numberOfLines={1}>

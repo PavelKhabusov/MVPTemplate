@@ -170,6 +170,8 @@
     "envLabel_SMTP_PASS": "Contraseña SMTP",
     "envLabel_SMTP_FROM": "Dirección del remitente",
     "envLabel_GOOGLE_CLIENT_ID": "Client ID",
+    "envLabel_GOOGLE_CLIENT_SECRET": "Client Secret",
+    "envLabel_CHROME_GOOGLE_CLIENT_ID": "Chrome Google Client ID",
     "envLabel_EXPO_ACCESS_TOKEN": "Expo Access Token",
     "envLabel_STRIPE_SECRET_KEY": "Clave secreta",
     "envLabel_STRIPE_WEBHOOK_SECRET": "Secreto del webhook",

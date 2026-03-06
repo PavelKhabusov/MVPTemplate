@@ -32,6 +32,35 @@ const builtinHandlers: Record<string, (message: any, sender: chrome.runtime.Mess
     sendResponse({ ok: true })
     return true
   },
+
+  GET_CURRENT_SHEET: (_message, _sender, sendResponse) => {
+    chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+      if (tab?.url) {
+        const match = tab.url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
+        if (match) { sendResponse({ spreadsheetId: match[1] }); return }
+      }
+      sendResponse({ spreadsheetId: null })
+    }).catch(() => sendResponse({ spreadsheetId: null }))
+    return true
+  },
+
+  OPEN_SIDEBAR: (message, sender, sendResponse) => {
+    if (sender.tab?.id) {
+      chrome.storage.session.set({ selectedItem: message.payload })
+      chrome.sidePanel?.open?.({ tabId: sender.tab.id })
+    }
+    sendResponse({ ok: true })
+    return true
+  },
+
+  GET_SELECTED_ITEM: (_message, _sender, sendResponse) => {
+    chrome.storage.session.get('selectedItem').then((result) => {
+      const item = result.selectedItem || null
+      if (item) chrome.storage.session.remove('selectedItem')
+      sendResponse(item)
+    })
+    return true
+  },
 }
 
 // Tab tracking — registered synchronously as required by MV3 service workers

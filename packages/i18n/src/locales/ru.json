@@ -189,6 +189,8 @@
     "envLabel_SMTP_PASS": "SMTP пароль",
     "envLabel_SMTP_FROM": "Адрес отправителя",
     "envLabel_GOOGLE_CLIENT_ID": "Client ID",
+    "envLabel_GOOGLE_CLIENT_SECRET": "Client Secret",
+    "envLabel_CHROME_GOOGLE_CLIENT_ID": "Chrome Google Client ID",
     "envLabel_EXPO_ACCESS_TOKEN": "Expo Access Token",
     "envLabel_STRIPE_SECRET_KEY": "Секретный ключ",
     "envLabel_STRIPE_WEBHOOK_SECRET": "Webhook секрет",

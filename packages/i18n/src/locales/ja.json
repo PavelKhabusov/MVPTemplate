@@ -170,6 +170,8 @@
     "envLabel_SMTP_PASS": "SMTPパスワード",
     "envLabel_SMTP_FROM": "送信元アドレス",
     "envLabel_GOOGLE_CLIENT_ID": "クライアントID",
+    "envLabel_GOOGLE_CLIENT_SECRET": "クライアントシークレット",
+    "envLabel_CHROME_GOOGLE_CLIENT_ID": "Chrome GoogleクライアントID",
     "envLabel_EXPO_ACCESS_TOKEN": "Expoアクセストークン",
     "envLabel_STRIPE_SECRET_KEY": "シークレットキー",
     "envLabel_STRIPE_WEBHOOK_SECRET": "Webhookシークレット",

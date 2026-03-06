@@ -38,8 +38,8 @@ const ENV_GROUPS = {
     types: { EMAIL_ENABLED: 'boolean', EMAIL_VERIFICATION_REQUIRED: 'boolean', SMTP_HOST: 'string', SMTP_PORT: 'string', SMTP_USER: 'string', SMTP_PASS: 'secret', SMTP_FROM: 'string' } as Record<string, string>,
   },
   auth: {
-    keys: ['GOOGLE_CLIENT_ID'],
-    types: { GOOGLE_CLIENT_ID: 'secret' } as Record<string, string>,
+    keys: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+    types: { GOOGLE_CLIENT_ID: 'secret', GOOGLE_CLIENT_SECRET: 'secret' } as Record<string, string>,
   },
   pushNotifications: {
     keys: ['EXPO_ACCESS_TOKEN'],
@@ -58,8 +58,8 @@ const ENV_GROUPS = {
     types: { EXPO_PUBLIC_DOCS_ENABLED: 'boolean', EXPO_PUBLIC_COOKIE_BANNER: 'boolean', EXPO_PUBLIC_COLOR_SCHEME: 'string', EXPO_PUBLIC_CUSTOM_COLOR: 'string' } as Record<string, string>,
   },
   extension: {
-    keys: ['CHROME_EXTENSION_ENABLED', 'CHROME_EXTENSION_MODE', 'CHROME_EXTENSION_ID'],
-    types: { CHROME_EXTENSION_ENABLED: 'boolean', CHROME_EXTENSION_MODE: 'string', CHROME_EXTENSION_ID: 'string' } as Record<string, string>,
+    keys: ['CHROME_EXTENSION_ENABLED', 'CHROME_EXTENSION_MODE', 'CHROME_EXTENSION_ID', 'CHROME_GOOGLE_CLIENT_ID'],
+    types: { CHROME_EXTENSION_ENABLED: 'boolean', CHROME_EXTENSION_MODE: 'string', CHROME_EXTENSION_ID: 'string', CHROME_GOOGLE_CLIENT_ID: 'secret' } as Record<string, string>,
   },
   storage: {
     keys: ['STORAGE_TYPE', 'S3_ENDPOINT', 'S3_BUCKET', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'S3_REGION', 'S3_PUBLIC_URL'],
