@@ -255,6 +255,8 @@
     "extensionMode_popup": "Попап",
     "extensionId": "ID в Chrome Web Store",
     "extensionStoreLink": "Открыть в Chrome Web Store",
+    "extensionGoogleClientId": "Google OAuth Client ID (доступ к Таблицам)",
+    "extensionGoogleClientIdHint": "Создать Client ID: Google Cloud Console → OAuth → Chrome App",
     "apiAI": "ИИ-провайдеры",
     "apiVoximplant": "Voximplant (VoIP)",
     "hintVoximplant": "Получите ключи на manage.voximplant.com",

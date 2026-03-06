@@ -599,6 +599,20 @@ function ExtensionEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               </Text>
             </ScalePress>
           )}
+
+          {/* Google OAuth Client ID for Google Sheets access */}
+          <EnvStringField
+            envKey="CHROME_GOOGLE_CLIENT_ID"
+            label={t('admin.extensionGoogleClientId')}
+            value={keys['CHROME_GOOGLE_CLIENT_ID']?.value ?? null}
+            isSecret
+            onSave={onUpdate}
+          />
+          <ScalePress onPress={() => Linking.openURL('https://console.cloud.google.com/apis/credentials')}>
+            <Text fontSize="$2" color="$accent">
+              {t('admin.extensionGoogleClientIdHint')} ↗
+            </Text>
+          </ScalePress>
         </YStack>
       )}
     </AppCard>

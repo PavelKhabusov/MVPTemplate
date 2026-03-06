@@ -6,16 +6,25 @@ import { extensionConfig } from './config'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-function readExtensionEnv(): Record<string, string> {
-  const envPath = path.resolve(__dirname, '..', '.env.extension')
-  if (!fs.existsSync(envPath)) return {}
-  const content = fs.readFileSync(envPath, 'utf-8')
+function readEnvFile(filePath: string): Record<string, string> {
+  if (!fs.existsSync(filePath)) return {}
+  const content = fs.readFileSync(filePath, 'utf-8')
   const result: Record<string, string> = {}
   for (const line of content.split('\n')) {
-    const idx = line.indexOf('=')
-    if (idx > 0) result[line.slice(0, idx).trim()] = line.slice(idx + 1).trim()
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const idx = trimmed.indexOf('=')
+    if (idx > 0) result[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim()
   }
   return result
+}
+
+function readExtensionEnv(): Record<string, string> {
+  const extEnv = readEnvFile(path.resolve(__dirname, '..', '.env.extension'))
+  // Also read backend .env for shared keys (e.g. CHROME_GOOGLE_CLIENT_ID set via admin panel)
+  const backendEnv = readEnvFile(path.resolve(__dirname, '..', '..', 'backend', '.env'))
+  // Extension env takes precedence over backend env
+  return { ...backendEnv, ...extEnv }
 }
 
 const ext = readExtensionEnv()

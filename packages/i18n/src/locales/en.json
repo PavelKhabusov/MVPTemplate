@@ -255,6 +255,8 @@
     "extensionMode_popup": "Popup",
     "extensionId": "Chrome Web Store ID",
     "extensionStoreLink": "Open in Chrome Web Store",
+    "extensionGoogleClientId": "Google OAuth Client ID (Sheets access)",
+    "extensionGoogleClientIdHint": "Create OAuth Client ID at Google Cloud Console → Chrome App",
     "apiAI": "AI Providers",
     "apiVoximplant": "Voximplant (VoIP)",
     "hintVoximplant": "Get credentials at manage.voximplant.com",

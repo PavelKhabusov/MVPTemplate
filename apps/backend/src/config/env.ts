@@ -104,6 +104,9 @@ const envSchema = z.object({
   PROXY_ENABLED: envBoolean,
   PROXY_URL: z.string().optional(),
 
+  // Chrome Extension
+  CHROME_GOOGLE_CLIENT_ID: z.string().optional(),
+
   // Voximplant
   VOXIMPLANT_ACCOUNT_ID: z.string().optional(),
   VOXIMPLANT_API_KEY: z.string().optional(),
