@@ -25,6 +25,7 @@ export interface VoxCallHandlers {
   onStateChange: (state: VoxCallState) => void
   onDurationTick: (seconds: number) => void
   onError: (message: string) => void
+  onConnectionDrop?: () => void
 }
 
 class VoximplantService {
@@ -35,6 +36,7 @@ class VoximplantService {
   private handlers: VoxCallHandlers | null = null
   private initialized = false
   private loggedIn = false
+  private serverConnected = false
 
   async init(node?: string | null): Promise<void> {
     if (this.initialized) return
@@ -49,14 +51,21 @@ class VoximplantService {
       this.sdk!.on(sdk.Events.ConnectionFailed, () => reject(new Error('Connection failed')))
       this.sdk!.init(config)
     })
+    // Handle connection drops after init (e.g. tab backgrounded, network change)
+    this.sdk!.on(sdk.Events.ConnectionClosed, () => {
+      this.serverConnected = false
+      this.loggedIn = false
+      this.handlers?.onConnectionDrop?.()
+    })
     this.initialized = true
   }
 
   async connect(): Promise<void> {
     if (!this.sdk) throw new Error('SDK not initialized')
+    if (this.serverConnected) return // Already connected
     const sdk = await loadSDK()
     await new Promise<void>((resolve, reject) => {
-      this.sdk!.on(sdk.Events.ConnectionEstablished, () => resolve())
+      this.sdk!.on(sdk.Events.ConnectionEstablished, () => { this.serverConnected = true; resolve() })
       this.sdk!.on(sdk.Events.ConnectionFailed, () => reject(new Error('Connection failed')))
       this.sdk!.connect()
     })
@@ -108,10 +117,14 @@ class VoximplantService {
         this.startDurationTimer()
       })
       this.currentCall.on(sdk.CallEvents.Disconnected, () => { this.cleanup(); this.handlers?.onStateChange('ended') })
-      this.currentCall.on(sdk.CallEvents.Failed, (e: any) => { this.cleanup(); this.handlers?.onStateChange('failed'); this.handlers?.onError(`Call failed: ${e.reason}`) })
+      this.currentCall.on(sdk.CallEvents.Failed, (e: any) => {
+        this.cleanup()
+        this.handlers?.onError(`Call failed: ${e.reason}`)
+        this.handlers?.onStateChange('idle') // Reset to idle so user can retry
+      })
     } catch (err) {
-      this.handlers?.onStateChange('failed')
       this.handlers?.onError(err instanceof Error ? err.message : 'Call failed')
+      this.handlers?.onStateChange('idle')
       this.currentCall = null
     }
   }
@@ -138,13 +151,14 @@ class VoximplantService {
     this.callStartTime = 0
   }
 
-  isConnected(): boolean { return this.loggedIn }
+  isReady(): boolean { return this.loggedIn }
 
   disconnect(): void {
     if (this.currentCall) this.currentCall.hangup()
     this.cleanup()
     if (this.sdk) this.sdk.disconnect()
     this.loggedIn = false
+    this.serverConnected = false
     this.initialized = false
     this.sdk = null
   }

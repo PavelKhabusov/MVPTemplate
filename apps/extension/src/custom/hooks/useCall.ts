@@ -22,13 +22,18 @@ export function useCall(options?: UseCallOptions) {
           setDuration(dur)
           optionsRef.current?.onCallEnded?.(dur)
         }
-        if (state === 'idle' || state === 'calling') {
+        if (state === 'calling') {
           setDuration(0)
-          setError(null)
+          setError(null) // Clear error only when a new call attempt starts
+        }
+        if (state === 'idle') {
+          setDuration(0)
+          // Don't clear error — let it persist so user can read it after failure
         }
       },
       onDurationTick: (seconds) => setDuration(seconds),
       onError: (message) => setError(message),
+      onConnectionDrop: () => setSdkReady(false),
     })
   }, [])
 

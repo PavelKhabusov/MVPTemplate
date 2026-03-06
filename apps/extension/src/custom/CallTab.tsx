@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Headphones, Smartphone, Phone, PhoneOff, Save, Zap } from 'lucide-react'
 import { ContactSkeleton } from './shared/Skeleton'
 import ErrorBlock from './shared/ErrorBlock'
@@ -9,6 +9,7 @@ import { useSheetColumns } from './hooks/useSheetColumns'
 import { useCall } from './hooks/useCall'
 import { writeCallResult } from './services/sheets'
 import { initiateCall, getVoximplantConfig } from './services/api'
+import { voximplantService } from './services/voximplant'
 import CallTimer from './shared/CallTimer'
 import WaveAnimation from './shared/WaveAnimation'
 import LimitModal from './shared/LimitModal'
@@ -26,6 +27,7 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
   const [voxConnected, setVoxConnected] = useState(false)
   const [sdkStatus, setSdkStatus] = useState<'idle' | 'connecting' | 'ready' | 'failed'>('idle')
   const [sdkInitError, setSdkInitError] = useState<string | null>(null)
+  const voxConfigRef = useRef<{ login: string; password: string; node: string } | null>(null)
   const [callMode, setCallMode] = useState<CallMode>('browser')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [note, setNote] = useState('')
@@ -34,7 +36,7 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [limitReached, setLimitReached] = useState(false)
 
-  // Get current sheet context
+  // Get current sheet context + re-init SDK on tab switch if needed
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_CURRENT_SHEET' }, (res) => {
       if (chrome.runtime.lastError) return
@@ -43,11 +45,13 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     const listener = (message: any) => {
       if (message.type === 'TAB_CONTEXT_CHANGED') {
         setSpreadsheetId(message.payload?.spreadsheetId || null)
+        // SDK may have dropped while the tab was inactive — reconnect if needed
+        if (!voximplantService.isReady()) tryInitSDK()
       }
     }
     chrome.runtime.onMessage.addListener(listener)
     return () => chrome.runtime.onMessage.removeListener(listener)
-  }, [])
+  }, [tryInitSDK])
 
   // Restore saved sheet name when spreadsheetId is known
   useEffect(() => {
@@ -62,27 +66,44 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     onCallEnded: () => setShowNoteBox(true),
   })
 
-  // Check if Voximplant is configured, then init SDK
-  useEffect(() => {
-    getVoximplantConfig().then((config) => {
-      setVoxConnected(!!config?.login)
-      if (config?.login && config?.password) {
+  // Try to init/reconnect SDK — safe to call multiple times
+  const tryInitSDK = useCallback(async () => {
+    // Load config if not cached yet
+    if (!voxConfigRef.current) {
+      try {
+        const config = await getVoximplantConfig()
+        setVoxConnected(!!config?.login)
+        if (!config?.login || !config?.password) return
         if (!config.node) {
           setSdkStatus('failed')
           setSdkInitError(t('ext.sdkNodeRequired'))
           return
         }
-        setSdkStatus('connecting')
-        setSdkInitError(null)
-        initSDK(config.login, config.password, config.node)
-          .then(() => setSdkStatus('ready'))
-          .catch((err) => {
-            setSdkStatus('failed')
-            setSdkInitError(err instanceof Error ? err.message : 'SDK init failed')
-          })
-      }
-    }).catch(() => {})
-  }, [initSDK])
+        voxConfigRef.current = { login: config.login, password: config.password, node: config.node }
+      } catch { return }
+    }
+    const cfg = voxConfigRef.current
+    if (!cfg) return
+    setSdkStatus('connecting')
+    setSdkInitError(null)
+    initSDK(cfg.login, cfg.password, cfg.node)
+      .then(() => setSdkStatus('ready'))
+      .catch((err) => {
+        setSdkStatus('failed')
+        setSdkInitError(err instanceof Error ? err.message : 'SDK init failed')
+      })
+  }, [initSDK, t])
+
+  // Init SDK on mount
+  useEffect(() => { tryInitSDK() }, [tryInitSDK])
+
+  // Re-init when connection drops (sdkReady goes false while we thought it was ready)
+  useEffect(() => {
+    if (!sdkReady && sdkStatus === 'ready') {
+      setSdkStatus('idle')
+      tryInitSDK()
+    }
+  }, [sdkReady]) // eslint-disable-line
 
   // Check for selected contact from content script
   useEffect(() => {
@@ -221,7 +242,7 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
             {displayContacts.map((c) => {
               const colors = statusColors[c.status]
               return (
-                <div key={c.id} onClick={() => setSelectedContact(c)}
+                <div key={c.id} onClick={() => { setSelectedContact(c); voxReset() }}
                   className={`flex items-center gap-2.5 py-2 px-2.5 rounded-lg cursor-pointer transition-all duration-100 ${
                     selectedContact?.id === c.id ? 'bg-bg-tertiary border border-bg-hover' : 'bg-transparent border border-transparent'
                   }`}>
