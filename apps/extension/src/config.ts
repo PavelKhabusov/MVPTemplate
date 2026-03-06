@@ -31,8 +31,8 @@ export interface ExtensionConfig {
   /** Register chrome.tabs listeners synchronously in background.ts to send TAB_CONTEXT_CHANGED (required for MV3 service workers) */
   tabTracking: boolean
 
-  /** Dynamic import of custom background message handlers */
-  backgroundHandlers: (() => Promise<{ default: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> }>) | null
+  /** Statically imported background message handlers (dynamic imports break MV3 service workers in dev mode) */
+  backgroundHandlers: Record<string, (message: any, sender: chrome.runtime.MessageSender, sendResponse: (r: any) => void) => boolean | void> | null
 
   /** Additional manifest permissions */
   permissions: string[]

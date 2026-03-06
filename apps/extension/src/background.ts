@@ -90,17 +90,8 @@ if (extensionConfig.tabTracking) {
   })
 }
 
-// Merge custom handlers from config
-let customHandlers: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> = {}
-
-// Keep a promise so we can wait for handlers if they're not ready yet
-let customHandlersReady: Promise<typeof customHandlers> = Promise.resolve({})
-
-if (extensionConfig.backgroundHandlers) {
-  customHandlersReady = extensionConfig.backgroundHandlers()
-    .then((mod) => { customHandlers = mod.default; return customHandlers })
-    .catch(() => ({}))
-}
+// Custom handlers — statically imported (dynamic imports break MV3 service workers in dev mode)
+const customHandlers = extensionConfig.backgroundHandlers ?? {}
 
 // Unified message router
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -114,11 +105,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return customHandlers[type](message, sender, sendResponse)
   }
 
-  // Custom handlers may still be loading — wait and retry once ready
-  customHandlersReady.then((handlers) => {
-    if (handlers[type]) {
-      handlers[type](message, sender, sendResponse)
-    }
-  })
-  return true // Keep port open while waiting
+  sendResponse({ error: `Unknown message type: ${type}` })
 })
