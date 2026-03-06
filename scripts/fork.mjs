@@ -11,6 +11,7 @@
  *   --bundle   iOS/Android bundle ID, e.g. "com.company.callsheet" (optional, auto-generated from slug)
  *   --tagline  Short description                        (optional)
  *   --cta-url  CTA / store URL                         (optional)
+ *   --scheme   Extension color scheme, e.g. "pink"      (optional, default: "slate")
  *
  * What this script updates:
  *   1. packages/template-config/src/brand.ts
@@ -61,6 +62,7 @@ const SLUG_KEBAB = SLUG.replace(/[^a-z0-9]/g, '-')   // e.g. "call-sheet"
 const BUNDLE = opts.bundle || `com.${SLUG}.app`       // e.g. "com.callsheet.app"
 const TAGLINE = opts.tagline || `${NAME} — built on MVPTemplate`
 const CTA_URL = opts['cta-url'] || ''
+const COLOR_SCHEME = opts.scheme || 'slate'           // e.g. "pink"
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -93,6 +95,7 @@ if (brand) {
     .replace(/tagline: '[^']+'(?=,\s*$)/m, `tagline: '${TAGLINE}'`)
     .replace(/copyright: '[^']+'(?=,\s*$)/m, `copyright: '${NAME}'`)
     .replace(/ctaUrl: '[^']+'(?=,\s*$)/m, `ctaUrl: '${CTA_URL || `https://github.com/your-org/${SLUG}`}'`)
+    .replace(/defaultColorScheme: '[^']+'(?=,\s*$)/m, `defaultColorScheme: '${COLOR_SCHEME}'`)
   write('packages/template-config/src/brand.ts', brand)
 }
 

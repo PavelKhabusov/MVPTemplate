@@ -35,4 +35,7 @@ export const APP_BRAND = {
 
   /** Default font for the browser extension (must match a key in FONT_FAMILY_CONFIG) */
   defaultFontFamily: 'monospace',
+
+  /** Default color scheme for the browser extension (must match a key in COLOR_SCHEMES) */
+  defaultColorScheme: 'slate',
 } as const
