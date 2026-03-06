@@ -2,8 +2,8 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'MVPTemplate',
-  slug: 'mvp-template',
+  name: 'MVPTemplate', // BRAND: change when forking
+  slug: 'mvp-template', // BRAND: change when forking
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',

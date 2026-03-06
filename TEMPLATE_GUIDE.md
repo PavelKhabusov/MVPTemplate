@@ -15,15 +15,39 @@ git remote rename origin template
 git remote add origin <your-repo-url>
 ```
 
-## 2. Переименование проекта
+## 2. Брендинг — APP_BRAND (единая точка)
+
+**Шаг 1 — изменить `packages/template-config/src/brand.ts`:**
+
+```ts
+export const APP_BRAND = {
+  name: 'CallSheet',           // отображаемое название
+  slug: 'callsheet',          // URL-safe идентификатор
+  tagline: 'Call from Google Sheets',
+  copyright: 'CallSheet',
+  ctaUrl: 'https://chromewebstore.google.com',
+}
+```
+
+`APP_BRAND` импортируется в runtime-файлы (`APP_CONFIG`, компоненты, i18n-fallbacks).
+
+**Шаг 2 — статические файлы (не могут импортировать пакеты, менять вручную):**
+
+Все помечены комментарием `// BRAND: change when forking`:
 
 | Файл | Что менять |
 |------|-----------|
+| `apps/mobile/app.config.ts` | `name`, `slug`, `scheme`, `bundleIdentifier`, `package` |
+| `apps/extension/src/manifest.ts` | `name`, `description`, `default_title` |
+| `apps/extension/src/sidebar/index.html` | `<title>` |
+| `apps/extension/src/popup/index.html` | `<title>` |
+| `apps/mobile/app/+html.tsx` | `<title>`, og:title, og:description |
+| `apps/backend/src/database/schema/company-info.ts` | `.default('...')` |
+| `apps/backend/src/modules/config/config.routes.ts` | `appName: '...'` |
+| `apps/backend/src/app.ts` | Swagger title/description |
+| `app.json` | android.package, ios.bundleIdentifier |
+| `apps/backend/.env` | `POSTGRES_DB`, `POSTGRES_USER`, `DATABASE_URL` |
 | `package.json` (корень) | `name` |
-| `apps/backend/docker/docker-compose.yml` | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` |
-| `apps/backend/.env` | `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET` |
-| `apps/mobile/app.json` | `name`, `slug`, `scheme` |
-| `apps/extension/src/manifest.ts` | `name`, `description` |
 
 ## 3. Chrome-расширение (config-driven)
 
@@ -169,29 +193,97 @@ if (!enabled) return null
 | `landing.heroBadge` | Бейдж (напр. "Open Source") |
 | `landing.heroCTA` | Текст кнопки CTA |
 | `landing.feature*` | Фичи (title + desc) |
+| `landing.showcase*` | Шаги "Как это работает" |
 | `landing.ctaTitle` | Финальный CTA |
 
 Файлы: `packages/i18n/src/locales/{en,ru,es,ja}.json`
 
-## 8. Документация
+**Важно:** блок `LandingTerminal` (терминал с технологиями) — шаблонный, убрать из `LandingPage.tsx` при форке, если не нужен. Найти в `packages/ui/src/landing/LandingPage.tsx` и удалить импорт + JSX.
+
+Вторичная CTA в Hero по умолчанию ведёт на GitHub. Обновить в `LandingHero.tsx` — `onSecondaryPress` URL.
+
+## 8. Иконки
+
+**Extension:** заменить `apps/extension/icons/icon-16.png`, `icon-48.png`, `icon-128.png`.
+
+**Mobile:** заменить `apps/mobile/assets/images/icon.png`, `splash-icon.png`, `adaptive-icon.png`.
+
+Не забыть обновить ссылки в `apps/mobile/app.config.ts` если меняется структура папок.
+
+## 9. Цветовая тема
+
+Выбрать схему в `apps/backend/.env`:
+```
+EXPO_PUBLIC_COLOR_SCHEME=indigo   # indigo | violet | blue | green | slate | ...
+```
+
+Доступные схемы: `packages/template-config/src/colorSchemes.ts`.
+
+## 10. Home и Explore вкладки
+
+`apps/mobile/app/(tabs)/index.tsx` — Home (дашборд).
+`apps/mobile/app/(tabs)/explore.tsx` — Explore/Analytics.
+
+**Оба файла нужно кастомизировать под продукт.** Шаблонные версии показывают:
+- Home: "Active Projects / Completed Tasks / Team Members" (не имеют смысла для большинства продуктов)
+- Explore: категории Design/Dev/Marketing, featured items — шаблонный контент
+
+**Как обновить:**
+1. Изменить i18n ключи `home.*` и `explore.*` в 4 locale-файлах
+2. Переписать компоненты в соответствии с продуктом
+3. Если вкладка полностью не нужна — переименовать (например, `explore` → `history`)
+
+Название вкладки: `apps/mobile/app/(tabs)/_layout.tsx` — массив `TABS`.
+
+## 11. Документация
 
 Система `@mvp/docs` — структурированные группы и страницы.
 
-1. Редактировать `packages/docs/src/docData.ts` — группы + страницы
-2. Контент через i18n ключи: `docs.content<PageId>`
+**Структура:**
+1. Редактировать `packages/docs/src/docData.ts` — группы + страницы (массив `DOC_GROUPS`)
+2. Контент через i18n ключи: `docs.content<PageId>` (markdown-строка)
 3. Добавить переводы в 4 locale-файла
 
-## 9. Платежи
+**Важно:** шаблонные docs содержат документацию MVPTemplate. При форке обязательно заменить на документацию продукта. Как минимум — группа "Getting Started" с Install + Setup + FAQ.
+
+## 12. Платежи
 
 1. `PAYMENTS_ENABLED=true` в `.env`
 2. Настроить нужные провайдеры: `STRIPE_ENABLED=true`, `YOOKASSA_ENABLED=true`, etc.
 3. Сид планов: `npm run db:seed -w apps/backend`
 4. Провайдеры: Stripe, YooKassa, Robokassa, PayPal, Polar
 
-## 10. Bundle size
+## 13. Bundle size
 
 Выключенные фичи должны не влиять на размер:
 
 - **Backend**: маршруты регистрируются условно через env — ок
 - **Frontend**: использовать `React.lazy()` для опциональных пакетов
 - **Extension**: `lazy(() => import('./custom/...'))` — Vite tree-shakes
+
+## 14. Чеклист при форке
+
+Полный список действий при создании нового продукта:
+
+- [ ] `packages/template-config/src/brand.ts` — APP_BRAND
+- [ ] `apps/mobile/app.config.ts` — name, slug, scheme, bundleIdentifier, package
+- [ ] `apps/extension/src/manifest.ts` — name, description, default_title
+- [ ] `apps/extension/src/sidebar/index.html` — `<title>`
+- [ ] `apps/extension/src/popup/index.html` — `<title>`
+- [ ] `apps/mobile/app/+html.tsx` — title, og:title, og:description
+- [ ] `apps/backend/src/database/schema/company-info.ts` — default name
+- [ ] `apps/backend/src/modules/config/config.routes.ts` — appName
+- [ ] `apps/backend/src/app.ts` — Swagger title/description
+- [ ] `app.json` — android.package, ios.bundleIdentifier
+- [ ] `apps/backend/.env` — POSTGRES_DB, POSTGRES_USER, DATABASE_URL
+- [ ] `package.json` — name
+- [ ] `apps/backend/.env` — EXPO_PUBLIC_COLOR_SCHEME (цветовая тема)
+- [ ] `apps/extension/icons/` — icon-16.png, icon-48.png, icon-128.png
+- [ ] `apps/mobile/assets/images/` — icon.png, splash-icon.png, adaptive-icon.png
+- [ ] `apps/extension/src/config.ts` — extensionConfig (вкладки, permissions)
+- [ ] i18n `landing.*` — контент лендинга (4 файла)
+- [ ] i18n `home.*`, `explore.*` — контент мобильного дашборда (4 файла)
+- [ ] `apps/mobile/app/(tabs)/index.tsx` — Home tab под продукт
+- [ ] `apps/mobile/app/(tabs)/explore.tsx` — Explore tab под продукт
+- [ ] `packages/docs/src/docData.ts` + i18n `docs.*` — документация продукта
+- [ ] `apps/backend/src/database/seed.ts` — планы и цены

@@ -27,9 +27,9 @@ const allPermissions = [...new Set([...basePermissions, ...extensionConfig.permi
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'MVP Extension',
+  name: 'MVP Extension', // BRAND: change when forking
   version: '0.1.0',
-  description: 'Your app — right in the browser',
+  description: 'Your app — right in the browser', // BRAND: change when forking
   permissions: allPermissions,
   ...(extensionConfig.hostPermissions.length > 0
     ? { host_permissions: extensionConfig.hostPermissions }
