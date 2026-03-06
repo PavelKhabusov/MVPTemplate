@@ -34,7 +34,7 @@ export async function voximplantRoutes(app: FastifyInstance) {
   app.get('/config', { preHandler: authenticate }, async (request, reply) => {
     const config = await voximplantRepository.getConfig(request.userId)
     if (!config?.voximplantLogin) {
-      throw AppError.notFound('Voximplant not connected')
+      return sendSuccess(reply, null)
     }
     return sendSuccess(reply, {
       login: config.voximplantLogin,

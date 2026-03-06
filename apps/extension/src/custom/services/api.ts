@@ -63,7 +63,7 @@ export async function getCallHistory(params: { sheetId?: string; page?: number; 
 // --- Voximplant ---
 
 export async function getVoximplantConfig() {
-  return request<{ login: string; appId: string | null }>('/voximplant/config')
+  return request<{ login: string; appId: string | null } | null>('/voximplant/config')
 }
 
 export async function connectVoximplant(data: { login: string; password: string; appId?: string }) {
