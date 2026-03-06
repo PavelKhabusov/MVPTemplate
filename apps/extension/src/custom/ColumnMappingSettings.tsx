@@ -39,6 +39,11 @@ export default function ColumnMappingSettings() {
     if (!spreadsheetId) return
     setSheetsLoading(true)
     getSheetList(spreadsheetId).then(setSheetList).catch(() => setSheetList([])).finally(() => setSheetsLoading(false))
+    // Restore saved sheet name for this spreadsheet
+    chrome.storage.sync.get('selectedSheet').then((stored) => {
+      const map = (stored.selectedSheet || {}) as Record<string, string>
+      if (map[spreadsheetId]) setSheetName(map[spreadsheetId])
+    }).catch(() => {})
   }, [spreadsheetId])
 
   const { headers, columns, updateColumn } = useSheetColumns({ spreadsheetId, sheetName: sheetName || undefined })
@@ -51,7 +56,17 @@ export default function ColumnMappingSettings() {
         <div className="bg-bg-secondary rounded-xl p-3">
           <div className="text-[10px] text-text-muted mb-2.5 uppercase tracking-wider">{t('ext.sheetTab')}</div>
           {sheetsLoading ? <SettingSkeleton /> : sheetList.length > 0 ? (
-            <select value={sheetName || ''} onChange={(e) => setSheetName(e.target.value)}
+            <select value={sheetName || ''} onChange={(e) => {
+              const name = e.target.value
+              setSheetName(name)
+              if (spreadsheetId && name) {
+                chrome.storage.sync.get('selectedSheet').then((stored) => {
+                  const map = (stored.selectedSheet || {}) as Record<string, string>
+                  map[spreadsheetId] = name
+                  chrome.storage.sync.set({ selectedSheet: map })
+                }).catch(() => {})
+              }
+            }}
               className="w-full bg-bg-primary border border-bg-tertiary rounded-lg py-2 px-3 text-xs text-text-primary outline-none cursor-pointer focus:border-brand">
               {!sheetName && <option value="">{t('ext.selectSheet')}</option>}
               {sheetList.map((name) => <option key={name} value={name}>{name}</option>)}

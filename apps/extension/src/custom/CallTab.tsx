@@ -47,6 +47,15 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     return () => chrome.runtime.onMessage.removeListener(listener)
   }, [])
 
+  // Restore saved sheet name when spreadsheetId is known
+  useEffect(() => {
+    if (!spreadsheetId) return
+    chrome.storage.sync.get('selectedSheet').then((stored) => {
+      const map = (stored.selectedSheet || {}) as Record<string, string>
+      if (map[spreadsheetId]) setSheetName(map[spreadsheetId])
+    }).catch(() => {})
+  }, [spreadsheetId])
+
   // Check if Voximplant is configured
   useEffect(() => {
     getVoximplantConfig().then((config) => {

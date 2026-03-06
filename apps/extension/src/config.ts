@@ -1,5 +1,6 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { Phone, Clock } from 'lucide-react'
+import customHandlers from './custom/backgroundHandlers'
 
 type Lang = 'en' | 'ru' | 'es' | 'ja'
 
@@ -16,6 +17,8 @@ export interface OnboardingStep {
   desc: Partial<Record<Lang, string>>
 }
 
+export type BackgroundHandlers = Record<string, (message: any, sender: chrome.runtime.MessageSender, sendResponse: (r: any) => void) => boolean | void>
+
 export interface ExtensionConfig {
   tabs: CustomTab[]
   settingsSections: Array<LazyExoticComponent<ComponentType<any>> | ComponentType<any>>
@@ -23,7 +26,8 @@ export interface ExtensionConfig {
   contentScripts: boolean
   /** Register chrome.tabs listeners synchronously in background.ts to send TAB_CONTEXT_CHANGED (required for MV3 service workers) */
   tabTracking: boolean
-  backgroundHandlers: (() => Promise<{ default: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> }>) | null
+  /** Synchronously imported background message handlers — dynamic imports break MV3 service workers in dev mode */
+  backgroundHandlers: BackgroundHandlers | null
   permissions: string[]
   hostPermissions: string[]
 }
@@ -71,7 +75,8 @@ export const extensionConfig: ExtensionConfig = {
 
   tabTracking: true,
 
-  backgroundHandlers: () => import('./custom/backgroundHandlers'),
+  // Static import — dynamic imports in MV3 service workers fail in dev mode (cross-origin from localhost)
+  backgroundHandlers: customHandlers,
 
   permissions: ['identity', 'tabs'],
   hostPermissions: ['*://docs.google.com/*', 'https://sheets.googleapis.com/*'],

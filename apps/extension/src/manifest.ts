@@ -71,9 +71,11 @@ export default defineManifest({
     ? {
         content_scripts: [
           {
-            matches: extensionConfig.hostPermissions.length > 0
-              ? extensionConfig.hostPermissions
-              : ['<all_urls>'],
+            // Exclude API endpoints (*.googleapis.com) — only inject into page URLs
+            matches: (() => {
+              const pageHosts = extensionConfig.hostPermissions.filter((p) => !p.includes('googleapis.com'))
+              return pageHosts.length > 0 ? pageHosts : ['<all_urls>']
+            })(),
             js: ['src/content.ts'],
           },
         ],
