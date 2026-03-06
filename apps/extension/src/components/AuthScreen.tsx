@@ -5,9 +5,10 @@ import { login, register } from '../services/api'
 
 interface AuthScreenProps {
   onAuth: () => void
+  googleAuthEnabled?: boolean
 }
 
-export default function AuthScreen({ onAuth }: AuthScreenProps) {
+export default function AuthScreen({ onAuth, googleAuthEnabled = false }: AuthScreenProps) {
   const [step, setStep] = useState<LoginStep>('welcome')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -127,14 +128,18 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
             {isRegister ? 'Already have an account? Sign In' : "No account? Register"}
           </button>
 
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-px bg-bg-tertiary" />
-            <span className="text-[11px] text-text-muted">or</span>
-            <div className="flex-1 h-px bg-bg-tertiary" />
-          </div>
-          <button className="bg-bg-secondary text-text-primary border border-bg-tertiary rounded-[10px] py-[11px] text-[13px] cursor-pointer font-sans flex items-center justify-center gap-2">
-            <span className="text-base">G</span> Sign in with Google
-          </button>
+          {googleAuthEnabled && (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-bg-tertiary" />
+                <span className="text-[11px] text-text-muted">or</span>
+                <div className="flex-1 h-px bg-bg-tertiary" />
+              </div>
+              <button className="bg-bg-secondary text-text-primary border border-bg-tertiary rounded-[10px] py-[11px] text-[13px] cursor-pointer font-sans flex items-center justify-center gap-2">
+                <span className="text-base">G</span> Sign in with Google
+              </button>
+            </>
+          )}
         </div>
       )}
 

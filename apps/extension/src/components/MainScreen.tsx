@@ -10,6 +10,7 @@ interface MainScreenProps {
   theme: ThemeMode
   setTheme: (mode: ThemeMode) => void
   onLogout: () => void
+  paymentsEnabled?: boolean
 }
 
 export default function MainScreen({
@@ -18,6 +19,7 @@ export default function MainScreen({
   theme,
   setTheme,
   onLogout,
+  paymentsEnabled = false,
 }: MainScreenProps) {
   const [tab, setTab] = useState<Tab>('home')
 
@@ -33,7 +35,7 @@ export default function MainScreen({
           </div>
           <span className="text-sm font-semibold tracking-tight">MVP Extension</span>
         </div>
-        {subscription && (
+        {paymentsEnabled && subscription && (
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full ${
               isActive ? 'bg-success/15 text-success' : 'bg-bg-tertiary text-text-muted'
@@ -72,7 +74,11 @@ export default function MainScreen({
 
       {/* Content */}
       {tab === 'home' && (
-        <HomeTab subscription={subscription} subscriptionLoading={subscriptionLoading} />
+        <HomeTab
+          subscription={subscription}
+          subscriptionLoading={subscriptionLoading}
+          paymentsEnabled={paymentsEnabled}
+        />
       )}
       {tab === 'settings' && (
         <SettingsTab theme={theme} setTheme={setTheme} onLogout={onLogout} />

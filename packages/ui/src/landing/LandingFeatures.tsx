@@ -75,9 +75,6 @@ export function LandingFeatures() {
         #bento-features > *:last-child {
           grid-column: span 2 !important;
         }
-        #integrations-strip {
-          grid-template-columns: 1fr 1fr 1fr !important;
-        }
       }
       @media (max-width: 600px) {
         #bento-features {
@@ -358,7 +355,7 @@ export function LandingFeatures() {
               </View>
 
               {/* ── Integrations strip (Auth + Payments + Extension) ── */}
-              <View style={{ gridColumn: 'span 3', animation: 'bentoFadeUp 0.5s ease-out both 0.38s' } as any}>
+              <View style={{ gridColumn: 'span 2', animation: 'bentoFadeUp 0.5s ease-out both 0.38s' } as any}>
                 <YStack
                   backgroundColor="$cardBackground"
                   borderRadius="$4"
@@ -366,161 +363,98 @@ export function LandingFeatures() {
                   borderColor="$borderColor"
                   className="bento-card"
                   hoverStyle={{ borderColor: '$accent' } as any}
+                  style={{ height: '100%' } as any}
                 >
                   <View
                     style={{
                       display: 'grid' as any,
                       gridTemplateColumns: 'repeat(3, 1fr)',
+                      height: '100%',
                     } as any}
                     nativeID="integrations-strip"
                   >
                     {/* Auth */}
-                    <YStack padding="$5" gap="$3">
-                      <XStack gap="$3" alignItems="center">
+                    <YStack padding="$4" gap="$2.5" justifyContent="center">
+                      <XStack gap="$2.5" alignItems="center">
                         <YStack
-                          width={44} height={44} borderRadius={12}
+                          width={36} height={36} borderRadius={10}
                           alignItems="center" justifyContent="center"
                           style={{ background: `linear-gradient(135deg, ${gs}20, ${ge}20)` } as any}
                         >
-                          <Ionicons name="shield-checkmark" size={22} color={acc} />
+                          <Ionicons name="shield-checkmark" size={18} color={acc} />
                         </YStack>
-                        <Text fontWeight="bold" fontSize="$5" color="$color">
+                        <Text fontWeight="bold" fontSize="$4" color="$color">
                           {t('landing.featureAuth' as any)}
                         </Text>
                       </XStack>
-                      {/* Mini login form mockup */}
-                      <YStack gap="$2" paddingLeft="$1">
-                        <YStack
-                          height={28} borderRadius={6} borderWidth={1}
-                          borderColor="$borderColor" backgroundColor="$subtleBackground"
-                          paddingHorizontal="$2.5" justifyContent="center"
-                        >
-                          <Text fontSize={10} color="$placeholderColor" style={{ fontFamily: 'monospace' } as any}>
-                            email@example.com
-                          </Text>
-                        </YStack>
-                        <YStack
-                          height={28} borderRadius={6} borderWidth={1}
-                          borderColor="$borderColor" backgroundColor="$subtleBackground"
-                          paddingHorizontal="$2.5" justifyContent="center"
-                        >
-                          <Text fontSize={10} color="$placeholderColor">••••••••</Text>
-                        </YStack>
-                        <XStack gap="$2" marginTop="$1">
-                          <YStack
-                            flex={1} height={26} borderRadius={6}
-                            alignItems="center" justifyContent="center"
-                            style={{ background: `linear-gradient(135deg, ${gs}, ${ge})` } as any}
-                          >
-                            <Text fontSize={10} fontWeight="bold" color="white">Sign in</Text>
-                          </YStack>
-                          <YStack
-                            width={26} height={26} borderRadius={6}
-                            borderWidth={1} borderColor="$borderColor"
-                            alignItems="center" justifyContent="center" backgroundColor="$subtleBackground"
-                          >
-                            <Ionicons name="logo-google" size={12} color={acc} />
-                          </YStack>
-                        </XStack>
-                      </YStack>
                       <Text fontSize="$2" color="$mutedText" lineHeight={18}>
-                        Email + JWT, Google SSO, SMS OTP
+                        {t('landing.featureAuthDesc' as any)}
                       </Text>
+                      <XStack gap="$1.5" flexWrap="wrap">
+                        {['Email + JWT', 'Google SSO', 'SMS OTP'].map((tag) => (
+                          <Text key={tag} fontSize={10} color="$mutedText"
+                            paddingHorizontal="$1.5" paddingVertical={2} borderRadius={6}
+                            backgroundColor="$subtleBackground"
+                          >{tag}</Text>
+                        ))}
+                      </XStack>
                     </YStack>
 
                     {/* Payments */}
                     <YStack
-                      padding="$5" gap="$3"
+                      padding="$4" gap="$2.5" justifyContent="center"
                       borderLeftWidth={1} borderRightWidth={1} borderColor="$borderColor"
                     >
-                      <XStack gap="$3" alignItems="center">
+                      <XStack gap="$2.5" alignItems="center">
                         <YStack
-                          width={44} height={44} borderRadius={12}
+                          width={36} height={36} borderRadius={10}
                           alignItems="center" justifyContent="center"
                           style={{ background: `linear-gradient(135deg, ${gs}20, ${ge}20)` } as any}
                         >
-                          <Ionicons name="card" size={22} color={acc} />
+                          <Ionicons name="card" size={18} color={acc} />
                         </YStack>
-                        <Text fontWeight="bold" fontSize="$5" color="$color">
+                        <Text fontWeight="bold" fontSize="$4" color="$color">
                           {t('landing.featurePayments' as any)}
                         </Text>
                       </XStack>
-                      {/* Mini pricing columns */}
-                      <XStack gap="$2" paddingLeft="$1">
-                        {[
-                          { label: 'Free', price: '$0' },
-                          { label: 'Pro', price: '$19', highlight: true },
-                          { label: 'Team', price: '$49' },
-                        ].map((plan) => (
-                          <YStack
-                            key={plan.label} flex={1} borderRadius={8} padding="$2"
-                            alignItems="center" gap="$1"
-                            borderWidth={plan.highlight ? 1.5 : 1}
-                            borderColor={plan.highlight ? '$accent' : '$borderColor'}
+                      <Text fontSize="$2" color="$mutedText" lineHeight={18}>
+                        {t('landing.featurePaymentsDesc' as any)}
+                      </Text>
+                      <XStack gap="$1.5" flexWrap="wrap">
+                        {['Stripe', 'PayPal', 'Polar', 'YooKassa'].map((tag) => (
+                          <Text key={tag} fontSize={10} color="$mutedText"
+                            paddingHorizontal="$1.5" paddingVertical={2} borderRadius={6}
                             backgroundColor="$subtleBackground"
-                          >
-                            <Text fontSize={9} color="$mutedText" fontWeight="600">{plan.label}</Text>
-                            <Text fontSize={14} fontWeight="bold" color={plan.highlight ? '$accent' : '$color'}>
-                              {plan.price}
-                            </Text>
-                          </YStack>
+                          >{tag}</Text>
                         ))}
                       </XStack>
-                      <Text fontSize="$2" color="$mutedText" lineHeight={18}>
-                        Stripe, PayPal, Polar, YooKassa
-                      </Text>
                     </YStack>
 
                     {/* Chrome Extension */}
-                    <YStack padding="$5" gap="$3">
-                      <XStack gap="$3" alignItems="center">
+                    <YStack padding="$4" gap="$2.5" justifyContent="center">
+                      <XStack gap="$2.5" alignItems="center">
                         <YStack
-                          width={44} height={44} borderRadius={12}
+                          width={36} height={36} borderRadius={10}
                           alignItems="center" justifyContent="center"
                           style={{ background: `linear-gradient(135deg, ${gs}20, ${ge}20)` } as any}
                         >
-                          <Ionicons name="extension-puzzle" size={22} color={acc} />
+                          <Ionicons name="extension-puzzle" size={18} color={acc} />
                         </YStack>
-                        <Text fontWeight="bold" fontSize="$5" color="$color">
+                        <Text fontWeight="bold" fontSize="$4" color="$color">
                           {t('landing.featureExtension' as any)}
                         </Text>
                       </XStack>
-                      {/* Mini browser with sidebar */}
-                      <YStack
-                        borderRadius={8} borderWidth={1} borderColor="$borderColor"
-                        overflow="hidden" paddingLeft="$1"
-                      >
-                        {/* Browser chrome */}
-                        <XStack
-                          height={18} alignItems="center" paddingHorizontal="$2" gap={4}
-                          style={{ backgroundColor: `${acc}08` } as any}
-                        >
-                          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#ff5f57' } as any} />
-                          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#febc2e' } as any} />
-                          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#28c840' } as any} />
-                        </XStack>
-                        <XStack height={56}>
-                          {/* Sidebar */}
-                          <YStack
-                            width={50} padding={4} gap={3}
-                            borderRightWidth={1} borderColor="$borderColor"
-                            style={{ background: `linear-gradient(180deg, ${gs}08, ${ge}08)` } as any}
-                          >
-                            <YStack height={5} borderRadius={2} width="80%" style={{ background: `${acc}40` } as any} />
-                            <YStack height={5} borderRadius={2} width="60%" style={{ background: `${acc}25` } as any} />
-                            <YStack height={5} borderRadius={2} width="70%" style={{ background: `${acc}25` } as any} />
-                          </YStack>
-                          {/* Page content */}
-                          <YStack flex={1} padding={6} gap={4}>
-                            <YStack height={4} borderRadius={2} width="60%" backgroundColor="$borderColor" />
-                            <YStack height={4} borderRadius={2} width="90%" backgroundColor="$borderColor" />
-                            <YStack height={4} borderRadius={2} width="45%" backgroundColor="$borderColor" />
-                          </YStack>
-                        </XStack>
-                      </YStack>
                       <Text fontSize="$2" color="$mutedText" lineHeight={18}>
-                        Sidebar & Popup modes
+                        {t('landing.featureExtensionDesc' as any)}
                       </Text>
+                      <XStack gap="$1.5" flexWrap="wrap">
+                        {['Sidebar', 'Popup', 'Auth', 'Themes'].map((tag) => (
+                          <Text key={tag} fontSize={10} color="$mutedText"
+                            paddingHorizontal="$1.5" paddingVertical={2} borderRadius={6}
+                            backgroundColor="$subtleBackground"
+                          >{tag}</Text>
+                        ))}
+                      </XStack>
                     </YStack>
                   </View>
                 </YStack>
@@ -535,9 +469,9 @@ export function LandingFeatures() {
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
               <View style={{ height: 280, opacity: 0 } as any} />
-              {/* Row 3: 1 + span3 integrations */}
+              {/* Row 3: 1 + span2 integrations */}
               <View style={{ height: 280, opacity: 0 } as any} />
-              <View style={{ gridColumn: 'span 3', height: 200, opacity: 0 } as any} />
+              <View style={{ gridColumn: 'span 2', height: 200, opacity: 0 } as any} />
             </>
           )}
         </View>

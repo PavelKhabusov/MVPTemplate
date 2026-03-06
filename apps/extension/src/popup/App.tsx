@@ -4,16 +4,22 @@ import OnboardingScreen from '../components/OnboardingScreen'
 import MainScreen from '../components/MainScreen'
 import { useTheme } from '../hooks/useTheme'
 import { useSubscription } from '../hooks/useSubscription'
-import { logout } from '../services/api'
+import { logout, fetchFlags, type AppFlags } from '../services/api'
+
+const DEFAULT_FLAGS: AppFlags = { googleAuth: false, payments: false, email: false }
 
 export default function App() {
   const [authed, setAuthed] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
   const [onboardingDone, setOnboardingDone] = useState(true)
+  const [flags, setFlags] = useState<AppFlags>(DEFAULT_FLAGS)
   const { theme, setTheme } = useTheme()
   const { subscription, loading: subLoading } = useSubscription()
 
   useEffect(() => {
+    // Fetch backend config flags
+    fetchFlags().then(setFlags).catch(() => {})
+
     chrome.storage?.local
       ?.get(['accessToken', 'onboardingDone'])
       .then((result) => {
@@ -46,7 +52,7 @@ export default function App() {
   }
 
   if (!authed) {
-    return <AuthScreen onAuth={() => setAuthed(true)} />
+    return <AuthScreen onAuth={() => setAuthed(true)} googleAuthEnabled={flags.googleAuth} />
   }
 
   if (!onboardingDone) {
@@ -60,6 +66,7 @@ export default function App() {
       theme={theme}
       setTheme={setTheme}
       onLogout={handleLogout}
+      paymentsEnabled={flags.payments}
     />
   )
 }

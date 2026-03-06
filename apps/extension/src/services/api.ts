@@ -66,6 +66,29 @@ async function tryRefresh(): Promise<string | null> {
   }
 }
 
+// --- Config ---
+
+export interface AppFlags {
+  googleAuth: boolean
+  payments: boolean
+  email: boolean
+}
+
+export async function fetchFlags(): Promise<AppFlags> {
+  try {
+    const res = await fetch(`${API_BASE}/config/flags`)
+    if (!res.ok) return { googleAuth: false, payments: false, email: false }
+    const json = await res.json()
+    return {
+      googleAuth: !!json.data?.googleAuth,
+      payments: !!json.data?.payments,
+      email: !!json.data?.email,
+    }
+  } catch {
+    return { googleAuth: false, payments: false, email: false }
+  }
+}
+
 // --- Auth ---
 
 export async function register(email: string, password: string) {

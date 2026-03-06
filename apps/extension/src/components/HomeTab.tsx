@@ -5,12 +5,15 @@ import type { Subscription } from '../types'
 interface HomeTabProps {
   subscription: Subscription | null
   subscriptionLoading: boolean
+  paymentsEnabled?: boolean
 }
 
-export default function HomeTab({ subscription, subscriptionLoading }: HomeTabProps) {
+export default function HomeTab({ subscription, subscriptionLoading, paymentsEnabled = false }: HomeTabProps) {
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
-      <SubscriptionCard subscription={subscription} loading={subscriptionLoading} />
+      {paymentsEnabled && (
+        <SubscriptionCard subscription={subscription} loading={subscriptionLoading} />
+      )}
 
       {/* Placeholder content */}
       <div className="bg-bg-secondary border border-bg-tertiary border-dashed rounded-xl p-6 flex flex-col items-center gap-3 text-center">
