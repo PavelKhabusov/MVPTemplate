@@ -291,6 +291,8 @@ EXPO_PUBLIC_COLOR_SCHEME=indigo   # indigo | violet | blue | green | slate | ...
 - [ ] `apps/extension/src/components/MainScreen.tsx` — название приложения в хедере (`span` со строкой)
 - [ ] `apps/backend/src/modules/admin/admin.routes.ts` — ENV_GROUPS для API-ключей продукта
 - [ ] `apps/mobile/src/admin/AdminApiSettings.tsx` — ENV_GROUP_META для отображения в админке
+- [ ] `packages/template-config/src/brand.ts` — APP_BRAND.tagline (отображается на экране логина расширения!)
+- [ ] `apps/extension/src/components/MainScreen.tsx` — строка названия в хедере (сейчас хардкод — заменить на APP_BRAND.name)
 
 ## 15. Ретроспектива — уроки из первого форка (CallSheet)
 
@@ -306,12 +308,18 @@ EXPO_PUBLIC_COLOR_SCHEME=indigo   # indigo | violet | blue | green | slate | ...
 ### Недочёты шаблона (нужно исправить в MVPTemplate)
 
 #### Захардкоженные строки продукта
-| Файл | Проблема |
-|------|----------|
-| `apps/extension/src/components/MainScreen.tsx` | Хедер содержит строку `"MVP Extension"` — не читается из APP_BRAND |
-| `apps/extension/src/manifest.ts` | name/description — только комментарий `// BRAND`, нет автоматической подстановки |
+| Файл | Проблема | Статус |
+|------|----------|--------|
+| `apps/extension/src/components/AuthScreen.tsx` | `"MVP Extension"` и `"Your app — right in the browser"` — не читается из APP_BRAND | ✅ Исправлено |
+| `apps/extension/src/components/MainScreen.tsx` | Хедер содержит строку `"CallSheet"` — должен читаться из APP_BRAND | 🔧 Нужно исправить |
+| `apps/extension/src/manifest.ts` | name/description — только комментарий `// BRAND`, нет автоматической подстановки | — |
 
-**Решение**: добавить в ExtensionConfig поля `appName`, `appDescription` — и использовать их в MainScreen и manifest.
+**Исправление AuthScreen** (уже в шаблоне):
+- Импортируется `APP_BRAND` из `@mvp/template-config`
+- `APP_BRAND.name` заменяет `"MVP Extension"`, `APP_BRAND.tagline` заменяет `"Your app — right in..."`
+- Добавлены контролы языка и темы в нижней части экрана (доступны до логина)
+- Все строки UI переведены через встроенный i18n-объект `LABELS`
+- `App.tsx` передаёт `theme`/`setTheme` в `AuthScreen`
 
 #### Порядок секций в Settings расширения
 **Проблема**: тема и язык отображаются ПЕРЕД бизнес-настройками (Voximplant, маппинг колонок). Для пользователя важнее сначала видеть настройки самого приложения.
@@ -345,14 +353,15 @@ EXPO_PUBLIC_COLOR_SCHEME=indigo   # indigo | violet | blue | green | slate | ...
 
 ### Что нужно добавить в шаблон
 
-1. **Пустые TODO-заглушки** в Home/Explore вкладках с комментарием `// TODO: customize for your product`
-2. **`APP_BRAND.appName`** в extensionConfig для автоматической подстановки в хедер расширения
-3. **`extensionConfig.settingsSections` рендерятся первыми** в SettingsTab (исправить в шаблоне)
-4. **`width: 100%`** вместо `width: 380px` в extension/globals.css
-5. **`MainScreen` слушает `TAB_CONTEXT_CHANGED`** для auto-switch на первую кастомную вкладку
-6. **README.md** с явными `# TODO: replace this` секциями вместо описания шаблона
-7. **Пустой `docData.ts`** по умолчанию (или с одной группой "Getting Started" с заглушками)
-8. **Параметризованные bento-карточки** в LandingFeatures — принимать массив с `{title, desc, visual}` из конфига вместо захардкоженного JSX
+1. ✅ **AuthScreen использует APP_BRAND** — `name` и `tagline`, плюс контролы языка/темы до логина
+2. ✅ **`extensionConfig.settingsSections` рендерятся первыми** в SettingsTab
+3. ✅ **`width: 100%`** вместо `width: 380px` в extension/globals.css
+4. ✅ **`MainScreen` слушает `TAB_CONTEXT_CHANGED`** для auto-switch на первую кастомную вкладку
+5. 🔧 **Пустые TODO-заглушки** в Home/Explore вкладках с комментарием `// TODO: customize for your product`
+6. 🔧 **`APP_BRAND`** в хедере MainScreen (сейчас хардкод строки)
+7. 🔧 **README.md** с явными `# TODO: replace this` секциями вместо описания шаблона
+8. 🔧 **Пустой `docData.ts`** по умолчанию (или с одной группой "Getting Started" с заглушками)
+9. 🔧 **Параметризованные bento-карточки** в LandingFeatures — принимать массив с `{title, desc, visual}` из конфига
 
 ---
 
