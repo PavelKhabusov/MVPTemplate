@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Sparkles, Home, Settings } from 'lucide-react'
 import type { Tab, Subscription, ThemeMode } from '../types'
+import { getMe } from '../services/api'
 import HomeTab from './HomeTab'
 import SettingsTab from './SettingsTab'
+
+type Lang = 'en' | 'ru'
 
 interface MainScreenProps {
   subscription: Subscription | null
@@ -11,6 +14,11 @@ interface MainScreenProps {
   setTheme: (mode: ThemeMode) => void
   onLogout: () => void
   paymentsEnabled?: boolean
+}
+
+const tabLabels = {
+  home: { en: 'Home', ru: 'Главная' },
+  settings: { en: 'Settings', ru: 'Настройки' },
 }
 
 export default function MainScreen({
@@ -22,8 +30,25 @@ export default function MainScreen({
   paymentsEnabled = false,
 }: MainScreenProps) {
   const [tab, setTab] = useState<Tab>('home')
+  const [lang, setLang] = useState<Lang>('en')
+  const [user, setUser] = useState<{ email: string; name: string } | null>(null)
 
   const isActive = subscription?.status === 'active'
+
+  useEffect(() => {
+    // Load saved language
+    chrome.storage?.local?.get('lang').then((r) => {
+      if (r?.lang === 'ru' || r?.lang === 'en') setLang(r.lang)
+    }).catch(() => {})
+
+    // Load user info
+    getMe().then(setUser).catch(() => {})
+  }, [])
+
+  const handleSetLang = (l: Lang) => {
+    setLang(l)
+    chrome.storage?.local?.set({ lang: l }).catch(() => {})
+  }
 
   return (
     <div className="w-full h-screen bg-bg-primary text-text-primary flex flex-col overflow-hidden">
@@ -57,7 +82,7 @@ export default function MainScreen({
           }`}
         >
           <Home size={14} />
-          Home
+          {tabLabels.home[lang]}
         </button>
         <button
           onClick={() => setTab('settings')}
@@ -68,7 +93,7 @@ export default function MainScreen({
           }`}
         >
           <Settings size={14} />
-          Settings
+          {tabLabels.settings[lang]}
         </button>
       </div>
 
@@ -81,7 +106,14 @@ export default function MainScreen({
         />
       )}
       {tab === 'settings' && (
-        <SettingsTab theme={theme} setTheme={setTheme} onLogout={onLogout} />
+        <SettingsTab
+          theme={theme}
+          setTheme={setTheme}
+          lang={lang}
+          setLang={handleSetLang}
+          user={user}
+          onLogout={onLogout}
+        />
       )}
     </div>
   )
