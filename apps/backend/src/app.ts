@@ -28,6 +28,7 @@ import { proxyRoutes } from './modules/proxy/proxy.routes'
 import { emailRoutes } from './modules/email/email.routes'
 import { callsRoutes } from './modules/calls/calls.routes'
 import { voximplantRoutes } from './modules/voximplant/voximplant.routes'
+import { sheetTemplatesRoutes } from './modules/sheet-templates/sheet-templates.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -148,6 +149,7 @@ export async function buildApp() {
   // CallSheet business logic
   await app.register(callsRoutes, { prefix: '/api/calls' })
   await app.register(voximplantRoutes, { prefix: '/api/voximplant' })
+  await app.register(sheetTemplatesRoutes, { prefix: '/api/sheet-templates' })
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })

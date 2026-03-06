@@ -5,6 +5,7 @@ import { callsRepository } from '../calls/calls.repository'
 import { connectSchema, webhookSchema } from './voximplant.schema'
 import { sendSuccess } from '../../common/utils/response'
 import { AppError } from '../../common/errors/app-error'
+import { decrypt } from '../../common/utils/crypto'
 import { env } from '../../config/env'
 import type { CallStatus } from '../../database/schema/calls'
 
@@ -39,9 +40,14 @@ export async function voximplantRoutes(app: FastifyInstance) {
     if (!config?.voximplantLogin) {
       return sendSuccess(reply, null)
     }
+    let password: string | null = null
+    if (config.voximplantPassword && env.ENCRYPTION_KEY) {
+      try { password = decrypt(config.voximplantPassword) } catch { /* ignore */ }
+    }
     return sendSuccess(reply, {
       login: config.voximplantLogin,
       appId: config.voximplantAppId,
+      password,
     })
   })
 

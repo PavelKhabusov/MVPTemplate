@@ -94,9 +94,50 @@ export async function getCallHistory(params: { sheetId?: string; page?: number; 
 // --- Voximplant ---
 
 export async function getVoximplantConfig() {
-  return request<{ login: string; appId: string | null } | null>('/voximplant/config')
+  return request<{ login: string; appId: string | null; password: string | null } | null>('/voximplant/config')
 }
 
 export async function connectVoximplant(data: { login: string; password: string; appId?: string }) {
   return request<{ ok: boolean }>('/voximplant/connect', { method: 'POST', body: JSON.stringify(data) })
+}
+
+// --- Sheet Templates ---
+
+export interface SheetTemplateData {
+  id: string
+  name: string
+  spreadsheetId: string | null
+  spreadsheetName: string | null
+  sheetName: string | null
+  columnMappings: Record<string, string | undefined>
+  isDefault: boolean
+}
+
+export async function matchSheetTemplate(spreadsheetId: string, sheetName: string) {
+  const params = new URLSearchParams({ spreadsheetId, sheetName })
+  return request<SheetTemplateData | null>(`/sheet-templates/match?${params}`)
+}
+
+export async function createSheetTemplate(data: {
+  name: string
+  spreadsheetId?: string
+  spreadsheetName?: string
+  sheetName?: string
+  columnMappings: Record<string, string | undefined>
+}) {
+  return request<SheetTemplateData>('/sheet-templates', { method: 'POST', body: JSON.stringify(data) })
+}
+
+export async function updateSheetTemplate(id: string, data: {
+  columnMappings?: Record<string, string | undefined>
+  name?: string
+  spreadsheetId?: string | null
+  spreadsheetName?: string | null
+  sheetName?: string | null
+}) {
+  return request<SheetTemplateData>(`/sheet-templates/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
+}
+
+export async function listSheetTemplates() {
+  return request<SheetTemplateData[]>('/sheet-templates')
 }

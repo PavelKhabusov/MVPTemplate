@@ -733,6 +733,11 @@
     "errorForbidden": "Нет доступа.",
     "errorNotFound": "Данные не найдены.",
     "errorGeneral": "Произошла ошибка",
-    "unknownContact": "Неизвестный"
+    "unknownContact": "Неизвестный",
+    "sdkConnecting": "Подключение к Voximplant...",
+    "sdkReady": "Voximplant подключён",
+    "sdkFailed": "Ошибка подключения к Voximplant",
+    "sdkStillConnecting": "Voximplant ещё подключается, подождите",
+    "sdkNotConfigured": "Voximplant не настроен. Перейдите в Настройки."
   }
 }

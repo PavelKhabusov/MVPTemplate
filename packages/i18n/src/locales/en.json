@@ -733,6 +733,11 @@
     "errorForbidden": "Access denied.",
     "errorNotFound": "Data not found.",
     "errorGeneral": "An error occurred",
-    "unknownContact": "Unknown"
+    "unknownContact": "Unknown",
+    "sdkConnecting": "Connecting to Voximplant...",
+    "sdkReady": "Voximplant connected",
+    "sdkFailed": "Voximplant connection failed",
+    "sdkStillConnecting": "Voximplant is still connecting, please wait",
+    "sdkNotConfigured": "Voximplant not configured. Go to Settings to connect."
   }
 }

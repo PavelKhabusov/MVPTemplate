@@ -24,6 +24,8 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
   const [sheetName, setSheetName] = useState<string | null>(null)
   const [selectedFromSheet, setSelectedFromSheet] = useState<SelectedContact | null>(null)
   const [voxConnected, setVoxConnected] = useState(false)
+  const [sdkStatus, setSdkStatus] = useState<'idle' | 'connecting' | 'ready' | 'failed'>('idle')
+  const [sdkInitError, setSdkInitError] = useState<string | null>(null)
   const [callMode, setCallMode] = useState<CallMode>('browser')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [note, setNote] = useState('')
@@ -56,12 +58,22 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     }).catch(() => {})
   }, [spreadsheetId])
 
-  // Check if Voximplant is configured
+  // Check if Voximplant is configured, then init SDK
   useEffect(() => {
     getVoximplantConfig().then((config) => {
       setVoxConnected(!!config?.login)
+      if (config?.login && config?.password) {
+        setSdkStatus('connecting')
+        setSdkInitError(null)
+        initSDK(config.login, config.password)
+          .then(() => setSdkStatus('ready'))
+          .catch((err) => {
+            setSdkStatus('failed')
+            setSdkInitError(err instanceof Error ? err.message : 'SDK init failed')
+          })
+      }
     }).catch(() => {})
-  }, [])
+  }, [initSDK])
 
   // Check for selected contact from content script
   useEffect(() => {
@@ -76,7 +88,7 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     sheetName: sheetName || undefined,
   })
 
-  const { callState: voxCallState, duration, error: callError, sdkReady, makeCall: voxMakeCall, hangup: voxHangup, reset: voxReset } = useCall({
+  const { callState: voxCallState, duration, error: callError, sdkReady, initSDK, makeCall: voxMakeCall, hangup: voxHangup, reset: voxReset } = useCall({
     onCallEnded: () => setShowNoteBox(true),
   })
 
@@ -109,8 +121,14 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
     } else if (sdkReady) {
       await voxMakeCall(selectedContact.phone)
     } else {
-      setSimCallState('calling')
-      setTimeout(() => setSimCallState('active'), 2000)
+      // SDK not ready — don't simulate, show an appropriate state based on sdkStatus
+      if (sdkStatus === 'connecting') {
+        setSdkInitError(t('ext.sdkStillConnecting'))
+      } else if (sdkStatus === 'failed') {
+        // sdkInitError already set
+      } else {
+        setSdkInitError(t('ext.sdkNotConfigured'))
+      }
     }
   }, [sdkReady, selectedContact, callMode, spreadsheetId, managerPhone, voxMakeCall, limitReached])
 
@@ -229,6 +247,19 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
             </button>
           ))}
         </div>
+        {callMode === 'browser' && voxConnected && (
+          <div className="mt-2 flex items-center gap-1.5">
+            {sdkStatus === 'connecting' && (
+              <><div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /><span className="text-[10px] text-amber-400">{t('ext.sdkConnecting')}</span></>
+            )}
+            {sdkStatus === 'ready' && (
+              <><div className="w-1.5 h-1.5 rounded-full bg-success" /><span className="text-[10px] text-success">{t('ext.sdkReady')}</span></>
+            )}
+            {sdkStatus === 'failed' && (
+              <><div className="w-1.5 h-1.5 rounded-full bg-danger" /><span className="text-[10px] text-danger">{sdkInitError || t('ext.sdkFailed')}</span></>
+            )}
+          </div>
+        )}
         {callMode === 'phone' && (
           <div className="mt-2">
             <input type="tel" placeholder={t('ext.managerPhonePlaceholder')} value={managerPhone} onChange={(e) => setManagerPhone(e.target.value)}
@@ -261,7 +292,11 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
                 className="bg-danger text-white border-none rounded-lg py-1.75 px-4.5 text-xs cursor-pointer font-sans">{t('common.cancel')}</button>
             </>
           )}
-          {callError && <div className="text-xs text-danger px-2 py-1 bg-danger/10 rounded-md">{callError}</div>}
+          {(callError || (callMode === 'browser' && callState === 'idle' && sdkInitError && sdkStatus !== 'connecting')) && (
+            <div className="text-xs text-danger px-2 py-1 bg-danger/10 rounded-md w-full text-center">
+              {callError || sdkInitError}
+            </div>
+          )}
           {callState === 'active' && (
             <>
               <div className="text-[13px] font-medium">{selectedContact.name}</div>

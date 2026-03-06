@@ -23,6 +23,7 @@ export const voximplantRepository = {
       .select({
         voximplantLogin: users.voximplantLogin,
         voximplantAppId: users.voximplantAppId,
+        voximplantPassword: users.voximplantPassword,
       })
       .from(users)
       .where(eq(users.id, userId))

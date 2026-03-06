@@ -45,3 +45,6 @@ export type { CompanyInfo, NewCompanyInfo } from './company-info'
 
 export { calls } from './calls'
 export type { Call, NewCall, CallStatus } from './calls'
+
+export { sheetTemplates } from './sheet-templates'
+export type { SheetTemplate, NewSheetTemplate, ColumnMappings } from './sheet-templates'
