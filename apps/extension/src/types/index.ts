@@ -1,6 +1,6 @@
 export type LoginStep = 'welcome' | 'form' | 'done'
 
-export type Tab = 'home' | 'settings'
+export type Tab = string
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 

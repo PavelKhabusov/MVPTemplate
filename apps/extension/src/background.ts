@@ -1,3 +1,5 @@
+import { extensionConfig } from './config'
+
 // Open side panel on extension icon click (only in sidebar mode)
 if (chrome.sidePanel) {
   chrome.action.onClicked.addListener((tab) => {
@@ -7,27 +9,49 @@ if (chrome.sidePanel) {
   })
 }
 
-// Message routing between content script ↔ popup/sidebar
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === 'GET_TOKEN') {
+// Built-in message handlers (token management)
+const builtinHandlers: Record<string, (message: any, sender: chrome.runtime.MessageSender, sendResponse: (r: any) => void) => boolean | void> = {
+  GET_TOKEN: (_message, _sender, sendResponse) => {
     chrome.storage.local.get(['accessToken'], (result) => {
       sendResponse({ token: result.accessToken ?? null })
     })
-    return true // async
-  }
+    return true
+  },
 
-  if (message.type === 'SET_TOKENS') {
+  SET_TOKENS: (message, _sender, sendResponse) => {
     chrome.storage.local.set({
       accessToken: message.accessToken,
       refreshToken: message.refreshToken,
     })
     sendResponse({ ok: true })
     return true
-  }
+  },
 
-  if (message.type === 'CLEAR_TOKENS') {
+  CLEAR_TOKENS: (_message, _sender, sendResponse) => {
     chrome.storage.local.remove(['accessToken', 'refreshToken'])
     sendResponse({ ok: true })
     return true
+  },
+}
+
+// Merge custom handlers from config
+let customHandlers: Record<string, (message: any, sender: any, sendResponse: (r: any) => void) => boolean | void> = {}
+
+if (extensionConfig.backgroundHandlers) {
+  extensionConfig.backgroundHandlers().then((mod) => {
+    customHandlers = mod.default
+  }).catch(() => {})
+}
+
+// Unified message router
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const { type } = message
+
+  if (builtinHandlers[type]) {
+    return builtinHandlers[type](message, sender, sendResponse)
+  }
+
+  if (customHandlers[type]) {
+    return customHandlers[type](message, sender, sendResponse)
   }
 })
