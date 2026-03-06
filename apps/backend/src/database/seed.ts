@@ -12,7 +12,8 @@ import postgres from 'postgres'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { eq } from 'drizzle-orm'
 import * as dotenv from 'dotenv'
-import { plans } from './schema/index'
+import bcrypt from 'bcrypt'
+import { plans, users } from './schema/index'
 
 // Load .env from backend root
 dotenv.config({ path: new URL('../../.env', import.meta.url).pathname })
@@ -39,7 +40,7 @@ type PlanSeed = {
   currency: string
   interval: 'month' | 'year' | 'one_time'
   features: string[]
-  provider: 'stripe' | 'yookassa' | 'robokassa' | 'paypal'
+  provider: 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar'
   sortOrder: number
 }
 
@@ -148,35 +149,71 @@ async function seed() {
   const existing = await db.select().from(plans).where(eq(plans.isActive, true)).limit(1)
 
   if (existing.length > 0) {
-    console.log('✅ Plans already exist — skipping seed. Delete existing plans first if you want to re-seed.')
-    await connection.end()
-    return
+    console.log('✅ Plans already exist — skipping plan seed.')
+  } else {
+    console.log(`📋 Inserting ${defaultPlans.length} default plans...`)
+
+    for (const plan of defaultPlans) {
+      const inserted = await db
+        .insert(plans)
+        .values({
+          name: plan.name,
+          description: plan.description,
+          priceAmount: plan.priceAmount,
+          currency: plan.currency,
+          interval: plan.interval,
+          features: plan.features,
+          provider: plan.provider,
+          sortOrder: plan.sortOrder,
+          isActive: true,
+        })
+        .returning({ id: plans.id, name: plans.name, interval: plans.interval, priceAmount: plans.priceAmount })
+
+      const p = inserted[0]
+      const price = p.priceAmount === 0 ? 'Free' : `$${(p.priceAmount / 100).toFixed(2)}/${p.interval}`
+      console.log(`  ✓ ${p.name} — ${price} (id: ${p.id})`)
+    }
   }
 
-  console.log(`📋 Inserting ${defaultPlans.length} default plans...`)
+  // ---------------------------------------------------------------------------
+  // Default users
+  // ---------------------------------------------------------------------------
+  console.log('\n👤 Checking for existing users...')
 
-  for (const plan of defaultPlans) {
-    const inserted = await db
-      .insert(plans)
-      .values({
-        name: plan.name,
-        description: plan.description,
-        priceAmount: plan.priceAmount,
-        currency: plan.currency,
-        interval: plan.interval,
-        features: plan.features,
-        provider: plan.provider,
-        sortOrder: plan.sortOrder,
-        isActive: true,
-      })
-      .returning({ id: plans.id, name: plans.name, interval: plans.interval, priceAmount: plans.priceAmount })
+  const existingUsers = await db.select().from(users).limit(1)
 
-    const p = inserted[0]
-    const price = p.priceAmount === 0 ? 'Free' : `$${(p.priceAmount / 100).toFixed(2)}/${p.interval}`
-    console.log(`  ✓ ${p.name} — ${price} (id: ${p.id})`)
+  if (existingUsers.length > 0) {
+    console.log('✅ Users already exist — skipping user seed.')
+  } else {
+    console.log('📋 Inserting default users...')
+
+    const SALT_ROUNDS = 12
+
+    const adminHash = await bcrypt.hash('admin123', SALT_ROUNDS)
+    const [admin] = await db.insert(users).values({
+      email: 'admin@example.com',
+      passwordHash: adminHash,
+      name: 'Admin',
+      role: 'admin',
+      emailVerified: true,
+    }).returning({ id: users.id, email: users.email, role: users.role })
+    console.log(`  ✓ ${admin.role}: ${admin.email} (password: admin123)`)
+
+    const userHash = await bcrypt.hash('user123', SALT_ROUNDS)
+    const [user] = await db.insert(users).values({
+      email: 'user@example.com',
+      passwordHash: userHash,
+      name: 'Test User',
+      role: 'user',
+      emailVerified: true,
+    }).returning({ id: users.id, email: users.email, role: users.role })
+    console.log(`  ✓ ${user.role}: ${user.email} (password: user123)`)
   }
 
   console.log('\n✅ Seed complete!')
+  console.log('\nDefault credentials:')
+  console.log('  Admin: admin@example.com / admin123')
+  console.log('  User:  user@example.com / user123')
   console.log('\nNext steps:')
   console.log('  1. Configure your payment provider (Stripe / YooKassa / etc.) in apps/backend/.env')
   console.log('  2. Create matching products in your provider dashboard')
