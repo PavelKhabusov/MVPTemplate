@@ -43,6 +43,7 @@ export default function AdminScreen() {
   const pushEnabled = useTemplateFlag('pushNotifications', false)
   const paymentsEnabled = useTemplateFlag('payments', false)
   const emailEnabled = useTemplateFlag('email', false)
+  const [aiEnabled, setAiEnabled] = useState(true)
   const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
@@ -52,7 +53,10 @@ export default function AdminScreen() {
     if (!pushEnabled && !emailEnabled && activeTab === 'notify') {
       setActiveTab('users')
     }
-  }, [analyticsEnabled, pushEnabled, emailEnabled, activeTab])
+    if (!aiEnabled && activeTab === 'proxy') {
+      setActiveTab('users')
+    }
+  }, [analyticsEnabled, pushEnabled, emailEnabled, aiEnabled, activeTab])
 
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
@@ -82,17 +86,25 @@ export default function AdminScreen() {
       setLoading(true)
       const params: Record<string, string | number> = { page: p, limit: 20 }
       if (q) params.search = q
-      const [usersRes, statsRes, configRes, analyticsRes] = await Promise.all([
+      const [usersRes, statsRes, configRes, analyticsRes, envRes] = await Promise.all([
         api.get('/admin/users', { params }),
         api.get('/admin/stats'),
         api.get('/admin/config'),
         api.get('/analytics/dashboard', { params: { days: 30 } }).catch(() => null),
+        api.get('/admin/env').catch(() => null),
       ])
       setUsers(usersRes.data.data)
       setTotalPages(usersRes.data.pagination?.totalPages ?? 1)
       setStats(statsRes.data.data)
       setConfig(configRes.data.data)
       if (analyticsRes) setAnalyticsData(analyticsRes.data.data)
+      if (envRes) {
+        const ai = envRes.data?.data?.ai
+        const hasKey = ai && Object.entries(ai).some(([k, v]: [string, any]) =>
+          (k === 'GEMINI_API_KEY' || k === 'OPENAI_API_KEY') && v?.value && v.value !== '__TOGGLE_ON__'
+        )
+        setAiEnabled(!!hasKey)
+      }
     } catch (err: any) {
       Alert.alert(t('common.error'), err.response?.data?.message ?? t('common.retry'))
     } finally {
@@ -182,12 +194,14 @@ export default function AdminScreen() {
                 <Text color={activeTab === 'storage' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.storage')}</Text>
               </XStack>
             </ScalePress>
-            <ScalePress onPress={() => setActiveTab('proxy')}>
-              <XStack backgroundColor={activeTab === 'proxy' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
-                <Ionicons name="git-network-outline" size={16} color={activeTab === 'proxy' ? 'white' : theme.accent.val} />
-                <Text color={activeTab === 'proxy' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.proxyTab')}</Text>
-              </XStack>
-            </ScalePress>
+            {aiEnabled && (
+              <ScalePress onPress={() => setActiveTab('proxy')}>
+                <XStack backgroundColor={activeTab === 'proxy' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                  <Ionicons name="git-network-outline" size={16} color={activeTab === 'proxy' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'proxy' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.proxyTab')}</Text>
+                </XStack>
+              </ScalePress>
+            )}
             {isTemplateConfigEnabled && (
               <ScalePress onPress={() => {
                 if (Platform.OS === 'web') {
@@ -313,7 +327,7 @@ export default function AdminScreen() {
       )}
 
       {/* Proxy Tab */}
-      {activeTab === 'proxy' && (
+      {aiEnabled && activeTab === 'proxy' && (
         <ProxyAdminTab />
       )}
 
