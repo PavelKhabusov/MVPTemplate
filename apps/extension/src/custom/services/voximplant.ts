@@ -27,7 +27,7 @@ class VoximplantService {
     if (this.initialized) return
     const sdk = await loadSDK()
     this.sdk = sdk.getInstance()
-    const config: Record<string, unknown> = { micRequired: true, showDebugInfo: false }
+    const config: Record<string, unknown> = { micRequired: false, showDebugInfo: false }
     if (node && (sdk as any).ConnectionNode?.[node]) {
       config.node = (sdk as any).ConnectionNode[node]
     }
@@ -74,6 +74,14 @@ class VoximplantService {
   async makeCall(phoneNumber: string): Promise<void> {
     if (!this.sdk) throw new Error('SDK not initialized')
     if (this.currentCall) throw new Error('Call already in progress')
+
+    // Request microphone access explicitly before dialing
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach((t) => t.stop())
+    } catch {
+      throw new Error('Microphone access denied. Allow microphone for this extension in browser settings.')
+    }
     const sdk = await loadSDK()
     this.handlers?.onStateChange('calling')
     try {
