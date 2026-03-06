@@ -287,3 +287,85 @@ EXPO_PUBLIC_COLOR_SCHEME=indigo   # indigo | violet | blue | green | slate | ...
 - [ ] `apps/mobile/app/(tabs)/explore.tsx` — Explore tab под продукт
 - [ ] `packages/docs/src/docData.ts` + i18n `docs.*` — документация продукта
 - [ ] `apps/backend/src/database/seed.ts` — планы и цены
+- [ ] `README.md` — описание продукта (не шаблона!)
+- [ ] `apps/extension/src/components/MainScreen.tsx` — название приложения в хедере (`span` со строкой)
+- [ ] `apps/backend/src/modules/admin/admin.routes.ts` — ENV_GROUPS для API-ключей продукта
+- [ ] `apps/mobile/src/admin/AdminApiSettings.tsx` — ENV_GROUP_META для отображения в админке
+
+## 15. Ретроспектива — уроки из первого форка (CallSheet)
+
+### Что работает хорошо
+
+- **Config-driven расширение** — `extensionConfig` в `config.ts` — главный успех архитектуры. Бизнес-логика изолирована в `custom/`, шаблонные компоненты не трогаются
+- **APP_BRAND** — единственное место для имени продукта в runtime (избавляет от рассыпанных строк)
+- **Bento-features** — анимированная сетка в лендинге хорошо подходит для любого продукта при замене визуализаций
+- **Платёжная система** — добавление нового продукта через seed.ts не требует изменения кода
+
+---
+
+### Недочёты шаблона (нужно исправить в MVPTemplate)
+
+#### Захардкоженные строки продукта
+| Файл | Проблема |
+|------|----------|
+| `apps/extension/src/components/MainScreen.tsx` | Хедер содержит строку `"MVP Extension"` — не читается из APP_BRAND |
+| `apps/extension/src/manifest.ts` | name/description — только комментарий `// BRAND`, нет автоматической подстановки |
+
+**Решение**: добавить в ExtensionConfig поля `appName`, `appDescription` — и использовать их в MainScreen и manifest.
+
+#### Порядок секций в Settings расширения
+**Проблема**: тема и язык отображаются ПЕРЕД бизнес-настройками (Voximplant, маппинг колонок). Для пользователя важнее сначала видеть настройки самого приложения.
+**Решение**: `extensionConfig.settingsSections` должны рендериться первыми в `SettingsTab.tsx` — исправлено в callsheet, нужно отразить в шаблоне.
+
+#### Фиксированная ширина расширения
+**Проблема**: `width: 380px` в `globals.css` вызывает горизонтальный скролл в sidebar-режиме, где Chrome сам задаёт ширину панели.
+**Решение**: `width: 100%; min-width: 0` с `box-sizing: border-box` — исправлено в callsheet.
+
+#### LandingFeatures — шаблонные визуализации
+**Проблема**: bento-карточки содержат специфичные для MVPTemplate визуализации (устройства, dark/light toggle, cycling greetings, API routes). При форке нужно переписывать весь компонент.
+**Решение**: сделать визуализации в bento-карточках параметризованными через конфиг, или документировать паттерн замены.
+
+#### README остаётся шаблонным
+**Проблема**: README содержит документацию по MVPTemplate, а не по продукту. Легко забыть.
+**Решение**: добавить README в чеклист форка (уже добавлено), сделать README.md с явным TODO-плейсхолдером.
+
+#### Нет авто-обнаружения Google Sheets в MainScreen
+**Проблема**: `TAB_CONTEXT_CHANGED` обрабатывается в CallTab, но MainScreen не переключается автоматически на нужную вкладку при обнаружении Google Sheets.
+**Решение**: слушатель в MainScreen с переключением на первую кастомную вкладку при `isGoogleSheets === true` — исправлено в callsheet.
+
+#### Home/Explore вкладки содержат шаблонный контент
+**Проблема**: "Active Projects / Completed Tasks / Team Members" не подходит ни для одного реального продукта. Пользователь замечает это только после запуска.
+**Решение**: добавить TODO-комментарии прямо в файлах `index.tsx` и `explore.tsx`, чтобы форкер видел что нужно заменить.
+
+#### Документация (@mvp/docs) — шаблонная
+**Проблема**: после форка в приложении видна документация MVPTemplate (Quick Start, Prerequisites, Docker, etc.) вместо документации продукта.
+**Решение**: добавить в чеклист (уже есть), рассмотреть пустой docData.ts по умолчанию.
+
+---
+
+### Что нужно добавить в шаблон
+
+1. **Пустые TODO-заглушки** в Home/Explore вкладках с комментарием `// TODO: customize for your product`
+2. **`APP_BRAND.appName`** в extensionConfig для автоматической подстановки в хедер расширения
+3. **`extensionConfig.settingsSections` рендерятся первыми** в SettingsTab (исправить в шаблоне)
+4. **`width: 100%`** вместо `width: 380px` в extension/globals.css
+5. **`MainScreen` слушает `TAB_CONTEXT_CHANGED`** для auto-switch на первую кастомную вкладку
+6. **README.md** с явными `# TODO: replace this` секциями вместо описания шаблона
+7. **Пустой `docData.ts`** по умолчанию (или с одной группой "Getting Started" с заглушками)
+8. **Параметризованные bento-карточки** в LandingFeatures — принимать массив с `{title, desc, visual}` из конфига вместо захардкоженного JSX
+
+---
+
+### Порядок действий при форке (оптимальный)
+
+1. `cp -R MVPTemplate myproject && cd myproject`
+2. `packages/template-config/src/brand.ts` — APP_BRAND
+3. `apps/backend/.env` — DB + цветовая тема
+4. `npm run dev` — проверить что всё запускается
+5. Пройти чеклист секции 14 сверху вниз
+6. `apps/extension/src/config.ts` — добавить кастомные вкладки
+7. `apps/extension/src/custom/` — бизнес-логика
+8. Backend-модули: schema → routes → service → регистрация в app.ts
+9. i18n: landing, home, explore, docs
+10. Seed планов → `npm run db:seed`
+11. Проверка: auth → main feature → payments → admin
