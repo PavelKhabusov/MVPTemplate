@@ -4,6 +4,7 @@ import { useHistory, type HistoryCall } from './hooks/useHistory'
 import { mockCallHistory, statusColors } from './data/mock'
 import { CallCardSkeleton } from './shared/Skeleton'
 import ErrorBlock from './shared/ErrorBlock'
+import { useTranslation } from '@mvp/i18n/src/browser'
 
 function formatDuration(seconds: number | null): string {
   if (seconds == null || seconds <= 0) return '—'
@@ -17,12 +18,12 @@ function formatDate(iso: string): string {
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-function statusLabel(status: string): string {
+function statusLabel(status: string, t: (key: string) => string): string {
   switch (status) {
-    case 'ANSWERED': case 'answered': return 'Дозвонился'
-    case 'NO_ANSWER': case 'missed': return 'Не взял'
-    case 'BUSY': case 'busy': return 'Занято'
-    case 'FAILED': case 'failed': return 'Ошибка'
+    case 'ANSWERED': case 'answered': return t('ext.statusAnswered')
+    case 'NO_ANSWER': case 'missed': return t('ext.statusMissed')
+    case 'BUSY': case 'busy': return t('ext.statusBusy')
+    case 'FAILED': case 'failed': return t('ext.statusFailed')
     default: return status
   }
 }
@@ -57,17 +58,18 @@ function AudioPlayer({ url }: { url: string }) {
 }
 
 function CallCard({ call }: { call: HistoryCall }) {
+  const { t } = useTranslation()
   const colors = statusColor(call.status)
   const isAnswered = call.status === 'ANSWERED' || call.status === 'answered'
   return (
     <div className="bg-bg-secondary rounded-xl p-3">
       <div className="flex items-start justify-between mb-1.5">
         <div>
-          <div className="text-[13px] font-medium">{call.contactName || 'Без имени'}</div>
+          <div className="text-[13px] font-medium">{call.contactName || t('ext.unknownContact')}</div>
           <div className="text-[11px] text-text-secondary font-mono">{call.contactPhone}</div>
         </div>
         <div className="text-right">
-          <div className="text-[10px] py-[2px] px-2 rounded-full font-medium" style={{ background: colors.bg, color: colors.text }}>{statusLabel(call.status)}</div>
+          <div className="text-[10px] py-[2px] px-2 rounded-full font-medium" style={{ background: colors.bg, color: colors.text }}>{statusLabel(call.status, t)}</div>
           <div className="text-[10px] text-text-muted mt-[3px]">{formatDate(call.startedAt)}</div>
         </div>
       </div>
@@ -94,6 +96,7 @@ const mockHistoryCalls: HistoryCall[] = mockCallHistory.map((m) => ({
 interface HistoryTabProps { lang?: string }
 
 export default function HistoryTab({ lang: _lang }: HistoryTabProps) {
+  const { t } = useTranslation()
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -110,18 +113,18 @@ export default function HistoryTab({ lang: _lang }: HistoryTabProps) {
   return (
     <div className="flex-1 overflow-y-auto p-3.5 px-4 flex flex-col gap-2">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs text-text-secondary">{useMock ? 'Демо данные' : `Все звонки · ${total}`}</span>
-        <button onClick={refresh} className="text-[11px] text-brand cursor-pointer hover:text-brand-light transition bg-transparent border-none font-sans">Обновить</button>
+        <span className="text-xs text-text-secondary">{useMock ? t('ext.demoData') : t('ext.allCalls', { total })}</span>
+        <button onClick={refresh} className="text-[11px] text-brand cursor-pointer hover:text-brand-light transition bg-transparent border-none font-sans">{t('ext.refresh')}</button>
       </div>
       {loading && <div className="flex flex-col gap-2"><CallCardSkeleton /><CallCardSkeleton /><CallCardSkeleton /></div>}
       {!loading && error && <ErrorBlock message={error} onRetry={refresh} />}
-      {!loading && displayCalls.length === 0 && !error && <div className="text-center py-8 text-text-muted text-xs">Нет звонков</div>}
+      {!loading && displayCalls.length === 0 && !error && <div className="text-center py-8 text-text-muted text-xs">{t('ext.noCalls')}</div>}
       {!loading && displayCalls.map((call) => <CallCard key={call.id} call={call} />)}
       {!useMock && totalPages > 1 && (
         <div className="flex items-center justify-center gap-4 py-3">
-          <button onClick={prevPage} disabled={page <= 1} className="text-xs text-brand disabled:text-text-muted disabled:cursor-default cursor-pointer flex items-center gap-0.5 bg-transparent border-none font-sans"><ChevronLeft size={13} />Назад</button>
+          <button onClick={prevPage} disabled={page <= 1} className="text-xs text-brand disabled:text-text-muted disabled:cursor-default cursor-pointer flex items-center gap-0.5 bg-transparent border-none font-sans"><ChevronLeft size={13} />{t('common.back')}</button>
           <span className="text-xs text-text-secondary">{page} / {totalPages}</span>
-          <button onClick={nextPage} disabled={page >= totalPages} className="text-xs text-brand disabled:text-text-muted disabled:cursor-default cursor-pointer flex items-center gap-0.5 bg-transparent border-none font-sans">Далее<ChevronRight size={13} /></button>
+          <button onClick={nextPage} disabled={page >= totalPages} className="text-xs text-brand disabled:text-text-muted disabled:cursor-default cursor-pointer flex items-center gap-0.5 bg-transparent border-none font-sans">{t('common.next')}<ChevronRight size={13} /></button>
         </div>
       )}
     </div>

@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react'
 import { useSheetColumns } from './hooks/useSheetColumns'
 import { columnIndexToLetter, getSheetList, type ColumnMapping } from './services/sheets'
 import { SettingSkeleton } from './shared/Skeleton'
+import { useTranslation } from '@mvp/i18n/src/browser'
 
-const COLUMN_FIELDS: { key: keyof ColumnMapping; label: string }[] = [
-  { key: 'phone', label: 'Телефоны' },
-  { key: 'name', label: 'Имя контакта' },
-  { key: 'status', label: 'Результат звонка' },
-  { key: 'date', label: 'Дата звонка' },
-  { key: 'duration', label: 'Длительность' },
-  { key: 'note', label: 'Заметка' },
-  { key: 'recording', label: 'Ссылка на запись' },
+const COLUMN_FIELD_KEYS: { key: keyof ColumnMapping; labelKey: string }[] = [
+  { key: 'phone', labelKey: 'ext.colPhone' },
+  { key: 'name', labelKey: 'ext.colName' },
+  { key: 'status', labelKey: 'ext.colStatus' },
+  { key: 'date', labelKey: 'ext.colDate' },
+  { key: 'duration', labelKey: 'ext.colDuration' },
+  { key: 'note', labelKey: 'ext.colNote' },
+  { key: 'recording', labelKey: 'ext.colRecording' },
 ]
 
 export default function ColumnMappingSettings() {
+  const { t } = useTranslation()
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null)
   const [sheetName, setSheetName] = useState<string | null>(null)
   const [sheetList, setSheetList] = useState<string[]>([])
@@ -40,26 +42,26 @@ export default function ColumnMappingSettings() {
       {/* Sheet selector */}
       {spreadsheetId && (
         <div className="bg-bg-secondary rounded-xl p-3">
-          <div className="text-[10px] text-text-muted mb-2.5 uppercase tracking-wider">Лист таблицы</div>
+          <div className="text-[10px] text-text-muted mb-2.5 uppercase tracking-wider">{t('ext.sheetTab')}</div>
           {sheetsLoading ? <SettingSkeleton /> : sheetList.length > 0 ? (
             <select value={sheetName || ''} onChange={(e) => setSheetName(e.target.value)}
               className="w-full bg-bg-primary border border-bg-tertiary rounded-lg py-2 px-3 text-xs text-text-primary outline-none cursor-pointer focus:border-brand">
-              {!sheetName && <option value="">Выберите лист</option>}
+              {!sheetName && <option value="">{t('ext.selectSheet')}</option>}
               {sheetList.map((name) => <option key={name} value={name}>{name}</option>)}
             </select>
-          ) : <div className="text-[11px] text-text-muted">Откройте Google Таблицу для выбора листа</div>}
+          ) : <div className="text-[11px] text-text-muted">{t('ext.openSheetsForSheet')}</div>}
         </div>
       )}
 
       {/* Column mapping */}
       <div className="bg-bg-secondary rounded-xl p-3">
-        <div className="text-[10px] text-text-muted mb-2.5 uppercase tracking-wider">Колонки таблицы</div>
+        <div className="text-[10px] text-text-muted mb-2.5 uppercase tracking-wider">{t('ext.tableColumns')}</div>
         <div className="text-[10px] text-text-muted mb-3">
-          Укажите букву столбца (A, B, C...){columnOptions.length > 0 && ' или выберите из списка'}
+          {t('ext.columnLetterHint')}{columnOptions.length > 0 && ` ${t('ext.orSelectFromList')}`}
         </div>
-        {COLUMN_FIELDS.map(({ key, label }) => (
+        {COLUMN_FIELD_KEYS.map(({ key, labelKey }) => (
           <div key={key} className="flex justify-between items-center mb-2 last:mb-0">
-            <span className="text-xs text-text-secondary">{label}</span>
+            <span className="text-xs text-text-secondary">{t(labelKey)}</span>
             <div className="flex items-center gap-1.5">
               <input type="text" placeholder="—" value={columns[key] || ''} maxLength={2}
                 onChange={(e) => updateColumn(key, e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
