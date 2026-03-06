@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000'
+const API_BASE = 'http://localhost:3000/api'
 
 async function getToken(): Promise<string | null> {
   const result = await chrome.storage?.local?.get('accessToken')
@@ -29,7 +29,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       headers['Authorization'] = `Bearer ${refreshed}`
       const retry = await fetch(`${API_BASE}${path}`, { ...options, headers })
       if (!retry.ok) throw new Error(`API error: ${retry.status}`)
-      return retry.json()
+      const retryJson = await retry.json()
+      return retryJson.data !== undefined ? retryJson.data : retryJson
     }
   }
 
@@ -42,7 +43,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new Error(errMsg)
   }
 
-  return res.json()
+  const json = await res.json()
+  return json.data !== undefined ? json.data : json
 }
 
 async function tryRefresh(): Promise<string | null> {
@@ -50,7 +52,7 @@ async function tryRefresh(): Promise<string | null> {
     const stored = (await chrome.storage?.local?.get('refreshToken')) as { refreshToken?: string }
     if (!stored.refreshToken) return null
 
-    const res = await fetch(`${API_BASE}/auth/refresh`, {
+    const res = await fetch(`http://localhost:3000/api/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: stored.refreshToken }),
@@ -58,7 +60,8 @@ async function tryRefresh(): Promise<string | null> {
 
     if (!res.ok) return null
 
-    const data = await res.json()
+    const json = await res.json()
+    const data = json.data || json
     await setTokens(data.accessToken, data.refreshToken)
     return data.accessToken
   } catch {
@@ -76,7 +79,7 @@ export interface AppFlags {
 
 export async function fetchFlags(): Promise<AppFlags> {
   try {
-    const res = await fetch(`${API_BASE}/config/flags`)
+    const res = await fetch(`http://localhost:3000/api/config/flags`)
     if (!res.ok) return { googleAuth: false, payments: false, email: false }
     const json = await res.json()
     return {
@@ -91,14 +94,14 @@ export async function fetchFlags(): Promise<AppFlags> {
 
 // --- Auth ---
 
-export async function register(email: string, password: string) {
+export async function register(email: string, password: string, name?: string) {
   const data = await request<{
     accessToken: string
     refreshToken: string
     userId: string
   }>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, name: name || email.split('@')[0] }),
   })
   await setTokens(data.accessToken, data.refreshToken)
   return data

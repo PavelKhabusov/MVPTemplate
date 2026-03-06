@@ -176,38 +176,30 @@ async function seed() {
   }
 
   // ---------------------------------------------------------------------------
-  // Default users
+  // Default users (always upsert — update password if already exists)
   // ---------------------------------------------------------------------------
-  console.log('\n👤 Checking for existing users...')
+  console.log('\n👤 Seeding test accounts...')
 
-  const existingUsers = await db.select().from(users).limit(1)
+  const SALT_ROUNDS = 12
 
-  if (existingUsers.length > 0) {
-    console.log('✅ Users already exist — skipping user seed.')
-  } else {
-    console.log('📋 Inserting default users...')
+  const seedUsers = [
+    { email: 'admin@example.com', password: 'admin123', name: 'Admin', role: 'admin' as const },
+    { email: 'user@example.com', password: 'user123', name: 'Test User', role: 'user' as const },
+  ]
 
-    const SALT_ROUNDS = 12
-
-    const adminHash = await bcrypt.hash('admin123', SALT_ROUNDS)
-    const [admin] = await db.insert(users).values({
-      email: 'admin@example.com',
-      passwordHash: adminHash,
-      name: 'Admin',
-      role: 'admin',
+  for (const u of seedUsers) {
+    const hash = await bcrypt.hash(u.password, SALT_ROUNDS)
+    const [result] = await db.insert(users).values({
+      email: u.email,
+      passwordHash: hash,
+      name: u.name,
+      role: u.role,
       emailVerified: true,
+    }).onConflictDoUpdate({
+      target: users.email,
+      set: { passwordHash: hash, name: u.name, role: u.role, emailVerified: true },
     }).returning({ id: users.id, email: users.email, role: users.role })
-    console.log(`  ✓ ${admin.role}: ${admin.email} (password: admin123)`)
-
-    const userHash = await bcrypt.hash('user123', SALT_ROUNDS)
-    const [user] = await db.insert(users).values({
-      email: 'user@example.com',
-      passwordHash: userHash,
-      name: 'Test User',
-      role: 'user',
-      emailVerified: true,
-    }).returning({ id: users.id, email: users.email, role: users.role })
-    console.log(`  ✓ ${user.role}: ${user.email} (password: user123)`)
+    console.log(`  ✓ ${result.role}: ${result.email} (password: ${u.password})`)
   }
 
   console.log('\n✅ Seed complete!')
