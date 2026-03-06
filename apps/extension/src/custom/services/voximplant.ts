@@ -1,6 +1,19 @@
 // Dynamic import to avoid "window is not defined" during Vite build
 let VI: typeof import('voximplant-websdk') | null = null
 
+// Normalize phone number to E.164 format (e.g. "79142163340" → "+79142163340")
+function normalizePhone(raw: string): string {
+  // Strip whitespace, dashes, parentheses, dots
+  const digits = raw.replace(/[\s\-().]/g, '')
+  if (!digits) return ''
+  // Already has +
+  if (digits.startsWith('+')) return digits
+  // Russian 8-xxx → +7-xxx
+  if (digits.startsWith('8') && digits.length === 11) return '+7' + digits.slice(1)
+  // Prepend + for everything else (7xxxxxxxxxx, country codes, etc.)
+  return '+' + digits
+}
+
 async function loadSDK() {
   if (!VI) VI = await import('voximplant-websdk')
   return VI
@@ -75,6 +88,9 @@ class VoximplantService {
     if (!this.sdk) throw new Error('SDK not initialized')
     if (this.currentCall) throw new Error('Call already in progress')
 
+    const normalized = normalizePhone(phoneNumber)
+    if (!normalized) throw new Error(`Invalid phone number: "${phoneNumber}"`)
+
     // Request microphone access explicitly before dialing
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -85,7 +101,7 @@ class VoximplantService {
     const sdk = await loadSDK()
     this.handlers?.onStateChange('calling')
     try {
-      this.currentCall = this.sdk.call({ number: phoneNumber, video: { sendVideo: false, receiveVideo: false } })
+      this.currentCall = this.sdk.call({ number: normalized, video: { sendVideo: false, receiveVideo: false } })
       this.currentCall.on(sdk.CallEvents.Connected, () => {
         this.callStartTime = Date.now()
         this.handlers?.onStateChange('active')
