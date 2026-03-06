@@ -734,6 +734,8 @@
     "errorNotFound": "Data not found.",
     "errorGeneral": "An error occurred",
     "unknownContact": "Unknown",
+    "voxNodePlaceholder": "Node (see control panel)",
+    "voxNodeDesc": "Find your node in Voximplant control panel → Credentials section",
     "sdkConnecting": "Connecting to Voximplant...",
     "sdkReady": "Voximplant connected",
     "sdkFailed": "Voximplant connection failed",

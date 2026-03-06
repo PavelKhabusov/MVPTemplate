@@ -94,10 +94,10 @@ export async function getCallHistory(params: { sheetId?: string; page?: number; 
 // --- Voximplant ---
 
 export async function getVoximplantConfig() {
-  return request<{ login: string; appId: string | null; password: string | null } | null>('/voximplant/config')
+  return request<{ login: string; appId: string | null; password: string | null; node: string | null } | null>('/voximplant/config')
 }
 
-export async function connectVoximplant(data: { login: string; password: string; appId?: string }) {
+export async function connectVoximplant(data: { login: string; password: string; appId?: string; node?: string }) {
   return request<{ ok: boolean }>('/voximplant/connect', { method: 'POST', body: JSON.stringify(data) })
 }
 

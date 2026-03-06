@@ -69,7 +69,7 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
       if (config?.login && config?.password) {
         setSdkStatus('connecting')
         setSdkInitError(null)
-        initSDK(config.login, config.password)
+        initSDK(config.login, config.password, config.node)
           .then(() => setSdkStatus('ready'))
           .catch((err) => {
             setSdkStatus('failed')

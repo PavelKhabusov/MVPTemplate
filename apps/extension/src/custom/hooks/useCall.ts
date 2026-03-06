@@ -32,10 +32,10 @@ export function useCall(options?: UseCallOptions) {
     })
   }, [])
 
-  const initSDK = useCallback(async (username: string, password: string) => {
+  const initSDK = useCallback(async (username: string, password: string, node?: string | null) => {
     try {
       setError(null)
-      await voximplantService.setup(username, password)
+      await voximplantService.setup(username, password, node)
       setSdkReady(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to initialize SDK')

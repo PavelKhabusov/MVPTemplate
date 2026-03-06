@@ -734,6 +734,8 @@
     "errorNotFound": "Данные не найдены.",
     "errorGeneral": "Произошла ошибка",
     "unknownContact": "Неизвестный",
+    "voxNodePlaceholder": "Нода (см. панель управления)",
+    "voxNodeDesc": "Найдите ноду в панели Voximplant → раздел Credentials",
     "sdkConnecting": "Подключение к Voximplant...",
     "sdkReady": "Voximplant подключён",
     "sdkFailed": "Ошибка подключения к Voximplant",

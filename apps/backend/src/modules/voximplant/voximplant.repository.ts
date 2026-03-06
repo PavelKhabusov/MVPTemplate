@@ -4,13 +4,14 @@ import { users } from '../../database/schema'
 import { encrypt } from '../../common/utils/crypto'
 
 export const voximplantRepository = {
-  async saveCredentials(userId: string, login: string, password: string, appId: string | null) {
+  async saveCredentials(userId: string, login: string, password: string, appId: string | null, node: string | null) {
     const result = await db
       .update(users)
       .set({
         voximplantLogin: login,
         voximplantPassword: encrypt(password),
         voximplantAppId: appId,
+        voximplantNode: node,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
@@ -24,6 +25,7 @@ export const voximplantRepository = {
         voximplantLogin: users.voximplantLogin,
         voximplantAppId: users.voximplantAppId,
         voximplantPassword: users.voximplantPassword,
+        voximplantNode: users.voximplantNode,
       })
       .from(users)
       .where(eq(users.id, userId))

@@ -17,6 +17,7 @@ export const users = pgTable('users', {
   voximplantLogin: varchar('voximplant_login', { length: 255 }),
   voximplantPassword: text('voximplant_password'), // AES-256-GCM encrypted
   voximplantAppId: varchar('voximplant_app_id', { length: 255 }),
+  voximplantNode: varchar('voximplant_node', { length: 20 }), // e.g. 'NODE_1'
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

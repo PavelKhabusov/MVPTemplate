@@ -4,7 +4,9 @@ import { SettingSkeleton } from './shared/Skeleton'
 import { getVoximplantConfig, connectVoximplant } from './services/api'
 import { useTranslation } from '@mvp/i18n/src/browser'
 
-interface VoxConfig { login: string; appId: string | null }
+const VOX_NODES = ['NODE_1','NODE_2','NODE_3','NODE_4','NODE_5','NODE_6','NODE_7','NODE_8','NODE_9','NODE_10','NODE_11','NODE_12'] as const
+
+interface VoxConfig { login: string; appId: string | null; node: string | null }
 
 export default function VoximplantSettings() {
   const { t } = useTranslation()
@@ -14,6 +16,7 @@ export default function VoximplantSettings() {
   const [voxLogin, setVoxLogin] = useState('')
   const [voxPassword, setVoxPassword] = useState('')
   const [voxAppId, setVoxAppId] = useState('')
+  const [voxNode, setVoxNode] = useState('')
   const [voxError, setVoxError] = useState<string | null>(null)
   const [voxSaving, setVoxSaving] = useState(false)
 
@@ -30,7 +33,7 @@ export default function VoximplantSettings() {
     if (!voxLogin || !voxPassword) return
     setVoxSaving(true); setVoxError(null)
     try {
-      await connectVoximplant({ login: voxLogin, password: voxPassword, appId: voxAppId || undefined })
+      await connectVoximplant({ login: voxLogin, password: voxPassword, appId: voxAppId || undefined, node: voxNode || undefined })
       setShowVoxForm(false); setVoxPassword(''); await loadVoxConfig()
     } catch (err) {
       setVoxError(err instanceof Error ? err.message : t('ext.errorGeneral'))
@@ -48,6 +51,12 @@ export default function VoximplantSettings() {
             className="bg-bg-primary border border-bg-tertiary rounded-lg py-2 px-3 text-xs text-text-primary outline-none focus:border-brand" />
           <input type="text" placeholder={t('ext.appIdOptional')} value={voxAppId} onChange={(e) => setVoxAppId(e.target.value)}
             className="bg-bg-primary border border-bg-tertiary rounded-lg py-2 px-3 text-xs text-text-primary outline-none focus:border-brand" />
+          <select value={voxNode} onChange={(e) => setVoxNode(e.target.value)}
+            className="bg-bg-primary border border-bg-tertiary rounded-lg py-2 px-3 text-xs text-text-primary outline-none focus:border-brand cursor-pointer">
+            <option value="">{t('ext.voxNodePlaceholder')}</option>
+            {VOX_NODES.map((n) => <option key={n} value={n}>{n}</option>)}
+          </select>
+          <div className="text-[10px] text-text-muted">{t('ext.voxNodeDesc')}</div>
           {voxError && <div className="text-[11px] text-red-400">{voxError}</div>}
           <div className="flex gap-2">
             <button onClick={handleVoxConnect} disabled={voxSaving || !voxLogin || !voxPassword}
@@ -68,14 +77,21 @@ export default function VoximplantSettings() {
                 <div className={`text-[11px] ${voxConfig?.login ? 'text-success' : 'text-text-muted'}`}>{voxConfig?.login ? t('ext.voxConnected') : t('ext.voxNotConnected')}</div>
               </div>
             </div>
-            <button onClick={() => { if (voxConfig?.login) setVoxLogin(voxConfig.login); if (voxConfig?.appId) setVoxAppId(voxConfig.appId); setShowVoxForm(true) }}
+            <button onClick={() => {
+              if (voxConfig?.login) setVoxLogin(voxConfig.login)
+              if (voxConfig?.appId) setVoxAppId(voxConfig.appId)
+              if (voxConfig?.node) setVoxNode(voxConfig.node)
+              setShowVoxForm(true)
+            }}
               className="bg-transparent border border-bg-tertiary rounded-md py-1 px-2.5 text-text-secondary text-[11px] cursor-pointer font-sans">
               {voxConfig?.login ? t('common.edit') : t('ext.connect')}
             </button>
           </div>
           {voxConfig?.login ? (
             <div className="text-[11px] text-text-muted bg-bg-primary rounded-lg py-2 px-2.5">
-              {voxConfig.login}{voxConfig.appId && ` · App: ${voxConfig.appId}`}
+              {voxConfig.login}
+              {voxConfig.appId && ` · App: ${voxConfig.appId}`}
+              {voxConfig.node && ` · ${voxConfig.node}`}
             </div>
           ) : (
             <div className="mt-1 flex flex-col gap-1.5">

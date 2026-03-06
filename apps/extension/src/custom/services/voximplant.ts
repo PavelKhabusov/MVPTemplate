@@ -23,14 +23,18 @@ class VoximplantService {
   private initialized = false
   private loggedIn = false
 
-  async init(): Promise<void> {
+  async init(node?: string | null): Promise<void> {
     if (this.initialized) return
     const sdk = await loadSDK()
     this.sdk = sdk.getInstance()
+    const config: Record<string, unknown> = { micRequired: true, showDebugInfo: false }
+    if (node && (sdk as any).ConnectionNode?.[node]) {
+      config.node = (sdk as any).ConnectionNode[node]
+    }
     await new Promise<void>((resolve, reject) => {
       this.sdk!.on(sdk.Events.SDKReady, () => resolve())
       this.sdk!.on(sdk.Events.ConnectionFailed, () => reject(new Error('Connection failed')))
-      this.sdk!.init({ micRequired: true, showDebugInfo: false, node: 'app.voximplant.com' })
+      this.sdk!.init(config)
     })
     this.initialized = true
   }
@@ -59,8 +63,8 @@ class VoximplantService {
     this.loggedIn = true
   }
 
-  async setup(username: string, password: string): Promise<void> {
-    await this.init()
+  async setup(username: string, password: string, node?: string | null): Promise<void> {
+    await this.init(node)
     await this.connect()
     await this.login(username, password)
   }

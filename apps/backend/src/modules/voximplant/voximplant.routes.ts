@@ -29,7 +29,8 @@ export async function voximplantRoutes(app: FastifyInstance) {
       request.userId,
       body.login,
       body.password,
-      body.appId ?? null
+      body.appId ?? null,
+      body.node ?? null
     )
     return sendSuccess(reply, { ok: true })
   })
@@ -48,6 +49,7 @@ export async function voximplantRoutes(app: FastifyInstance) {
       login: config.voximplantLogin,
       appId: config.voximplantAppId,
       password,
+      node: config.voximplantNode,
     })
   })
 
