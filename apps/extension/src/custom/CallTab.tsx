@@ -36,23 +36,6 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [limitReached, setLimitReached] = useState(false)
 
-  // Get current sheet context + re-init SDK on tab switch if needed
-  useEffect(() => {
-    chrome.runtime.sendMessage({ type: 'GET_CURRENT_SHEET' }, (res) => {
-      if (chrome.runtime.lastError) return
-      if (res?.spreadsheetId) setSpreadsheetId(res.spreadsheetId)
-    })
-    const listener = (message: any) => {
-      if (message.type === 'TAB_CONTEXT_CHANGED') {
-        setSpreadsheetId(message.payload?.spreadsheetId || null)
-        // SDK may have dropped while the tab was inactive — reconnect if needed
-        if (!voximplantService.isReady()) tryInitSDK()
-      }
-    }
-    chrome.runtime.onMessage.addListener(listener)
-    return () => chrome.runtime.onMessage.removeListener(listener)
-  }, [tryInitSDK])
-
   // Restore saved sheet name when spreadsheetId is known
   useEffect(() => {
     if (!spreadsheetId) return
@@ -96,6 +79,23 @@ export default function CallTab({ lang: _lang }: CallTabProps) {
 
   // Init SDK on mount
   useEffect(() => { tryInitSDK() }, [tryInitSDK])
+
+  // Get current sheet context + re-init SDK on tab switch if needed
+  useEffect(() => {
+    chrome.runtime.sendMessage({ type: 'GET_CURRENT_SHEET' }, (res) => {
+      if (chrome.runtime.lastError) return
+      if (res?.spreadsheetId) setSpreadsheetId(res.spreadsheetId)
+    })
+    const listener = (message: any) => {
+      if (message.type === 'TAB_CONTEXT_CHANGED') {
+        setSpreadsheetId(message.payload?.spreadsheetId || null)
+        // SDK may have dropped while the tab was inactive — reconnect if needed
+        if (!voximplantService.isReady()) tryInitSDK()
+      }
+    }
+    chrome.runtime.onMessage.addListener(listener)
+    return () => chrome.runtime.onMessage.removeListener(listener)
+  }, [tryInitSDK])
 
   // Re-init when connection drops (sdkReady goes false while we thought it was ready)
   useEffect(() => {
