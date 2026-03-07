@@ -28,6 +28,8 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ext": "npx playwright test --config=playwright.extension.config.ts",
     "dev:extension": "npm run dev -w apps/extension",
     "build:extension": "npm run build -w apps/extension",
     "gitpush": "git push origin HEAD"
