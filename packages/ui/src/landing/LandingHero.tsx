@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Platform, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Image, Platform, View } from 'react-native'
 import { YStack, XStack, Text, H1, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
@@ -82,17 +82,21 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
       } as any}
     >
       {/* Background photo with Ken Burns effect */}
-      <View
+      <Image
+        source={HERO_BG_ASSET}
         style={{
           position: 'absolute',
-          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           zIndex: 0,
+          width: '100%',
+          height: '100%',
           animation: 'heroKenBurns 25s ease-in-out alternate infinite',
           willChange: 'transform',
-          backgroundImage: `url(${HERO_BG_ASSET})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 40%',
-          backgroundRepeat: 'no-repeat',
+          objectFit: 'cover',
+          objectPosition: 'center 40%',
         } as any}
       />
 
