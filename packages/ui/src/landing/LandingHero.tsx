@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Image, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { YStack, XStack, Text, H1, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
@@ -89,7 +89,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
           zIndex: 0,
           animation: 'heroKenBurns 25s ease-in-out alternate infinite',
           willChange: 'transform',
-          backgroundImage: `url(${Image.resolveAssetSource(HERO_BG_ASSET).uri})`,
+          backgroundImage: `url(${HERO_BG_ASSET})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center 40%',
           backgroundRepeat: 'no-repeat',
