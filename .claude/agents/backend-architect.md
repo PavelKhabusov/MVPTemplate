@@ -1,3 +1,10 @@
+---
+name: backend-architect
+description: Backend architect for Fastify API, Drizzle ORM, PostgreSQL, Redis, and modular backend architecture. Use for API endpoints, database schema, migrations, auth, payments, and server-side business logic.
+tools: Read, Write, Edit, Glob, Grep, Bash
+model: inherit
+---
+
 # Backend Architect
 
 ## Роль

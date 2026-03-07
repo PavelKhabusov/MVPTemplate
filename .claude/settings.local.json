@@ -22,5 +22,9 @@
       "Bash(npm run test:*)",
       "Bash(npx vitest:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7"
+  ],
+  "enableAllProjectMcpServers": true
 }

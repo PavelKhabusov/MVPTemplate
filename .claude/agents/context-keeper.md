@@ -1,3 +1,10 @@
+---
+name: context-keeper
+description: Documentation maintainer and project context keeper. Updates CLAUDE.md, MEMORY.md, agent files, and changelog after significant changes. Use after major features, refactors, or when project context needs updating.
+tools: Read, Write, Edit, Glob, Grep
+model: inherit
+---
+
 # Context Keeper
 
 ## Роль

@@ -1,3 +1,10 @@
+---
+name: playwright-qa-tester
+description: QA engineer for E2E browser testing with Playwright. Clicks through UI elements, tests navigation, forms, modals, visual regression, and accessibility. Use after implementing features to verify they work in the browser.
+tools: Read, Write, Edit, Glob, Grep, Bash
+model: inherit
+---
+
 # Playwright QA Tester
 
 ## Роль
