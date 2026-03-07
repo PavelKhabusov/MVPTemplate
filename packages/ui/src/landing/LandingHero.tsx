@@ -74,6 +74,9 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         background-clip: text !important;
         animation: heroGradientShift 6s ease-in-out infinite;
         letter-spacing: -0.03em;
+        display: inline-block !important;
+        padding-bottom: 8px !important;
+        line-height: 1.15 !important;
       }
       .hero-dot-grid {
         background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
@@ -104,8 +107,10 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
       alignItems="center"
       style={{
         background: `
-          radial-gradient(ellipse 75% 55% at 15% 15%, rgba(56,189,248,0.14) 0%, transparent 65%),
-          radial-gradient(ellipse 65% 50% at 88% 8%, rgba(139,92,246,0.12) 0%, transparent 65%)
+          radial-gradient(ellipse 75% 55% at 15% 15%, rgba(56,189,248,0.18) 0%, transparent 65%),
+          radial-gradient(ellipse 65% 50% at 88% 8%, rgba(139,92,246,0.14) 0%, transparent 65%),
+          radial-gradient(ellipse 50% 38% at 72% 92%, rgba(251,146,60,0.09) 0%, transparent 55%),
+          ${theme.background.val}
         `,
         minHeight: '82vh',
         justifyContent: 'center',

@@ -105,6 +105,9 @@ export function LandingFeatures() {
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
+        display: inline-block !important;
+        padding-bottom: 6px !important;
+        line-height: 1.25 !important;
       }
       @keyframes bentoFadeUp {
         from { opacity: 0; transform: translateY(24px); }
