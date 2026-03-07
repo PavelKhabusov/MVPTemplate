@@ -297,7 +297,15 @@
     "proxyEmpty": "No hay proxies configurados",
     "proxyHttpOnly": "Solo se usan proxies HTTP para solicitudes de IA. Los SOCKS5 se pueden probar pero no se usarán.",
     "proxySave": "Guardar",
-    "proxyCancel": "Cancelar"
+    "proxyCancel": "Cancelar",
+    "envLabel_DODO_API_KEY": "Clave API",
+    "envLabel_DODO_WEBHOOK_SECRET": "Secreto de Webhook",
+    "envLabel_PADDLE_API_KEY": "Clave API",
+    "envLabel_PADDLE_WEBHOOK_SECRET": "Secreto de Webhook",
+    "envLabel_PADDLE_SANDBOX": "Modo sandbox",
+    "hintDodo": "Obtén claves en Dodo Payments Dashboard →",
+    "hintPaddle": "Obtén claves en Paddle Vendor Dashboard →",
+    "paddleSandbox": "Modo sandbox"
   },
   "notifications": {
     "title": "Notificaciones",

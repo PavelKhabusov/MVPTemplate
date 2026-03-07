@@ -301,7 +301,15 @@
     "proxyEmpty": "プロキシがありません",
     "proxyHttpOnly": "HTTPのみ",
     "proxySave": "保存",
-    "proxyCancel": "キャンセル"
+    "proxyCancel": "キャンセル",
+    "envLabel_DODO_API_KEY": "APIキー",
+    "envLabel_DODO_WEBHOOK_SECRET": "Webhookシークレット",
+    "envLabel_PADDLE_API_KEY": "APIキー",
+    "envLabel_PADDLE_WEBHOOK_SECRET": "Webhookシークレット",
+    "envLabel_PADDLE_SANDBOX": "サンドボックスモード",
+    "hintDodo": "Dodo Payments DashboardでAPIキーを取得 →",
+    "hintPaddle": "Paddle Vendor DashboardでAPIキーを取得 →",
+    "paddleSandbox": "サンドボックスモード"
   },
   "notifications": {
     "title": "通知",

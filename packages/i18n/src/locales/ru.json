@@ -349,7 +349,15 @@
     "companySave": "Сохранить",
     "companySaved": "Информация о компании сохранена",
     "companySaveError": "Не удалось сохранить информацию",
-    "loadError": "Не удалось загрузить данные"
+    "loadError": "Не удалось загрузить данные",
+    "envLabel_DODO_API_KEY": "API-ключ",
+    "envLabel_DODO_WEBHOOK_SECRET": "Webhook-секрет",
+    "envLabel_PADDLE_API_KEY": "API-ключ",
+    "envLabel_PADDLE_WEBHOOK_SECRET": "Webhook-секрет",
+    "envLabel_PADDLE_SANDBOX": "Режим песочницы",
+    "hintDodo": "Получить ключи в Dodo Payments Dashboard →",
+    "hintPaddle": "Получить ключи в Paddle Vendor Dashboard →",
+    "paddleSandbox": "Режим песочницы"
   },
   "notifications": {
     "title": "Уведомления",

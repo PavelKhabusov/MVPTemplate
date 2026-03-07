@@ -6,7 +6,7 @@ import { SlideIn } from '../animations/SlideIn'
 
 /* ── terminal command lines ── */
 const TERMINAL_LINES = [
-  { prompt: true, text: 'git clone <repo-url> && cd callsheet' },
+  { prompt: true, text: 'git clone <repo-url> && cd MVPTemplate' },
   { prompt: true, text: 'npm install' },
   { prompt: false, text: '✓ Dependencies installed' },
   { prompt: true, text: 'docker compose up -d' },
@@ -20,7 +20,7 @@ const TERMINAL_LINES = [
 
 /* ── project tree ── */
 const TREE_LINES: readonly { depth: number; name: string; comment?: string }[] = [
-  { depth: 0, name: 'callsheet/' },
+  { depth: 0, name: 'MVPTemplate/' },
   { depth: 1, name: 'apps/' },
   { depth: 2, name: 'mobile/', comment: 'Expo · iOS / Android / Web' },
   { depth: 3, name: 'app/', comment: 'file-based routes' },

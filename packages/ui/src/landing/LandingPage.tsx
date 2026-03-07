@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 import { LandingNav } from './LandingNav'
 import { LandingHero } from './LandingHero'
 import { LandingFeatures } from './LandingFeatures'
+import { LandingTerminal } from './LandingTerminal'
 import { LandingShowcase } from './LandingShowcase'
 import { LandingPricing } from './LandingPricing'
 import { LandingCTA } from './LandingCTA'
@@ -40,6 +41,7 @@ export function LandingPage({ logo, paymentsEnabled = false, plans = [] }: Landi
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <LandingHero onNavigate={navigate} />
         <LandingFeatures />
+        <LandingTerminal />
         <LandingShowcase />
         {paymentsEnabled && (
           <LandingPricing onNavigate={navigate} plans={plans} />

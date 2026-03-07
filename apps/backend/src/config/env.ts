@@ -71,6 +71,17 @@ const envSchema = z.object({
   POLAR_ACCESS_TOKEN: z.string().optional(),
   POLAR_WEBHOOK_SECRET: z.string().optional(),
   POLAR_ORGANIZATION_ID: z.string().optional(),
+  // Dodo Payment
+  DODO_ENABLED: envBoolean,
+  DODO_API_KEY: z.string().optional(),
+  DODO_WEBHOOK_SECRET: z.string().optional(),
+
+  // Paddle
+  PADDLE_ENABLED: envBoolean,
+  PADDLE_API_KEY: z.string().optional(),
+  PADDLE_WEBHOOK_SECRET: z.string().optional(),
+  PADDLE_SANDBOX: envBoolean.default(true),
+
 
   // SMS
   SMS_ENABLED: envBoolean,

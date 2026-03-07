@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Platform, View } from 'react-native'
 import { YStack, XStack, Text, H1, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
 import { FadeIn } from '../animations/FadeIn'
 import { SlideIn } from '../animations/SlideIn'
 import { ScalePress } from '../animations/ScalePress'
@@ -195,7 +196,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
               </XStack>
             </ScalePress>
 
-            <ScalePress onPress={() => window.open('https://chromewebstore.google.com', '_blank')}>
+            <ScalePress onPress={() => window.open(APP_BRAND.ctaUrl, '_blank')}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"

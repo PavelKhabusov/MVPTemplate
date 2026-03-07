@@ -349,7 +349,15 @@
     "companySave": "Save",
     "companySaved": "Company info saved",
     "companySaveError": "Failed to save company info",
-    "loadError": "Failed to load data"
+    "loadError": "Failed to load data",
+    "envLabel_DODO_API_KEY": "API Key",
+    "envLabel_DODO_WEBHOOK_SECRET": "Webhook Secret",
+    "envLabel_PADDLE_API_KEY": "API Key",
+    "envLabel_PADDLE_WEBHOOK_SECRET": "Webhook Secret",
+    "envLabel_PADDLE_SANDBOX": "Sandbox mode",
+    "hintDodo": "Get keys at Dodo Payments Dashboard →",
+    "hintPaddle": "Get keys at Paddle Vendor Dashboard →",
+    "paddleSandbox": "Sandbox mode"
   },
   "notifications": {
     "title": "Notifications",
