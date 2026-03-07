@@ -7,7 +7,12 @@ export default defineConfig({
   retries: 1,
   expect: {
     timeout: 10000,
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.01,
+      animations: 'disabled',
+    },
   },
+  snapshotPathTemplate: '{testDir}/screenshots/{testFilePath}/{arg}{ext}',
   use: {
     baseURL: 'http://localhost:8081',
     screenshot: 'only-on-failure',
