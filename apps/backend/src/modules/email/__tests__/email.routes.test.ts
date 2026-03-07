@@ -32,7 +32,7 @@ vi.mock('../../../config/env', () => ({
     HOST: '0.0.0.0',
     NODE_ENV: 'test',
     CORS_ORIGIN: 'http://localhost:8081',
-    EMAIL_ENABLED: false,
+    EMAIL_ENABLED: true,
     EMAIL_VERIFICATION_REQUIRED: false,
     SMS_ENABLED: false,
     SMS_VERIFICATION_REQUIRED: false,
@@ -69,7 +69,7 @@ vi.mock('../../../config/database', () => ({
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue([]),
     insert: vi.fn().mockReturnThis(),
     values: vi.fn().mockReturnThis(),
     returning: vi.fn().mockResolvedValue([]),
@@ -77,9 +77,6 @@ vi.mock('../../../config/database', () => ({
     set: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
     execute: vi.fn().mockResolvedValue([]),
-    groupBy: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    offset: vi.fn().mockResolvedValue([]),
   },
 }))
 
@@ -120,15 +117,13 @@ vi.mock('../../users/users.repository', () => ({
   },
 }))
 
-vi.mock('../push.service', () => ({
-  sendToUsers: vi.fn(),
-}))
-
-vi.mock('../../email/email.service', () => ({
+vi.mock('../email.service', () => ({
   emailService: {
     sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
     sendWelcomeEmail: vi.fn().mockResolvedValue(undefined),
     sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
+    broadcastWelcome: vi.fn(),
+    broadcastAnnouncement: vi.fn(),
   },
 }))
 
@@ -136,19 +131,25 @@ vi.mock('../../sms/sms.service', () => ({
   smsService: { send: vi.fn().mockResolvedValue(undefined) },
 }))
 
+vi.mock('../../push/push.service', () => ({
+  sendToUsers: vi.fn(),
+}))
+
 // ─── Imports (after mocks) ───────────────────────────────────────────────────
 
 import { buildApp } from '../../../app'
 import { authService } from '../../auth/auth.service'
 import { usersRepository } from '../../users/users.repository'
-import { sendToUsers } from '../push.service'
+import { emailService } from '../email.service'
+import { db } from '../../../config/database'
 import jwt from 'jsonwebtoken'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const mockAuthService = vi.mocked(authService)
 const mockUsersRepository = vi.mocked(usersRepository)
-const mockSendToUsers = vi.mocked(sendToUsers)
+const mockEmailService = vi.mocked(emailService)
+const mockDb = vi.mocked(db)
 
 function generateValidJwt(userId = 'user-test-001', email = 'test@example.com'): string {
   return jwt.sign(
@@ -160,7 +161,7 @@ function generateValidJwt(userId = 'user-test-001', email = 'test@example.com'):
 
 // ─── Test suite ──────────────────────────────────────────────────────────────
 
-describe('Push Routes — Integration', () => {
+describe('Email Routes — Integration', () => {
   let app: FastifyInstance
 
   beforeAll(async () => {
@@ -180,132 +181,30 @@ describe('Push Routes — Integration', () => {
     } as any)
   })
 
-  // ─── POST /api/push/register ────────────────────────────────────────────────
+  // ─── POST /api/email/broadcast ──────────────────────────────────────────────
 
-  describe('POST /api/push/register', () => {
-    it('should return 200 and register push token when authenticated', async () => {
-      const token = generateValidJwt()
-
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/register',
-        headers: { authorization: `Bearer ${token}` },
-        payload: { token: 'ExponentPushToken[abc123]', platform: 'ios' },
-      })
-
-      expect(res.statusCode).toBe(200)
-      const body = res.json()
-      expect(body.data).toHaveProperty('registered', true)
-    })
-
-    it('should return 401 without authorization header', async () => {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/register',
-        payload: { token: 'ExponentPushToken[abc123]', platform: 'ios' },
-      })
-
-      expect(res.statusCode).toBe(401)
-      expect(res.json().error).toBe('UNAUTHORIZED')
-    })
-
-    it('should return 400 when platform is invalid', async () => {
-      const token = generateValidJwt()
-
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/register',
-        headers: { authorization: `Bearer ${token}` },
-        payload: { token: 'ExponentPushToken[abc123]', platform: 'windows' },
-      })
-
-      expect(res.statusCode).toBe(400)
-    })
-  })
-
-  // ─── DELETE /api/push/unregister ────────────────────────────────────────────
-
-  describe('DELETE /api/push/unregister', () => {
-    it('should return 200 and unregister when authenticated', async () => {
-      const token = generateValidJwt()
-
-      const res = await app.inject({
-        method: 'DELETE',
-        url: '/api/push/unregister',
-        headers: { authorization: `Bearer ${token}` },
-      })
-
-      expect(res.statusCode).toBe(200)
-      const body = res.json()
-      expect(body.data).toHaveProperty('unregistered', true)
-    })
-  })
-
-  // ─── POST /api/push/send ───────────────────────────────────────────────────
-
-  describe('POST /api/push/send', () => {
-    it('should return 200 when admin sends notification', async () => {
+  describe('POST /api/email/broadcast', () => {
+    it('should return 200 when admin sends broadcast', async () => {
       const token = generateValidJwt()
       mockUsersRepository.findById.mockResolvedValue({ role: 'admin' } as any)
-      mockSendToUsers.mockResolvedValue({ sent: 5, failed: 0, total: 5 })
+      // db.select().from().where() chain returns recipients
+      mockDb.where.mockResolvedValue([
+        { email: 'user1@example.com', name: 'User One' },
+        { email: 'user2@example.com', name: 'User Two' },
+      ] as any)
+      mockEmailService.broadcastWelcome.mockResolvedValue({ sent: 2, failed: 0, total: 2 })
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/push/send',
+        url: '/api/email/broadcast',
         headers: { authorization: `Bearer ${token}` },
-        payload: { title: 'Test Notification', body: 'Hello everyone' },
+        payload: { template: 'welcome' },
       })
 
       expect(res.statusCode).toBe(200)
       const body = res.json()
-      expect(body.data).toEqual({ sent: 5, failed: 0, total: 5 })
-      expect(mockSendToUsers).toHaveBeenCalledOnce()
-    })
-
-    it('should return 403 when non-admin tries to send', async () => {
-      const token = generateValidJwt()
-      mockUsersRepository.findById.mockResolvedValue({ role: 'user' } as any)
-
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/send',
-        headers: { authorization: `Bearer ${token}` },
-        payload: { title: 'Test Notification' },
-      })
-
-      expect(res.statusCode).toBe(403)
-      expect(res.json().error).toBe('FORBIDDEN')
-    })
-
-    it('should return 401 without authorization header', async () => {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/send',
-        payload: { title: 'Test Notification' },
-      })
-
-      expect(res.statusCode).toBe(401)
-      expect(res.json().error).toBe('UNAUTHORIZED')
-    })
-  })
-
-  // ─── GET /api/push/history ──────────────────────────────────────────────────
-
-  describe('GET /api/push/history', () => {
-    it('should return 200 with paginated history for admin', async () => {
-      const token = generateValidJwt()
-      mockUsersRepository.findById.mockResolvedValue({ role: 'admin' } as any)
-
-      const res = await app.inject({
-        method: 'GET',
-        url: '/api/push/history?page=1&limit=10',
-        headers: { authorization: `Bearer ${token}` },
-      })
-
-      expect(res.statusCode).toBe(200)
-      const body = res.json()
-      expect(body).toHaveProperty('data')
-      expect(body).toHaveProperty('pagination')
+      expect(body.data).toEqual({ sent: 2, failed: 0, total: 2 })
+      expect(mockEmailService.broadcastWelcome).toHaveBeenCalledOnce()
     })
 
     it('should return 403 for non-admin user', async () => {
@@ -313,13 +212,39 @@ describe('Push Routes — Integration', () => {
       mockUsersRepository.findById.mockResolvedValue({ role: 'user' } as any)
 
       const res = await app.inject({
-        method: 'GET',
-        url: '/api/push/history',
+        method: 'POST',
+        url: '/api/email/broadcast',
         headers: { authorization: `Bearer ${token}` },
+        payload: { template: 'welcome' },
       })
 
       expect(res.statusCode).toBe(403)
       expect(res.json().error).toBe('FORBIDDEN')
+    })
+
+    it('should return 401 without authorization header', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/email/broadcast',
+        payload: { template: 'welcome' },
+      })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json().error).toBe('UNAUTHORIZED')
+    })
+
+    it('should return 400 with invalid body (missing template)', async () => {
+      const token = generateValidJwt()
+      mockUsersRepository.findById.mockResolvedValue({ role: 'admin' } as any)
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/email/broadcast',
+        headers: { authorization: `Bearer ${token}` },
+        payload: { subject: 'Hello' },
+      })
+
+      expect(res.statusCode).toBe(400)
     })
   })
 })

@@ -69,35 +69,32 @@ vi.mock('../../../config/database', () => ({
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
+    offset: vi.fn().mockResolvedValue([]),
     insert: vi.fn().mockReturnThis(),
     values: vi.fn().mockReturnThis(),
     returning: vi.fn().mockResolvedValue([]),
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
-    execute: vi.fn().mockResolvedValue([]),
-    groupBy: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    offset: vi.fn().mockResolvedValue([]),
   },
 }))
 
 vi.mock('../../../database/schema/index', () => ({
-  users: { id: 'id', email: 'email', name: 'name' },
+  users: { id: 'id', email: 'email' },
   refreshTokens: { tokenHash: 'tokenHash', userId: 'userId' },
   emailVerificationTokens: { tokenHash: 'tokenHash', userId: 'userId' },
   passwordResetTokens: { tokenHash: 'tokenHash', userId: 'userId' },
   phoneVerificationCodes: { userId: 'userId' },
   companyInfo: { id: 'id' },
   userSettings: { userId: 'userId' },
-  pushTokens: { userId: 'userId', token: 'token', platform: 'platform' },
-  notifications: { id: 'id', userId: 'userId', title: 'title', body: 'body', type: 'type', createdAt: 'createdAt' },
+  notifications: { id: 'id', userId: 'userId', createdAt: 'createdAt', isRead: 'isRead' },
+  docFeedback: { id: 'id' },
 }))
 
 vi.mock('../../auth/auth.service', () => ({
   authService: {
-    verifyAccessToken: vi.fn(),
     register: vi.fn(),
     login: vi.fn(),
     googleAuth: vi.fn(),
@@ -110,18 +107,9 @@ vi.mock('../../auth/auth.service', () => ({
     resendVerification: vi.fn(),
     sendPhoneCode: vi.fn(),
     verifyPhone: vi.fn(),
+    verifyAccessToken: vi.fn(),
     createTokenPair: vi.fn(),
   },
-}))
-
-vi.mock('../../users/users.repository', () => ({
-  usersRepository: {
-    findById: vi.fn(),
-  },
-}))
-
-vi.mock('../push.service', () => ({
-  sendToUsers: vi.fn(),
 }))
 
 vi.mock('../../email/email.service', () => ({
@@ -140,17 +128,17 @@ vi.mock('../../sms/sms.service', () => ({
 
 import { buildApp } from '../../../app'
 import { authService } from '../../auth/auth.service'
-import { usersRepository } from '../../users/users.repository'
-import { sendToUsers } from '../push.service'
+import { db } from '../../../config/database'
 import jwt from 'jsonwebtoken'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const mockAuthService = vi.mocked(authService)
-const mockUsersRepository = vi.mocked(usersRepository)
-const mockSendToUsers = vi.mocked(sendToUsers)
+const mockDb = vi.mocked(db) as any
 
-function generateValidJwt(userId = 'user-test-001', email = 'test@example.com'): string {
+const USER_ID = 'user-test-001'
+
+function generateValidJwt(userId = USER_ID, email = 'test@example.com'): string {
   return jwt.sign(
     { sub: userId, email },
     'test-access-secret-key-minimum-32-chars!!',
@@ -160,7 +148,7 @@ function generateValidJwt(userId = 'user-test-001', email = 'test@example.com'):
 
 // ─── Test suite ──────────────────────────────────────────────────────────────
 
-describe('Push Routes — Integration', () => {
+describe('Notifications Routes — Integration', () => {
   let app: FastifyInstance
 
   beforeAll(async () => {
@@ -174,152 +162,133 @@ describe('Push Routes — Integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Default: verifyAccessToken returns valid payload
     mockAuthService.verifyAccessToken.mockReturnValue({
-      sub: 'user-test-001',
+      sub: USER_ID,
       email: 'test@example.com',
     } as any)
   })
 
-  // ─── POST /api/push/register ────────────────────────────────────────────────
+  // ─── GET /api/notifications ────────────────────────────────────────────────
 
-  describe('POST /api/push/register', () => {
-    it('should return 200 and register push token when authenticated', async () => {
+  describe('GET /api/notifications', () => {
+    it('should return 200 with notifications list', async () => {
+      const mockNotifications = [
+        { id: 'n1', userId: USER_ID, title: 'Welcome', body: 'Hello!', isRead: false, createdAt: new Date().toISOString() },
+        { id: 'n2', userId: USER_ID, title: 'Update', body: 'New feature', isRead: true, createdAt: new Date().toISOString() },
+      ]
+      // Mock chainable: db.select().from().where().orderBy().limit().offset() → mockNotifications
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockResolvedValue(mockNotifications),
+              }),
+            }),
+          }),
+        }),
+      })
       const token = generateValidJwt()
 
       const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/register',
+        method: 'GET',
+        url: '/api/notifications',
         headers: { authorization: `Bearer ${token}` },
-        payload: { token: 'ExponentPushToken[abc123]', platform: 'ios' },
       })
 
       expect(res.statusCode).toBe(200)
       const body = res.json()
-      expect(body.data).toHaveProperty('registered', true)
+      expect(body.data).toHaveLength(2)
+      expect(body.data[0].title).toBe('Welcome')
     })
 
     it('should return 401 without authorization header', async () => {
       const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/register',
-        payload: { token: 'ExponentPushToken[abc123]', platform: 'ios' },
+        method: 'GET',
+        url: '/api/notifications',
       })
 
       expect(res.statusCode).toBe(401)
       expect(res.json().error).toBe('UNAUTHORIZED')
     })
 
-    it('should return 400 when platform is invalid', async () => {
-      const token = generateValidJwt()
-
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/register',
-        headers: { authorization: `Bearer ${token}` },
-        payload: { token: 'ExponentPushToken[abc123]', platform: 'windows' },
+    it('should return 200 with pagination params', async () => {
+      const mockNotifications = [
+        { id: 'n3', userId: USER_ID, title: 'Page 2 item', body: 'Content', isRead: false, createdAt: new Date().toISOString() },
+      ]
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockResolvedValue(mockNotifications),
+              }),
+            }),
+          }),
+        }),
       })
-
-      expect(res.statusCode).toBe(400)
-    })
-  })
-
-  // ─── DELETE /api/push/unregister ────────────────────────────────────────────
-
-  describe('DELETE /api/push/unregister', () => {
-    it('should return 200 and unregister when authenticated', async () => {
       const token = generateValidJwt()
-
-      const res = await app.inject({
-        method: 'DELETE',
-        url: '/api/push/unregister',
-        headers: { authorization: `Bearer ${token}` },
-      })
-
-      expect(res.statusCode).toBe(200)
-      const body = res.json()
-      expect(body.data).toHaveProperty('unregistered', true)
-    })
-  })
-
-  // ─── POST /api/push/send ───────────────────────────────────────────────────
-
-  describe('POST /api/push/send', () => {
-    it('should return 200 when admin sends notification', async () => {
-      const token = generateValidJwt()
-      mockUsersRepository.findById.mockResolvedValue({ role: 'admin' } as any)
-      mockSendToUsers.mockResolvedValue({ sent: 5, failed: 0, total: 5 })
-
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/send',
-        headers: { authorization: `Bearer ${token}` },
-        payload: { title: 'Test Notification', body: 'Hello everyone' },
-      })
-
-      expect(res.statusCode).toBe(200)
-      const body = res.json()
-      expect(body.data).toEqual({ sent: 5, failed: 0, total: 5 })
-      expect(mockSendToUsers).toHaveBeenCalledOnce()
-    })
-
-    it('should return 403 when non-admin tries to send', async () => {
-      const token = generateValidJwt()
-      mockUsersRepository.findById.mockResolvedValue({ role: 'user' } as any)
-
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/send',
-        headers: { authorization: `Bearer ${token}` },
-        payload: { title: 'Test Notification' },
-      })
-
-      expect(res.statusCode).toBe(403)
-      expect(res.json().error).toBe('FORBIDDEN')
-    })
-
-    it('should return 401 without authorization header', async () => {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/push/send',
-        payload: { title: 'Test Notification' },
-      })
-
-      expect(res.statusCode).toBe(401)
-      expect(res.json().error).toBe('UNAUTHORIZED')
-    })
-  })
-
-  // ─── GET /api/push/history ──────────────────────────────────────────────────
-
-  describe('GET /api/push/history', () => {
-    it('should return 200 with paginated history for admin', async () => {
-      const token = generateValidJwt()
-      mockUsersRepository.findById.mockResolvedValue({ role: 'admin' } as any)
 
       const res = await app.inject({
         method: 'GET',
-        url: '/api/push/history?page=1&limit=10',
+        url: '/api/notifications?page=2&limit=5',
         headers: { authorization: `Bearer ${token}` },
       })
 
       expect(res.statusCode).toBe(200)
       const body = res.json()
-      expect(body).toHaveProperty('data')
-      expect(body).toHaveProperty('pagination')
+      expect(body.data).toHaveLength(1)
+      expect(body.meta.page).toBe(2)
+      expect(body.meta.limit).toBe(5)
     })
+  })
 
-    it('should return 403 for non-admin user', async () => {
+  // ─── PATCH /api/notifications/:id/read ─────────────────────────────────────
+
+  describe('PATCH /api/notifications/:id/read', () => {
+    it('should return 200 and mark notification as read', async () => {
+      // Mock chainable: db.update().set().where() → result
+      mockDb.update.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue({ rowCount: 1 }),
+        }),
+      })
       const token = generateValidJwt()
-      mockUsersRepository.findById.mockResolvedValue({ role: 'user' } as any)
 
       const res = await app.inject({
-        method: 'GET',
-        url: '/api/push/history',
+        method: 'PATCH',
+        url: '/api/notifications/n1/read',
         headers: { authorization: `Bearer ${token}` },
       })
 
-      expect(res.statusCode).toBe(403)
-      expect(res.json().error).toBe('FORBIDDEN')
+      expect(res.statusCode).toBe(200)
+      const body = res.json()
+      expect(body.data.read).toBe(true)
+    })
+  })
+
+  // ─── POST /api/notifications/read-all ──────────────────────────────────────
+
+  describe('POST /api/notifications/read-all', () => {
+    it('should return 200 and mark all notifications as read', async () => {
+      // Mock chainable: db.update().set().where() → result
+      mockDb.update.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue({ rowCount: 5 }),
+        }),
+      })
+      const token = generateValidJwt()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/notifications/read-all',
+        headers: { authorization: `Bearer ${token}` },
+      })
+
+      expect(res.statusCode).toBe(200)
+      const body = res.json()
+      expect(body.data.readAll).toBe(true)
     })
   })
 })
