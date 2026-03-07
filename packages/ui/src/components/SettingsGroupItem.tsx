@@ -49,7 +49,7 @@ export const SettingsGroupItem = memo(function SettingsGroupItem({
         <Ionicons name={icon} size={18} color={color} />
       </YStack>
 
-      <Text flex={1} flexShrink={0} color={danger ? '$error' : '$color'} fontSize={16} numberOfLines={1}>
+      <Text flex={1} flexShrink={0} color={danger ? '$error' : '$color'} fontSize={16} numberOfLines={1} textAlign="left">
         {label}
       </Text>
 
