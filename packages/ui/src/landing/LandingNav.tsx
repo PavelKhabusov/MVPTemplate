@@ -71,31 +71,43 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         border-radius: 40px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.05) !important;
-        transition: box-shadow 0.4s ease !important;
+        transition: max-width 0.45s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s ease !important;
+      }
+      #lnav-pill.lnav-compact {
+        max-width: 560px !important;
+      }
+      .lnav-logo {
+        max-width: 300px;
+        overflow: hidden !important;
+        transition: max-width 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease !important;
+      }
+      #lnav-pill.lnav-compact .lnav-logo {
+        max-width: 0px !important;
+        opacity: 0 !important;
+      }
+      #lnav-pill.lnav-compact .lnav-auth {
+        flex: 0 0 auto !important;
       }
     `
     document.head.appendChild(style)
     return () => { style.remove() }
   }, [])
 
-  // Scroll: shrink WIDTH (increase outer padding) on scroll down, restore on scroll up
+  // Scroll: compact pill on scroll down (shrink to content width, hide logo), expand on scroll up
   useEffect(() => {
     if (Platform.OS !== 'web') return
     let lastY = 0
     const onScroll = (e: Event) => {
       const target = e.target as Element | Window
       const y = 'scrollTop' in target ? (target as Element).scrollTop : window.scrollY
-      const nav = navRef.current
-      if (!nav) return
+      const pill = document.getElementById('lnav-pill')
+      if (!pill) return
       if (y <= 20) {
-        nav.style.paddingLeft = '16px'
-        nav.style.paddingRight = '16px'
+        pill.classList.remove('lnav-compact')
       } else if (y > lastY) {
-        nav.style.paddingLeft = '56px'
-        nav.style.paddingRight = '56px'
+        pill.classList.add('lnav-compact')
       } else {
-        nav.style.paddingLeft = '16px'
-        nav.style.paddingRight = '16px'
+        pill.classList.remove('lnav-compact')
       }
       lastY = y
     }
@@ -150,8 +162,8 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
           alignItems: 'center',
         }}
       >
-        {/* LEFT: Logo */}
-        <XStack flex={1} alignItems="center">
+        {/* LEFT: Logo (collapses in compact mode) */}
+        <XStack flex={1} alignItems="center" className="lnav-logo">
           <ScalePress onPress={() => onNavigate('/landing')}>
             <XStack alignItems="center" gap="$2">
               {logo ? (
