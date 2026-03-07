@@ -26,32 +26,36 @@ export class AuthPage {
   constructor(page: Page) {
     this.page = page
 
-    // Sign In page elements
-    this.signInHeading = page.getByRole('heading', { name: 'Sign In' })
+    // Sign In — RNW renders H1 as <div role="heading">, but Tamagui may not set role
+    // Use text matching instead of getByRole('heading')
+    this.signInHeading = page.getByText('Sign In', { exact: true }).first()
     this.emailInput = page.getByPlaceholder('email@example.com')
     this.passwordInput = page.getByPlaceholder('********').first()
-    this.signInButton = page.getByRole('button', { name: 'Sign In' })
+    // RNW renders AppButton as <div role="button"> — use text match
+    this.signInButton = page.getByText('Sign In', { exact: true }).last()
     this.forgotPasswordLink = page.getByText('Forgot Password?')
-    this.createAccountLink = page.getByText('Create Account').first()
+    this.createAccountLink = page.getByText('Create Account')
 
-    // Sign Up page elements
-    this.signUpHeading = page.getByRole('heading', { name: 'Sign Up' })
+    // Sign Up
+    this.signUpHeading = page.getByText('Sign Up', { exact: true }).first()
     this.nameInput = page.getByPlaceholder('John Doe')
     this.signUpEmailInput = page.getByPlaceholder('email@example.com')
     this.signUpPasswordInput = page.getByPlaceholder('********').first()
     this.confirmPasswordInput = page.getByPlaceholder('********').last()
-    this.createAccountButton = page.getByRole('button', { name: 'Create Account' })
-    this.signInLink = page.getByText('Sign In').last()
+    this.createAccountButton = page.getByText('Create Account', { exact: true }).last()
+    this.signInLink = page.getByText('Sign In', { exact: true }).last()
   }
 
   async gotoSignIn() {
     await this.page.goto('/sign-in')
-    await this.page.waitForLoadState('networkidle')
+    await this.page.waitForLoadState('domcontentloaded')
+    await this.page.waitForSelector('text=Sign In', { timeout: 15000 })
   }
 
   async gotoSignUp() {
     await this.page.goto('/sign-up')
-    await this.page.waitForLoadState('networkidle')
+    await this.page.waitForLoadState('domcontentloaded')
+    await this.page.waitForSelector('text=Sign Up', { timeout: 15000 })
   }
 
   async fillSignIn(email: string, password: string) {

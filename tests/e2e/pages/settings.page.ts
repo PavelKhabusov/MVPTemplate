@@ -27,8 +27,9 @@ export class SettingsPage {
 
     // Unauthenticated state shows sign in prompt
     this.signInPromptText = page.getByText('Sign in to view your profile and access all features')
-    this.signInButton = page.getByRole('button', { name: 'Sign In' })
-    this.createAccountButton = page.getByRole('button', { name: 'Create Account' })
+    // RNW renders AppButton as <div>, not <button> — use text
+    this.signInButton = page.getByText('Sign In', { exact: true }).first()
+    this.createAccountButton = page.getByText('Create Account', { exact: true }).first()
 
     // Theme row shows current theme value (System/Light/Dark)
     this.themeRow = page.getByText('Theme').first()
@@ -42,8 +43,19 @@ export class SettingsPage {
   }
 
   async goto() {
-    await this.page.goto('/settings')
-    await this.page.waitForLoadState('networkidle')
+    // Expo Router web: try both URL patterns
+    await this.page.goto('/')
+    await this.page.waitForLoadState('domcontentloaded')
+    // Navigate via sidebar/tab to settings, or go directly
+    const settingsLink = this.page.getByText('Settings').first()
+    try {
+      await settingsLink.click({ timeout: 5000 })
+    } catch {
+      // Fallback: direct navigation
+      await this.page.goto('/(tabs)/settings')
+      await this.page.waitForLoadState('domcontentloaded')
+    }
+    await this.page.waitForSelector('text=Theme', { timeout: 15000 })
   }
 
   /**
@@ -96,10 +108,7 @@ export class SettingsPage {
    * Close the About modal by clicking the backdrop (overlay).
    */
   async closeAboutModalByBackdrop() {
-    // The modal overlay covers the whole screen; click the outer overlay
-    // Use position: fixed element as the backdrop
-    const backdrop = this.page.locator('[style*="position: fixed"][style*="rgba(0,0,0,0.5)"]')
-    // Click in the corner (outside the modal card) to close
-    await backdrop.click({ position: { x: 10, y: 10 } })
+    // Click outside the modal content area — top-left corner of viewport
+    await this.page.mouse.click(10, 10)
   }
 }

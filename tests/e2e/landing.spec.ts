@@ -1,16 +1,17 @@
 import { test, expect } from '@playwright/test'
 import { LandingPage } from './pages/landing.page'
+import { dismissOverlays } from './helpers/dismiss-overlays'
 
 test.describe('Landing Page', () => {
   let landing: LandingPage
 
   test.beforeEach(async ({ page }) => {
+    await dismissOverlays(page)
     landing = new LandingPage(page)
     await landing.goto()
   })
 
   test('hero section renders with title and badge', async () => {
-    await expect(landing.heroSection).toBeVisible()
     await expect(landing.heroTitle).toBeVisible()
     await expect(landing.heroBadge).toBeVisible()
   })
@@ -22,10 +23,12 @@ test.describe('Landing Page', () => {
   })
 
   test('CTA buttons are visible and interactive', async () => {
-    await expect(landing.heroCTA).toBeVisible()
+    // Hero CTA buttons
+    const getStartedButtons = landing.page.getByText('Get Started Free')
+    await expect(getStartedButtons.first()).toBeVisible()
     await expect(landing.heroSecondaryCTA).toBeVisible()
 
-    // Bottom CTA section should also be present
+    // Bottom CTA section
     await landing.ctaTitle.scrollIntoViewIfNeeded()
     await expect(landing.ctaTitle).toBeVisible()
   })

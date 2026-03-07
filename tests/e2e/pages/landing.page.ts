@@ -25,7 +25,8 @@ export class LandingPage {
     this.page = page
 
     // Hero uses nativeID="hero-section" which renders as id="hero-section" on web
-    this.heroSection = page.locator('#hero-section')
+    // nativeID doesn't render as HTML id in RNW — locate by content
+    this.heroSection = page.locator(':has(> :has-text("Ship your MVP"))').first()
     // The hero title contains the i18n text "Ship your MVP in days, not months"
     this.heroTitle = page.getByText('Ship your MVP in days, not months')
     this.heroBadge = page.getByText('Open Source MVP Template')
@@ -42,16 +43,11 @@ export class LandingPage {
 
   async goto() {
     await this.page.goto('/landing')
-    await this.page.waitForLoadState('networkidle')
+    await this.page.waitForLoadState('domcontentloaded')
+    // Wait for hero text to render (React hydration)
+    await this.heroTitle.waitFor({ state: 'visible', timeout: 30000 })
   }
 
-  async getViewportWidth(): Promise<number> {
-    return this.page.viewportSize()?.width ?? 0
-  }
-
-  /**
-   * Check if the page has horizontal overflow (indicates layout issues).
-   */
   async hasHorizontalOverflow(): Promise<boolean> {
     return this.page.evaluate(() => {
       return document.documentElement.scrollWidth > document.documentElement.clientWidth
