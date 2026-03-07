@@ -34,15 +34,6 @@ export function LandingPage({ logo, paymentsEnabled = false, plans = [] }: Landi
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    // Load Coconut decorative font from CDNFonts
-    if (!document.querySelector('[data-font-coconut]')) {
-      const fontLink = document.createElement('link')
-      fontLink.rel = 'stylesheet'
-      fontLink.href = 'https://fonts.cdnfonts.com/css/coconut'
-      fontLink.setAttribute('data-font-coconut', '')
-      document.head.appendChild(fontLink)
-    }
-
     const style = document.createElement('style')
     style.textContent = `
       body { scroll-behavior: smooth; }

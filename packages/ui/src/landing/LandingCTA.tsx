@@ -88,7 +88,7 @@ export function LandingCTA({ onNavigate }: LandingCTAProps) {
             nativeID="cta-title"
             fontWeight="bold" fontSize={44} color="$color"
             textAlign="center" lineHeight={52}
-            style={{ letterSpacing: '-0.02em', fontFamily: "'coconut', sans-serif" } as any}
+            style={{ letterSpacing: '-0.02em' } as any}
           >
             {t('landing.ctaTitle')}
           </Text>
