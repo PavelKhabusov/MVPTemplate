@@ -65,7 +65,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
     style.setAttribute('data-lnav-style', '')
     style.textContent = `
       #lnav-pill {
-        background-color: rgba(8, 8, 14, 0.80) !important;
+        background-color: rgba(8, 8, 14, 0.40) !important;
         backdrop-filter: blur(24px) saturate(1.6) !important;
         -webkit-backdrop-filter: blur(24px) saturate(1.6) !important;
         border-radius: 40px !important;

@@ -34,23 +34,12 @@ export function LandingPage({ logo, paymentsEnabled = false, plans = [] }: Landi
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    // Load Instrument Serif for editorial headlines
-    if (!document.querySelector('[data-font-instrument-serif]')) {
-      const preconnect = document.createElement('link')
-      preconnect.rel = 'preconnect'
-      preconnect.href = 'https://fonts.googleapis.com'
-      document.head.appendChild(preconnect)
-
-      const preconnectGstatic = document.createElement('link')
-      preconnectGstatic.rel = 'preconnect'
-      preconnectGstatic.href = 'https://fonts.gstatic.com'
-      ;(preconnectGstatic as any).crossOrigin = 'anonymous'
-      document.head.appendChild(preconnectGstatic)
-
+    // Load Coconut decorative font from CDNFonts
+    if (!document.querySelector('[data-font-coconut]')) {
       const fontLink = document.createElement('link')
       fontLink.rel = 'stylesheet'
-      fontLink.href = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap'
-      fontLink.setAttribute('data-font-instrument-serif', '')
+      fontLink.href = 'https://fonts.cdnfonts.com/css/coconut'
+      fontLink.setAttribute('data-font-coconut', '')
       document.head.appendChild(fontLink)
     }
 

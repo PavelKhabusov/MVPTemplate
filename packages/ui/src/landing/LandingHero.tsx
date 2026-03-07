@@ -8,6 +8,9 @@ import { FadeIn } from '../animations/FadeIn'
 import { SlideIn } from '../animations/SlideIn'
 import { ScalePress } from '../animations/ScalePress'
 
+// Unsplash Lake Tahoe sunset by c6SciRp2kaQ — free to use
+const HERO_BG_URL = 'https://images.unsplash.com/photo-1513875528452-39400945934d?w=1920&q=80&auto=format'
+
 interface LandingHeroProps {
   onNavigate: (href: string) => void
 }
@@ -16,79 +19,41 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
   const { t } = useTranslation()
   const theme = useTheme()
 
-  // Inject CSS keyframes for hero animations
   useEffect(() => {
     if (Platform.OS !== 'web') return
     const style = document.createElement('style')
     style.textContent = `
-      @keyframes heroGradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      @keyframes heroFloat1 {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(8deg); }
-      }
-      @keyframes heroFloat2 {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-30px) rotate(-6deg); }
-      }
-      @keyframes heroFloat3 {
-        0%, 100% { transform: translateY(0) scale(1); }
-        50% { transform: translateY(-15px) scale(1.1); }
-      }
       @keyframes heroPulseGlow {
         0%, 100% { box-shadow: 0 0 24px ${theme.accentGradientStart.val}50; }
         50% { box-shadow: 0 0 48px ${theme.accentGradientStart.val}70, 0 0 90px ${theme.accentGradientEnd.val}35; }
       }
       @keyframes heroBadgePulse {
         0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
+        50% { opacity: 0.85; }
       }
-      @keyframes heroBlobDrift1 {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        33% { transform: translate(50px, -70px) scale(1.06); }
-        66% { transform: translate(-35px, 40px) scale(0.94); }
-      }
-      @keyframes heroBlobDrift2 {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        40% { transform: translate(-60px, 50px) scale(1.08); }
-        80% { transform: translate(30px, -30px) scale(0.96); }
-      }
-      @keyframes heroBlobDrift3 {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(40px, -50px) scale(1.05); }
+      @keyframes heroKenBurns {
+        0% { transform: scale(1.0); }
+        100% { transform: scale(1.08); }
       }
       .hero-gradient-text {
-        font-family: 'Instrument Serif', Georgia, serif !important;
-        font-weight: 400 !important;
-        background: linear-gradient(90deg,
-          #38bdf8,
+        font-weight: 700 !important;
+        background: linear-gradient(135deg,
+          #ffffff,
+          rgba(255,255,255,0.85),
           ${theme.accentGradientStart.val},
-          #a78bfa,
-          #f472b6,
-          ${theme.accentGradientEnd.val},
-          #38bdf8
+          ${theme.accentGradientEnd.val}
         ) !important;
-        background-size: 300% auto !important;
+        background-size: 200% auto !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
-        animation: heroGradientShift 6s ease-in-out infinite;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
         display: inline-block !important;
         padding-bottom: 8px !important;
-        line-height: 1.15 !important;
-      }
-      .hero-dot-grid {
-        background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.5) 1px, transparent 0);
-        background-size: 44px 44px;
-        opacity: 0.04;
+        line-height: 1.12 !important;
       }
       @media (max-width: 768px) {
-        #hero-floats { display: none !important; }
-        .hero-gradient-text { font-size: 36px !important; line-height: 42px !important; letter-spacing: -0.02em !important; }
+        .hero-gradient-text { font-size: 36px !important; line-height: 42px !important; }
         #hero-section { min-height: 60vh !important; padding-top: 40px !important; padding-bottom: 40px !important; }
       }
       @media (max-width: 480px) {
@@ -109,101 +74,77 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
       style={{
         paddingTop: 96,
         paddingBottom: 80,
-        background: `
-          radial-gradient(ellipse 80% 65% at 10% 0%, rgba(109, 40, 217, 0.24) 0%, transparent 70%),
-          radial-gradient(ellipse 65% 55% at 85% 95%, rgba(251, 146, 60, 0.22) 0%, transparent 62%),
-          radial-gradient(ellipse 55% 45% at 50% 50%, rgba(49, 46, 129, 0.12) 0%, transparent 75%),
-          #07070e
-        `,
         minHeight: '82vh',
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
       } as any}
     >
-      {/* Dot grid background */}
+      {/* Background photo with Ken Burns effect */}
       <View
-        className="hero-dot-grid"
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none' } as any}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          animation: 'heroKenBurns 25s ease-in-out alternate infinite',
+          willChange: 'transform',
+          backgroundImage: `url(${HERO_BG_URL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 40%',
+          backgroundRepeat: 'no-repeat',
+        } as any}
       />
 
-      {/* Large animated blobs (Dodo/OpenAI style) */}
-      <View nativeID="hero-floats" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' } as any}>
-        {/* Cyan blob - top left */}
-        <View style={{
-          position: 'absolute', top: '-15%', left: '-12%',
-          width: 700, height: 700, borderRadius: 350,
-          background: 'radial-gradient(circle, rgba(56,189,248,0.18) 0%, transparent 70%)',
-          animation: 'heroBlobDrift1 18s ease-in-out infinite',
-          pointerEvents: 'none',
-        } as any} />
-        {/* Purple blob - top right */}
-        <View style={{
-          position: 'absolute', top: '-10%', right: '-15%',
-          width: 650, height: 650, borderRadius: 325,
-          background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
-          animation: 'heroBlobDrift2 22s ease-in-out infinite',
-          pointerEvents: 'none',
-        } as any} />
-        {/* Teal blob - bottom right (subtle) */}
-        <View style={{
-          position: 'absolute', bottom: '-10%', right: '5%',
-          width: 400, height: 400, borderRadius: 200,
-          background: 'radial-gradient(circle, rgba(20,184,166,0.08) 0%, transparent 70%)',
-          animation: 'heroBlobDrift3 26s ease-in-out infinite',
-          pointerEvents: 'none',
-        } as any} />
+      {/* Dark overlay for text readability */}
+      <View
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 1,
+          background: `linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.55) 0%,
+            rgba(0, 0, 0, 0.40) 40%,
+            rgba(0, 0, 0, 0.55) 100%
+          )`,
+          backdropFilter: 'blur(1px)',
+        } as any}
+      />
 
-        {/* Small floating accents */}
-        <View style={{
-          position: 'absolute', top: '22%', left: '12%',
-          width: 56, height: 56, borderRadius: 14, opacity: 0.15,
-          background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
-          animation: 'heroFloat1 6s ease-in-out infinite',
+      {/* Subtle gradient accent overlay */}
+      <View
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 2,
+          background: `radial-gradient(ellipse 80% 60% at 50% 80%, ${theme.accentGradientStart.val}18 0%, transparent 70%)`,
           pointerEvents: 'none',
-        } as any} />
-        <View style={{
-          position: 'absolute', top: '62%', right: '9%',
-          width: 38, height: 38, borderRadius: 38, opacity: 0.13,
-          background: `linear-gradient(135deg, ${theme.accentGradientEnd.val}, ${theme.accentGradientStart.val})`,
-          animation: 'heroFloat2 8s ease-in-out infinite',
-          pointerEvents: 'none',
-        } as any} />
-        <View style={{
-          position: 'absolute', top: '32%', right: '22%',
-          width: 22, height: 22, borderRadius: 6, opacity: 0.1,
-          background: theme.accent.val,
-          animation: 'heroFloat3 5s ease-in-out infinite',
-          pointerEvents: 'none',
-        } as any} />
-        <View style={{
-          position: 'absolute', bottom: '22%', left: '17%',
-          width: 30, height: 30, borderRadius: 30, opacity: 0.12,
-          background: theme.accentGradientEnd.val,
-          animation: 'heroFloat2 7s ease-in-out infinite 1s',
-          pointerEvents: 'none',
-        } as any} />
-      </View>
+        } as any}
+      />
 
-      <YStack maxWidth={800} alignItems="center" gap="$5" zIndex={1}>
+      <YStack maxWidth={800} alignItems="center" gap="$5" zIndex={3}>
         {/* Badge */}
         <FadeIn>
           <XStack
-            backgroundColor={`${theme.accent.val}15`}
             paddingHorizontal="$3"
             paddingVertical="$1.5"
             borderRadius={20}
             borderWidth={1}
-            borderColor={`${theme.accent.val}30`}
-            style={{ animation: 'heroBadgePulse 3s ease-in-out infinite' } as any}
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.10)',
+              borderColor: 'rgba(255,255,255,0.20)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              animation: 'heroBadgePulse 3s ease-in-out infinite',
+            } as any}
           >
-            <Text color="$accent" fontSize="$2" fontWeight="600">
+            <Text color="white" fontSize="$2" fontWeight="600" style={{ opacity: 0.9 } as any}>
               {t('landing.heroBadge')}
             </Text>
           </XStack>
         </FadeIn>
 
-        {/* Headline with animated gradient */}
+        {/* Headline */}
         <SlideIn from="bottom" delay={100}>
           <H1
             textAlign="center"
@@ -222,8 +163,9 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
             textAlign="center"
             fontSize="$5"
             lineHeight={28}
-            color="rgba(190, 190, 215, 0.72)"
+            color="rgba(255, 255, 255, 0.75)"
             maxWidth={600}
+            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' } as any}
           >
             {t('landing.heroSubtitle')}
           </Text>
@@ -255,13 +197,17 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
                 paddingVertical="$3"
                 borderRadius="$4"
                 borderWidth={1}
-                borderColor="$borderColor"
                 alignItems="center"
                 gap="$2"
-                backgroundColor="$cardBackground"
-                style={{ transition: 'border-color 0.2s ease' } as any}
+                style={{
+                  borderColor: 'rgba(255,255,255,0.25)',
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  transition: 'border-color 0.2s ease, background-color 0.2s ease',
+                } as any}
               >
-                <Text fontWeight="600" fontSize="$4" color="$color">{t('landing.heroSecondaryCTA')}</Text>
+                <Text fontWeight="600" fontSize="$4" color="white">{t('landing.heroSecondaryCTA')}</Text>
               </XStack>
             </ScalePress>
           </XStack>
@@ -269,11 +215,13 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
 
         {/* Social proof */}
         <SlideIn from="bottom" delay={400}>
-          <XStack gap="$4" flexWrap="wrap" justifyContent="center" opacity={0.6}>
-            {(['heroSocialProof1', 'heroSocialProof2', 'heroSocialProof3'] as const).map((key, i) => (
+          <XStack gap="$4" flexWrap="wrap" justifyContent="center" opacity={0.8}>
+            {(['heroSocialProof1', 'heroSocialProof2', 'heroSocialProof3'] as const).map((key) => (
               <XStack key={key} alignItems="center" gap="$1.5">
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: theme.accent.val }} />
-                <Text fontSize="$2" color="rgba(190, 190, 215, 0.8)" fontWeight="500">
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: 'white' }} />
+                <Text fontSize="$2" color="rgba(255, 255, 255, 0.85)" fontWeight="500"
+                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' } as any}
+                >
                   {t(`landing.${key}`)}
                 </Text>
               </XStack>
