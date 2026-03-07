@@ -71,28 +71,24 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         border-radius: 40px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.05) !important;
-        transition: max-width 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s ease !important;
+        transition: background-color 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease !important;
       }
       #lnav-pill.lnav-compact {
-        max-width: 620px !important;
+        background-color: rgba(8, 8, 14, 0.75) !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
       }
       .lnav-appname {
         display: inline-block !important;
         overflow: hidden !important;
         white-space: nowrap !important;
         max-width: 200px;
-        transition: max-width 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease !important;
+        opacity: 1;
+        transition: max-width 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease !important;
       }
       #lnav-pill.lnav-compact .lnav-appname {
         max-width: 0px !important;
         opacity: 0 !important;
-        margin-left: 0px !important;
-      }
-      #lnav-pill.lnav-compact .lnav-logo {
-        flex: 0 0 auto !important;
-      }
-      #lnav-pill.lnav-compact .lnav-auth {
-        flex: 0 0 auto !important;
       }
     `
     document.head.appendChild(style)
@@ -196,7 +192,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         </XStack>
 
         {/* CENTER: Nav links (desktop) */}
-        <XStack className="lnav-links" alignItems="left" gap="$5">
+        <XStack className="lnav-links" alignItems="center" gap="$5">
           <Text color={NAV_MUTED} fontSize="$3" fontWeight="500"
             style={{ cursor: 'pointer' } as any}
             hoverStyle={{ color: NAV_TEXT } as any}
