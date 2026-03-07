@@ -92,11 +92,19 @@ export function LandingFeatures() {
         }
       }
       .bento-card {
-        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         cursor: default;
       }
       .bento-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-6px);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(128,128,255,0.12) !important;
+      }
+      .features-gradient-heading {
+        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc) !important;
+        background-size: 200% auto !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
       }
       @keyframes bentoFadeUp {
         from { opacity: 0; transform: translateY(24px); }
@@ -126,11 +134,22 @@ export function LandingFeatures() {
   return (
     <YStack id="features" paddingVertical="$10" paddingHorizontal="$5" alignItems="center">
       <YStack maxWidth={1200} width="100%" gap="$8">
-        <YStack alignItems="center" gap="$2">
-          <Text nativeID="features-title" fontWeight="bold" fontSize={36} color="$color" textAlign="center">
+        <YStack alignItems="center" gap="$3">
+          <XStack
+            paddingHorizontal="$3" paddingVertical="$1.5" borderRadius={20}
+            borderWidth={1} borderColor={`${acc}30`}
+            style={{ backgroundColor: `${acc}10` } as any}
+          >
+            <Text fontSize="$2" fontWeight="600" color="$accent">{t('landing.featuresLabel' as any) || 'What\'s included'}</Text>
+          </XStack>
+          <Text
+            nativeID="features-title"
+            fontWeight="bold" fontSize={40} textAlign="center"
+            className="features-gradient-heading"
+          >
             {t('landing.featuresTitle')}
           </Text>
-          <Text fontSize="$4" color="$mutedText" textAlign="center" maxWidth={500}>
+          <Text fontSize="$4" color="$mutedText" textAlign="center" maxWidth={520}>
             {t('landing.featuresSubtitle')}
           </Text>
         </YStack>
@@ -433,14 +452,17 @@ function BentoCard({
   return (
     <YStack
       backgroundColor="$cardBackground"
-      borderRadius="$4"
+      borderRadius="$5"
       borderWidth={1}
       borderColor="$borderColor"
       padding="$5"
       gap="$4"
       className="bento-card"
       hoverStyle={{ borderColor: '$accent' } as any}
-      style={fullHeight ? { height: '100%' } as any : undefined}
+      style={{
+        ...(fullHeight ? { height: '100%' } : {}),
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+      } as any}
     >
       {children}
     </YStack>
