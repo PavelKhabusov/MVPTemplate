@@ -3,6 +3,7 @@ import { Platform, View } from 'react-native'
 import { YStack, XStack, Text, H1, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
+import { trackLandingCTA } from '@mvp/analytics'
 import { FadeIn } from '../animations/FadeIn'
 import { SlideIn } from '../animations/SlideIn'
 import { ScalePress } from '../animations/ScalePress'
@@ -231,7 +232,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         {/* CTA buttons */}
         <SlideIn from="bottom" delay={300}>
           <XStack gap="$3" flexWrap="wrap" justifyContent="center">
-            <ScalePress onPress={() => onNavigate('/sign-up')}>
+            <ScalePress onPress={() => { trackLandingCTA('primary'); onNavigate('/sign-up') }}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"
@@ -248,7 +249,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
               </XStack>
             </ScalePress>
 
-            <ScalePress onPress={() => window.open(APP_BRAND.ctaUrl, '_blank')}>
+            <ScalePress onPress={() => { trackLandingCTA('secondary'); window.open(APP_BRAND.ctaUrl, '_blank') }}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"
@@ -263,6 +264,20 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
                 <Text fontWeight="600" fontSize="$4" color="$color">{t('landing.heroSecondaryCTA')}</Text>
               </XStack>
             </ScalePress>
+          </XStack>
+        </SlideIn>
+
+        {/* Social proof */}
+        <SlideIn from="bottom" delay={400}>
+          <XStack gap="$4" flexWrap="wrap" justifyContent="center" opacity={0.6}>
+            {(['heroSocialProof1', 'heroSocialProof2', 'heroSocialProof3'] as const).map((key, i) => (
+              <XStack key={key} alignItems="center" gap="$1.5">
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: theme.accent.val }} />
+                <Text fontSize="$2" color="rgba(190, 190, 215, 0.8)" fontWeight="500">
+                  {t(`landing.${key}`)}
+                </Text>
+              </XStack>
+            ))}
           </XStack>
         </SlideIn>
       </YStack>

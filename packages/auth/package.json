@@ -21,6 +21,7 @@
     "@mvp/lib": "*",
     "@mvp/store": "*",
     "@mvp/i18n": "*",
-    "@mvp/ui": "*"
+    "@mvp/ui": "*",
+    "@mvp/analytics": "*"
   }
 }

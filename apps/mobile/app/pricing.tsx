@@ -7,6 +7,7 @@ import { AppButton, FadeIn, ScalePress } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { PricingCard, SubscriptionBadge } from '@mvp/payments'
 import type { Plan, Subscription } from '@mvp/payments'
+import { trackPricingView, trackBillingToggle, trackCheckoutStart, trackCheckoutSuccess, trackSubscriptionCancel } from '@mvp/analytics'
 import { api } from '../src/services/api'
 
 export default function PricingScreen() {
@@ -28,6 +29,7 @@ export default function PricingScreen() {
     if (Platform.OS === 'web') {
       const params = new URLSearchParams(window.location.search)
       if (params.get('success') === 'true') {
+        trackCheckoutSuccess()
         setShowSuccess(true)
         window.history.replaceState({}, '', window.location.pathname)
       }
@@ -41,8 +43,10 @@ export default function PricingScreen() {
         api.get('/payments/plans', { signal }),
         api.get('/payments/subscription', { signal }).catch(() => null),
       ])
-      setPlans(plansRes.data.data ?? [])
+      const loadedPlans = plansRes.data.data ?? []
+      setPlans(loadedPlans)
       setSubscription(subRes?.data?.data ?? null)
+      if (loadedPlans.length > 0) trackPricingView(loadedPlans.length)
     } catch (err: any) {
       if (err?.name !== 'CanceledError' && err?.name !== 'AbortError') {
         // ignore silently
@@ -89,6 +93,7 @@ export default function PricingScreen() {
   }, [plans, hasIntervalOptions])
 
   const handleSelect = async (planId: string) => {
+    trackCheckoutStart(planId)
     setCheckoutLoading(planId)
     try {
       const baseUrl = Platform.OS === 'web' ? window.location.origin : 'https://localhost:8081'
@@ -112,6 +117,7 @@ export default function PricingScreen() {
 
   const handleCancel = async () => {
     const doCancel = async () => {
+      trackSubscriptionCancel()
       setCanceling(true)
       try {
         await api.post('/payments/cancel')
@@ -214,7 +220,7 @@ export default function PricingScreen() {
                 borderWidth={1}
                 borderColor="$borderColor"
               >
-                <ScalePress onPress={() => setBillingInterval('month')}>
+                <ScalePress onPress={() => { setBillingInterval('month'); trackBillingToggle('month') }}>
                   <XStack
                     backgroundColor={billingInterval === 'month' ? '$cardBackground' : 'transparent'}
                     paddingHorizontal="$4"
@@ -235,7 +241,7 @@ export default function PricingScreen() {
                     </Text>
                   </XStack>
                 </ScalePress>
-                <ScalePress onPress={() => setBillingInterval('year')}>
+                <ScalePress onPress={() => { setBillingInterval('year'); trackBillingToggle('year') }}>
                   <XStack
                     backgroundColor={billingInterval === 'year' ? '$cardBackground' : 'transparent'}
                     paddingHorizontal="$4"
@@ -254,7 +260,7 @@ export default function PricingScreen() {
                     >
                       {t('landing.pricingYearly')}
                     </Text>
-                    {savingsPercent > 0 && billingInterval !== 'year' && (
+                    {savingsPercent > 0 && (
                       <XStack
                         backgroundColor="$accent"
                         borderRadius="$2"

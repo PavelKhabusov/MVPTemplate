@@ -142,11 +142,7 @@ export default function HomeScreen() {
         <SlideIn from="bottom" delay={300}>
           <AppCard>
             <Text fontWeight="600" fontSize="$4" color="$color" marginBottom="$3">{t('home.recentCalls')}</Text>
-            {isAuthenticated ? (
-              <Text color="$mutedText" fontSize="$2" textAlign="center" paddingVertical="$4">
-                {t('home.noCallsYet')}
-              </Text>
-            ) : (
+            {!isAuthenticated ? (
               <YStack gap="$2">
                 <AnimatedListItem index={0}>
                   <CallItem name="Ivan Petrov" phone="+7 999 123-45-67" duration="2:15" status="answered" time="10m ago" />
@@ -158,6 +154,10 @@ export default function HomeScreen() {
                   <CallItem name="Dmitry Kozlov" phone="+7 916 789-01-23" duration="5:42" status="answered" time="2h ago" />
                 </AnimatedListItem>
               </YStack>
+            ) : (
+              <Text color="$mutedText" fontSize="$2" textAlign="center" paddingVertical="$4">
+                {t('home.noCallsYet')}
+              </Text>
             )}
           </AppCard>
         </SlideIn>

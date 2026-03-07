@@ -17,6 +17,7 @@
     "@tamagui/portal": "*",
     "moti": "*",
     "react-native-reanimated": "*",
-    "expo-linear-gradient": "*"
+    "expo-linear-gradient": "*",
+    "@mvp/analytics": "*"
   }
 }
