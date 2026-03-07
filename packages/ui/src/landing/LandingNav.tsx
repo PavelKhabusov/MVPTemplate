@@ -103,6 +103,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
       zIndex={100}
       paddingTop="$3"
       paddingHorizontal="$4"
+      backgroundColor="transparent"
       style={{ position: 'sticky' } as any}
     >
       {/* Floating pill */}

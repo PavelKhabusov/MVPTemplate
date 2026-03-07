@@ -105,10 +105,9 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
       style={{
         background: `
           radial-gradient(ellipse 75% 55% at 15% 15%, rgba(56,189,248,0.14) 0%, transparent 65%),
-          radial-gradient(ellipse 65% 50% at 88% 8%, rgba(139,92,246,0.12) 0%, transparent 65%),
-          radial-gradient(ellipse 55% 40% at 50% 100%, rgba(251,146,60,0.09) 0%, transparent 65%)
+          radial-gradient(ellipse 65% 50% at 88% 8%, rgba(139,92,246,0.12) 0%, transparent 65%)
         `,
-        minHeight: '88vh',
+        minHeight: '82vh',
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
@@ -138,11 +137,11 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
           animation: 'heroBlobDrift2 22s ease-in-out infinite',
           pointerEvents: 'none',
         } as any} />
-        {/* Amber blob - bottom center */}
+        {/* Teal blob - bottom right (subtle) */}
         <View style={{
-          position: 'absolute', bottom: '-25%', left: '25%',
-          width: 550, height: 550, borderRadius: 275,
-          background: 'radial-gradient(circle, rgba(251,146,60,0.11) 0%, transparent 70%)',
+          position: 'absolute', bottom: '-10%', right: '5%',
+          width: 400, height: 400, borderRadius: 200,
+          background: 'radial-gradient(circle, rgba(20,184,166,0.08) 0%, transparent 70%)',
           animation: 'heroBlobDrift3 26s ease-in-out infinite',
           pointerEvents: 'none',
         } as any} />
