@@ -51,11 +51,13 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
   }, [])
 
   // Compact on scroll down, expand on scroll up — direct DOM manipulation for 60fps
+  // Uses capture phase on document to catch ScrollView's internal scroll events
   useEffect(() => {
     if (Platform.OS !== 'web') return
     let lastY = 0
-    const onScroll = () => {
-      const y = window.scrollY
+    const onScroll = (e: Event) => {
+      const target = e.target as Element | Window
+      const y = 'scrollTop' in target ? (target as Element).scrollTop : window.scrollY
       const nav = navRef.current
       const pill = pillRef.current
       if (!nav || !pill) return
@@ -74,8 +76,9 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
       }
       lastY = y
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    // capture: true catches scroll events on any descendant (including ScrollView's div)
+    document.addEventListener('scroll', onScroll as any, { passive: true, capture: true })
+    return () => document.removeEventListener('scroll', onScroll as any, { capture: true } as any)
   }, [])
 
   if (Platform.OS !== 'web') return null
@@ -140,8 +143,10 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
     <View
       ref={navRef}
       style={{
-        position: 'sticky' as any,
+        position: 'fixed' as any,
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 100,
         paddingTop: 12,
         paddingLeft: 16,

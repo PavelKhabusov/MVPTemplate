@@ -102,10 +102,11 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
   return (
     <YStack
       nativeID="hero-section"
-      paddingVertical="$10"
       paddingHorizontal="$5"
       alignItems="center"
       style={{
+        paddingTop: 96,
+        paddingBottom: 80,
         background: `
           radial-gradient(ellipse 75% 55% at 15% 15%, rgba(56,189,248,0.18) 0%, transparent 65%),
           radial-gradient(ellipse 65% 50% at 88% 8%, rgba(139,92,246,0.14) 0%, transparent 65%),
