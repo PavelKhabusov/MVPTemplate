@@ -27,7 +27,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Inject responsive CSS
+  // Inject responsive CSS + scroll-compact transitions
   useEffect(() => {
     if (Platform.OS !== 'web') return
     const style = document.createElement('style')
@@ -40,9 +40,42 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         .landing-nav-burger { display: flex !important; }
         .landing-mobile-menu { display: flex !important; }
       }
+      #landing-nav-root {
+        transition: padding-top 0.4s cubic-bezier(0.4,0,0.2,1),
+                    padding-bottom 0.4s cubic-bezier(0.4,0,0.2,1),
+                    border-bottom-color 0.4s ease;
+      }
+      #landing-nav-root.nav-compact {
+        backdrop-filter: blur(28px) saturate(2) !important;
+        -webkit-backdrop-filter: blur(28px) saturate(2) !important;
+        border-bottom-color: transparent !important;
+      }
+      .nav-inner-row {
+        transition: height 0.4s cubic-bezier(0.4,0,0.2,1);
+      }
+      .nav-compact .nav-inner-row {
+        height: 42px !important;
+      }
     `
     document.head.appendChild(style)
     return () => { document.head.removeChild(style) }
+  }, [])
+
+  // Compact nav on scroll down, expand on scroll up
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    let lastY = 0
+    const onScroll = () => {
+      const y = window.scrollY
+      const nav = document.getElementById('landing-nav-root')
+      if (!nav) return
+      if (y <= 20) nav.classList.remove('nav-compact')
+      else if (y > lastY) nav.classList.add('nav-compact')
+      else nav.classList.remove('nav-compact')
+      lastY = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   if (Platform.OS !== 'web') return null
@@ -63,6 +96,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
 
   return (
     <YStack
+      nativeID="landing-nav-root"
       top={0}
       zIndex={100}
       backgroundColor="$background"
@@ -75,6 +109,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
       } as any}
     >
       <XStack
+        className="nav-inner-row"
         width="100%"
         maxWidth={1200}
         paddingHorizontal="$4"
