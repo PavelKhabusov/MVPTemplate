@@ -196,7 +196,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         </XStack>
 
         {/* CENTER: Nav links (desktop) */}
-        <XStack className="lnav-links" alignItems="center" gap="$5">
+        <XStack className="lnav-links" alignItems="left" gap="$5">
           <Text color={NAV_MUTED} fontSize="$3" fontWeight="500"
             style={{ cursor: 'pointer' } as any}
             hoverStyle={{ color: NAV_TEXT } as any}
