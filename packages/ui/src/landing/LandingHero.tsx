@@ -60,6 +60,8 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         50% { transform: translate(40px, -50px) scale(1.05); }
       }
       .hero-gradient-text {
+        font-family: 'Instrument Serif', Georgia, serif !important;
+        font-weight: 400 !important;
         background: linear-gradient(90deg,
           #38bdf8,
           ${theme.accentGradientStart.val},
@@ -73,16 +75,15 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
         animation: heroGradientShift 6s ease-in-out infinite;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.02em;
         display: inline-block !important;
         padding-bottom: 8px !important;
         line-height: 1.15 !important;
       }
       .hero-dot-grid {
-        background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
+        background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.5) 1px, transparent 0);
         background-size: 44px 44px;
-        opacity: 0.045;
-        color: ${theme.color.val};
+        opacity: 0.04;
       }
       @media (max-width: 768px) {
         #hero-floats { display: none !important; }
@@ -95,7 +96,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
     `
     document.head.appendChild(style)
     return () => { document.head.removeChild(style) }
-  }, [theme.accentGradientStart.val, theme.accentGradientEnd.val, theme.color.val])
+  }, [theme.accentGradientStart.val, theme.accentGradientEnd.val])
 
   if (Platform.OS !== 'web') return null
 
@@ -108,10 +109,10 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         paddingTop: 96,
         paddingBottom: 80,
         background: `
-          radial-gradient(ellipse 75% 55% at 15% 15%, rgba(56,189,248,0.18) 0%, transparent 65%),
-          radial-gradient(ellipse 65% 50% at 88% 8%, rgba(139,92,246,0.14) 0%, transparent 65%),
-          radial-gradient(ellipse 50% 38% at 72% 92%, rgba(251,146,60,0.09) 0%, transparent 55%),
-          ${theme.background.val}
+          radial-gradient(ellipse 80% 65% at 10% 0%, rgba(109, 40, 217, 0.24) 0%, transparent 70%),
+          radial-gradient(ellipse 65% 55% at 85% 95%, rgba(251, 146, 60, 0.22) 0%, transparent 62%),
+          radial-gradient(ellipse 55% 45% at 50% 50%, rgba(49, 46, 129, 0.12) 0%, transparent 75%),
+          #07070e
         `,
         minHeight: '82vh',
         justifyContent: 'center',
@@ -220,7 +221,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
             textAlign="center"
             fontSize="$5"
             lineHeight={28}
-            color="$mutedText"
+            color="rgba(190, 190, 215, 0.72)"
             maxWidth={600}
           >
             {t('landing.heroSubtitle')}

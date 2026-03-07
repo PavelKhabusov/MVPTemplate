@@ -10,6 +10,13 @@ import { MotiView, AnimatePresence } from 'moti'
 import { AppAvatar } from '../components/AppAvatar'
 import { ScalePress } from '../animations/ScalePress'
 
+// Fixed colors for always-dark nav pill
+const NAV_TEXT = 'rgba(240, 240, 252, 0.90)'
+const NAV_MUTED = 'rgba(180, 180, 200, 0.65)'
+const NAV_ICON = 'rgba(180, 180, 200, 0.70)'
+const NAV_BTN_BG = 'rgba(255, 255, 255, 0.08)'
+const NAV_BTN_BORDER = 'rgba(255, 255, 255, 0.14)'
+
 interface LandingNavProps {
   onNavigate: (href: string) => void
   logo?: any
@@ -28,9 +35,8 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navRef = useRef<any>(null)
-  const pillRef = useRef<any>(null)
 
-  // Responsive CSS for className-based visibility
+  // Static CSS: responsive breakpoints
   useEffect(() => {
     if (Platform.OS !== 'web') return
     const style = document.createElement('style')
@@ -50,8 +56,29 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
     return () => { document.head.removeChild(style) }
   }, [])
 
-  // Compact on scroll down, expand on scroll up — direct DOM manipulation for 60fps
-  // Uses capture phase on document to catch ScrollView's internal scroll events
+  // Dark glass pill — always dark, floats over the hero
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    const prev = document.querySelector('[data-lnav-style]')
+    if (prev) prev.remove()
+    const style = document.createElement('style')
+    style.setAttribute('data-lnav-style', '')
+    style.textContent = `
+      #lnav-pill {
+        background-color: rgba(8, 8, 14, 0.80) !important;
+        backdrop-filter: blur(24px) saturate(1.6) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(1.6) !important;
+        border-radius: 40px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+        transition: box-shadow 0.4s ease !important;
+      }
+    `
+    document.head.appendChild(style)
+    return () => { style.remove() }
+  }, [])
+
+  // Scroll: shrink WIDTH (increase outer padding) on scroll down, restore on scroll up
   useEffect(() => {
     if (Platform.OS !== 'web') return
     let lastY = 0
@@ -59,24 +86,19 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
       const target = e.target as Element | Window
       const y = 'scrollTop' in target ? (target as Element).scrollTop : window.scrollY
       const nav = navRef.current
-      const pill = pillRef.current
-      if (!nav || !pill) return
+      if (!nav) return
       if (y <= 20) {
-        nav.style.paddingTop = '12px'
-        pill.style.height = '56px'
-        pill.style.boxShadow = '0 4px 24px rgba(0,0,0,0.10)'
+        nav.style.paddingLeft = '16px'
+        nav.style.paddingRight = '16px'
       } else if (y > lastY) {
-        nav.style.paddingTop = '4px'
-        pill.style.height = '44px'
-        pill.style.boxShadow = '0 8px 40px rgba(0,0,0,0.18)'
+        nav.style.paddingLeft = '56px'
+        nav.style.paddingRight = '56px'
       } else {
-        nav.style.paddingTop = '12px'
-        pill.style.height = '56px'
-        pill.style.boxShadow = '0 4px 24px rgba(0,0,0,0.10)'
+        nav.style.paddingLeft = '16px'
+        nav.style.paddingRight = '16px'
       }
       lastY = y
     }
-    // capture: true catches scroll events on any descendant (including ScrollView's div)
     document.addEventListener('scroll', onScroll as any, { passive: true, capture: true })
     return () => document.removeEventListener('scroll', onScroll as any, { capture: true } as any)
   }, [])
@@ -97,49 +119,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
     setShowLangPicker(false)
   }
 
-  // Pill visual styles derived from theme — applied directly, no Tamagui override possible
-  const pillStyle: any = {
-    width: '100%',
-    maxWidth: 1100,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    paddingLeft: 20,
-    paddingRight: 20,
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${theme.background.val}f0`,
-    backdropFilter: 'blur(20px) saturate(1.8)',
-    WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: theme.borderColor.val,
-    boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-    transition: 'height 0.35s cubic-bezier(0.4,0,0.2,1), box-shadow 0.35s ease',
-  }
-
-  const mobileDropdownStyle: any = {
-    maxWidth: 1100,
-    width: '100%',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginTop: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: theme.borderColor.val,
-    backgroundColor: `${theme.background.val}f2`,
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    flexDirection: 'column',
-    gap: 12,
-  }
-
   return (
-    // Plain View — no Tamagui interference with background/styling
     <View
       ref={navRef}
       style={{
@@ -152,12 +132,24 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         paddingLeft: 16,
         paddingRight: 16,
         backgroundColor: 'transparent',
-        transition: 'padding-top 0.35s cubic-bezier(0.4,0,0.2,1)' as any,
+        transition: 'padding 0.4s cubic-bezier(0.4,0,0.2,1)' as any,
       }}
     >
-      {/* Floating nav card */}
-      <View ref={pillRef} style={pillStyle}>
-
+      {/* Floating dark glass pill */}
+      <View
+        nativeID="lnav-pill"
+        style={{
+          width: '100%' as any,
+          maxWidth: 1100,
+          marginLeft: 'auto' as any,
+          marginRight: 'auto' as any,
+          paddingLeft: 20,
+          paddingRight: 20,
+          height: 56,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
         {/* LEFT: Logo */}
         <XStack flex={1} alignItems="center">
           <ScalePress onPress={() => onNavigate('/landing')}>
@@ -173,29 +165,29 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
                   <Text color="white" fontWeight="bold" fontSize={13}>M</Text>
                 </YStack>
               )}
-              <Text fontWeight="700" fontSize="$4" color="$color">{appName}</Text>
+              <Text fontWeight="700" fontSize="$4" color={NAV_TEXT}>{appName}</Text>
             </XStack>
           </ScalePress>
         </XStack>
 
         {/* CENTER: Nav links (desktop) */}
         <XStack className="lnav-links" alignItems="center" gap="$5">
-          <Text color="$mutedText" fontSize="$3" fontWeight="500"
+          <Text color={NAV_MUTED} fontSize="$3" fontWeight="500"
             style={{ cursor: 'pointer' } as any}
-            hoverStyle={{ color: '$color' } as any}
+            hoverStyle={{ color: NAV_TEXT } as any}
             onPress={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
             {t('landing.navFeatures')}
           </Text>
-          <Text color="$mutedText" fontSize="$3" fontWeight="500"
+          <Text color={NAV_MUTED} fontSize="$3" fontWeight="500"
             style={{ cursor: 'pointer' } as any}
-            hoverStyle={{ color: '$color' } as any}
+            hoverStyle={{ color: NAV_TEXT } as any}
             onPress={() => document.getElementById('showcase')?.scrollIntoView({ behavior: 'smooth' })}>
             {t('landing.navShowcase')}
           </Text>
           {paymentsEnabled && (
-            <Text color="$mutedText" fontSize="$3" fontWeight="500"
+            <Text color={NAV_MUTED} fontSize="$3" fontWeight="500"
               style={{ cursor: 'pointer' } as any}
-              hoverStyle={{ color: '$color' } as any}
+              hoverStyle={{ color: NAV_TEXT } as any}
               onPress={() => onNavigate('/pricing')}>
               {t('landing.navPricing')}
             </Text>
@@ -205,16 +197,18 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         {/* RIGHT: Controls + Auth (desktop) */}
         <XStack className="lnav-auth" flex={1} justifyContent="flex-end" alignItems="center" gap="$2">
           <ScalePress onPress={cycleTheme}>
-            <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center" backgroundColor="$subtleBackground">
-              <Ionicons name={themeIcon as any} size={15} color={theme.mutedText.val} />
+            <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
+              style={{ backgroundColor: NAV_BTN_BG } as any}>
+              <Ionicons name={themeIcon as any} size={15} color={NAV_ICON} />
             </YStack>
           </ScalePress>
 
           <YStack position="relative" zIndex={10}>
             <ScalePress onPress={() => setShowLangPicker((v) => !v)}>
-              <XStack height={32} paddingHorizontal="$2" borderRadius={8} alignItems="center" gap="$1.5" backgroundColor="$subtleBackground">
-                <Ionicons name="language-outline" size={13} color={theme.mutedText.val} />
-                <Text fontSize="$2" color="$mutedText">
+              <XStack height={32} paddingHorizontal="$2" borderRadius={8} alignItems="center" gap="$1.5"
+                style={{ backgroundColor: NAV_BTN_BG } as any}>
+                <Ionicons name="language-outline" size={13} color={NAV_ICON} />
+                <Text fontSize="$2" color={NAV_MUTED}>
                   {LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? 'EN'}
                 </Text>
               </XStack>
@@ -259,8 +253,8 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
             <XStack alignItems="center" gap="$2">
               <ScalePress onPress={() => onNavigate('/sign-in')}>
                 <XStack height={32} paddingHorizontal="$3.5" borderRadius={8} alignItems="center"
-                  borderWidth={1} borderColor="$borderColor" backgroundColor="$subtleBackground">
-                  <Text color="$color" fontSize="$3" fontWeight="500">{t('auth.signIn')}</Text>
+                  style={{ borderWidth: 1, borderStyle: 'solid', borderColor: NAV_BTN_BORDER, backgroundColor: NAV_BTN_BG } as any}>
+                  <Text color={NAV_TEXT} fontSize="$3" fontWeight="500">{t('auth.signIn')}</Text>
                 </XStack>
               </ScalePress>
               <ScalePress onPress={() => onNavigate('/sign-up')}>
@@ -276,13 +270,15 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         {/* Mobile: hamburger */}
         <XStack alignItems="center" gap="$2" className="lnav-burger">
           <ScalePress onPress={cycleTheme}>
-            <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center" backgroundColor="$subtleBackground">
-              <Ionicons name={themeIcon as any} size={15} color={theme.mutedText.val} />
+            <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
+              style={{ backgroundColor: NAV_BTN_BG } as any}>
+              <Ionicons name={themeIcon as any} size={15} color={NAV_ICON} />
             </YStack>
           </ScalePress>
           <TouchableOpacity onPress={() => setMobileMenuOpen((v) => !v)}>
-            <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center" backgroundColor="$subtleBackground">
-              <Ionicons name={mobileMenuOpen ? 'close' : 'menu'} size={17} color={theme.color.val} />
+            <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
+              style={{ backgroundColor: NAV_BTN_BG } as any}>
+              <Ionicons name={mobileMenuOpen ? 'close' : 'menu'} size={17} color={NAV_TEXT} />
             </YStack>
           </TouchableOpacity>
         </XStack>
@@ -290,17 +286,33 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
 
       {/* Mobile dropdown */}
       {mobileMenuOpen && (
-        <View className="lnav-mobile" style={mobileDropdownStyle}>
-          <Text color="$mutedText" fontSize="$3"
+        <View className="lnav-mobile" style={{
+          maxWidth: 1100,
+          width: '100%' as any,
+          marginLeft: 'auto' as any,
+          marginRight: 'auto' as any,
+          marginTop: 6,
+          padding: 16,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderStyle: 'solid' as any,
+          borderColor: 'rgba(255,255,255,0.08)',
+          backgroundColor: 'rgba(8, 8, 14, 0.92)',
+          backdropFilter: 'blur(24px)' as any,
+          WebkitBackdropFilter: 'blur(24px)' as any,
+          flexDirection: 'column' as any,
+          gap: 12,
+        }}>
+          <Text color={NAV_MUTED} fontSize="$3"
             onPress={() => { document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false) }}>
             {t('landing.navFeatures')}
           </Text>
-          <Text color="$mutedText" fontSize="$3"
+          <Text color={NAV_MUTED} fontSize="$3"
             onPress={() => { document.getElementById('showcase')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false) }}>
             {t('landing.navShowcase')}
           </Text>
           {paymentsEnabled && (
-            <Text color="$mutedText" fontSize="$3"
+            <Text color={NAV_MUTED} fontSize="$3"
               onPress={() => { onNavigate('/pricing'); setMobileMenuOpen(false) }}>
               {t('landing.navPricing')}
             </Text>
@@ -311,7 +323,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
                 <XStack paddingHorizontal="$2.5" paddingVertical="$1.5" borderRadius="$2" borderWidth={1}
                   borderColor={i18n.language === lang ? '$accent' : '$borderColor'}
                   backgroundColor={i18n.language === lang ? `${theme.accent.val}15` : 'transparent'}>
-                  <Text fontSize="$2" color={i18n.language === lang ? '$accent' : '$mutedText'}>{LANGUAGE_LABELS[lang]}</Text>
+                  <Text fontSize="$2" color={i18n.language === lang ? '$accent' : NAV_MUTED}>{LANGUAGE_LABELS[lang]}</Text>
                 </XStack>
               </TouchableOpacity>
             ))}
@@ -325,7 +337,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
             </TouchableOpacity>
           ) : (
             <XStack gap="$3" alignItems="center">
-              <Text color="$mutedText" fontSize="$3"
+              <Text color={NAV_MUTED} fontSize="$3"
                 onPress={() => { onNavigate('/sign-in'); setMobileMenuOpen(false) }}>
                 {t('auth.signIn')}
               </Text>
