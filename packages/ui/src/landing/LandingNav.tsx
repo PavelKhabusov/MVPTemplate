@@ -199,8 +199,8 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
           alignItems: 'center',
         }}
       >
-        {/* LEFT: Logo (collapses in compact mode) */}
-        <XStack flex={1} alignItems="center" className="lnav-logo">
+        {/* LEFT: Logo */}
+        <XStack alignItems="center" className="lnav-logo">
           <ScalePress onPress={() => onNavigate('/landing')}>
             <XStack alignItems="center" gap="$2">
               {logo ? (
@@ -221,8 +221,8 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
           </ScalePress>
         </XStack>
 
-        {/* CENTER: Nav links (desktop) */}
-        <XStack className="lnav-links" alignItems="center" gap="$5">
+        {/* RIGHT: Nav links (desktop) */}
+        <XStack className="lnav-links" alignItems="center" gap="$5" style={{ marginLeft: 'auto' } as any}>
           <Text color={NAV_MUTED} fontSize="$3" fontWeight="500"
             style={{ cursor: 'pointer' } as any}
             hoverStyle={{ color: NAV_TEXT } as any}
@@ -246,7 +246,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         </XStack>
 
         {/* RIGHT: Controls + Auth (desktop) */}
-        <XStack className="lnav-auth" flex={1} justifyContent="flex-end" alignItems="center" gap="$2">
+        <XStack className="lnav-auth" alignItems="center" gap="$2" paddingLeft="$3">
           <ScalePress onPress={cycleTheme}>
             <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
               style={{ backgroundColor: NAV_BTN_BG } as any}>
