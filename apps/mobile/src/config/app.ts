@@ -3,7 +3,7 @@ import { APP_BRAND } from '@mvp/template-config'
 /**
  * Runtime app configuration.
  * Product name and branding come from APP_BRAND
- * (packages/template-config/src/brand.ts).
+ * (packages/template-config/src/brand.ts) — change it there when forking.
  */
 
 export const APP_CONFIG = {

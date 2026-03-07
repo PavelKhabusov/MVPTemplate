@@ -6,13 +6,13 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: callsheet
-      POSTGRES_PASSWORD: callsheet
-      POSTGRES_DB: callsheet
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mvptemplate
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U callsheet']
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 2s
       timeout: 3s
       retries: 10

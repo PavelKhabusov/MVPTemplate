@@ -9,10 +9,10 @@
  */
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import en from './locales/en.json' with { type: 'json' }
-import ru from './locales/ru.json' with { type: 'json' }
-import es from './locales/es.json' with { type: 'json' }
-import ja from './locales/ja.json' with { type: 'json' }
+import en from './locales/en.json'
+import ru from './locales/ru.json'
+import es from './locales/es.json'
+import ja from './locales/ja.json'
 
 export const SUPPORTED_LANGUAGES = ['en', 'ru', 'es', 'ja'] as const
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]

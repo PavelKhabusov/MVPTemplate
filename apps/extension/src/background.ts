@@ -9,7 +9,7 @@ if (chrome.sidePanel) {
   })
 }
 
-// Built-in message handlers (token management + tab context)
+// Built-in message handlers (token management)
 const builtinHandlers: Record<string, (message: any, sender: chrome.runtime.MessageSender, sendResponse: (r: any) => void) => boolean | void> = {
   GET_TOKEN: (_message, _sender, sendResponse) => {
     chrome.storage.local.get(['accessToken'], (result) => {
@@ -33,7 +33,6 @@ const builtinHandlers: Record<string, (message: any, sender: chrome.runtime.Mess
     return true
   },
 
-  // Always available — needed before custom handlers finish loading
   GET_CURRENT_SHEET: (_message, _sender, sendResponse) => {
     chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
       if (tab?.url) {
@@ -47,19 +46,19 @@ const builtinHandlers: Record<string, (message: any, sender: chrome.runtime.Mess
 
   OPEN_SIDEBAR: (message, sender, sendResponse) => {
     if (sender.tab?.id) {
-      chrome.storage.session.set({ selectedContact: message.payload })
+      chrome.storage.session.set({ selectedItem: message.payload })
       chrome.sidePanel?.open?.({ tabId: sender.tab.id })
     }
     sendResponse({ ok: true })
     return true
   },
 
-  GET_SELECTED_CONTACT: (_message, _sender, sendResponse) => {
-    chrome.storage.session.get('selectedContact').then((result) => {
-      const contact = result.selectedContact || null
-      if (contact) chrome.storage.session.remove('selectedContact')
-      sendResponse(contact)
-    }).catch(() => sendResponse(null))
+  GET_SELECTED_ITEM: (_message, _sender, sendResponse) => {
+    chrome.storage.session.get('selectedItem').then((result) => {
+      const item = result.selectedItem || null
+      if (item) chrome.storage.session.remove('selectedItem')
+      sendResponse(item)
+    })
     return true
   },
 }

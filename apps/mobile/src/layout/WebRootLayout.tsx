@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, AppAvatar, ScalePress, SearchModal } from '@mvp/ui'
 import { AnimatePresence, MotiView } from 'moti'
 import { TemplateConfigSidebar, useTemplateConfigStore, useTemplateFlag, getFontZoom } from '@mvp/template-config'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
 import { useThemeStore, useAuthStore, useCompanyStore } from '@mvp/store'
 import type { ThemeMode } from '@mvp/store'
 import { useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
@@ -353,7 +354,7 @@ export function WebRootLayout() {
   const searchPlacement = useTemplateConfigStore((s) => s.searchPlacement)
   const fontScale = useTemplateConfigStore((s) => s.fontScale)
   const fontZoom = getFontZoom(fontScale)
-  const appName = useCompanyStore((s) => s.info.appName) || 'CallSheet'
+  const appName = useCompanyStore((s) => s.info.appName) || APP_BRAND.name
   const [searchOpen, setSearchOpen] = useState(false)
 
   const showHeader = webLayout === 'header' || webLayout === 'both'

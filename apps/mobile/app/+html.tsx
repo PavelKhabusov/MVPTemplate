@@ -5,23 +5,23 @@ export default function Root({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta httpEquiv="X-UA-Compatible" content="MVPTemplate" />
+        <meta name="viewport" content="MVPTemplate" />
 
         {/* Primary Meta Tags */}
-        <title>CallSheet</title>
-        <meta name="title" content="CallSheet" />
-        <meta name="description" content="Call clients directly from Google Sheets" />
+        <title>MVPTemplate</title>
+        <meta name="title" content="MVPTemplate" />
+        <meta name="description" content="MVPTemplate" />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="CallSheet" />
-        <meta property="og:description" content="Call clients directly from Google Sheets" />
+        <meta property="og:title" content="MVPTemplate" />
+        <meta property="og:description" content="MVPTemplate" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="CallSheet" />
-        <meta name="twitter:description" content="Call clients directly from Google Sheets" />
+        <meta name="twitter:title" content="MVPTemplate" />
+        <meta name="twitter:description" content="MVPTemplate" />
 
         {/* Favicon */}
         <link rel="icon" type="image/png" href="/favicon.png?v=2" />

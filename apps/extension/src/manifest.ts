@@ -19,36 +19,21 @@ function readEnvFile(filePath: string): Record<string, string> {
   return result
 }
 
-function readExtensionEnv(): Record<string, string> {
-  const extEnv = readEnvFile(path.resolve(__dirname, '..', '.env.extension'))
-  // Also read backend .env for shared keys (e.g. CHROME_GOOGLE_CLIENT_ID set via admin panel)
-  const backendEnv = readEnvFile(path.resolve(__dirname, '..', '..', 'backend', '.env'))
-  // Extension env takes precedence over backend env
-  return { ...backendEnv, ...extEnv }
-}
-
-const ext = readExtensionEnv()
+const ext = readEnvFile(path.resolve(__dirname, '..', '.env.extension'))
+const backendEnv = readEnvFile(path.resolve(__dirname, '..', '..', 'backend', '.env'))
 const mode = ext.VITE_EXTENSION_MODE || 'sidebar'
 const isPopup = mode === 'popup'
-const googleClientId = ext.CHROME_GOOGLE_CLIENT_ID || ext.VITE_GOOGLE_CLIENT_ID || ''
+const googleClientId = backendEnv.CHROME_GOOGLE_CLIENT_ID || ext.CHROME_GOOGLE_CLIENT_ID || ''
 
 const basePermissions = isPopup ? ['activeTab', 'storage'] : ['sidePanel', 'activeTab', 'storage']
 const allPermissions = [...new Set([...basePermissions, ...extensionConfig.permissions])]
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'CallSheet',
+  name: 'MVPTemplate', // BRAND: change when forking
   version: '0.1.0',
-  description: 'Call clients directly from Google Sheets',
+  description: 'Production-ready cross-platform MVP starter', // BRAND: change when forking
   permissions: allPermissions,
-  ...(googleClientId
-    ? {
-        oauth2: {
-          client_id: googleClientId,
-          scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-        },
-      }
-    : {}),
   ...(extensionConfig.hostPermissions.length > 0
     ? { host_permissions: extensionConfig.hostPermissions }
     : {}),
@@ -64,18 +49,17 @@ export default defineManifest({
         },
       }),
   action: {
-    default_title: 'CallSheet',
+    default_title: 'MVPTemplate',
     ...(isPopup ? { default_popup: 'src/popup/index.html' } : {}),
   },
+  ...(googleClientId ? { oauth2: { client_id: googleClientId, scopes: [] } } : {}),
   ...(extensionConfig.contentScripts
     ? {
         content_scripts: [
           {
-            // Exclude API endpoints (*.googleapis.com) — only inject into page URLs
-            matches: (() => {
-              const pageHosts = extensionConfig.hostPermissions.filter((p) => !p.includes('googleapis.com'))
-              return pageHosts.length > 0 ? pageHosts : ['<all_urls>']
-            })(),
+            matches: extensionConfig.hostPermissions.length > 0
+              ? extensionConfig.hostPermissions
+              : ['<all_urls>'],
             js: ['src/content.ts'],
           },
         ],
