@@ -20,6 +20,7 @@ import {
   StaggerGroup,
   SettingsGroup,
   SettingsGroupItem,
+  AppModal,
 } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useTemplateFlag } from '@mvp/template-config'
@@ -416,92 +417,50 @@ function AboutInfoRow({ label, value, accent }: { label: string; value: string; 
 function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const company = useCompanyStore((s) => s.info)
 
   const displayName = company.appName || APP_CONFIG.name
   const displayCompany = company.companyName || APP_CONFIG.developer
 
-  const content = (
-    <YStack alignItems="center" gap="$5" paddingHorizontal="$5" paddingVertical="$6">
-      <YStack alignItems="center" gap="$2">
-        <YStack
-          width={72}
-          height={72}
-          borderRadius="$5"
-          backgroundColor="$subtleBackground"
-          borderWidth={1}
-          borderColor="$borderColor"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
-        </YStack>
-        <Text fontSize="$6" fontWeight="700" color="$color">{displayName}</Text>
-        {company.tagline ? (
-          <Text fontSize="$2" color="$mutedText" textAlign="center">{company.tagline}</Text>
-        ) : null}
-        <Text fontSize="$2" color="$mutedText">v{APP_CONFIG.version}</Text>
-      </YStack>
-
-      <YStack width="100%" gap="$2">
-        <AboutInfoRow label={t('settings.version')} value={APP_CONFIG.version} />
-        <AboutInfoRow label={t('settings.developer')} value={displayCompany} />
-        {company.website ? (
-          <AboutInfoRow label={t('admin.companyWebsite')} value={company.website} accent />
-        ) : null}
-        {company.supportEmail ? (
-          <AboutInfoRow label={t('admin.companySupportEmail')} value={company.supportEmail} accent />
-        ) : null}
-      </YStack>
-
-      <Text fontSize="$2" color="$mutedText" textAlign="center">
-        {t('settings.madeWith')} · © {APP_CONFIG.year}
-      </Text>
-    </YStack>
-  )
-
-  if (!visible) return null
-
-  if (Platform.OS === 'web') {
-    return (
-      <YStack
-        // @ts-ignore
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' }}
-        onPress={onClose}
-      >
-        <YStack
-          backgroundColor="$background"
-          borderRadius="$5"
-          borderWidth={1}
-          borderColor="$borderColor"
-          maxWidth={400}
-          width="90%"
-          // @ts-ignore
-          onPress={(e: any) => e.stopPropagation()}
-        >
-          <XStack justifyContent="flex-end" padding="$3">
-            <ScalePress onPress={onClose}>
-              <Ionicons name="close" size={22} color={theme.mutedText.val} />
-            </ScalePress>
-          </XStack>
-          {content}
-        </YStack>
-      </YStack>
-    )
-  }
-
   return (
-    <Modal visible animationType="slide" presentationStyle="formSheet" onRequestClose={onClose}>
-      <YStack flex={1} backgroundColor="$background" paddingTop={insets.top}>
-        <XStack justifyContent="flex-end" padding="$3">
-          <ScalePress onPress={onClose}>
-            <Ionicons name="close" size={24} color={theme.color.val} />
-          </ScalePress>
-        </XStack>
-        {content}
+    <AppModal visible={visible} onClose={onClose} title={t('settings.about')} maxWidth={400}>
+      <YStack alignItems="center" gap="$5" paddingVertical="$2">
+        <YStack alignItems="center" gap="$2">
+          <YStack
+            width={72}
+            height={72}
+            borderRadius="$5"
+            backgroundColor="$subtleBackground"
+            borderWidth={1}
+            borderColor="$borderColor"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
+          </YStack>
+          <Text fontSize="$6" fontWeight="700" color="$color">{displayName}</Text>
+          {company.tagline ? (
+            <Text fontSize="$2" color="$mutedText" textAlign="center">{company.tagline}</Text>
+          ) : null}
+          <Text fontSize="$2" color="$mutedText">v{APP_CONFIG.version}</Text>
+        </YStack>
+
+        <YStack width="100%" gap="$2">
+          <AboutInfoRow label={t('settings.version')} value={APP_CONFIG.version} />
+          <AboutInfoRow label={t('settings.developer')} value={displayCompany} />
+          {company.website ? (
+            <AboutInfoRow label={t('admin.companyWebsite')} value={company.website} accent />
+          ) : null}
+          {company.supportEmail ? (
+            <AboutInfoRow label={t('admin.companySupportEmail')} value={company.supportEmail} accent />
+          ) : null}
+        </YStack>
+
+        <Text fontSize="$2" color="$mutedText" textAlign="center">
+          {t('settings.madeWith')} · © {APP_CONFIG.year}
+        </Text>
       </YStack>
-    </Modal>
+    </AppModal>
   )
 }
 

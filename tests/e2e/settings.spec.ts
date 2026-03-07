@@ -62,10 +62,8 @@ test.describe('Settings Page', () => {
     const versionLabel = page.getByText('Version').first()
     await expect(versionLabel).toBeVisible({ timeout: 5000 })
 
-    // Close by clicking outside the modal panel (right side of viewport, away from sidebar)
-    // The About modal backdrop uses onPress={onClose} on the outer fixed YStack
-    const viewport = page.viewportSize()!
-    await page.mouse.click(viewport.width - 20, 20)
+    // Close via Escape key (AppModal registers a keydown listener)
+    await page.keyboard.press('Escape')
 
     // Modal should disappear
     await expect(versionLabel).not.toBeVisible({ timeout: 5000 })
