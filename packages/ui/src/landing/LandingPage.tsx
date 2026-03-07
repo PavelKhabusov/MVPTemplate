@@ -34,6 +34,26 @@ export function LandingPage({ logo, paymentsEnabled = false, plans = [] }: Landi
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
+    // Load Caveat (Latin + Cyrillic handwritten) + Yomogi (Japanese handwritten)
+    if (!document.querySelector('[data-font-caveat]')) {
+      const preconnect = document.createElement('link')
+      preconnect.rel = 'preconnect'
+      preconnect.href = 'https://fonts.googleapis.com'
+      document.head.appendChild(preconnect)
+
+      const preconnectGstatic = document.createElement('link')
+      preconnectGstatic.rel = 'preconnect'
+      preconnectGstatic.href = 'https://fonts.gstatic.com'
+      ;(preconnectGstatic as any).crossOrigin = 'anonymous'
+      document.head.appendChild(preconnectGstatic)
+
+      const fontLink = document.createElement('link')
+      fontLink.rel = 'stylesheet'
+      fontLink.href = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Yomogi&display=swap'
+      fontLink.setAttribute('data-font-caveat', '')
+      document.head.appendChild(fontLink)
+    }
+
     const style = document.createElement('style')
     style.textContent = `
       body { scroll-behavior: smooth; }
