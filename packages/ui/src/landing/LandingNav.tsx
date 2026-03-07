@@ -71,19 +71,25 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         border-radius: 40px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.05) !important;
-        transition: max-width 0.45s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s ease !important;
+        transition: max-width 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s ease !important;
       }
       #lnav-pill.lnav-compact {
-        max-width: 560px !important;
+        max-width: 620px !important;
       }
-      .lnav-logo {
-        max-width: 300px;
+      .lnav-appname {
+        display: inline-block !important;
         overflow: hidden !important;
+        white-space: nowrap !important;
+        max-width: 200px;
         transition: max-width 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease !important;
       }
-      #lnav-pill.lnav-compact .lnav-logo {
+      #lnav-pill.lnav-compact .lnav-appname {
         max-width: 0px !important;
         opacity: 0 !important;
+        margin-left: 0px !important;
+      }
+      #lnav-pill.lnav-compact .lnav-logo {
+        flex: 0 0 auto !important;
       }
       #lnav-pill.lnav-compact .lnav-auth {
         flex: 0 0 auto !important;
@@ -93,21 +99,26 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
     return () => { style.remove() }
   }, [])
 
-  // Scroll: compact pill on scroll down (shrink to content width, hide logo), expand on scroll up
+  // Scroll: compact pill on scroll down (shrink width, hide app name), expand on scroll up
   useEffect(() => {
     if (Platform.OS !== 'web') return
     let lastY = 0
+    let compact = false
+    const THRESHOLD = 8
     const onScroll = (e: Event) => {
       const target = e.target as Element | Window
       const y = 'scrollTop' in target ? (target as Element).scrollTop : window.scrollY
       const pill = document.getElementById('lnav-pill')
       if (!pill) return
-      if (y <= 20) {
+      if (y <= 20 && compact) {
         pill.classList.remove('lnav-compact')
-      } else if (y > lastY) {
+        compact = false
+      } else if (y > 40 && y > lastY + THRESHOLD && !compact) {
         pill.classList.add('lnav-compact')
-      } else {
+        compact = true
+      } else if (y < lastY - THRESHOLD && compact) {
         pill.classList.remove('lnav-compact')
+        compact = false
       }
       lastY = y
     }
@@ -177,7 +188,9 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
                   <Text color="white" fontWeight="bold" fontSize={13}>M</Text>
                 </YStack>
               )}
-              <Text fontWeight="700" fontSize="$4" color={NAV_TEXT}>{appName}</Text>
+              <XStack className="lnav-appname">
+                <Text fontWeight="700" fontSize="$4" color={NAV_TEXT} style={{ whiteSpace: 'nowrap' } as any}>{appName}</Text>
+              </XStack>
             </XStack>
           </ScalePress>
         </XStack>
