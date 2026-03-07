@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Image } from 'react-native'
 import { YStack, Text, GetProps, useTheme } from 'tamagui'
 
@@ -16,7 +17,7 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
+export const AppAvatar = memo(function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
   const theme = useTheme()
 
   if (uri) {
@@ -26,12 +27,15 @@ export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
         height={size}
         borderRadius={size / 2}
         overflow="hidden"
+        accessibilityRole="image"
+        accessibilityLabel={name || 'Avatar'}
         {...props}
       >
         <Image
           source={{ uri }}
           style={{ width: size, height: size }}
           resizeMode="cover"
+          accessibilityLabel={name || 'Avatar'}
         />
       </YStack>
     )
@@ -45,6 +49,8 @@ export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
       backgroundColor={theme.accent.val}
       alignItems="center"
       justifyContent="center"
+      accessibilityRole="image"
+      accessibilityLabel={name || 'Avatar'}
       {...props}
     >
       <Text color="white" fontWeight="bold" fontSize={size * 0.35}>
@@ -52,4 +58,4 @@ export function AppAvatar({ uri, name, size = 48, ...props }: AppAvatarProps) {
       </Text>
     </YStack>
   )
-}
+})

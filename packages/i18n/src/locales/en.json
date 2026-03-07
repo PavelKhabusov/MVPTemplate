@@ -697,6 +697,10 @@
     "fontLarge": "Large",
     "fontFamily": "Font Family"
   },
+  "phone": {
+    "countryPickerTitle": "Country",
+    "searchCountry": "Search country..."
+  },
   "profileMenu": {
     "profile": "Profile",
     "theme": "Theme",

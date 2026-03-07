@@ -697,6 +697,10 @@
     "fontLarge": "Крупный",
     "fontFamily": "Шрифт"
   },
+  "phone": {
+    "countryPickerTitle": "Страна",
+    "searchCountry": "Поиск страны..."
+  },
   "profileMenu": {
     "profile": "Профиль",
     "theme": "Тема",

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 import Animated, {
   useSharedValue,
@@ -30,7 +30,7 @@ const springConfig = {
   mass: 0.6,
 }
 
-export function AnimatedTabIcon({
+export const AnimatedTabIcon = memo(function AnimatedTabIcon({
   name,
   nameFilled,
   focused,
@@ -139,7 +139,7 @@ export function AnimatedTabIcon({
       />
     </Animated.View>
   )
-}
+})
 
 const styles = StyleSheet.create({
   container: {
