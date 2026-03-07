@@ -79,9 +79,9 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         will-change: max-width !important;
       }
       #lnav-pill.lnav-compact {
-        max-width: 560px !important;
-        padding-left: 10px !important;
-        padding-right: 6px !important;
+        max-width: 680px !important;
+        padding-left: 12px !important;
+        padding-right: 8px !important;
         background-color: rgba(8, 8, 14, 0.85) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.06) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
@@ -101,13 +101,13 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
       #lnav-pill.lnav-compact .lnav-logo {
         flex: 0 0 auto !important;
       }
-      /* Hide theme/lang controls in compact — Dodo style: only links + CTA */
-      #lnav-pill.lnav-compact .lnav-hide-compact {
-        display: none !important;
+      #lnav-pill.lnav-compact .lnav-links {
+        margin-left: auto !important;
+        gap: 12px !important;
       }
       #lnav-pill.lnav-compact .lnav-auth {
         flex: 0 0 auto !important;
-        gap: 6px !important;
+        gap: 4px !important;
       }
     `
     document.head.appendChild(style)
@@ -247,7 +247,6 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
 
         {/* RIGHT: Controls + Auth (desktop) */}
         <XStack className="lnav-auth" flex={1} justifyContent="flex-end" alignItems="center" gap="$2">
-          <XStack className="lnav-hide-compact" alignItems="center" gap="$2">
           <ScalePress onPress={cycleTheme}>
             <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
               style={{ backgroundColor: NAV_BTN_BG } as any}>
@@ -293,7 +292,6 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
               )}
             </AnimatePresence>
           </YStack>
-          </XStack>
 
           {isAuthenticated && user ? (
             <ScalePress onPress={() => onNavigate('/')}>
