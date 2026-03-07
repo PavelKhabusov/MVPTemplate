@@ -239,8 +239,8 @@ describe('Notifications Routes — Integration', () => {
       expect(res.statusCode).toBe(200)
       const body = res.json()
       expect(body.data).toHaveLength(1)
-      expect(body.meta.page).toBe(2)
-      expect(body.meta.limit).toBe(5)
+      expect(body.pagination.page).toBe(2)
+      expect(body.pagination.limit).toBe(5)
     })
   })
 

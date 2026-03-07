@@ -224,7 +224,7 @@ describe('Admin Routes — Integration', () => {
       expect(res.statusCode).toBe(200)
       const body = res.json()
       expect(body.data).toHaveLength(2)
-      expect(body.meta.total).toBe(2)
+      expect(body.pagination.total).toBe(2)
       expect(mockAdminRepository.listUsers).toHaveBeenCalledOnce()
     })
 
