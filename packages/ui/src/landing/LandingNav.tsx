@@ -79,9 +79,9 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
         will-change: max-width !important;
       }
       #lnav-pill.lnav-compact {
-        max-width: fit-content !important;
+        max-width: 620px !important;
         padding-left: 12px !important;
-        padding-right: 8px !important;
+        padding-right: 12px !important;
         background-color: rgba(8, 8, 14, 0.85) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.06) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
