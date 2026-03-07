@@ -1,16 +1,16 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
-vi.mock('../../config/env', () => ({
-  env: {
-    JWT_ACCESS_SECRET: 'test-secret-key-for-unit-tests',
-    JWT_REFRESH_EXPIRY: '30d',
-    JWT_ACCESS_EXPIRY: '15m',
-    EMAIL_ENABLED: false,
-    EMAIL_VERIFICATION_REQUIRED: false,
-    SMS_ENABLED: false,
-    GOOGLE_CLIENT_ID: '',
-  },
+const mockEnv = vi.hoisted(() => ({
+  JWT_ACCESS_SECRET: 'test-secret-key-for-unit-tests',
+  JWT_REFRESH_EXPIRY: '30d',
+  JWT_ACCESS_EXPIRY: '15m',
+  EMAIL_ENABLED: false,
+  EMAIL_VERIFICATION_REQUIRED: false,
+  SMS_ENABLED: false,
+  GOOGLE_CLIENT_ID: '',
 }))
+
+vi.mock('../../config/env', () => ({ env: mockEnv }))
 
 vi.mock('../auth.repository', () => ({
   authRepository: {
