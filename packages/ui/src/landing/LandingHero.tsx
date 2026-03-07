@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Platform, View } from 'react-native'
+import { Image, Platform, View } from 'react-native'
 import { YStack, XStack, Text, H1, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
@@ -8,8 +8,9 @@ import { FadeIn } from '../animations/FadeIn'
 import { SlideIn } from '../animations/SlideIn'
 import { ScalePress } from '../animations/ScalePress'
 
-// Unsplash Lake Tahoe sunset by c6SciRp2kaQ — free to use
-const HERO_BG_URL = 'https://images.unsplash.com/photo-1513875528452-39400945934d?w=1920&q=80&auto=format'
+// Local hero background — place your image at apps/mobile/assets/images/hero-bg.jpg
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const HERO_BG_ASSET = require('../../../../apps/mobile/assets/images/hero-bg.jpg')
 
 interface LandingHeroProps {
   onNavigate: (href: string) => void
@@ -88,7 +89,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
           zIndex: 0,
           animation: 'heroKenBurns 25s ease-in-out alternate infinite',
           willChange: 'transform',
-          backgroundImage: `url(${HERO_BG_URL})`,
+          backgroundImage: `url(${Image.resolveAssetSource(HERO_BG_ASSET).uri})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center 40%',
           backgroundRepeat: 'no-repeat',
