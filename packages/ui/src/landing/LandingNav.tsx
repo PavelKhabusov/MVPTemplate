@@ -337,23 +337,23 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
 
       {/* Mobile dropdown */}
       {mobileMenuOpen && (
-        <View className="lnav-mobile" style={{
+        <View {...{ className: 'lnav-mobile' } as any} style={{
           maxWidth: 1100,
-          width: '100%' as any,
-          marginLeft: 'auto' as any,
-          marginRight: 'auto' as any,
+          width: '100%',
+          marginLeft: 'auto',
+          marginRight: 'auto',
           marginTop: 6,
           padding: 16,
           borderRadius: 20,
           borderWidth: 1,
-          borderStyle: 'solid' as any,
+          borderStyle: 'solid',
           borderColor: 'rgba(255,255,255,0.08)',
           backgroundColor: 'rgba(8, 8, 14, 0.92)',
-          backdropFilter: 'blur(24px)' as any,
-          WebkitBackdropFilter: 'blur(24px)' as any,
-          flexDirection: 'column' as any,
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          flexDirection: 'column',
           gap: 12,
-        }}>
+        } as any}>
           <Text color={NAV_MUTED} fontSize="$3"
             onPress={() => { document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false) }}>
             {t('landing.navFeatures')}

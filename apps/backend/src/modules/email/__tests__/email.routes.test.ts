@@ -149,7 +149,7 @@ import jwt from 'jsonwebtoken'
 const mockAuthService = vi.mocked(authService)
 const mockUsersRepository = vi.mocked(usersRepository)
 const mockEmailService = vi.mocked(emailService)
-const mockDb = vi.mocked(db)
+const mockDb = vi.mocked(db) as any
 
 function generateValidJwt(userId = 'user-test-001', email = 'test@example.com'): string {
   return jwt.sign(

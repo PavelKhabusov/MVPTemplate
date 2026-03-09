@@ -16,7 +16,7 @@ const {
   const mockMkdir = vi.fn().mockResolvedValue(undefined)
   const mockExistsSync = vi.fn().mockReturnValue(false)
   const mockEnv = {
-    STORAGE_TYPE: 'local' as const,
+    STORAGE_TYPE: 'local' as 'local' | 's3',
     S3_ENDPOINT: undefined as string | undefined,
     S3_BUCKET: undefined as string | undefined,
     S3_ACCESS_KEY: undefined as string | undefined,

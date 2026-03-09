@@ -31,7 +31,7 @@ interface CoachMarkContextValue {
   startTour: (steps: CoachMarkStep[], labels?: CoachMarkLabels) => void
   nextStep: () => void
   dismissTour: () => void
-  registerRef: (id: string, ref: React.RefObject<View>) => void
+  registerRef: (id: string, ref: React.RefObject<View | null>) => void
   unregisterRef: (id: string) => void
   registerScrollTo: (id: string, fn: () => void) => void
   unregisterScrollTo: (id: string) => void
@@ -64,7 +64,7 @@ interface CoachMarkProviderProps {
 }
 
 export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
-  const refsMap = useRef(new Map<string, React.RefObject<View>>())
+  const refsMap = useRef(new Map<string, React.RefObject<View | null>>())
   const scrollersMap = useRef(new Map<string, () => void>())
   const [state, setState] = useState<CoachMarkState>({
     steps: [],
@@ -137,7 +137,7 @@ export function CoachMarkProvider({ children }: CoachMarkProviderProps) {
     setState({ steps: [], activeIndex: null, spotlightRect: null, labels: {} })
   }, [])
 
-  const registerRef = useCallback((id: string, ref: React.RefObject<View>) => {
+  const registerRef = useCallback((id: string, ref: React.RefObject<View | null>) => {
     refsMap.current.set(id, ref)
   }, [])
 

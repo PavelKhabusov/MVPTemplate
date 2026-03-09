@@ -212,7 +212,7 @@ describe('Admin Routes — Integration', () => {
         { id: 'u1', email: 'user1@example.com', name: 'User 1', role: 'user' },
         { id: 'u2', email: 'user2@example.com', name: 'User 2', role: 'user' },
       ]
-      mockAdminRepository.listUsers.mockResolvedValue({ items: mockUsers, total: 2 })
+      mockAdminRepository.listUsers.mockResolvedValue({ items: mockUsers as any, total: 2 })
       const token = generateValidJwt()
 
       const res = await app.inject({

@@ -38,7 +38,7 @@ vi.mock('../../../config/database', () => {
   // Default from() result: array-like with .where() method
   function defaultFromResult() {
     const result: unknown[] & { where?: (...args: unknown[]) => unknown[] } = []
-    result.where = (...wArgs: unknown[]) => {
+    result.where = (...wArgs: unknown[]): any => {
       mockDbWhere(...wArgs)
       return (mockDbWhere as unknown as Record<string, unknown>)._returnValue ?? []
     }
@@ -193,7 +193,7 @@ describe('push.service', () => {
 
       await createNotification('user-1', { title: 'Hi' })
 
-      const chunkedMessages = mockChunkPushNotifications.mock.calls[0][0]
+      const chunkedMessages = mockChunkPushNotifications.mock.calls[0][0] as any[]
       expect(chunkedMessages).toHaveLength(1)
       expect(chunkedMessages[0].to).toBe('ExponentPushToken[valid]')
     })

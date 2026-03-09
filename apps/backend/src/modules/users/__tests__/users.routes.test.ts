@@ -160,7 +160,7 @@ const MOCK_USER_FULL = {
   features: [] as string[],
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
-}
+} as any
 
 function generateValidJwt(userId = 'user-test-001', email = 'test@example.com'): string {
   return jwt.sign(
@@ -224,7 +224,7 @@ describe('Users Routes — Integration', () => {
     })
 
     it('should return 404 when user is not found in database', async () => {
-      mockUsersRepo.findById.mockResolvedValue(null)
+      mockUsersRepo.findById.mockResolvedValue(null as any)
       const token = generateValidJwt()
 
       const res = await app.inject({

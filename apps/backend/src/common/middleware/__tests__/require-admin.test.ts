@@ -63,7 +63,7 @@ describe('requireAdmin middleware', () => {
   })
 
   it('should throw 403 when user is not found', async () => {
-    mockUsersRepo.findById.mockResolvedValue(null)
+    mockUsersRepo.findById.mockResolvedValue(null as any)
 
     const request = createMockRequest('nonexistent-user')
     const reply = createMockReply()
