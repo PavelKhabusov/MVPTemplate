@@ -1,28 +1,47 @@
 import { useState, useCallback } from 'react'
-import { ScrollView, Platform, RefreshControl } from 'react-native'
-import { YStack, XStack, Text, H2, useTheme } from 'tamagui'
+import { ScrollView, Platform, ActivityIndicator, RefreshControl } from 'react-native'
+import { YStack, XStack, Text, H2, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { FadeIn, SlideIn, AnimatedListItem, AppCard } from '@mvp/ui'
+import { useBookmarksStore } from '@mvp/store'
+import { FadeIn, SlideIn, AnimatedListItem, AppCard, ScalePress, AppAvatar } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
+import { useSearch } from '@mvp/lib'
+import { api } from '../../src/services/api'
 
-const MONTHLY_STATS = [
-  { key: 'answered', icon: 'call-outline' as const, colorKey: 'success' as const, value: 0 },
-  { key: 'missed', icon: 'call-missed-outline' as const, colorKey: 'error' as const, value: 0 },
-  { key: 'total', icon: 'bar-chart-outline' as const, colorKey: 'accent' as const, value: 0 },
-  { key: 'minutes', icon: 'time-outline' as const, colorKey: 'secondary' as const, value: 0 },
+const CATEGORIES = [
+  { key: 'catDesign', icon: 'color-palette-outline' as const, colorKey: 'accent' as const },
+  { key: 'catDev', icon: 'code-slash-outline' as const, colorKey: 'secondary' as const },
+  { key: 'catMarketing', icon: 'megaphone-outline' as const, colorKey: 'accent' as const },
+  { key: 'catAnalytics', icon: 'bar-chart-outline' as const, colorKey: 'secondary' as const },
+]
+
+const FEATURED = [
+  { titleKey: 'item1Title', descKey: 'item1Desc', icon: 'layers-outline' as const, colorKey: 'accent' as const },
+  { titleKey: 'item2Title', descKey: 'item2Desc', icon: 'analytics-outline' as const, colorKey: 'secondary' as const },
+  { titleKey: 'item3Title', descKey: 'item3Desc', icon: 'lock-closed-outline' as const, colorKey: 'accent' as const },
+  { titleKey: 'item4Title', descKey: 'item4Desc', icon: 'server-outline' as const, colorKey: 'secondary' as const },
 ]
 
 export default function ExploreScreen() {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const theme = useTheme()
+  const { bookmarkedIds, toggle: toggleBookmark } = useBookmarksStore()
+  const { query, setQuery, results, isLoading, addRecentSearch } = useSearch(
+    async (q) => {
+      const { data } = await api.get('/search', { params: { q } })
+      return data.data
+    }
+  )
   const [refreshing, setRefreshing] = useState(false)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
     setTimeout(() => setRefreshing(false), 1200)
   }, [])
+
+  const hasSearchResults = query.length >= 2
 
   return (
     <ScrollView
@@ -55,117 +74,180 @@ export default function ExploreScreen() {
           </YStack>
         </FadeIn>
 
-        {/* Monthly Stats Grid */}
+        {/* Search Bar */}
+        <FadeIn>
+          <XStack
+            backgroundColor="$subtleBackground"
+            borderRadius="$3"
+            borderWidth={1}
+            borderColor="$borderColor"
+            paddingHorizontal="$3"
+            alignItems="center"
+            gap="$2"
+          >
+            <Ionicons name="search-outline" size={18} color={theme.mutedText.val} />
+            <Input
+              flex={1}
+              placeholder={t('explore.searchPlaceholder')}
+              value={query}
+              onChangeText={setQuery}
+              onSubmitEditing={() => { if (query.length >= 2) addRecentSearch(query) }}
+              backgroundColor="transparent"
+              borderWidth={0}
+              height={42}
+              fontSize="$2"
+              color="$color"
+              placeholderTextColor="$placeholderColor"
+            />
+            {isLoading && <ActivityIndicator size="small" />}
+            {query.length > 0 && (
+              <ScalePress onPress={() => setQuery('')}>
+                <Ionicons name="close-circle" size={18} color={theme.mutedText.val} />
+              </ScalePress>
+            )}
+          </XStack>
+        </FadeIn>
+
+        {/* Search Results */}
+        {hasSearchResults && (
+          <SlideIn from="bottom">
+            <YStack gap="$3">
+              <Text fontWeight="600" fontSize="$4" color="$color">
+                {t('explore.searchResults')} ({results.length})
+              </Text>
+              {results.length === 0 && !isLoading ? (
+                <Text color="$mutedText" fontSize="$2" textAlign="center" paddingVertical="$4">
+                  {t('explore.noResults')}
+                </Text>
+              ) : (
+                <YStack gap="$2">
+                  {results.map((user: any, idx: number) => (
+                    <AnimatedListItem key={user.id} index={idx}>
+                      <AppCard animated={false}>
+                        <XStack gap="$3" alignItems="center">
+                          <AppAvatar name={user.name} uri={user.avatar_url} size={40} />
+                          <Text fontWeight="600" fontSize="$3" color="$color">{user.name}</Text>
+                        </XStack>
+                      </AppCard>
+                    </AnimatedListItem>
+                  ))}
+                </YStack>
+              )}
+            </YStack>
+          </SlideIn>
+        )}
+
+        {/* Categories */}
         <SlideIn from="bottom" delay={100}>
           <YStack gap="$3">
-            <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.thisMonth')}</Text>
+            <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.categories')}</Text>
             <XStack gap="$3" flexWrap="wrap">
-              {MONTHLY_STATS.map((stat) => {
-                const colorVal = stat.colorKey === 'accent'
-                  ? theme.accent.val
-                  : stat.colorKey === 'secondary'
-                  ? theme.secondary.val
-                  : stat.colorKey === 'success'
-                  ? theme.success.val
-                  : theme.error.val
+              {CATEGORIES.map((cat) => {
+                const color = cat.colorKey === 'accent' ? theme.accent.val : theme.secondary.val
+                const colorEnd = cat.colorKey === 'accent' ? theme.accentGradientEnd.val : theme.accent.val
                 return (
-                  <AppCard key={stat.key} flex={1} minWidth={130} padding="$3" gap="$2" alignItems="center">
-                    <YStack
-                      width={40}
-                      height={40}
-                      borderRadius={20}
-                      backgroundColor={colorVal + '18'}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Ionicons name={stat.icon} size={20} color={colorVal} />
+                  <ScalePress key={cat.key} onPress={() => {}}>
+                    <YStack width={80} alignItems="center" gap="$2">
+                      <YStack
+                        width={56}
+                        height={56}
+                        borderRadius={16}
+                        alignItems="center"
+                        justifyContent="center"
+                        style={Platform.OS === 'web'
+                          ? { background: `linear-gradient(135deg, ${color}, ${colorEnd})` }
+                          : { backgroundColor: color }
+                        }
+                      >
+                        <Ionicons name={cat.icon} size={24} color="white" />
+                      </YStack>
+                      <Text fontSize="$1" color="$mutedText" textAlign="center" numberOfLines={1}>
+                        {t(`explore.${cat.key}`)}
+                      </Text>
                     </YStack>
-                    <Text fontSize="$6" fontWeight="bold" color="$color">{stat.value}</Text>
-                    <Text fontSize="$1" color="$mutedText" textAlign="center">
-                      {t(`explore.stat${stat.key.charAt(0).toUpperCase() + stat.key.slice(1)}`)}
-                    </Text>
-                  </AppCard>
+                  </ScalePress>
                 )
               })}
             </XStack>
           </YStack>
         </SlideIn>
 
-        {/* FREE Quota */}
+        {/* Featured */}
         <SlideIn from="bottom" delay={200}>
-          <AppCard>
-            <YStack gap="$3">
-              <XStack justifyContent="space-between" alignItems="center">
-                <XStack gap="$2" alignItems="center">
-                  <Ionicons name="gift-outline" size={20} color={theme.accent.val} />
-                  <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.freeQuota')}</Text>
-                </XStack>
-                <Text fontSize="$2" color="$accent">FREE</Text>
-              </XStack>
-              <YStack gap="$1">
-                <XStack justifyContent="space-between">
-                  <Text fontSize="$2" color="$mutedText">{t('explore.callsUsed')}</Text>
-                  <Text fontSize="$2" color="$color" fontWeight="600">0 / 30</Text>
-                </XStack>
-                <YStack
-                  height={6}
-                  borderRadius={3}
-                  backgroundColor="$subtleBackground"
-                  overflow="hidden"
-                >
-                  <YStack
-                    height="100%"
-                    width="0%"
-                    borderRadius={3}
-                    backgroundColor="$accent"
-                  />
-                </YStack>
-              </YStack>
-              <Text fontSize="$1" color="$mutedText">{t('explore.quotaResetNote')}</Text>
-            </YStack>
-          </AppCard>
-        </SlideIn>
-
-        {/* Recent Call History */}
-        <SlideIn from="bottom" delay={300}>
           <YStack gap="$3">
             <XStack justifyContent="space-between" alignItems="center">
-              <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.callHistory')}</Text>
+              <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.featured')}</Text>
+              <Text fontSize="$2" color="$accent">{t('common.viewAll')}</Text>
             </XStack>
-            <AnimatedListItem index={0}>
-              <AppCard animated={false}>
-                <YStack gap="$2" alignItems="center" paddingVertical="$4">
-                  <Ionicons name="call-outline" size={32} color={theme.mutedText.val} />
-                  <Text color="$mutedText" fontSize="$2" textAlign="center">
-                    {t('explore.noCallsYet')}
-                  </Text>
-                  <Text color="$mutedText" fontSize="$1" textAlign="center">
-                    {t('explore.noCallsHint')}
-                  </Text>
-                </YStack>
-              </AppCard>
-            </AnimatedListItem>
+            <YStack gap="$3">
+              {FEATURED.map((item, idx) => {
+                const isBookmarked = bookmarkedIds.includes(item.titleKey)
+                const itemColor = item.colorKey === 'accent' ? theme.accent.val : theme.secondary.val
+                return (
+                  <AnimatedListItem key={item.titleKey} index={idx}>
+                    <AppCard animated={false}>
+                      <XStack gap="$3" alignItems="center">
+                        <YStack
+                          width={44}
+                          height={44}
+                          borderRadius={12}
+                          backgroundColor="$subtleBackground"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Ionicons name={item.icon} size={22} color={itemColor} />
+                        </YStack>
+                        <YStack flex={1} gap="$1">
+                          <Text fontWeight="600" fontSize="$3" color="$color">
+                            {t(`explore.${item.titleKey}`)}
+                          </Text>
+                          <Text fontSize="$2" color="$mutedText" numberOfLines={1}>
+                            {t(`explore.${item.descKey}`)}
+                          </Text>
+                        </YStack>
+                        <ScalePress onPress={() => toggleBookmark(item.titleKey)}>
+                          <Ionicons
+                            name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                            size={20}
+                            color={isBookmarked ? theme.accent.val : theme.mutedText.val}
+                          />
+                        </ScalePress>
+                      </XStack>
+                    </AppCard>
+                  </AnimatedListItem>
+                )
+              })}
+            </YStack>
           </YStack>
         </SlideIn>
 
-        {/* Tips */}
-        <SlideIn from="bottom" delay={400}>
+        {/* Trending section */}
+        <SlideIn from="bottom" delay={300}>
           <AppCard>
             <YStack gap="$3">
               <XStack gap="$2" alignItems="center">
-                <Ionicons name="bulb-outline" size={20} color={theme.accent.val} />
-                <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.tips')}</Text>
+                <Ionicons name="trending-up" size={20} color={theme.accent.val} />
+                <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.trending')}</Text>
               </XStack>
-              <YStack gap="$2">
-                {['tip1', 'tip2', 'tip3'].map((key, i) => (
-                  <AnimatedListItem key={key} index={i}>
-                    <XStack gap="$2" alignItems="flex-start">
-                      <Text color="$accent" fontSize="$2" fontWeight="600">{i + 1}.</Text>
-                      <Text color="$mutedText" fontSize="$2" flex={1}>{t(`explore.${key}`)}</Text>
-                    </XStack>
-                  </AnimatedListItem>
-                ))}
-              </YStack>
+              <XStack gap="$2" flexWrap="wrap">
+                {['React Native', 'TypeScript', 'Tamagui', 'Expo', 'Fastify', 'Drizzle'].map((tag, i) => {
+                  const isAccented = i % 3 === 0
+                  const isSecondary = i % 3 === 1
+                  return (
+                    <YStack
+                      key={tag}
+                      backgroundColor={isAccented ? (theme.accent.val + '18') : isSecondary ? (theme.secondary.val + '18') : '$subtleBackground'}
+                      paddingHorizontal="$3"
+                      paddingVertical="$1.5"
+                      borderRadius="$2"
+                      borderWidth={1}
+                      borderColor={isAccented ? '$accent' : isSecondary ? '$secondary' : '$borderColor'}
+                    >
+                      <Text fontSize="$2" color={isAccented ? '$accent' : isSecondary ? '$secondary' : '$color'}>{tag}</Text>
+                    </YStack>
+                  )
+                })}
+              </XStack>
             </YStack>
           </AppCard>
         </SlideIn>
