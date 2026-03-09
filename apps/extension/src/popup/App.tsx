@@ -77,7 +77,6 @@ export default function App() {
       setTheme={setTheme}
       onLogout={handleLogout}
       paymentsEnabled={flags.payments}
-      user={user}
     />
   )
 }
