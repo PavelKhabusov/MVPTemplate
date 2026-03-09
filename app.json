@@ -7,10 +7,10 @@
     },
     "owner": "pashenka",
     "android": {
-      "package": "com.PavelKhabusov.CallSheet"
+      "package": "com.PavelKhabusov.MVPTemplate"
     },
     "ios": {
-      "bundleIdentifier": "com.PavelKhabusov.CallSheet",
+      "bundleIdentifier": "com.PavelKhabusov.MVPTemplate",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

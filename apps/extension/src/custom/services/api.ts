@@ -1,4 +1,4 @@
-// CallSheet-specific API endpoints
+// Custom API endpoints
 
 const API_BASE = 'http://localhost:3000/api'
 

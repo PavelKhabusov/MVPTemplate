@@ -93,7 +93,7 @@ export function CompanyInfoTab() {
               {t('admin.companyAppSection')}
             </Text>
             <YStack gap="$3">
-              {field('admin.companyAppName', 'appName', { placeholder: 'CallSheet' })}
+              {field('admin.companyAppName', 'appName', { placeholder: 'MVPTemplate' })}
               {field('admin.companyTagline', 'tagline', { placeholder: t('admin.companyTaglinePlaceholder') })}
             </YStack>
           </AppCard>

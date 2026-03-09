@@ -6,7 +6,7 @@ import { useTranslation } from '@mvp/i18n/src/browser'
 
 const VOX_NODES = ['NODE_1','NODE_2','NODE_3','NODE_4','NODE_5','NODE_6','NODE_7','NODE_8','NODE_9','NODE_10','NODE_11','NODE_12'] as const
 
-// Detect node from domain, e.g. callsheet.account.n2.voximplant.com → NODE_2
+// Detect node from domain, e.g. myapp.account.n2.voximplant.com → NODE_2
 function detectNodeFromDomain(domain: string): string {
   const match = domain.match(/\.n(\d+)\.voximplant\.com$/)
   if (match) {
@@ -80,7 +80,7 @@ export default function VoximplantSettings() {
           {/* App domain */}
           <div>
             <div className="text-[10px] text-text-muted mb-1">{t('ext.voxAppDomainLabel')}</div>
-            <input type="text" placeholder="callsheet.ubrdumbo.n2.voximplant.com" value={voxDomain}
+            <input type="text" placeholder="myapp.account.n2.voximplant.com" value={voxDomain}
               onChange={(e) => handleDomainChange(e.target.value.trim())}
               className="w-full bg-bg-primary border border-bg-tertiary rounded-lg py-2 px-3 text-xs text-text-primary outline-none focus:border-brand font-mono" />
             <div className="text-[10px] text-text-muted mt-1">{t('ext.voxAppDomainDesc')}</div>

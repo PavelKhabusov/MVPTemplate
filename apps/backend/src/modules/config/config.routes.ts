@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm'
 
 const DEFAULT_COMPANY_INFO = {
   id: 1,
-  appName: 'CallSheet',
+  appName: 'MVPTemplate',
   companyName: '',
   tagline: '',
   supportEmail: '',

@@ -186,7 +186,7 @@ export async function adminRoutes(app: FastifyInstance) {
   // GET /api/admin/company-info — read company info
   app.get('/company-info', async (_request, reply) => {
     const [info] = await db.select().from(companyInfo).where(eq(companyInfo.id, 1))
-    return sendSuccess(reply, info ?? { id: 1, appName: 'CallSheet', companyName: '', tagline: '', supportEmail: '', website: '', phone: '', address: '', updatedAt: new Date() })
+    return sendSuccess(reply, info ?? { id: 1, appName: 'MVPTemplate', companyName: '', tagline: '', supportEmail: '', website: '', phone: '', address: '', updatedAt: new Date() })
   })
 
   // PUT /api/admin/company-info — upsert company info

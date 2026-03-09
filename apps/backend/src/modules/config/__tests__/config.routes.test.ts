@@ -245,7 +245,7 @@ describe('Config Routes — Integration', () => {
       expect(res.statusCode).toBe(200)
       const body = res.json()
       expect(body.data.id).toBe(1)
-      expect(body.data.appName).toBe('CallSheet')
+      expect(body.data.appName).toBe('MVPTemplate')
     })
   })
 })

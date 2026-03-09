@@ -1,4 +1,4 @@
-// CallSheet custom background handlers
+// Custom background handlers
 // Tab tracking is handled in background.ts via extensionConfig.tabTracking: true
 
 // Google Sheets API helpers
