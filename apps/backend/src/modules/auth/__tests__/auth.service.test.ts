@@ -1,16 +1,16 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
-vi.mock('../../config/env', () => ({
-  env: {
-    JWT_ACCESS_SECRET: 'test-secret-key-for-unit-tests',
-    JWT_REFRESH_EXPIRY: '30d',
-    JWT_ACCESS_EXPIRY: '15m',
-    EMAIL_ENABLED: false,
-    EMAIL_VERIFICATION_REQUIRED: false,
-    SMS_ENABLED: false,
-    GOOGLE_CLIENT_ID: '',
-  },
+const mockEnv = vi.hoisted(() => ({
+  JWT_ACCESS_SECRET: 'test-secret-key-for-unit-tests',
+  JWT_REFRESH_EXPIRY: '30d',
+  JWT_ACCESS_EXPIRY: '15m',
+  EMAIL_ENABLED: false,
+  EMAIL_VERIFICATION_REQUIRED: false,
+  SMS_ENABLED: false,
+  GOOGLE_CLIENT_ID: '',
 }))
+
+vi.mock('../../config/env', () => ({ env: mockEnv }))
 
 vi.mock('../auth.repository', () => ({
   authRepository: {
@@ -76,13 +76,19 @@ const mockUser = {
   bio: null as string | null,
   phone: null as string | null,
   location: null as string | null,
+  birthday: null as string | null,
   emailVerified: true,
   phoneVerified: false,
+  voximplantLogin: null as string | null,
+  voximplantPassword: null as string | null,
+  voximplantAppId: null as string | null,
   role: 'user' as const,
   features: [] as string[],
+  emailEnabled: false,
+  smsEnabled: false,
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
-}
+} as any
 
 const mockRefreshTokenRecord = {
   id: 'token-rec-1',
@@ -90,7 +96,7 @@ const mockRefreshTokenRecord = {
   tokenHash: 'hashed-refresh-token',
   expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   createdAt: new Date(),
-}
+} as any
 
 describe('authService', () => {
   beforeEach(() => {
@@ -103,7 +109,7 @@ describe('authService', () => {
 
   describe('register', () => {
     it('creates a new user and returns an access/refresh token pair', async () => {
-      vi.mocked(authRepository.findUserByEmail).mockResolvedValue(null)
+      vi.mocked(authRepository.findUserByEmail).mockResolvedValue(null as any)
       vi.mocked(authRepository.createUser).mockResolvedValue(mockUser)
 
       const result = await authService.register({
@@ -128,7 +134,7 @@ describe('authService', () => {
     })
 
     it('hashes the password with bcrypt before saving', async () => {
-      vi.mocked(authRepository.findUserByEmail).mockResolvedValue(null)
+      vi.mocked(authRepository.findUserByEmail).mockResolvedValue(null as any)
       vi.mocked(authRepository.createUser).mockResolvedValue(mockUser)
 
       await authService.register({ email: 'new@example.com', password: 'plain-text', name: 'New' })
@@ -154,7 +160,7 @@ describe('authService', () => {
     })
 
     it('throws 401 Unauthorized when email is not found', async () => {
-      vi.mocked(authRepository.findUserByEmail).mockResolvedValue(null)
+      vi.mocked(authRepository.findUserByEmail).mockResolvedValue(null as any)
 
       await expect(
         authService.login({ email: 'ghost@example.com', password: 'pass' }),
@@ -200,7 +206,7 @@ describe('authService', () => {
     })
 
     it('throws 401 Unauthorized when token is not found', async () => {
-      vi.mocked(authRepository.findRefreshToken).mockResolvedValue(null)
+      vi.mocked(authRepository.findRefreshToken).mockResolvedValue(null as any)
 
       await expect(authService.refresh('unknown-token')).rejects.toMatchObject({ statusCode: 401 })
     })

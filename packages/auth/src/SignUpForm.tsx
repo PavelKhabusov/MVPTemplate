@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { YStack } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
+import { trackSignUp, trackSignUpError } from '@mvp/analytics'
 import { useAuth } from './AuthProvider'
 
 function getErrorMessage(err: any, t: (key: string) => string): string {
@@ -44,9 +45,12 @@ export function SignUpForm() {
     setLoading(true)
     try {
       await authApi.register({ email, password, name })
+      trackSignUp('email')
       onAuthSuccess()
     } catch (err: any) {
-      setErrors({ form: getErrorMessage(err, t) })
+      const msg = getErrorMessage(err, t)
+      trackSignUpError('email', msg)
+      setErrors({ form: msg })
     } finally {
       setLoading(false)
     }

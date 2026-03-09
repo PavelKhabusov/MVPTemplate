@@ -71,8 +71,8 @@ const mockSubscription = {
 describe('paymentsService.handleWebhookEvent', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(paymentsRepository.updatePaymentByProviderId).mockResolvedValue(null)
-    vi.mocked(paymentsRepository.updateSubscriptionByProviderId).mockResolvedValue(null)
+    vi.mocked(paymentsRepository.updatePaymentByProviderId).mockResolvedValue(null as any)
+    vi.mocked(paymentsRepository.updateSubscriptionByProviderId).mockResolvedValue(null as any)
   })
 
   // ─── payment.succeeded ───────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ describe('paymentsService.handleWebhookEvent', () => {
 
   describe('subscription.created', () => {
     it('creates a subscription record on first webhook delivery', async () => {
-      vi.mocked(paymentsRepository.findSubscriptionByProviderId).mockResolvedValue(null)
+      vi.mocked(paymentsRepository.findSubscriptionByProviderId).mockResolvedValue(null as any)
       vi.mocked(paymentsRepository.getPlanById).mockResolvedValue(mockPlan)
       vi.mocked(paymentsRepository.createSubscription).mockResolvedValue(mockSubscription)
 
@@ -174,7 +174,7 @@ describe('paymentsService.handleWebhookEvent', () => {
     })
 
     it('also marks the associated payment as succeeded (Robokassa combined webhook)', async () => {
-      vi.mocked(paymentsRepository.findSubscriptionByProviderId).mockResolvedValue(null)
+      vi.mocked(paymentsRepository.findSubscriptionByProviderId).mockResolvedValue(null as any)
       vi.mocked(paymentsRepository.getPlanById).mockResolvedValue(mockPlan)
       vi.mocked(paymentsRepository.createSubscription).mockResolvedValue(mockSubscription)
 

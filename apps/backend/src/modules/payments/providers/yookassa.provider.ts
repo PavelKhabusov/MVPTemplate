@@ -4,6 +4,7 @@ import type {
   CheckoutResult,
   WebhookEvent,
   CancelSubscriptionParams,
+  RefundResult,
 } from './payment-provider'
 
 const YOOKASSA_API = 'https://api.yookassa.ru/v3'
@@ -130,7 +131,7 @@ export class YooKassaProvider implements PaymentProvider {
     throw new Error('YooKassa subscriptions are managed locally')
   }
 
-  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number) {
+  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number): Promise<RefundResult> {
     throw new Error('YooKassa refunds are not yet implemented')
   }
 }

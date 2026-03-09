@@ -20,6 +20,7 @@ import {
   StaggerGroup,
   SettingsGroup,
   SettingsGroupItem,
+  AppModal,
 } from '@mvp/ui'
 import { Ionicons } from '@expo/vector-icons'
 import { useTemplateFlag } from '@mvp/template-config'
@@ -41,6 +42,300 @@ const THEME_LABELS: Record<ThemeMode, string> = {
 
 const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark']
 
+// ---------------------------------------------------------------------------
+// Shared hook: common state & callbacks used by all 3 views
+// ---------------------------------------------------------------------------
+
+function useSettingsCommon() {
+  const { t, i18n } = useTranslation()
+  const theme = useTheme()
+  const { mode, setMode } = useThemeStore()
+  const setLanguage = useLanguageStore((s) => s.setLanguage)
+  const docsEnabled = useTemplateFlag('docs', true)
+  const pushEnabled = useTemplateFlag('pushNotifications', false)
+  const onboardingEnabled = useTemplateFlag('onboarding', true)
+  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
+  const [showLangPicker, setShowLangPicker] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
+
+  const cycleTheme = () => {
+    const currentIdx = THEME_CYCLE.indexOf(mode)
+    const next = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length]
+    setMode(next)
+  }
+
+  const selectLanguage = (lang: SupportedLanguage) => {
+    i18n.changeLanguage(lang)
+    setLanguage(lang)
+    setShowLangPicker(false)
+  }
+
+  const handleReplayTour = () => {
+    resetOnboarding()
+    router.push('/')
+  }
+
+  return {
+    t,
+    i18n,
+    theme,
+    mode,
+    docsEnabled,
+    pushEnabled,
+    onboardingEnabled,
+    showLangPicker,
+    setShowLangPicker,
+    showAbout,
+    setShowAbout,
+    cycleTheme,
+    selectLanguage,
+    handleReplayTour,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared sections
+// ---------------------------------------------------------------------------
+
+function AppearanceSection({
+  mode,
+  cycleTheme,
+  currentLang,
+  showLangPicker,
+  toggleLangPicker,
+  selectLanguage,
+}: {
+  mode: ThemeMode
+  cycleTheme: () => void
+  currentLang: SupportedLanguage
+  showLangPicker: boolean
+  toggleLangPicker: () => void
+  selectLanguage: (lang: SupportedLanguage) => void
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <>
+      <SettingsGroup header={t('settings.theme')}>
+        <SettingsGroupItem
+          icon="color-palette-outline"
+          label={t('settings.theme')}
+          value={t(THEME_LABELS[mode])}
+          onPress={cycleTheme}
+        />
+        <SettingsGroupItem
+          icon="language-outline"
+          label={t('settings.language')}
+          value={LANGUAGE_LABELS[currentLang] ?? currentLang}
+          onPress={toggleLangPicker}
+        />
+      </SettingsGroup>
+
+      <AnimatePresence>
+        {showLangPicker && (
+          <MotiView
+            from={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: 'timing', duration: 200 }}
+          >
+            <LanguagePicker
+              currentLang={currentLang}
+              onSelect={selectLanguage}
+            />
+          </MotiView>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
+function GeneralSection({
+  pushEnabled,
+  docsEnabled,
+  onboardingEnabled,
+  onNotifications,
+  onReplayTour,
+  onShowAbout,
+  showPricing,
+}: {
+  pushEnabled: boolean
+  docsEnabled: boolean
+  onboardingEnabled: boolean
+  onNotifications: () => void
+  onReplayTour: () => void
+  onShowAbout: () => void
+  showPricing?: boolean
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <SettingsGroup header={t('settings.title')}>
+      {showPricing && (
+        <SettingsGroupItem
+          icon="pricetags-outline"
+          label={t('payments.title')}
+          onPress={() => router.push('/pricing')}
+        />
+      )}
+      {pushEnabled && (
+        <SettingsGroupItem
+          icon="notifications-outline"
+          label={t('settings.notifications')}
+          onPress={onNotifications}
+        />
+      )}
+      {docsEnabled && (
+        <SettingsGroupItem
+          icon="book-outline"
+          label={t('docs.title')}
+          onPress={() => router.push('/docs')}
+        />
+      )}
+      {onboardingEnabled && (
+        <SettingsGroupItem
+          icon="compass-outline"
+          label={t('settings.replayTour')}
+          onPress={onReplayTour}
+        />
+      )}
+      <SettingsGroupItem
+        icon="information-circle-outline"
+        label={t('settings.about')}
+        value={APP_CONFIG.version}
+        onPress={onShowAbout}
+      />
+    </SettingsGroup>
+  )
+}
+
+function DocumentsSection() {
+  const { t } = useTranslation()
+
+  return (
+    <SettingsGroup header={t('settings.documents')}>
+      <SettingsGroupItem
+        icon="shield-outline"
+        label={t('settings.privacy')}
+        onPress={() => router.push('/privacy')}
+      />
+      <SettingsGroupItem
+        icon="document-text-outline"
+        label={t('settings.terms')}
+        onPress={() => router.push('/terms')}
+      />
+      <SettingsGroupItem
+        icon="newspaper-outline"
+        label={t('settings.offer')}
+        onPress={() => router.push('/offer')}
+      />
+    </SettingsGroup>
+  )
+}
+
+function AccountSection({ user, showEditProfile }: { user: any; showEditProfile?: boolean }) {
+  const { t } = useTranslation()
+
+  return (
+    <SettingsGroup header={t('profile.title')}>
+      {showEditProfile && (
+        <SettingsGroupItem
+          icon="pencil-outline"
+          label={t('profile.editProfile')}
+          onPress={() => router.push('/edit-profile')}
+        />
+      )}
+      {user?.phone ? (
+        <SettingsGroupItem
+          icon="call-outline"
+          label={t('profile.phone')}
+          value={user.phone}
+        />
+      ) : null}
+      <SettingsGroupItem
+        icon="mail-outline"
+        label={t('profile.email')}
+        value={user?.email ?? '-'}
+      />
+      {user?.bio ? (
+        <SettingsGroupItem
+          icon="document-text-outline"
+          label={t('profile.bio')}
+          value={user.bio.length > 30 ? user.bio.slice(0, 30) + '...' : user.bio}
+        />
+      ) : null}
+      {user?.location ? (
+        <SettingsGroupItem
+          icon="location-outline"
+          label={t('profile.location')}
+          value={user.location}
+        />
+      ) : null}
+      {user?.birthday ? (
+        <SettingsGroupItem
+          icon="calendar-outline"
+          label={t('profile.birthday')}
+          value={new Date(user.birthday).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+        />
+      ) : null}
+    </SettingsGroup>
+  )
+}
+
+function AdminSection() {
+  const { t } = useTranslation()
+
+  return (
+    <SettingsGroup header={t('admin.title')}>
+      <SettingsGroupItem
+        icon="shield-checkmark-outline"
+        label={t('admin.title')}
+        onPress={() => router.push('/admin')}
+      />
+    </SettingsGroup>
+  )
+}
+
+function SignOutSection({ onSignOut }: { onSignOut: () => void }) {
+  const { t } = useTranslation()
+
+  return (
+    <SettingsGroup>
+      <SettingsGroupItem
+        icon="log-out-outline"
+        label={t('settings.signOut')}
+        onPress={onSignOut}
+        danger
+      />
+    </SettingsGroup>
+  )
+}
+
+function SignInPrompt() {
+  const { t } = useTranslation()
+
+  return (
+    <YStack alignItems="center" gap="$3" paddingVertical="$2">
+      <AppAvatar name="?" size={64} />
+      <Text color="$mutedText" textAlign="center" maxWidth={300}>
+        {t('profile.signInPrompt')}
+      </Text>
+      <XStack gap="$3">
+        <AppButton onPress={() => router.push('/sign-in')} size="sm">
+          {t('auth.signIn')}
+        </AppButton>
+        <AppButton variant="outline" onPress={() => router.push('/sign-up')} size="sm">
+          {t('auth.createAccount')}
+        </AppButton>
+      </XStack>
+    </YStack>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Root component
+// ---------------------------------------------------------------------------
+
 export default function SettingsScreen() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
@@ -54,6 +349,10 @@ export default function SettingsScreen() {
 
   return <UnauthenticatedSettingsView />
 }
+
+// ---------------------------------------------------------------------------
+// Modals (unchanged)
+// ---------------------------------------------------------------------------
 
 function NotificationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const theme = useTheme()
@@ -99,171 +398,83 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
   )
 }
 
+function AboutInfoRow({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <XStack
+      paddingVertical="$3"
+      paddingHorizontal="$4"
+      backgroundColor="$subtleBackground"
+      borderRadius="$3"
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      <Text fontSize="$3" color="$mutedText">{label}</Text>
+      <Text fontSize="$3" color={accent ? '$accent' : '$color'} fontWeight="500">{value}</Text>
+    </XStack>
+  )
+}
+
 function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const company = useCompanyStore((s) => s.info)
 
   const displayName = company.appName || APP_CONFIG.name
   const displayCompany = company.companyName || APP_CONFIG.developer
 
-  const content = (
-    <YStack alignItems="center" gap="$5" paddingHorizontal="$5" paddingVertical="$6">
-      <YStack alignItems="center" gap="$2">
-        <YStack
-          width={72}
-          height={72}
-          borderRadius="$5"
-          backgroundColor="$subtleBackground"
-          borderWidth={1}
-          borderColor="$borderColor"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
-        </YStack>
-        <Text fontSize="$6" fontWeight="700" color="$color">{displayName}</Text>
-        {company.tagline ? (
-          <Text fontSize="$2" color="$mutedText" textAlign="center">{company.tagline}</Text>
-        ) : null}
-        <Text fontSize="$2" color="$mutedText">v{APP_CONFIG.version}</Text>
-      </YStack>
-
-      <YStack width="100%" gap="$2">
-        <XStack
-          paddingVertical="$3"
-          paddingHorizontal="$4"
-          backgroundColor="$subtleBackground"
-          borderRadius="$3"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Text fontSize="$3" color="$mutedText">{t('settings.version')}</Text>
-          <Text fontSize="$3" color="$color" fontWeight="500">{APP_CONFIG.version}</Text>
-        </XStack>
-        <XStack
-          paddingVertical="$3"
-          paddingHorizontal="$4"
-          backgroundColor="$subtleBackground"
-          borderRadius="$3"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Text fontSize="$3" color="$mutedText">{t('settings.developer')}</Text>
-          <Text fontSize="$3" color="$color" fontWeight="500">{displayCompany}</Text>
-        </XStack>
-        {company.website ? (
-          <XStack
-            paddingVertical="$3"
-            paddingHorizontal="$4"
-            backgroundColor="$subtleBackground"
-            borderRadius="$3"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Text fontSize="$3" color="$mutedText">{t('admin.companyWebsite')}</Text>
-            <Text fontSize="$3" color="$accent" fontWeight="500">{company.website}</Text>
-          </XStack>
-        ) : null}
-        {company.supportEmail ? (
-          <XStack
-            paddingVertical="$3"
-            paddingHorizontal="$4"
-            backgroundColor="$subtleBackground"
-            borderRadius="$3"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Text fontSize="$3" color="$mutedText">{t('admin.companySupportEmail')}</Text>
-            <Text fontSize="$3" color="$accent" fontWeight="500">{company.supportEmail}</Text>
-          </XStack>
-        ) : null}
-      </YStack>
-
-      <Text fontSize="$2" color="$mutedText" textAlign="center">
-        {t('settings.madeWith')} · © {APP_CONFIG.year}
-      </Text>
-    </YStack>
-  )
-
-  if (!visible) return null
-
-  if (Platform.OS === 'web') {
-    return (
-      <YStack
-        // @ts-ignore
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' }}
-        onPress={onClose}
-      >
-        <YStack
-          backgroundColor="$background"
-          borderRadius="$5"
-          borderWidth={1}
-          borderColor="$borderColor"
-          maxWidth={400}
-          width="90%"
-          // @ts-ignore
-          onPress={(e: any) => e.stopPropagation()}
-        >
-          <XStack justifyContent="flex-end" padding="$3">
-            <ScalePress onPress={onClose}>
-              <Ionicons name="close" size={22} color={theme.mutedText.val} />
-            </ScalePress>
-          </XStack>
-          {content}
-        </YStack>
-      </YStack>
-    )
-  }
-
   return (
-    <Modal visible animationType="slide" presentationStyle="formSheet" onRequestClose={onClose}>
-      <YStack flex={1} backgroundColor="$background" paddingTop={insets.top}>
-        <XStack justifyContent="flex-end" padding="$3">
-          <ScalePress onPress={onClose}>
-            <Ionicons name="close" size={24} color={theme.color.val} />
-          </ScalePress>
-        </XStack>
-        {content}
+    <AppModal visible={visible} onClose={onClose} title={t('settings.about')} maxWidth={400}>
+      <YStack alignItems="center" gap="$5" paddingVertical="$2">
+        <YStack alignItems="center" gap="$2">
+          <YStack
+            width={72}
+            height={72}
+            borderRadius="$5"
+            backgroundColor="$subtleBackground"
+            borderWidth={1}
+            borderColor="$borderColor"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
+          </YStack>
+          <Text fontSize="$6" fontWeight="700" color="$color">{displayName}</Text>
+          {company.tagline ? (
+            <Text fontSize="$2" color="$mutedText" textAlign="center">{company.tagline}</Text>
+          ) : null}
+          <Text fontSize="$2" color="$mutedText">v{APP_CONFIG.version}</Text>
+        </YStack>
+
+        <YStack width="100%" gap="$2">
+          <AboutInfoRow label={t('settings.version')} value={APP_CONFIG.version} />
+          <AboutInfoRow label={t('settings.developer')} value={displayCompany} />
+          {company.website ? (
+            <AboutInfoRow label={t('admin.companyWebsite')} value={company.website} accent />
+          ) : null}
+          {company.supportEmail ? (
+            <AboutInfoRow label={t('admin.companySupportEmail')} value={company.supportEmail} accent />
+          ) : null}
+        </YStack>
+
+        <Text fontSize="$2" color="$mutedText" textAlign="center">
+          {t('settings.madeWith')} · © {APP_CONFIG.year}
+        </Text>
       </YStack>
-    </Modal>
+    </AppModal>
   )
 }
 
+// ---------------------------------------------------------------------------
+// View: Unauthenticated (native)
+// ---------------------------------------------------------------------------
+
 function UnauthenticatedSettingsView() {
-  const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
-  const theme = useTheme()
-  const { mode, setMode } = useThemeStore()
-  const docsEnabled = useTemplateFlag('docs', true)
-  const pushEnabled = useTemplateFlag('pushNotifications', false)
-  const onboardingEnabled = useTemplateFlag('onboarding', true)
-  const setLanguage = useLanguageStore((s) => s.setLanguage)
-  const [showLangPicker, setShowLangPicker] = useState(false)
-  const [showAbout, setShowAbout] = useState(false)
-  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
-
-  const handleReplayTour = () => {
-    resetOnboarding()
-    router.push('/')
-  }
-
-  const cycleTheme = () => {
-    const currentIdx = THEME_CYCLE.indexOf(mode)
-    const next = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length]
-    setMode(next)
-  }
-
-  const selectLanguage = (lang: SupportedLanguage) => {
-    i18n.changeLanguage(lang)
-    setLanguage(lang)
-    setShowLangPicker(false)
-  }
+  const s = useSettingsCommon()
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: theme.background.val }}
+      style={{ flex: 1, backgroundColor: s.theme.background.val }}
       contentContainerStyle={{
         paddingTop: insets.top + 16,
         paddingHorizontal: 16,
@@ -271,138 +482,52 @@ function UnauthenticatedSettingsView() {
         gap: 20,
       }}
     >
-      {/* Sign In prompt */}
       <FadeIn>
-        <YStack alignItems="center" gap="$3" paddingVertical="$2">
-          <AppAvatar name="?" size={64} />
-          <Text color="$mutedText" textAlign="center" maxWidth={300}>
-            {t('profile.signInPrompt')}
-          </Text>
-          <XStack gap="$3">
-            <AppButton onPress={() => router.push('/sign-in')} size="sm">
-              {t('auth.signIn')}
-            </AppButton>
-            <AppButton variant="outline" onPress={() => router.push('/sign-up')} size="sm">
-              {t('auth.createAccount')}
-            </AppButton>
-          </XStack>
-        </YStack>
+        <SignInPrompt />
       </FadeIn>
 
-      {/* Appearance */}
       <SlideIn from="bottom" delay={100}>
-        <SettingsGroup header={t('settings.theme')}>
-          <SettingsGroupItem
-            icon="color-palette-outline"
-            label={t('settings.theme')}
-            value={t(THEME_LABELS[mode])}
-            onPress={cycleTheme}
-          />
-          <SettingsGroupItem
-            icon="language-outline"
-            label={t('settings.language')}
-            value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
-            onPress={() => setShowLangPicker(!showLangPicker)}
-          />
-        </SettingsGroup>
-
-        <AnimatePresence>
-          {showLangPicker && (
-            <MotiView
-              from={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: 'timing', duration: 200 }}
-            >
-              <LanguagePicker
-                currentLang={i18n.language as SupportedLanguage}
-                onSelect={selectLanguage}
-              />
-            </MotiView>
-          )}
-        </AnimatePresence>
+        <AppearanceSection
+          mode={s.mode}
+          cycleTheme={s.cycleTheme}
+          currentLang={s.i18n.language as SupportedLanguage}
+          showLangPicker={s.showLangPicker}
+          toggleLangPicker={() => s.setShowLangPicker(!s.showLangPicker)}
+          selectLanguage={s.selectLanguage}
+        />
       </SlideIn>
 
-      {/* General */}
       <SlideIn from="bottom" delay={200}>
-        <SettingsGroup header={t('settings.title')}>
-          {pushEnabled && (
-            <SettingsGroupItem
-              icon="notifications-outline"
-              label={t('settings.notifications')}
-              onPress={() => router.push('/sign-in')}
-            />
-          )}
-          {docsEnabled && (
-            <SettingsGroupItem
-              icon="book-outline"
-              label={t('docs.title')}
-              onPress={() => router.push('/docs')}
-            />
-          )}
-          {onboardingEnabled && (
-            <SettingsGroupItem
-              icon="compass-outline"
-              label={t('settings.replayTour')}
-              onPress={handleReplayTour}
-            />
-          )}
-          <SettingsGroupItem
-            icon="information-circle-outline"
-            label={t('settings.about')}
-            value={APP_CONFIG.version}
-            onPress={() => setShowAbout(true)}
-          />
-        </SettingsGroup>
+        <GeneralSection
+          pushEnabled={s.pushEnabled}
+          docsEnabled={s.docsEnabled}
+          onboardingEnabled={s.onboardingEnabled}
+          onNotifications={() => router.push('/sign-in')}
+          onReplayTour={s.handleReplayTour}
+          onShowAbout={() => s.setShowAbout(true)}
+        />
       </SlideIn>
 
-      {/* Documents */}
       <SlideIn from="bottom" delay={300}>
-        <SettingsGroup header={t('settings.documents')}>
-          <SettingsGroupItem
-            icon="shield-outline"
-            label={t('settings.privacy')}
-            onPress={() => router.push('/privacy')}
-          />
-          <SettingsGroupItem
-            icon="document-text-outline"
-            label={t('settings.terms')}
-            onPress={() => router.push('/terms')}
-          />
-          <SettingsGroupItem
-            icon="newspaper-outline"
-            label={t('settings.offer')}
-            onPress={() => router.push('/offer')}
-          />
-        </SettingsGroup>
+        <DocumentsSection />
       </SlideIn>
 
-      <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
+      <AboutModal visible={s.showAbout} onClose={() => s.setShowAbout(false)} />
     </ScrollView>
   )
 }
 
+// ---------------------------------------------------------------------------
+// View: Authenticated (native)
+// ---------------------------------------------------------------------------
+
 function AuthenticatedSettingsView() {
-  const { t, i18n } = useTranslation()
-  const theme = useTheme()
   const insets = useSafeAreaInsets()
   const user = useAuthStore((s) => s.user)
   const userRole = useAuthStore((s) => s.user?.role)
-  const { mode, setMode } = useThemeStore()
-  const setLanguage = useLanguageStore((s) => s.setLanguage)
-  const docsEnabled = useTemplateFlag('docs', true)
-  const pushEnabled = useTemplateFlag('pushNotifications', false)
-  const onboardingEnabled = useTemplateFlag('onboarding', true)
-  const [showLangPicker, setShowLangPicker] = useState(false)
+  const s = useSettingsCommon()
   const [showNotifications, setShowNotifications] = useState(false)
-  const [showAbout, setShowAbout] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
-
-  const handleReplayTour = () => {
-    resetOnboarding()
-    router.push('/')
-  }
 
   const scrollY = useSharedValue(0)
   const scrollHandler = useAnimatedScrollHandler({
@@ -415,18 +540,6 @@ function AuthenticatedSettingsView() {
     setRefreshing(true)
     setTimeout(() => setRefreshing(false), 1200)
   }, [])
-
-  const cycleTheme = () => {
-    const currentIdx = THEME_CYCLE.indexOf(mode)
-    const next = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length]
-    setMode(next)
-  }
-
-  const selectLanguage = (lang: SupportedLanguage) => {
-    i18n.changeLanguage(lang)
-    setLanguage(lang)
-    setShowLangPicker(false)
-  }
 
   const handleSignOut = async () => {
     await authApi.logout()
@@ -444,7 +557,7 @@ function AuthenticatedSettingsView() {
         avatarName={user?.name}
         userName={user?.name ?? 'Guest'}
         userStatus={user?.email}
-        rightAction={{ label: t('common.edit'), onPress: () => router.push('/edit-profile') }}
+        rightAction={{ label: s.t('common.edit'), onPress: () => router.push('/edit-profile') }}
       />
 
       <Animated.ScrollView
@@ -460,213 +573,77 @@ function AuthenticatedSettingsView() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={theme.accent.val}
-            colors={[theme.accent.val]}
-            progressBackgroundColor={theme.cardBackground.val}
+            tintColor={s.theme.accent.val}
+            colors={[s.theme.accent.val]}
+            progressBackgroundColor={s.theme.cardBackground.val}
           />
         }
       >
-        {/* Account */}
         <StaggerGroup index={groupIndex++}>
-          <SettingsGroup header={t('profile.title')}>
-            {user?.phone ? (
-              <SettingsGroupItem
-                icon="call-outline"
-                label={t('profile.phone')}
-                value={user.phone}
-              />
-            ) : null}
-            <SettingsGroupItem
-              icon="mail-outline"
-              label={t('profile.email')}
-              value={user?.email ?? '-'}
-            />
-            {user?.bio ? (
-              <SettingsGroupItem
-                icon="document-text-outline"
-                label={t('profile.bio')}
-                value={user.bio.length > 30 ? user.bio.slice(0, 30) + '...' : user.bio}
-              />
-            ) : null}
-            {user?.location ? (
-              <SettingsGroupItem
-                icon="location-outline"
-                label={t('profile.location')}
-                value={user.location}
-              />
-            ) : null}
-            {user?.birthday ? (
-              <SettingsGroupItem
-                icon="calendar-outline"
-                label={t('profile.birthday')}
-                value={new Date(user.birthday).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-              />
-            ) : null}
-          </SettingsGroup>
+          <AccountSection user={user} />
         </StaggerGroup>
 
-        {/* Appearance */}
         <StaggerGroup index={groupIndex++}>
-          <SettingsGroup header={t('settings.theme')}>
-            <SettingsGroupItem
-              icon="color-palette-outline"
-              label={t('settings.theme')}
-              value={t(THEME_LABELS[mode])}
-              onPress={cycleTheme}
-            />
-            <SettingsGroupItem
-              icon="language-outline"
-              label={t('settings.language')}
-              value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
-              onPress={() => setShowLangPicker(!showLangPicker)}
-            />
-          </SettingsGroup>
-
-          <AnimatePresence>
-            {showLangPicker && (
-              <MotiView
-                from={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ type: 'timing', duration: 200 }}
-              >
-                <LanguagePicker
-                  currentLang={i18n.language as SupportedLanguage}
-                  onSelect={selectLanguage}
-                />
-              </MotiView>
-            )}
-          </AnimatePresence>
+          <AppearanceSection
+            mode={s.mode}
+            cycleTheme={s.cycleTheme}
+            currentLang={s.i18n.language as SupportedLanguage}
+            showLangPicker={s.showLangPicker}
+            toggleLangPicker={() => s.setShowLangPicker(!s.showLangPicker)}
+            selectLanguage={s.selectLanguage}
+          />
         </StaggerGroup>
 
-        {/* General */}
         <StaggerGroup index={groupIndex++}>
-          <SettingsGroup header={t('settings.title')}>
-            <SettingsGroupItem
-              icon="pricetags-outline"
-              label={t('payments.title')}
-              onPress={() => router.push('/pricing')}
-            />
-            {pushEnabled && (
-              <SettingsGroupItem
-                icon="notifications-outline"
-                label={t('settings.notifications')}
-                onPress={() => setShowNotifications(true)}
-              />
-            )}
-            {docsEnabled && (
-              <SettingsGroupItem
-                icon="book-outline"
-                label={t('docs.title')}
-                onPress={() => router.push('/docs')}
-              />
-            )}
-            {onboardingEnabled && (
-              <SettingsGroupItem
-                icon="compass-outline"
-                label={t('settings.replayTour')}
-                onPress={handleReplayTour}
-              />
-            )}
-            <SettingsGroupItem
-              icon="information-circle-outline"
-              label={t('settings.about')}
-              value={APP_CONFIG.version}
-              onPress={() => setShowAbout(true)}
-            />
-          </SettingsGroup>
+          <GeneralSection
+            pushEnabled={s.pushEnabled}
+            docsEnabled={s.docsEnabled}
+            onboardingEnabled={s.onboardingEnabled}
+            onNotifications={() => setShowNotifications(true)}
+            onReplayTour={s.handleReplayTour}
+            onShowAbout={() => s.setShowAbout(true)}
+            showPricing
+          />
         </StaggerGroup>
 
-        {/* Documents */}
         <StaggerGroup index={groupIndex++}>
-          <SettingsGroup header={t('settings.documents')}>
-            <SettingsGroupItem
-              icon="shield-outline"
-              label={t('settings.privacy')}
-              onPress={() => router.push('/privacy')}
-            />
-            <SettingsGroupItem
-              icon="document-text-outline"
-              label={t('settings.terms')}
-              onPress={() => router.push('/terms')}
-            />
-            <SettingsGroupItem
-              icon="newspaper-outline"
-              label={t('settings.offer')}
-              onPress={() => router.push('/offer')}
-            />
-          </SettingsGroup>
+          <DocumentsSection />
         </StaggerGroup>
 
-        {pushEnabled && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
-        <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
+        {s.pushEnabled && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
+        <AboutModal visible={s.showAbout} onClose={() => s.setShowAbout(false)} />
 
-        {/* Admin */}
         {userRole === 'admin' && (
           <StaggerGroup index={groupIndex++}>
-            <SettingsGroup header={t('admin.title')}>
-              <SettingsGroupItem
-                icon="shield-checkmark-outline"
-                label={t('admin.title')}
-                onPress={() => router.push('/admin')}
-              />
-            </SettingsGroup>
+            <AdminSection />
           </StaggerGroup>
         )}
 
-        {/* Sign Out */}
         <StaggerGroup index={groupIndex++}>
-          <SettingsGroup>
-            <SettingsGroupItem
-              icon="log-out-outline"
-              label={t('settings.signOut')}
-              onPress={handleSignOut}
-              danger
-            />
-          </SettingsGroup>
+          <SignOutSection onSignOut={handleSignOut} />
         </StaggerGroup>
       </Animated.ScrollView>
     </YStack>
   )
 }
 
+// ---------------------------------------------------------------------------
+// View: Web (handles both auth & unauth)
+// ---------------------------------------------------------------------------
+
 function WebSettingsView() {
-  const { t, i18n } = useTranslation()
-  const theme = useTheme()
   const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const userRole = useAuthStore((s) => s.user?.role)
-  const { mode, setMode } = useThemeStore()
-  const setLanguage = useLanguageStore((s) => s.setLanguage)
-  const docsEnabled = useTemplateFlag('docs', true)
-  const pushEnabled = useTemplateFlag('pushNotifications', false)
-  const onboardingEnabled = useTemplateFlag('onboarding', true)
-  const [showLangPicker, setShowLangPicker] = useState(false)
+  const s = useSettingsCommon()
   const [showNotifications, setShowNotifications] = useState(false)
-  const [showAbout, setShowAbout] = useState(false)
-  const resetOnboarding = useAppStore((s) => s.resetOnboarding)
-
-  const handleReplayTour = () => {
-    resetOnboarding()
-    router.push('/')
-  }
-
-  const cycleTheme = () => {
-    const currentIdx = THEME_CYCLE.indexOf(mode)
-    const next = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length]
-    setMode(next)
-  }
-
-  const selectLanguage = (lang: SupportedLanguage) => {
-    i18n.changeLanguage(lang)
-    setLanguage(lang)
-    setShowLangPicker(false)
-  }
 
   const handleSignOut = async () => {
     await authApi.logout()
     router.replace('/')
   }
+
+  let groupIndex = 0
 
   return (
     <YStack flex={1} backgroundColor="$background">
@@ -681,194 +658,65 @@ function WebSettingsView() {
             </YStack>
           </YStack>
         ) : (
-          <YStack alignItems="center" gap="$3" paddingVertical="$4">
-            <AppAvatar name="?" size={64} />
-            <Text color="$mutedText" textAlign="center" maxWidth={300}>
-              {t('profile.signInPrompt')}
-            </Text>
-            <XStack gap="$3">
-              <AppButton onPress={() => router.push('/sign-in')} size="sm">
-                {t('auth.signIn')}
-              </AppButton>
-              <AppButton variant="outline" onPress={() => router.push('/sign-up')} size="sm">
-                {t('auth.createAccount')}
-              </AppButton>
-            </XStack>
-          </YStack>
+          <SignInPrompt />
         )}
 
         {/* Account (auth only) */}
         {isAuthenticated && (
-          <StaggerGroup index={0}>
-            <SettingsGroup header={t('profile.title')}>
-              <SettingsGroupItem
-                icon="pencil-outline"
-                label={t('profile.editProfile')}
-                onPress={() => router.push('/edit-profile')}
-              />
-              {user?.phone ? (
-                <SettingsGroupItem
-                  icon="call-outline"
-                  label={t('profile.phone')}
-                  value={user.phone}
-                />
-              ) : null}
-              <SettingsGroupItem
-                icon="mail-outline"
-                label={t('profile.email')}
-                value={user?.email ?? '-'}
-              />
-              {user?.bio ? (
-                <SettingsGroupItem
-                  icon="document-text-outline"
-                  label={t('profile.bio')}
-                  value={user.bio.length > 30 ? user.bio.slice(0, 30) + '...' : user.bio}
-                />
-              ) : null}
-              {user?.location ? (
-                <SettingsGroupItem
-                  icon="location-outline"
-                  label={t('profile.location')}
-                  value={user.location}
-                />
-              ) : null}
-              {user?.birthday ? (
-                <SettingsGroupItem
-                  icon="calendar-outline"
-                  label={t('profile.birthday')}
-                  value={new Date(user.birthday).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                />
-              ) : null}
-            </SettingsGroup>
+          <StaggerGroup index={groupIndex++}>
+            <AccountSection user={user} showEditProfile />
           </StaggerGroup>
         )}
 
-        {/* Appearance */}
-        <StaggerGroup index={isAuthenticated ? 1 : 0}>
-          <SettingsGroup header={t('settings.theme')}>
-            <SettingsGroupItem
-              icon="color-palette-outline"
-              label={t('settings.theme')}
-              value={t(THEME_LABELS[mode])}
-              onPress={cycleTheme}
-            />
-            <SettingsGroupItem
-              icon="language-outline"
-              label={t('settings.language')}
-              value={LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? i18n.language}
-              onPress={() => setShowLangPicker(!showLangPicker)}
-            />
-          </SettingsGroup>
-
-          <AnimatePresence>
-            {showLangPicker && (
-              <MotiView
-                from={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ type: 'timing', duration: 200 }}
-              >
-                <LanguagePicker
-                  currentLang={i18n.language as SupportedLanguage}
-                  onSelect={selectLanguage}
-                />
-              </MotiView>
-            )}
-          </AnimatePresence>
+        <StaggerGroup index={groupIndex++}>
+          <AppearanceSection
+            mode={s.mode}
+            cycleTheme={s.cycleTheme}
+            currentLang={s.i18n.language as SupportedLanguage}
+            showLangPicker={s.showLangPicker}
+            toggleLangPicker={() => s.setShowLangPicker(!s.showLangPicker)}
+            selectLanguage={s.selectLanguage}
+          />
         </StaggerGroup>
 
-        {/* General */}
-        <StaggerGroup index={isAuthenticated ? 2 : 1}>
-          <SettingsGroup header={t('settings.title')}>
-            <SettingsGroupItem
-              icon="pricetags-outline"
-              label={t('payments.title')}
-              onPress={() => router.push('/pricing')}
-            />
-            {pushEnabled && (
-              <SettingsGroupItem
-                icon="notifications-outline"
-                label={t('settings.notifications')}
-                onPress={() => isAuthenticated ? setShowNotifications(true) : router.push('/sign-in')}
-              />
-            )}
-            {docsEnabled && (
-              <SettingsGroupItem
-                icon="book-outline"
-                label={t('docs.title')}
-                onPress={() => router.push('/docs')}
-              />
-            )}
-            {onboardingEnabled && (
-              <SettingsGroupItem
-                icon="compass-outline"
-                label={t('settings.replayTour')}
-                onPress={handleReplayTour}
-              />
-            )}
-            <SettingsGroupItem
-              icon="information-circle-outline"
-              label={t('settings.about')}
-              value={APP_CONFIG.version}
-              onPress={() => setShowAbout(true)}
-            />
-          </SettingsGroup>
+        <StaggerGroup index={groupIndex++}>
+          <GeneralSection
+            pushEnabled={s.pushEnabled}
+            docsEnabled={s.docsEnabled}
+            onboardingEnabled={s.onboardingEnabled}
+            onNotifications={() => isAuthenticated ? setShowNotifications(true) : router.push('/sign-in')}
+            onReplayTour={s.handleReplayTour}
+            onShowAbout={() => s.setShowAbout(true)}
+            showPricing
+          />
         </StaggerGroup>
 
-        {/* Documents */}
-        <StaggerGroup index={isAuthenticated ? 3 : 2}>
-          <SettingsGroup header={t('settings.documents')}>
-            <SettingsGroupItem
-              icon="shield-outline"
-              label={t('settings.privacy')}
-              onPress={() => router.push('/privacy')}
-            />
-            <SettingsGroupItem
-              icon="document-text-outline"
-              label={t('settings.terms')}
-              onPress={() => router.push('/terms')}
-            />
-            <SettingsGroupItem
-              icon="newspaper-outline"
-              label={t('settings.offer')}
-              onPress={() => router.push('/offer')}
-            />
-          </SettingsGroup>
+        <StaggerGroup index={groupIndex++}>
+          <DocumentsSection />
         </StaggerGroup>
 
-        {pushEnabled && isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
-        <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
+        {s.pushEnabled && isAuthenticated && <NotificationModal visible={showNotifications} onClose={() => setShowNotifications(false)} />}
+        <AboutModal visible={s.showAbout} onClose={() => s.setShowAbout(false)} />
 
-        {/* Admin */}
         {userRole === 'admin' && (
-          <StaggerGroup index={isAuthenticated ? 4 : 3}>
-            <SettingsGroup header={t('admin.title')}>
-              <SettingsGroupItem
-                icon="shield-checkmark-outline"
-                label={t('admin.title')}
-                onPress={() => router.push('/admin')}
-              />
-            </SettingsGroup>
+          <StaggerGroup index={groupIndex++}>
+            <AdminSection />
           </StaggerGroup>
         )}
 
-        {/* Sign Out */}
         {isAuthenticated && (
-          <StaggerGroup index={userRole === 'admin' ? 5 : 4}>
-            <SettingsGroup>
-              <SettingsGroupItem
-                icon="log-out-outline"
-                label={t('settings.signOut')}
-                onPress={handleSignOut}
-                danger
-              />
-            </SettingsGroup>
+          <StaggerGroup index={groupIndex++}>
+            <SignOutSection onSignOut={handleSignOut} />
           </StaggerGroup>
         )}
       </ScrollView>
     </YStack>
   )
 }
+
+// ---------------------------------------------------------------------------
+// LanguagePicker
+// ---------------------------------------------------------------------------
 
 function LanguagePicker({
   currentLang,

@@ -4,7 +4,7 @@ import OnboardingScreen from '../components/OnboardingScreen'
 import MainScreen from '../components/MainScreen'
 import { useTheme } from '../hooks/useTheme'
 import { useSubscription } from '../hooks/useSubscription'
-import { logout, fetchFlags, type AppFlags } from '../services/api'
+import { logout, fetchFlags, getMe, type AppFlags } from '../services/api'
 
 const DEFAULT_FLAGS: AppFlags = { googleAuth: false, payments: false, email: false }
 
@@ -13,17 +13,26 @@ export default function App() {
   const [authChecked, setAuthChecked] = useState(false)
   const [onboardingDone, setOnboardingDone] = useState(true)
   const [flags, setFlags] = useState<AppFlags>(DEFAULT_FLAGS)
+  const [user, setUser] = useState<{ email: string; name: string } | null>(null)
   const { theme, setTheme } = useTheme()
-  const { subscription, loading: subLoading } = useSubscription()
+  const { subscription, loading: subLoading } = useSubscription(authed && authChecked)
 
   useEffect(() => {
-    // Fetch backend config flags
     fetchFlags().then(setFlags).catch(() => {})
 
     chrome.storage?.local
       ?.get(['accessToken', 'onboardingDone'])
-      .then((result) => {
-        if (result?.accessToken) setAuthed(true)
+      .then(async (result) => {
+        if (result?.accessToken) {
+          // Validate token — if expired/invalid, clear it and show login
+          const u = await getMe().catch(() => null)
+          if (u) {
+            setAuthed(true)
+            setUser(u)
+          } else {
+            chrome.storage?.local?.remove(['accessToken', 'refreshToken']).catch(() => {})
+          }
+        }
         if (result?.onboardingDone) setOnboardingDone(true)
         else setOnboardingDone(false)
         setAuthChecked(true)
@@ -41,6 +50,7 @@ export default function App() {
   const handleLogout = useCallback(async () => {
     await logout()
     setAuthed(false)
+    setUser(null)
   }, [])
 
   if (!authChecked) {
@@ -52,7 +62,7 @@ export default function App() {
   }
 
   if (!authed) {
-    return <AuthScreen onAuth={() => setAuthed(true)} googleAuthEnabled={flags.googleAuth} />
+    return <AuthScreen onAuth={() => setAuthed(true)} googleAuthEnabled={flags.googleAuth} theme={theme} setTheme={setTheme} />
   }
 
   if (!onboardingDone) {

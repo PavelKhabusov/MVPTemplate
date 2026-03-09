@@ -16,7 +16,15 @@
       "Bash(npx tsc:*)",
       "Bash(curl:*)",
       "Bash(npx turbo:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(npx playwright:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx vitest:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7"
+  ],
+  "enableAllProjectMcpServers": true
 }

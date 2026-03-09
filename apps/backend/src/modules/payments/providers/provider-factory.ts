@@ -5,14 +5,18 @@ import { YooKassaProvider } from './yookassa.provider'
 import { RobokassaProvider } from './robokassa.provider'
 import { PayPalProvider } from './paypal.provider'
 import { PolarProvider } from './polar.provider'
+import { DodoProvider } from './dodo.provider'
+import { PaddleProvider } from './paddle.provider'
 
 let stripeProvider: StripeProvider | null = null
 let yookassaProvider: YooKassaProvider | null = null
 let robokassaProvider: RobokassaProvider | null = null
 let paypalProvider: PayPalProvider | null = null
 let polarProvider: PolarProvider | null = null
+let dodoProvider: DodoProvider | null = null
+let paddleProvider: PaddleProvider | null = null
 
-export type ProviderName = 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar'
+export type ProviderName = 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar' | 'dodopayment' | 'paddle'
 
 export function getPaymentProvider(provider: ProviderName): PaymentProvider {
   if (provider === 'stripe') {
@@ -80,6 +84,28 @@ export function getPaymentProvider(provider: ProviderName): PaymentProvider {
     return polarProvider
   }
 
+  if (provider === 'dodopayment') {
+    if (!env.DODO_ENABLED) throw new Error('Dodo Payment is disabled (DODO_ENABLED=false)')
+    if (!env.DODO_API_KEY) {
+      throw new Error('Dodo Payment is not configured. Set DODO_API_KEY.')
+    }
+    if (!dodoProvider) {
+      dodoProvider = new DodoProvider(env.DODO_API_KEY, env.DODO_WEBHOOK_SECRET)
+    }
+    return dodoProvider
+  }
+
+  if (provider === 'paddle') {
+    if (!env.PADDLE_ENABLED) throw new Error('Paddle is disabled (PADDLE_ENABLED=false)')
+    if (!env.PADDLE_API_KEY) {
+      throw new Error('Paddle is not configured. Set PADDLE_API_KEY.')
+    }
+    if (!paddleProvider) {
+      paddleProvider = new PaddleProvider(env.PADDLE_API_KEY, env.PADDLE_WEBHOOK_SECRET, env.PADDLE_SANDBOX)
+    }
+    return paddleProvider
+  }
+
   throw new Error(`Unknown payment provider: ${provider}`)
 }
 
@@ -90,5 +116,7 @@ export function getEnabledProviders(): ProviderName[] {
   if (env.ROBOKASSA_ENABLED && env.ROBOKASSA_MERCHANT_LOGIN) providers.push('robokassa')
   if (env.PAYPAL_ENABLED && env.PAYPAL_CLIENT_ID) providers.push('paypal')
   if (env.POLAR_ENABLED && env.POLAR_ACCESS_TOKEN) providers.push('polar')
+  if (env.DODO_ENABLED && env.DODO_API_KEY) providers.push('dodopayment')
+  if (env.PADDLE_ENABLED && env.PADDLE_API_KEY) providers.push('paddle')
   return providers
 }

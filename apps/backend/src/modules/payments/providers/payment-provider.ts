@@ -52,7 +52,7 @@ export interface RefundResult {
 }
 
 export interface PaymentProvider {
-  readonly name: 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar'
+  readonly name: 'stripe' | 'yookassa' | 'robokassa' | 'paypal' | 'polar' | 'dodopayment' | 'paddle'
 
   createCheckoutSession(params: CreateCheckoutParams): Promise<CheckoutResult>
 

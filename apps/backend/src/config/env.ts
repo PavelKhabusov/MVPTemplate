@@ -20,6 +20,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:8081'),
   EXPO_ACCESS_TOKEN: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 
   // Analytics
   ANALYTICS_ENABLED: envBoolean.default(true),
@@ -70,6 +71,17 @@ const envSchema = z.object({
   POLAR_ACCESS_TOKEN: z.string().optional(),
   POLAR_WEBHOOK_SECRET: z.string().optional(),
   POLAR_ORGANIZATION_ID: z.string().optional(),
+  // Dodo Payment
+  DODO_ENABLED: envBoolean,
+  DODO_API_KEY: z.string().optional(),
+  DODO_WEBHOOK_SECRET: z.string().optional(),
+
+  // Paddle
+  PADDLE_ENABLED: envBoolean,
+  PADDLE_API_KEY: z.string().optional(),
+  PADDLE_WEBHOOK_SECRET: z.string().optional(),
+  PADDLE_SANDBOX: envBoolean.default(true),
+
 
   // SMS
   SMS_ENABLED: envBoolean,
@@ -102,6 +114,16 @@ const envSchema = z.object({
   // Proxy (legacy env vars — proxy is now managed via DB)
   PROXY_ENABLED: envBoolean,
   PROXY_URL: z.string().optional(),
+
+  // Chrome Extension
+  CHROME_GOOGLE_CLIENT_ID: z.string().optional(),
+
+  // Voximplant
+  VOXIMPLANT_ACCOUNT_ID: z.string().optional(),
+  VOXIMPLANT_API_KEY: z.string().optional(),
+
+  // Encryption (for AES-256-GCM, 32-byte hex key)
+  ENCRYPTION_KEY: z.string().optional(),
 
   // Storage
   STORAGE_TYPE: z.enum(['local', 's3']).default('local'),

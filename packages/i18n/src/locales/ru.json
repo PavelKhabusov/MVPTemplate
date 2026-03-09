@@ -60,7 +60,15 @@
       "emailRequired": "Введите email",
       "passwordMin": "Пароль минимум 8 символов",
       "passwordsMismatch": "Пароли не совпадают"
-    }
+    },
+    "signInOrRegister": "Войти / Регистрация",
+    "orQuickReg": "или быстрая регистрация",
+    "signingIn": "Входим...",
+    "alreadyHaveAccount": "Уже есть аккаунт? Войти",
+    "noAccountRegister": "Нет аккаунта? Зарегистрироваться",
+    "enterEmailPassword": "Введите email и пароль",
+    "errorPasswordFormat": "Проверьте email и пароль (мин. 6 символов)",
+    "errorServerDown": "Сервер недоступен. Запустите backend."
   },
   "tabs": {
     "home": "Главная",
@@ -181,6 +189,8 @@
     "envLabel_SMTP_PASS": "SMTP пароль",
     "envLabel_SMTP_FROM": "Адрес отправителя",
     "envLabel_GOOGLE_CLIENT_ID": "Client ID",
+    "envLabel_GOOGLE_CLIENT_SECRET": "Client Secret",
+    "envLabel_CHROME_GOOGLE_CLIENT_ID": "Chrome Google Client ID",
     "envLabel_EXPO_ACCESS_TOKEN": "Expo Access Token",
     "envLabel_STRIPE_SECRET_KEY": "Секретный ключ",
     "envLabel_STRIPE_WEBHOOK_SECRET": "Webhook секрет",
@@ -339,7 +349,15 @@
     "companySave": "Сохранить",
     "companySaved": "Информация о компании сохранена",
     "companySaveError": "Не удалось сохранить информацию",
-    "loadError": "Не удалось загрузить данные"
+    "loadError": "Не удалось загрузить данные",
+    "envLabel_DODO_API_KEY": "API-ключ",
+    "envLabel_DODO_WEBHOOK_SECRET": "Webhook-секрет",
+    "envLabel_PADDLE_API_KEY": "API-ключ",
+    "envLabel_PADDLE_WEBHOOK_SECRET": "Webhook-секрет",
+    "envLabel_PADDLE_SANDBOX": "Режим песочницы",
+    "hintDodo": "Получить ключи в Dodo Payments Dashboard →",
+    "hintPaddle": "Получить ключи в Paddle Vendor Dashboard →",
+    "paddleSandbox": "Режим песочницы"
   },
   "notifications": {
     "title": "Уведомления",
@@ -413,6 +431,10 @@
     "heroBadge": "Open Source MVP шаблон",
     "heroCTA": "Начать бесплатно",
     "heroSecondaryCTA": "GitHub",
+    "heroSocialProof1": "Готов к продакшену",
+    "heroSocialProof2": "7 платежных провайдеров",
+    "heroSocialProof3": "iOS, Android и Web",
+    "featuresLabel": "Что включено",
     "featuresTitle": "Создан для скорости",
     "featuresSubtitle": "Всё, что нужно современному приложению — уже настроено и готово к кастомизации.",
     "featureCrossPlatform": "Кросс-платформа",
@@ -448,6 +470,7 @@
     "showcaseItem11": "Chrome Extension с авторизацией, темами и подписками",
     "terminalTitle": "Опыт разработчика",
     "terminalSubtitle": "От git clone до работающего приложения — за 5 минут.",
+    "ctaBadge": "Начните сегодня",
     "ctaTitle": "Готовы создать что-то большое?",
     "ctaSubtitle": "Клонируйте репозиторий и начните сегодня. Бесплатно и с открытым кодом.",
     "ctaPrimary": "Начать разработку",
@@ -676,6 +699,10 @@
     "fontDefault": "Стандарт",
     "fontLarge": "Крупный",
     "fontFamily": "Шрифт"
+  },
+  "phone": {
+    "countryPickerTitle": "Страна",
+    "searchCountry": "Поиск страны..."
   },
   "profileMenu": {
     "profile": "Профиль",

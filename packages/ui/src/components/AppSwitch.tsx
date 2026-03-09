@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Pressable, Platform } from 'react-native'
 import { useTheme } from 'tamagui'
 import { MotiView } from 'moti'
@@ -14,7 +15,7 @@ const SIZES = {
   md: { track: { w: 48, h: 28 }, thumb: 22, pad: 3 },
 }
 
-export function AppSwitch({ checked, onCheckedChange, activeColor, size = 'md' }: AppSwitchProps) {
+export const AppSwitch = memo(function AppSwitch({ checked, onCheckedChange, activeColor, size = 'md' }: AppSwitchProps) {
   const theme = useTheme()
   const s = SIZES[size]
   const accent = activeColor ?? theme.accent.val
@@ -56,4 +57,4 @@ export function AppSwitch({ checked, onCheckedChange, activeColor, size = 'md' }
       </MotiView>
     </Pressable>
   )
-}
+})

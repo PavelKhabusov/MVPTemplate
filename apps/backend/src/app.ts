@@ -74,9 +74,9 @@ export async function buildApp() {
     await app.register(swagger, {
       openapi: {
         info: {
-          title: 'MVP Template API',
+          title: 'MVPTemplate API',
           version: '1.0.0',
-          description: 'API documentation for MVP Template',
+          description: 'API documentation for MVPTemplate',
         },
         servers: [
           { url: `http://${env.HOST}:${env.PORT}`, description: 'Development' },

@@ -125,6 +125,37 @@ export async function paymentsRoutes(app: FastifyInstance) {
       }
     })
 
+
+    webhook.post('/webhook/dodopayment', async (request, reply) => {
+      try {
+        const provider = getPaymentProvider('dodopayment')
+        const event = await provider.parseWebhook(
+          request.body as string,
+          request.headers as Record<string, string>,
+        )
+        await paymentsService.handleWebhookEvent(event)
+        return reply.status(200).send({ received: true })
+      } catch (err: any) {
+        request.log.error(err, 'Dodo Payment webhook error')
+        return reply.status(400).send({ error: err.message })
+      }
+    })
+
+    webhook.post('/webhook/paddle', async (request, reply) => {
+      try {
+        const provider = getPaymentProvider('paddle')
+        const event = await provider.parseWebhook(
+          request.body as string,
+          request.headers as Record<string, string>,
+        )
+        await paymentsService.handleWebhookEvent(event)
+        return reply.status(200).send({ received: true })
+      } catch (err: any) {
+        request.log.error(err, 'Paddle webhook error')
+        return reply.status(400).send({ error: err.message })
+      }
+    })
+
     webhook.post('/webhook/polar', async (request, reply) => {
       try {
         const provider = getPaymentProvider('polar')

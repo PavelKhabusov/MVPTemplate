@@ -15,6 +15,8 @@ interface ScalePressProps {
   scale?: number
   disabled?: boolean
   style?: ViewStyle
+  accessibilityLabel?: string
+  accessibilityHint?: string
 }
 
 /**
@@ -28,6 +30,8 @@ export function ScalePress({
   scale = PRESS_SCALE,
   disabled = false,
   style,
+  accessibilityLabel,
+  accessibilityHint,
 }: ScalePressProps) {
   const pressed = useSharedValue(1)
 
@@ -47,6 +51,10 @@ export function ScalePress({
       onLongPress={onLongPress}
       disabled={disabled}
       style={[animatedStyle, style]}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
     >
       {children}
     </AnimatedPressable>

@@ -5,6 +5,7 @@ import type {
   CheckoutResult,
   WebhookEvent,
   CancelSubscriptionParams,
+  RefundResult,
 } from './payment-provider'
 
 const ROBOKASSA_URL = 'https://auth.robokassa.ru/Merchant/Index.aspx'
@@ -149,7 +150,7 @@ export class RobokassaProvider implements PaymentProvider {
     throw new Error('Robokassa subscriptions are managed locally')
   }
 
-  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number) {
+  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number): Promise<RefundResult> {
     throw new Error('Robokassa refunds are not yet implemented')
   }
 }

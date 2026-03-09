@@ -4,6 +4,7 @@ import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { AnimatePresence, MotiView } from 'moti'
 import { useTranslation } from '@mvp/i18n'
 import { useCookieConsentStore } from '@mvp/store'
+import { trackCookieConsent } from '@mvp/analytics'
 import { router } from 'expo-router'
 import { ScalePress } from '../animations/ScalePress'
 
@@ -25,11 +26,13 @@ export function CookieBanner({ enabled = true }: { enabled?: boolean }) {
   if (consent !== null) return null
 
   const handleAccept = () => {
+    trackCookieConsent('accepted')
     setVisible(false)
     setTimeout(() => setConsent('accepted'), 300)
   }
 
   const handleDecline = () => {
+    trackCookieConsent('declined')
     setVisible(false)
     setTimeout(() => setConsent('declined'), 300)
   }

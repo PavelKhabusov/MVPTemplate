@@ -132,6 +132,9 @@ function OverlayContent({
         style={StyleSheet.absoluteFill}
         onPress={onNext}
         activeOpacity={1}
+        accessibilityRole="button"
+        accessibilityLabel={isLast ? (labels.done ?? 'Done') : (labels.next ?? 'Next')}
+        accessibilityHint="Tap to advance tour"
       />
 
       {/* Tooltip — always within screen bounds */}
@@ -175,10 +178,10 @@ function OverlayContent({
 
           {/* Actions */}
           <XStack justifyContent="flex-end" gap="$4" marginTop="$1">
-            <ScalePress onPress={onDismiss}>
+            <ScalePress onPress={onDismiss} accessibilityLabel={labels.skip ?? 'Skip'}>
               <Text fontSize="$2" color="$mutedText">{labels.skip ?? 'Skip'}</Text>
             </ScalePress>
-            <ScalePress onPress={onNext}>
+            <ScalePress onPress={onNext} accessibilityLabel={isLast ? (labels.done ?? 'Done') : (labels.next ?? 'Next')}>
               <XStack gap="$1.5" alignItems="center">
                 <Text fontSize="$2" color="$accent" fontWeight="600">
                   {isLast ? (labels.done ?? 'Done') : (labels.next ?? 'Next')}

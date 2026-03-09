@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { AnimatePresence, MotiView } from 'moti'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ScalePress, AppModal } from '@mvp/ui'
+import { trackOnboardingStep, trackOnboardingComplete, trackOnboardingSkip } from '@mvp/analytics'
 
 export interface WizardStep {
   id: string
@@ -40,12 +41,20 @@ export function OnboardingWizard({
   const isLast = currentIndex === steps.length - 1
   const isWeb = Platform.OS === 'web'
 
+  const handleSkip = () => {
+    trackOnboardingSkip(currentIndex + 1)
+    onSkip()
+  }
+
   const handleNext = () => {
     if (isLast) {
+      trackOnboardingComplete()
       onComplete()
       return
     }
-    setCurrentIndex((i) => i + 1)
+    const nextIndex = currentIndex + 1
+    trackOnboardingStep(nextIndex + 1, steps.length)
+    setCurrentIndex(nextIndex)
   }
 
   // Reset index when wizard becomes invisible (re-show from start next time)
@@ -87,7 +96,7 @@ export function OnboardingWizard({
   // ── Web: centered dialog via AppModal ─────────────────────────────────────
   if (isWeb) {
     return (
-      <AppModal visible onClose={onSkip} title="" maxWidth={480}>
+      <AppModal visible onClose={handleSkip} title="" maxWidth={480}>
         <YStack gap="$5" alignItems="center" paddingVertical="$2">
           {/* Icon */}
           <AnimatePresence>
@@ -144,7 +153,7 @@ export function OnboardingWizard({
       <YStack flex={1} backgroundColor="$background">
         {/* Skip */}
         <XStack position="absolute" top={insets.top + 16} right={20} zIndex={10}>
-          <ScalePress onPress={onSkip}>
+          <ScalePress onPress={handleSkip}>
             <XStack padding="$2.5">
               <Text color="$mutedText" fontSize="$3">{skip}</Text>
             </XStack>

@@ -5,6 +5,7 @@ import { MotiView, AnimatePresence } from 'moti'
 interface AppCardProps extends GetProps<typeof YStack> {
   animated?: boolean
   visible?: boolean
+  accessibilityLabel?: string
 }
 
 export function AppCard({
@@ -12,9 +13,11 @@ export function AppCard({
   animated = true,
   visible = true,
   flex,
+  accessibilityLabel,
   ...props
 }: AppCardProps) {
   const theme = useTheme()
+  const isPressable = !!props.onPress
 
   const card = (
     <YStack
@@ -25,6 +28,8 @@ export function AppCard({
       borderColor={theme.cardBorder.val}
       shadowColor={theme.cardShadow.val}
       flex={animated ? undefined : flex}
+      accessibilityRole={isPressable ? 'button' : 'summary'}
+      accessibilityLabel={accessibilityLabel}
       {...(animated && flex != null && Platform.OS === 'web' ? { height: '100%' as any } : {})}
       {...props}
     >

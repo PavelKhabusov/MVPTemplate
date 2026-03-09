@@ -1,10 +1,16 @@
-import { useEffect } from 'react'
-import { Platform, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Image, Platform, View } from 'react-native'
 import { YStack, XStack, Text, H1, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
+import { trackLandingCTA } from '@mvp/analytics'
 import { FadeIn } from '../animations/FadeIn'
 import { SlideIn } from '../animations/SlideIn'
 import { ScalePress } from '../animations/ScalePress'
+
+// Local hero background — place your image at apps/mobile/assets/images/hero-bg.jpg
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const HERO_BG_ASSET = require('../../../../apps/mobile/assets/images/hero-bg.jpg')
 
 interface LandingHeroProps {
   onNavigate: (href: string) => void
@@ -14,52 +20,45 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
   const { t } = useTranslation()
   const theme = useTheme()
 
-  // Inject CSS keyframes for hero animations
   useEffect(() => {
     if (Platform.OS !== 'web') return
     const style = document.createElement('style')
     style.textContent = `
-      @keyframes heroGradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      @keyframes heroFloat1 {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(8deg); }
-      }
-      @keyframes heroFloat2 {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-30px) rotate(-6deg); }
-      }
-      @keyframes heroFloat3 {
-        0%, 100% { transform: translateY(0) scale(1); }
-        50% { transform: translateY(-15px) scale(1.1); }
-      }
       @keyframes heroPulseGlow {
-        0%, 100% { box-shadow: 0 0 20px ${theme.accentGradientStart.val}40; }
-        50% { box-shadow: 0 0 40px ${theme.accentGradientStart.val}60, 0 0 80px ${theme.accentGradientEnd.val}30; }
+        0%, 100% { box-shadow: 0 0 24px ${theme.accentGradientStart.val}50; }
+        50% { box-shadow: 0 0 48px ${theme.accentGradientStart.val}70, 0 0 90px ${theme.accentGradientEnd.val}35; }
       }
       @keyframes heroBadgePulse {
         0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
+        50% { opacity: 0.85; }
+      }
+      @keyframes heroKenBurns {
+        0% { transform: scale(1.0); }
+        100% { transform: scale(1.08); }
       }
       .hero-gradient-text {
-        background: linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val}, ${theme.accent.val}, ${theme.accentGradientStart.val}) !important;
+        font-weight: 700 !important;
+        background: linear-gradient(135deg,
+          #ffffff,
+          rgba(255,255,255,0.85),
+          ${theme.accentGradientStart.val},
+          ${theme.accentGradientEnd.val}
+        ) !important;
         background-size: 200% auto !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
-        animation: heroGradientShift 4s ease-in-out infinite;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
+        display: inline-block !important;
+        padding-bottom: 8px !important;
+        line-height: 1.12 !important;
       }
       @media (max-width: 768px) {
-        #hero-floats { display: none !important; }
-        .hero-gradient-text { font-size: 32px !important; line-height: 38px !important; }
+        .hero-gradient-text { font-size: 36px !important; line-height: 42px !important; }
         #hero-section { min-height: 60vh !important; padding-top: 40px !important; padding-bottom: 40px !important; }
       }
       @media (max-width: 480px) {
-        .hero-gradient-text { font-size: 26px !important; line-height: 32px !important; }
+        .hero-gradient-text { font-size: 28px !important; line-height: 34px !important; }
       }
     `
     document.head.appendChild(style)
@@ -71,90 +70,91 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
   return (
     <YStack
       nativeID="hero-section"
-      paddingVertical="$10"
       paddingHorizontal="$5"
       alignItems="center"
       style={{
-        background: `radial-gradient(ellipse at 50% 0%, ${theme.accentGradientStart.val}18 0%, transparent 70%)`,
-        minHeight: '80vh',
+        paddingTop: 96,
+        paddingBottom: 80,
+        minHeight: '82vh',
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
       } as any}
     >
-      {/* Floating decorative elements */}
-      <View nativeID="hero-floats" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' } as any}>
-      <View
+      {/* Background photo with Ken Burns effect */}
+      <Image
+        source={HERO_BG_ASSET}
         style={{
-          position: 'absolute', top: '15%', left: '10%',
-          width: 60, height: 60, borderRadius: 16, opacity: 0.12,
-          background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
-          animation: 'heroFloat1 6s ease-in-out infinite',
-          pointerEvents: 'none',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+          width: '100%',
+          height: '100%',
+          animation: 'heroKenBurns 25s ease-in-out alternate infinite',
+          willChange: 'transform',
+          objectFit: 'cover',
+          objectPosition: 'center 40%',
         } as any}
       />
-      <View
-        style={{
-          position: 'absolute', top: '60%', right: '8%',
-          width: 40, height: 40, borderRadius: 40, opacity: 0.1,
-          background: `linear-gradient(135deg, ${theme.accentGradientEnd.val}, ${theme.accentGradientStart.val})`,
-          animation: 'heroFloat2 8s ease-in-out infinite',
-          pointerEvents: 'none',
-        } as any}
-      />
-      <View
-        style={{
-          position: 'absolute', top: '30%', right: '20%',
-          width: 24, height: 24, borderRadius: 6, opacity: 0.08,
-          background: theme.accent.val,
-          animation: 'heroFloat3 5s ease-in-out infinite',
-          pointerEvents: 'none',
-        } as any}
-      />
-      <View
-        style={{
-          position: 'absolute', bottom: '20%', left: '15%',
-          width: 32, height: 32, borderRadius: 32, opacity: 0.1,
-          background: theme.accentGradientEnd.val,
-          animation: 'heroFloat2 7s ease-in-out infinite 1s',
-          pointerEvents: 'none',
-        } as any}
-      />
-      <View
-        style={{
-          position: 'absolute', top: '45%', left: '5%',
-          width: 18, height: 18, borderRadius: 4, opacity: 0.06,
-          background: theme.accentGradientStart.val,
-          animation: 'heroFloat1 9s ease-in-out infinite 2s',
-          pointerEvents: 'none',
-        } as any}
-      />
-      </View>
 
-      <YStack maxWidth={800} alignItems="center" gap="$5" zIndex={1}>
+      {/* Dark overlay for text readability */}
+      <View
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 1,
+          background: `linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.55) 0%,
+            rgba(0, 0, 0, 0.40) 40%,
+            rgba(0, 0, 0, 0.55) 100%
+          )`,
+          backdropFilter: 'blur(1px)',
+        } as any}
+      />
+
+      {/* Subtle gradient accent overlay */}
+      <View
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 2,
+          background: `radial-gradient(ellipse 80% 60% at 50% 80%, ${theme.accentGradientStart.val}18 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        } as any}
+      />
+
+      <YStack maxWidth={800} alignItems="center" gap="$5" zIndex={3}>
         {/* Badge */}
         <FadeIn>
           <XStack
-            backgroundColor={`${theme.accent.val}15`}
             paddingHorizontal="$3"
             paddingVertical="$1.5"
             borderRadius={20}
             borderWidth={1}
-            borderColor={`${theme.accent.val}30`}
-            style={{ animation: 'heroBadgePulse 3s ease-in-out infinite' } as any}
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.10)',
+              borderColor: 'rgba(255,255,255,0.20)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              animation: 'heroBadgePulse 3s ease-in-out infinite',
+            } as any}
           >
-            <Text color="$accent" fontSize="$2" fontWeight="600">
+            <Text color="white" fontSize="$2" fontWeight="600" style={{ opacity: 0.9 } as any}>
               {t('landing.heroBadge')}
             </Text>
           </XStack>
         </FadeIn>
 
-        {/* Headline with animated gradient */}
+        {/* Headline */}
         <SlideIn from="bottom" delay={100}>
           <H1
             textAlign="center"
-            fontSize={52}
-            lineHeight={60}
+            fontSize={60}
+            lineHeight={68}
             fontWeight="bold"
             className="hero-gradient-text"
           >
@@ -168,8 +168,9 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
             textAlign="center"
             fontSize="$5"
             lineHeight={28}
-            color="$mutedText"
+            color="rgba(255, 255, 255, 0.75)"
             maxWidth={600}
+            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' } as any}
           >
             {t('landing.heroSubtitle')}
           </Text>
@@ -178,7 +179,7 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
         {/* CTA buttons */}
         <SlideIn from="bottom" delay={300}>
           <XStack gap="$3" flexWrap="wrap" justifyContent="center">
-            <ScalePress onPress={() => onNavigate('/sign-up')}>
+            <ScalePress onPress={() => { trackLandingCTA('primary'); onNavigate('/sign-up') }}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"
@@ -195,21 +196,41 @@ export function LandingHero({ onNavigate }: LandingHeroProps) {
               </XStack>
             </ScalePress>
 
-            <ScalePress onPress={() => window.open('https://github.com/PavelKhabusov/MVPTemplate', '_blank')}>
+            <ScalePress onPress={() => { trackLandingCTA('secondary'); window.open(APP_BRAND.ctaUrl, '_blank') }}>
               <XStack
                 paddingHorizontal="$5"
                 paddingVertical="$3"
                 borderRadius="$4"
                 borderWidth={1}
-                borderColor="$borderColor"
                 alignItems="center"
                 gap="$2"
-                backgroundColor="$cardBackground"
-                style={{ transition: 'border-color 0.2s ease' } as any}
+                style={{
+                  borderColor: 'rgba(255,255,255,0.25)',
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  transition: 'border-color 0.2s ease, background-color 0.2s ease',
+                } as any}
               >
-                <Text fontWeight="600" fontSize="$4" color="$color">{t('landing.heroSecondaryCTA')}</Text>
+                <Text fontWeight="600" fontSize="$4" color="white">{t('landing.heroSecondaryCTA')}</Text>
               </XStack>
             </ScalePress>
+          </XStack>
+        </SlideIn>
+
+        {/* Social proof */}
+        <SlideIn from="bottom" delay={400}>
+          <XStack gap="$4" flexWrap="wrap" justifyContent="center" opacity={0.8}>
+            {(['heroSocialProof1', 'heroSocialProof2', 'heroSocialProof3'] as const).map((key) => (
+              <XStack key={key} alignItems="center" gap="$1.5">
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: 'white' }} />
+                <Text fontSize="$2" color="rgba(255, 255, 255, 0.85)" fontWeight="500"
+                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' } as any}
+                >
+                  {t(`landing.${key}`)}
+                </Text>
+              </XStack>
+            ))}
           </XStack>
         </SlideIn>
       </YStack>

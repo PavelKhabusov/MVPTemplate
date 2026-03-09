@@ -3,6 +3,7 @@ import { YStack, Text } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
 import { AppButton, AppInput, FadeIn, SlideIn } from '@mvp/ui'
+import { trackSignIn, trackSignInError } from '@mvp/analytics'
 import { useAuth } from './AuthProvider'
 
 function getErrorMessage(err: any, t: (key: string) => string): string {
@@ -28,9 +29,12 @@ export function SignInForm() {
     setLoading(true)
     try {
       await authApi.login({ email, password })
+      trackSignIn('email')
       onAuthSuccess()
     } catch (err: any) {
-      setError(getErrorMessage(err, t))
+      const msg = getErrorMessage(err, t)
+      trackSignInError('email', msg)
+      setError(msg)
     } finally {
       setLoading(false)
     }

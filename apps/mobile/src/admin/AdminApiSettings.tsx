@@ -25,6 +25,7 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
   ai: { icon: 'sparkles-outline', labelKey: 'admin.apiAI', mainToggle: 'GEMINI_API_KEY' },
   extension: { icon: 'extension-puzzle-outline', labelKey: 'admin.apiExtension', mainToggle: 'CHROME_EXTENSION_ENABLED' },
+  voximplant: { icon: 'call-outline', labelKey: 'admin.apiVoximplant', mainToggle: 'VOXIMPLANT_ACCOUNT_ID', hintKey: 'admin.hintVoximplant', hintUrl: 'https://manage.voximplant.com/' },
 }
 
 const PAYMENT_PROVIDERS = [
@@ -33,6 +34,8 @@ const PAYMENT_PROVIDERS = [
   { key: 'yookassa', label: 'YooKassa',  color: '#0077FF', enabledKey: 'YOOKASSA_ENABLED',   keys: ['YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YOOKASSA_WEBHOOK_SECRET'],          hintKey: 'admin.hintYookassa',  hintUrl: 'https://yookassa.ru/my/merchant/integration' },
   { key: 'robokassa', label: 'Robokassa', color: '#E5392B', enabledKey: 'ROBOKASSA_ENABLED',  keys: ['ROBOKASSA_MERCHANT_LOGIN', 'ROBOKASSA_PASSWORD1', 'ROBOKASSA_PASSWORD2'],      hintKey: 'admin.hintRobokassa', hintUrl: 'https://partner.robokassa.ru/' },
   { key: 'polar',    label: 'Polar',     color: '#0062FF', enabledKey: 'POLAR_ENABLED',      keys: ['POLAR_ACCESS_TOKEN', 'POLAR_WEBHOOK_SECRET', 'POLAR_ORGANIZATION_ID'],         hintKey: 'admin.hintPolar',     hintUrl: 'https://dashboard.polar.sh/' },
+  { key: 'dodopayment', label: 'Dodo',    color: '#FF5C00', enabledKey: 'DODO_ENABLED',         keys: ['DODO_API_KEY', 'DODO_WEBHOOK_SECRET'],                                          hintKey: 'admin.hintDodo',      hintUrl: 'https://dodopayments.com/dashboard' },
+  { key: 'paddle',   label: 'Paddle',    color: '#0075E0', enabledKey: 'PADDLE_ENABLED',      keys: ['PADDLE_API_KEY', 'PADDLE_WEBHOOK_SECRET'],                                       hintKey: 'admin.hintPaddle',    hintUrl: 'https://vendors.paddle.com/' },
 ] as const
 
 const SMS_PROVIDERS = [
@@ -227,6 +230,19 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               <AppSwitch
                 checked={paypalModeEntry.value !== 'live'}
                 onCheckedChange={(checked) => onUpdate('PAYPAL_MODE', checked ? 'sandbox' : 'live')}
+              />
+            </XStack>
+          )}
+
+          {/* Paddle sandbox mode toggle */}
+          {activeProvider === 'paddle' && keys['PADDLE_SANDBOX'] && (
+            <XStack alignItems="center" justifyContent="space-between">
+              <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
+                {t('admin.paddleSandbox')}
+              </Text>
+              <AppSwitch
+                checked={keys['PADDLE_SANDBOX'].value === 'true'}
+                onCheckedChange={(checked) => onUpdate('PADDLE_SANDBOX', String(checked))}
               />
             </XStack>
           )}
@@ -591,6 +607,15 @@ function ExtensionEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             onSave={onUpdate}
           />
 
+          {/* Google OAuth Client ID for extension */}
+          <EnvStringField
+            envKey="CHROME_GOOGLE_CLIENT_ID"
+            label={t('admin.envLabel_CHROME_GOOGLE_CLIENT_ID', { defaultValue: 'Chrome Google Client ID' })}
+            value={keys['CHROME_GOOGLE_CLIENT_ID']?.value || null}
+            isSecret
+            onSave={onUpdate}
+          />
+
           {storeUrl && (
             <ScalePress onPress={() => Linking.openURL(storeUrl)}>
               <Text fontSize="$2" color="$accent" numberOfLines={1}>
@@ -598,6 +623,20 @@ function ExtensionEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               </Text>
             </ScalePress>
           )}
+
+          {/* Google OAuth Client ID for Google Sheets access */}
+          <EnvStringField
+            envKey="CHROME_GOOGLE_CLIENT_ID"
+            label={t('admin.extensionGoogleClientId')}
+            value={keys['CHROME_GOOGLE_CLIENT_ID']?.value ?? null}
+            isSecret
+            onSave={onUpdate}
+          />
+          <ScalePress onPress={() => Linking.openURL('https://console.cloud.google.com/apis/credentials')}>
+            <Text fontSize="$2" color="$accent">
+              {t('admin.extensionGoogleClientIdHint')} ↗
+            </Text>
+          </ScalePress>
         </YStack>
       )}
     </AppCard>

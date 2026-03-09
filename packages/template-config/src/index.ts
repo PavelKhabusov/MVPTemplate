@@ -8,6 +8,7 @@ export type { WebLayout, UserBadgePlacement, HeaderNavAlign, ItemPlacement, Sear
 export { useTemplateFlag } from './useTemplateFlag'
 export { TemplateConfigSidebar } from './TemplateConfigSidebar'
 export { TemplateConfigButton } from './TemplateConfigButton'
+export { APP_BRAND } from './brand'
 export { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme, applyCustomColor } from './colorSchemes'
 export { applyRadiusScale, applyCardStyle, applyFontFamily, getFontZoom, FONT_FAMILY_CONFIG } from './designTokens'
 export type { ColorScheme, ColorSchemeValues } from './colorSchemes'

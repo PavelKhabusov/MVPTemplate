@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
 import { AppSwitch } from './AppSwitch'
 import { Ionicons } from '@expo/vector-icons'
@@ -15,7 +16,7 @@ interface SettingsGroupItemProps {
   onToggleChange?: (val: boolean) => void
 }
 
-export function SettingsGroupItem({
+export const SettingsGroupItem = memo(function SettingsGroupItem({
   icon,
   iconColor,
   label,
@@ -35,6 +36,7 @@ export function SettingsGroupItem({
       paddingVertical="$2.5"
       paddingHorizontal="$3"
       gap="$3"
+      accessibilityLabel={label}
     >
       <YStack
         width={30}
@@ -47,7 +49,7 @@ export function SettingsGroupItem({
         <Ionicons name={icon} size={18} color={color} />
       </YStack>
 
-      <Text flex={1} flexShrink={0} color={danger ? '$error' : '$color'} fontSize={16} numberOfLines={1}>
+      <Text flex={1} flexShrink={0} color={danger ? '$error' : '$color'} fontSize={16} numberOfLines={1} textAlign="left">
         {label}
       </Text>
 
@@ -74,8 +76,8 @@ export function SettingsGroupItem({
   if (toggle) return content
 
   return (
-    <ScalePress onPress={onPress} disabled={!onPress} scale={onPress ? 0.98 : 1}>
+    <ScalePress onPress={onPress} disabled={!onPress} scale={onPress ? 0.98 : 1} accessibilityLabel={label}>
       {content}
     </ScalePress>
   )
-}
+})

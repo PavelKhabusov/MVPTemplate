@@ -48,97 +48,89 @@ const defaultPlans: PlanSeed[] = [
   // ── Free ──────────────────────────────────────────────────────────────────
   {
     name: 'Free',
-    description: 'Get started at no cost. Perfect for exploring the platform.',
+    description: 'Get started with 30 calls per month. No credit card required.',
     priceAmount: 0,
     currency: 'usd',
     interval: 'month',
     features: [
-      'Up to 3 projects',
-      '1 GB storage',
-      'Community support',
-      'Core features included',
+      '30 calls per month',
+      'Call from browser (WebRTC)',
+      'Phone number detection',
+      'Call history',
     ],
     provider: 'stripe',
     sortOrder: 0,
   },
 
-  // ── Pro Monthly ────────────────────────────────────────────────────────────
+  // ── Pro Monthly (Stripe, USD) ─────────────────────────────────────────────
   {
     name: 'Pro',
-    description: 'For growing teams that need more power and flexibility.',
-    priceAmount: 1900,   // $19 / month
+    description: 'Unlimited calls, call recording, and auto-save to Google Sheets.',
+    priceAmount: 990,    // $9.90 / month
     currency: 'usd',
     interval: 'month',
     features: [
-      'Unlimited projects',
-      '50 GB storage',
-      'Priority email support',
-      'Advanced analytics',
-      'Team collaboration',
-      'API access',
+      'Unlimited calls',
+      'Call recording',
+      'Auto-save results to sheet',
+      'Call via phone (callback)',
+      'Priority support',
     ],
     provider: 'stripe',
     sortOrder: 1,
   },
 
-  // ── Pro Yearly ─────────────────────────────────────────────────────────────
+  // ── Pro Yearly (Stripe, USD) ──────────────────────────────────────────────
   {
     name: 'Pro',
-    description: 'For growing teams that need more power and flexibility.',
-    priceAmount: 15200,  // $152 / year — saves ~33% vs monthly
+    description: 'Unlimited calls, call recording, and auto-save to Google Sheets.',
+    priceAmount: 7900,   // $79 / year — saves ~33% vs monthly
     currency: 'usd',
     interval: 'year',
     features: [
-      'Unlimited projects',
-      '50 GB storage',
-      'Priority email support',
-      'Advanced analytics',
-      'Team collaboration',
-      'API access',
+      'Unlimited calls',
+      'Call recording',
+      'Auto-save results to sheet',
+      'Call via phone (callback)',
+      'Priority support',
     ],
     provider: 'stripe',
     sortOrder: 2,
   },
 
-  // ── Enterprise Monthly ─────────────────────────────────────────────────────
+  // ── Pro Monthly (YooKassa, RUB) ───────────────────────────────────────────
   {
-    name: 'Enterprise',
-    description: 'Full control for large organizations with dedicated support.',
-    priceAmount: 4900,   // $49 / month
-    currency: 'usd',
+    name: 'Pro',
+    description: 'Безлимитные звонки, запись разговоров и автосохранение в таблицу.',
+    priceAmount: 99000,  // 990₽ / month
+    currency: 'rub',
     interval: 'month',
     features: [
-      'Everything in Pro',
-      'Unlimited storage',
-      'Dedicated account manager',
-      'Custom integrations',
-      'SLA guarantee (99.9% uptime)',
-      'SSO & advanced security',
-      'On-premise deployment option',
-      'Custom contracts & invoicing',
+      'Безлимитные звонки',
+      'Запись разговоров',
+      'Автосохранение в таблицу',
+      'Звонок через телефон (callback)',
+      'Приоритетная поддержка',
     ],
-    provider: 'stripe',
+    provider: 'yookassa',
     sortOrder: 3,
   },
 
-  // ── Enterprise Yearly ─────────────────────────────────────────────────────
+  // ── Pro Yearly (YooKassa, RUB) ────────────────────────────────────────────
   {
-    name: 'Enterprise',
-    description: 'Full control for large organizations with dedicated support.',
-    priceAmount: 39200,  // $392 / year — saves ~33% vs monthly
-    currency: 'usd',
+    name: 'Pro',
+    description: 'Безлимитные звонки, запись разговоров и автосохранение в таблицу.',
+    priceAmount: 790000, // 7900₽ / year — saves ~33% vs monthly
+    currency: 'rub',
     interval: 'year',
     features: [
-      'Everything in Pro',
-      'Unlimited storage',
-      'Dedicated account manager',
-      'Custom integrations',
-      'SLA guarantee (99.9% uptime)',
-      'SSO & advanced security',
-      'On-premise deployment option',
-      'Custom contracts & invoicing',
+      'Безлимитные звонки',
+      'Запись разговоров',
+      'Автосохранение в таблицу',
+      'Звонок через телефон (callback)',
+      'Приоритетная поддержка',
     ],
-    provider: 'stripe',
+    provider: 'yookassa',
     sortOrder: 4,
   },
 ]

@@ -4,6 +4,7 @@ import type {
   CheckoutResult,
   WebhookEvent,
   CancelSubscriptionParams,
+  RefundResult,
 } from './payment-provider'
 
 export class PayPalProvider implements PaymentProvider {
@@ -307,7 +308,7 @@ export class PayPalProvider implements PaymentProvider {
     }
   }
 
-  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number) {
+  async refundPayment(_providerPaymentId: string, _amountMinorUnits?: number): Promise<RefundResult> {
     throw new Error('PayPal refunds are not yet implemented')
   }
 

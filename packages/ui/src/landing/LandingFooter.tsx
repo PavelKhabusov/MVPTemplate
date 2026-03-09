@@ -4,6 +4,7 @@ import { YStack, XStack, Text, Separator, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { ScalePress } from '../animations/ScalePress'
 import { useCompanyStore } from '@mvp/store'
+import { APP_BRAND } from '@mvp/template-config/src/brand'
 
 interface LandingFooterProps {
   onNavigate: (href: string) => void
@@ -14,7 +15,7 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const company = useCompanyStore((s) => s.info)
-  const appName = company.appName || 'MVPTemplate'
+  const appName = company.appName || APP_BRAND.name
 
   useEffect(() => {
     if (Platform.OS !== 'web') return
@@ -44,7 +45,7 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
         {/* Columns */}
         <XStack flexWrap="wrap" gap="$8">
           {/* Brand */}
-          <YStack className="footer-brand" gap="$3" style={{ minWidth: 240, flex: 1 } as any}>
+          <YStack className="footer-brand" gap="$3" alignItems="flex-start" style={{ minWidth: 240, flex: 1 } as any}>
             <XStack alignItems="center" gap="$2">
               {logo ? (
                 <Image source={logo} style={{ width: 28, height: 28, borderRadius: 7 }} />
@@ -70,8 +71,8 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
           </YStack>
 
           {/* Product */}
-          <YStack className="footer-col" gap="$3" style={{ minWidth: 160 } as any}>
-            <Text fontWeight="bold" fontSize="$3" color="$color">
+          <YStack className="footer-col" gap="$3" alignItems="flex-start" style={{ minWidth: 160 } as any}>
+            <Text fontWeight="bold" fontSize="$3" color="$color" textAlign="left">
               {t('landing.footerProduct')}
             </Text>
             <FooterLink label={t('landing.footerFeatures')} onPress={() => {
@@ -81,17 +82,17 @@ export function LandingFooter({ onNavigate, logo }: LandingFooterProps) {
           </YStack>
 
           {/* Resources */}
-          <YStack className="footer-col" gap="$3" style={{ minWidth: 160 } as any}>
-            <Text fontWeight="bold" fontSize="$3" color="$color">
+          <YStack className="footer-col" gap="$3" alignItems="flex-start" style={{ minWidth: 160 } as any}>
+            <Text fontWeight="bold" fontSize="$3" color="$color" textAlign="left">
               {t('landing.footerResources')}
             </Text>
             <FooterLink label={t('landing.footerDocs')} onPress={() => onNavigate('/docs')} />
-            <FooterLink label={t('landing.footerGitHub')} onPress={() => window.open('https://github.com/PavelKhabusov/MVPTemplate', '_blank')} />
+            <FooterLink label={t('landing.footerGitHub')} onPress={() => window.open(APP_BRAND.ctaUrl, '_blank')} />
           </YStack>
 
           {/* Legal */}
-          <YStack className="footer-col" gap="$3" style={{ minWidth: 160 } as any}>
-            <Text fontWeight="bold" fontSize="$3" color="$color">
+          <YStack className="footer-col" gap="$3" alignItems="flex-start" style={{ minWidth: 160 } as any}>
+            <Text fontWeight="bold" fontSize="$3" color="$color" textAlign="left">
               {t('landing.footerLegal')}
             </Text>
             <FooterLink label={t('settings.privacy')} onPress={() => onNavigate('/privacy')} />
@@ -118,6 +119,7 @@ function FooterLink({ label, onPress }: { label: string; onPress: () => void }) 
         fontSize="$3"
         color="$mutedText"
         cursor="pointer"
+        textAlign="left"
         hoverStyle={{ color: '$color' } as any}
       >
         {label}

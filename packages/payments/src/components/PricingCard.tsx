@@ -128,7 +128,7 @@ export function PricingCard({ plan, isCurrentPlan, isHighlighted, onSelect, load
           </XStack>
 
           {/* Savings badge for yearly */}
-          {savingsPercent > 0 && plan.interval === 'year' && (
+          {(savingsPercent ?? 0) > 0 && plan.interval === 'year' && (
             <XStack alignItems="center" gap="$1.5">
               <XStack
                 backgroundColor={`${theme.accent.val}20`}

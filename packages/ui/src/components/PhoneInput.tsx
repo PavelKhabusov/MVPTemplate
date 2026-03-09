@@ -1,9 +1,10 @@
 import { useState, useMemo, useCallback } from 'react'
 import { FlatList, Modal, Platform } from 'react-native'
-import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
+import { YStack, XStack, Text, Input, View, useTheme } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
 import { countries, applyMask, extractDigits } from '@mvp/lib'
 import type { Country } from '@mvp/lib'
+import { useTranslation } from '@mvp/i18n'
 import { ScalePress } from '../animations/ScalePress'
 
 interface PhoneInputProps {
@@ -20,6 +21,7 @@ export function PhoneInput({
   placeholder,
 }: PhoneInputProps) {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   // Parse initial country from value or default
   const initialCountry = useMemo(() => {
@@ -123,66 +125,93 @@ export function PhoneInput({
       </XStack>
 
       {/* Country Picker Modal */}
-      <Modal
-        visible={pickerVisible}
-        animationType="slide"
-        presentationStyle={Platform.OS === 'ios' ? 'pageSheet' : undefined}
-        onRequestClose={() => setPickerVisible(false)}
-      >
-        <YStack flex={1} backgroundColor="$background" paddingTop={Platform.OS === 'ios' ? '$6' : '$4'}>
-          {/* Header */}
-          <XStack paddingHorizontal="$4" paddingBottom="$3" alignItems="center" justifyContent="space-between">
-            <Text fontSize={18} fontWeight="bold" color="$color">Country</Text>
-            <ScalePress onPress={() => { setPickerVisible(false); setSearch('') }}>
-              <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
-            </ScalePress>
-          </XStack>
+      {pickerVisible && (() => {
+        const modalContent = (
+          <YStack flex={1} backgroundColor="$background" paddingTop={Platform.OS === 'ios' ? '$6' : '$4'}>
+            {/* Header */}
+            <XStack paddingHorizontal="$4" paddingBottom="$3" alignItems="center" justifyContent="space-between">
+              <Text fontSize={18} fontWeight="bold" color="$color">{t('phone.countryPickerTitle')}</Text>
+              <ScalePress onPress={() => { setPickerVisible(false); setSearch('') }}>
+                <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
+              </ScalePress>
+            </XStack>
 
-          {/* Search */}
-          <YStack paddingHorizontal="$4" paddingBottom="$2">
-            <Input
-              value={search}
-              onChangeText={setSearch}
-              placeholder="Search country..."
-              placeholderTextColor={theme.mutedText.val as any}
-              backgroundColor="$subtleBackground"
-              borderWidth={1}
-              borderColor="$borderColor"
-              borderRadius="$3"
-              height={40}
-              fontSize={15}
-              color="$color"
-              paddingHorizontal="$3"
-              autoFocus
+            {/* Search */}
+            <YStack paddingHorizontal="$4" paddingBottom="$2">
+              <Input
+                value={search}
+                onChangeText={setSearch}
+                placeholder={t('phone.searchCountry')}
+                placeholderTextColor={theme.mutedText.val as any}
+                backgroundColor="$subtleBackground"
+                borderWidth={1}
+                borderColor="$borderColor"
+                borderRadius="$3"
+                height={40}
+                fontSize={15}
+                color="$color"
+                paddingHorizontal="$3"
+                autoFocus
+              />
+            </YStack>
+
+            {/* List */}
+            <FlatList
+              data={filteredCountries}
+              keyExtractor={(item) => item.code}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => (
+                <ScalePress onPress={() => handleCountrySelect(item)}>
+                  <XStack
+                    paddingVertical="$2.5"
+                    paddingHorizontal="$4"
+                    gap="$3"
+                    alignItems="center"
+                    backgroundColor={item.code === country.code ? '$subtleBackground' : 'transparent'}
+                  >
+                    <Text fontSize={24}>{item.flag}</Text>
+                    <Text flex={1} fontSize={16} color="$color">{item.name}</Text>
+                    <Text fontSize={14} color="$mutedText">{item.dialCode}</Text>
+                    {item.code === country.code && (
+                      <Ionicons name="checkmark" size={20} color={theme.accent.val} />
+                    )}
+                  </XStack>
+                </ScalePress>
+              )}
             />
           </YStack>
+        )
 
-          {/* List */}
-          <FlatList
-            data={filteredCountries}
-            keyExtractor={(item) => item.code}
-            keyboardShouldPersistTaps="handled"
-            renderItem={({ item }) => (
-              <ScalePress onPress={() => handleCountrySelect(item)}>
-                <XStack
-                  paddingVertical="$2.5"
-                  paddingHorizontal="$4"
-                  gap="$3"
-                  alignItems="center"
-                  backgroundColor={item.code === country.code ? '$subtleBackground' : 'transparent'}
-                >
-                  <Text fontSize={24}>{item.flag}</Text>
-                  <Text flex={1} fontSize={16} color="$color">{item.name}</Text>
-                  <Text fontSize={14} color="$mutedText">{item.dialCode}</Text>
-                  {item.code === country.code && (
-                    <Ionicons name="checkmark" size={20} color={theme.accent.val} />
-                  )}
-                </XStack>
-              </ScalePress>
-            )}
-          />
-        </YStack>
-      </Modal>
+        if (Platform.OS === 'web') {
+          return (
+            <View
+              // @ts-ignore — position: 'fixed' is valid on web
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 99999,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+              }}
+            >
+              {modalContent}
+            </View>
+          )
+        }
+
+        return (
+          <Modal
+            visible={pickerVisible}
+            animationType="slide"
+            presentationStyle={Platform.OS === 'ios' ? 'pageSheet' : undefined}
+            onRequestClose={() => setPickerVisible(false)}
+          >
+            {modalContent}
+          </Modal>
+        )
+      })()}
     </>
   )
 }
