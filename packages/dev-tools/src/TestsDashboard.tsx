@@ -187,6 +187,8 @@ export function TestsDashboard({ apiBase }: Props) {
   const [consoleCollapsed, setConsoleCollapsed] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const logScrollRef = useRef<ScrollView>(null)
+  const statesRef = useRef(states)
+  statesRef.current = states
   const isWeb = Platform.OS === 'web'
   const accent = theme.accent?.val || '#8b5cf6'
   const monoFamily = isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'
@@ -238,6 +240,16 @@ export function TestsDashboard({ apiBase }: Props) {
               const ns: Record<string, St> = {}
               for (const [id, s] of Object.entries(d.state) as [string, any][])
                 ns[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary }
+              // Detect test completion → fetch final log
+              const prev = statesRef.current
+              for (const [id, s] of Object.entries(ns)) {
+                if (prev[id]?.status === 'running' && (s.status === 'passed' || s.status === 'failed')) {
+                  fetch(`${devApi}/tests/log?id=${id}`)
+                    .then(r => r.json())
+                    .then(ld => { if (ld.log) setLog(ld.log) })
+                    .catch(() => {})
+                }
+              }
               setStates(p => ({ ...p, ...ns }))
             }
             setConnected(true)
@@ -270,15 +282,17 @@ export function TestsDashboard({ apiBase }: Props) {
       .catch(() => {})
   }, [devApi])
 
-  // On native, poll for active test log
+  // On native, poll for active test log via ref to avoid interval reset
   useEffect(() => {
     if (isWeb || !activeId) return
+    // Fetch immediately, then poll
+    fetchLog(activeId)
     const id = setInterval(() => {
-      const st = states[activeId]
+      const st = statesRef.current[activeId]
       if (st?.status === 'running') fetchLog(activeId)
-    }, 2000)
+    }, 1500)
     return () => clearInterval(id)
-  }, [isWeb, activeId, states, fetchLog])
+  }, [isWeb, activeId, fetchLog])
 
   const handleHeightChange = useCallback((h: number) => {
     setConsoleHeight(h)
