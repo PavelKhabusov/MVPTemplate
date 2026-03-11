@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { Platform, LogBox, AppState } from 'react-native'
 import { SplashScreen, router, usePathname } from 'expo-router'
 import { TamaguiProvider } from 'tamagui'
@@ -10,8 +10,13 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-rean
 import { tamaguiConfig, ToastProvider } from '@mvp/ui'
 import { CoachMarkProvider, CoachMarkOverlay } from '@mvp/onboarding'
 import { applyColorScheme, applyCustomColor, DEFAULT_SCHEME_KEY, useTemplateConfigStore, useTemplateFlag, applyRadiusScale, applyCardStyle, applyFontFamily } from '@mvp/template-config'
-import { useThemeStore, useLanguageStore, useAuthStore, useCompanyStore } from '@mvp/store'
+import { useThemeStore, useAuthStore, useCompanyStore } from '@mvp/store'
 import { initI18n, useTranslation } from '@mvp/i18n'
+import { useLanguageStore as _langStore } from '@mvp/store'
+
+// Initialize i18n synchronously at module level (before any component renders)
+// MMKV is synchronous so the persisted language is already available.
+initI18n(_langStore.getState().language)
 import { analytics } from '@mvp/analytics'
 import { storage } from '@mvp/lib'
 import { SEO } from '@mvp/ui'
@@ -72,9 +77,9 @@ function PageSEO() {
 export default function RootLayout() {
   const resolvedTheme = useThemeStore((s) => s.resolvedTheme)
   const isThemeHydrated = useThemeStore((s) => s._hasHydrated)
-  const savedLanguage = useLanguageStore((s) => s.language)
+
   const isInitialized = useAuthStore((s) => s.isInitialized)
-  const [i18nReady, setI18nReady] = useState(false)
+
 
   const [fontsLoaded, fontError] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
@@ -83,10 +88,6 @@ export default function RootLayout() {
 
   const { i18n } = useTranslation()
 
-  useEffect(() => {
-    initI18n(savedLanguage)
-    setI18nReady(true)
-  }, [])
 
   // Fetch public company info on startup
   useEffect(() => {
@@ -193,7 +194,7 @@ export default function RootLayout() {
     }
   }, [resolvedTheme, templateColorScheme, templateCustomColor, templateRadiusScale, templateCardStyle, templateFontFamily])
 
-  const ready = (fontsLoaded || fontError) && i18nReady && isInitialized && isThemeHydrated
+  const ready = (fontsLoaded || fontError) && isInitialized && isThemeHydrated
 
   useEffect(() => {
     if (ready) {
