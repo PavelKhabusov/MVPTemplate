@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { mmkvStorage } from '@mvp/lib'
-import { Appearance, ColorSchemeName } from 'react-native'
+import { Appearance, Platform } from 'react-native'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 
@@ -12,9 +12,16 @@ interface ThemeState {
   setMode: (mode: ThemeMode) => void
 }
 
+function getSystemTheme(): 'light' | 'dark' {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  return Appearance.getColorScheme() ?? 'light'
+}
+
 function resolveTheme(mode: ThemeMode): 'light' | 'dark' {
   if (mode === 'system') {
-    return Appearance.getColorScheme() ?? 'light'
+    return getSystemTheme()
   }
   return mode
 }
@@ -54,11 +61,18 @@ if (useThemeStore.persist.hasHydrated()) {
 }
 
 // Listen for system theme changes and update resolvedTheme when mode is 'system'
-Appearance.addChangeListener(({ colorScheme }) => {
-  const { mode } = useThemeStore.getState()
-  if (mode === 'system') {
-    useThemeStore.setState({
-      resolvedTheme: colorScheme ?? 'light',
-    })
-  }
-})
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const { mode } = useThemeStore.getState()
+    if (mode === 'system') {
+      useThemeStore.setState({ resolvedTheme: e.matches ? 'dark' : 'light' })
+    }
+  })
+} else {
+  Appearance.addChangeListener(({ colorScheme }) => {
+    const { mode } = useThemeStore.getState()
+    if (mode === 'system') {
+      useThemeStore.setState({ resolvedTheme: colorScheme ?? 'light' })
+    }
+  })
+}

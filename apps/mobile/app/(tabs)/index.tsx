@@ -92,6 +92,7 @@ export default function HomeScreen() {
       ref={scrollRef}
       style={{ flex: 1, backgroundColor: theme.background.val }}
       contentContainerStyle={{ paddingBottom: 40 }}
+      {...(Platform.OS === 'ios' ? { contentInset: { top: insets.top }, contentOffset: { x: 0, y: -insets.top } } : {})}
       refreshControl={
         Platform.OS !== 'web' ? (
           <RefreshControl
@@ -109,7 +110,7 @@ export default function HomeScreen() {
       <YStack
         flex={1}
         padding="$4"
-        paddingTop={Platform.OS === 'web' ? '$4' : insets.top + 16}
+        paddingTop={Platform.OS === 'ios' ? 16 : Platform.OS === 'web' ? '$4' : insets.top + 16}
         gap="$5"
         backgroundColor="$background"
       >
