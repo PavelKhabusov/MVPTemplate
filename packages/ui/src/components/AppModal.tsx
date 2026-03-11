@@ -1,7 +1,9 @@
 import React, { type ReactNode, useEffect, useState } from 'react'
-import { Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
-import { H4, Text, YStack, XStack, useTheme } from 'tamagui'
+import { Modal, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native'
+import { H4, Text, YStack, XStack, useTheme, TamaguiProvider, getConfig } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+const el = React.createElement
 
 export function AppModal({
   visible,
@@ -21,8 +23,6 @@ export function AppModal({
   const theme = useTheme()
   const isWide = screenWidth > 600
 
-  // Web: track mount state separately from `visible` so exit animation
-  // plays before the element is removed from the DOM.
   const [mounted, setMounted] = useState(false)
   const [shown, setShown] = useState(false)
 
@@ -81,85 +81,108 @@ export function AppModal({
   }
 
   // ── Web ───────────────────────────────────────────────────────────────
-  // Render inline with position:fixed — stays inside React/Tamagui tree,
-  // so fonts, theme tokens, and context all work correctly.
-  if (!mounted) return null
+  if (!mounted || typeof document === 'undefined') return null
+
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createPortal } = require('react-dom') as typeof import('react-dom')
 
   const modalWidth = isWide ? Math.min(maxWidth, screenWidth - 48) : screenWidth - 32
   const modalMaxHeight = screenHeight - insets.top - insets.bottom - 48
   const ease = '240ms cubic-bezier(0.32, 0.72, 0, 1)'
 
-  return (
-    // @ts-ignore — position:'fixed' is web-only
-    <View
-      onStartShouldSetResponder={() => true}
-      onResponderRelease={onClose}
-      // @ts-ignore
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0, bottom: 0,
-        zIndex: 99999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: shown ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)',
-        transition: `background-color ${ease}`,
-      }}
-    >
-      {/* Modal panel */}
-      <View
-        onStartShouldSetResponder={() => true}
-        // @ts-ignore
-        style={{
-          width: modalWidth,
-          maxHeight: modalMaxHeight,
-          backgroundColor: theme.background.val,
-          borderRadius: 16,
-          overflow: 'hidden',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
-          display: 'flex',
-          flexDirection: 'column',
-          opacity: shown ? 1 : 0,
-          transform: shown ? 'scale(1) translateY(0px)' : 'scale(0.96) translateY(12px)',
-          transition: `opacity ${ease}, transform ${ease}`,
-        }}
-      >
-        {/* Header */}
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          padding="$3"
-          paddingBottom="$2.5"
-          borderBottomWidth={1}
-          borderBottomColor="$borderColor"
-        >
-          <H4 color="$color" fontFamily="$body" flex={1} numberOfLines={1} paddingRight="$3">
-            {title}
-          </H4>
-          <Pressable
-            onPress={onClose}
-            // @ts-ignore
-            style={{
-              padding: '4px 8px',
-              borderRadius: 8,
-              cursor: 'pointer',
-              outline: 'none',
-            }}
-          >
-            <Text fontSize={24} lineHeight={24} color="$mutedText">×</Text>
-          </Pressable>
-        </XStack>
+  // Detect current theme name from the Tamagui context
+  const themeName = (theme as any).name || 'dark'
+  const config = getConfig()
 
-        {/* Content */}
-        <ScrollView
-          style={{ flex: 1, maxHeight: modalMaxHeight - 65 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <YStack padding="$4">
-            {children}
-          </YStack>
-        </ScrollView>
-      </View>
-    </View>
+  return createPortal(
+    // Wrap in TamaguiProvider so Tamagui tokens/fonts resolve inside the portal
+    el(TamaguiProvider as React.ComponentType<any>, {
+      config,
+      defaultTheme: themeName,
+    },
+      el('div', {
+        onClick: onClose,
+        style: {
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: shown ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)',
+          transition: `background-color ${ease}`,
+        },
+      },
+        el('div', {
+          onClick: (e: MouseEvent) => e.stopPropagation(),
+          style: {
+            position: 'relative',
+            zIndex: 1,
+            width: modalWidth,
+            maxHeight: modalMaxHeight,
+            backgroundColor: theme.background.val,
+            borderRadius: 16,
+            overflow: 'hidden',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+            display: 'flex',
+            flexDirection: 'column',
+            opacity: shown ? 1 : 0,
+            transform: shown ? 'scale(1) translateY(0px)' : 'scale(0.96) translateY(12px)',
+            transition: `opacity ${ease}, transform ${ease}`,
+          },
+        },
+          // Header
+          el('div', {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px',
+              paddingBottom: '12px',
+              borderBottom: `1px solid ${theme.borderColor.val}`,
+              flexShrink: 0,
+            },
+          },
+            el(H4 as React.ComponentType<any>, {
+              color: '$color',
+              fontFamily: '$body',
+              flex: 1,
+              numberOfLines: 1,
+              paddingRight: '$3',
+            }, title),
+            el('button', {
+              onClick: onClose,
+              style: {
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 24,
+                lineHeight: 1,
+                color: theme.mutedText.val,
+                padding: '4px 8px',
+                borderRadius: 8,
+                flexShrink: 0,
+                transition: 'opacity 150ms',
+                outline: 'none',
+              },
+              onMouseEnter: (e: MouseEvent) => { (e.target as HTMLElement).style.opacity = '0.6' },
+              onMouseLeave: (e: MouseEvent) => { (e.target as HTMLElement).style.opacity = '1' },
+            }, '×'),
+          ),
+
+          // Content
+          el('div', {
+            style: {
+              overflowY: 'auto',
+              flex: 1,
+              maxHeight: modalMaxHeight - 65,
+            },
+          },
+            el(YStack as React.ComponentType<any>, { padding: '$4' }, children),
+          ),
+        ),
+      ),
+    ),
+    document.body,
   )
 }
