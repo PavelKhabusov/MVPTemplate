@@ -119,13 +119,6 @@ const envSchema = z.object({
   // Chrome Extension
   CHROME_GOOGLE_CLIENT_ID: z.string().optional(),
 
-  // Voximplant
-  VOXIMPLANT_ACCOUNT_ID: z.string().optional(),
-  VOXIMPLANT_API_KEY: z.string().optional(),
-
-  // Encryption (for AES-256-GCM, 32-byte hex key)
-  ENCRYPTION_KEY: z.string().optional(),
-
   // Storage
   STORAGE_TYPE: z.enum(['local', 's3']).default('local'),
   S3_ENDPOINT: z.string().optional(),

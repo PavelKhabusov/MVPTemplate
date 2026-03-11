@@ -69,10 +69,6 @@ const ENV_GROUPS = {
     keys: ['GEMINI_API_KEY', 'GEMINI_MODEL', 'GEMINI_CONCURRENT_LIMIT', 'OPENAI_API_KEY', 'OPENAI_MODEL', 'OPENAI_MAX_TOKENS', 'AI_PROXY_ENABLED'],
     types: { GEMINI_API_KEY: 'secret', GEMINI_MODEL: 'string', GEMINI_CONCURRENT_LIMIT: 'string', OPENAI_API_KEY: 'secret', OPENAI_MODEL: 'string', OPENAI_MAX_TOKENS: 'string', AI_PROXY_ENABLED: 'boolean' } as Record<string, string>,
   },
-  voximplant: {
-    keys: ['VOXIMPLANT_ACCOUNT_ID', 'VOXIMPLANT_API_KEY', 'ENCRYPTION_KEY'],
-    types: { VOXIMPLANT_ACCOUNT_ID: 'secret', VOXIMPLANT_API_KEY: 'secret', ENCRYPTION_KEY: 'secret' } as Record<string, string>,
-  },
 } as const
 
 const ALL_ENV_KEYS: string[] = Object.values(ENV_GROUPS).flatMap((g) => [...g.keys])

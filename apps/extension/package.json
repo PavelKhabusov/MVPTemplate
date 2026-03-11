@@ -15,8 +15,7 @@
     "lucide-react": "^0.460",
     "react": "^19",
     "react-dom": "^19",
-    "tailwindcss": "^4",
-    "voximplant-websdk": "^4.11.2-2978"
+    "tailwindcss": "^4"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",

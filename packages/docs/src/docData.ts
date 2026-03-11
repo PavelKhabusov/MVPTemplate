@@ -21,17 +21,14 @@ export const DOC_GROUPS: DocGroup[] = [
     pages: [
       { id: 'install', titleKey: 'docs.pageInstall', contentKey: 'docs.contentInstall' },
       { id: 'setup', titleKey: 'docs.pageSetup', contentKey: 'docs.contentSetup' },
-      { id: 'connect-voximplant', titleKey: 'docs.pageConnectVoximplant', contentKey: 'docs.contentConnectVoximplant' },
     ],
   },
   {
     id: 'using',
     titleKey: 'docs.groupUsing',
-    icon: 'call-outline',
+    icon: 'book-outline',
     pages: [
-      { id: 'make-calls', titleKey: 'docs.pageMakeCalls', contentKey: 'docs.contentMakeCalls' },
-      { id: 'column-mapping', titleKey: 'docs.pageColumnMapping', contentKey: 'docs.contentColumnMapping' },
-      { id: 'call-history', titleKey: 'docs.pageCallHistory', contentKey: 'docs.contentCallHistory' },
+      { id: 'features', titleKey: 'docs.pageFeatures', contentKey: 'docs.contentFeatures' },
     ],
   },
   {
@@ -49,7 +46,6 @@ export const DOC_GROUPS: DocGroup[] = [
     icon: 'help-circle-outline',
     pages: [
       { id: 'faq-general', titleKey: 'docs.pageFaqGeneral', contentKey: 'docs.contentFaqGeneral' },
-      { id: 'faq-voximplant', titleKey: 'docs.pageFaqVoximplant', contentKey: 'docs.contentFaqVoximplant' },
     ],
   },
 ]

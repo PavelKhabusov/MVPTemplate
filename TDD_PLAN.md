@@ -44,11 +44,9 @@
 | `users.repository` | findById, updateProfile, updateSettings |
 | `admin.repository` | listUsers (pagination + filters), updateUserRole, updateUserFeatures |
 | `analytics.repository` | trackEvent, getEventsByUser, getEventStats |
-| `calls.repository` | createCall, getCallHistory, updateCallStatus |
 | `proxy.repository` | createProxy, listProxies, updateProxy, deleteProxy |
 | `doc-feedback.repository` | createFeedback, getFeedbackByPage, getFeedbackStats |
 | `sheet-templates.repository` | createTemplate, listTemplates, updateTemplate, deleteTemplate |
-| `voximplant.repository` | saveCredentials, getCredentials |
 | `notifications` | (routes only — тестировать через route injection) |
 
 **Подход**: Mock Drizzle через `vi.mock('../../../config/database')` — тот же паттерн что в auth/payments.

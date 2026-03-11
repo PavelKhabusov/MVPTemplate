@@ -285,9 +285,6 @@ describe('API Contract Tests — Response Shape Snapshots', () => {
       mockUsersRepo.findById.mockResolvedValue({
         ...MOCK_USER,
         passwordHash: '$2b$12$hash',
-        voximplantLogin: null,
-        voximplantPassword: null,
-        voximplantAppId: null,
       })
       const token = generateValidJwt()
 

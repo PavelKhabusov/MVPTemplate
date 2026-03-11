@@ -21,11 +21,11 @@ git remote add origin <your-repo-url>
 
 ```ts
 export const APP_BRAND = {
-  name: 'CallSheet',           // отображаемое название
-  slug: 'callsheet',          // URL-safe идентификатор
-  tagline: 'Call from Google Sheets',
-  copyright: 'CallSheet',
-  ctaUrl: 'https://chromewebstore.google.com',
+  name: 'MyApp',               // отображаемое название
+  slug: 'myapp',              // URL-safe идентификатор
+  tagline: 'Your awesome app',
+  copyright: 'MyApp',
+  ctaUrl: 'https://example.com',
 }
 ```
 
@@ -57,16 +57,14 @@ export const APP_BRAND = {
 
 ```ts
 import { lazy } from 'react'
-import { Phone, Clock } from 'lucide-react'
+import { Home, Settings } from 'lucide-react'
 import type { ExtensionConfig } from './config'
 
 export const extensionConfig: ExtensionConfig = {
   // Кастомные вкладки (заменяют Home, добавляются перед Settings)
   tabs: [
-    { id: 'call', label: { en: 'Call', ru: 'Звонок' }, icon: Phone,
-      component: lazy(() => import('./custom/CallTab')) },
-    { id: 'history', label: { en: 'History', ru: 'История' }, icon: Clock,
-      component: lazy(() => import('./custom/HistoryTab')) },
+    { id: 'dashboard', label: { en: 'Dashboard', ru: 'Главная' }, icon: Home,
+      component: lazy(() => import('./custom/DashboardTab')) },
   ],
 
   // Секции в настройках (рендерятся перед Logout)
@@ -76,7 +74,7 @@ export const extensionConfig: ExtensionConfig = {
 
   // Шаги онбординга (добавляются к базовым 3 шагам)
   onboardingSteps: [
-    { icon: '📞', title: { en: 'Feature', ru: 'Фича' }, desc: { en: '...', ru: '...' } },
+    { icon: '🚀', title: { en: 'Feature', ru: 'Фича' }, desc: { en: '...', ru: '...' } },
   ],
 
   // Content scripts (файл src/content.ts)
@@ -97,7 +95,7 @@ export const extensionConfig: ExtensionConfig = {
 apps/extension/src/
 ├── config.ts          ← единственная точка кастомизации
 ├── custom/            ← бизнес-логика продукта
-│   ├── CallTab.tsx
+│   ├── DashboardTab.tsx
 │   ├── MySettings.tsx
 │   ├── backgroundHandlers.ts
 │   ├── hooks/
@@ -337,12 +335,12 @@ chrome.storage?.local?.get('lang').then(r => { if (r?.lang) i18n.changeLanguage(
 ```
 
 #### Порядок секций в Settings расширения
-**Проблема**: тема и язык отображаются ПЕРЕД бизнес-настройками (Voximplant, маппинг колонок). Для пользователя важнее сначала видеть настройки самого приложения.
-**Решение**: `extensionConfig.settingsSections` должны рендериться первыми в `SettingsTab.tsx` — исправлено в callsheet, нужно отразить в шаблоне.
+**Проблема**: тема и язык отображаются ПЕРЕД бизнес-настройками. Для пользователя важнее сначала видеть настройки самого приложения.
+**Решение**: `extensionConfig.settingsSections` должны рендериться первыми в `SettingsTab.tsx`.
 
 #### Фиксированная ширина расширения
 **Проблема**: `width: 380px` в `globals.css` вызывает горизонтальный скролл в sidebar-режиме, где Chrome сам задаёт ширину панели.
-**Решение**: `width: 100%; min-width: 0` с `box-sizing: border-box` — исправлено в callsheet.
+**Решение**: `width: 100%; min-width: 0` с `box-sizing: border-box`.
 
 #### LandingFeatures — шаблонные визуализации
 **Проблема**: bento-карточки содержат специфичные для MVPTemplate визуализации (устройства, dark/light toggle, cycling greetings, API routes). При форке нужно переписывать весь компонент.
@@ -353,8 +351,8 @@ chrome.storage?.local?.get('lang').then(r => { if (r?.lang) i18n.changeLanguage(
 **Решение**: добавить README в чеклист форка (уже добавлено), сделать README.md с явным TODO-плейсхолдером.
 
 #### Нет авто-обнаружения Google Sheets в MainScreen
-**Проблема**: `TAB_CONTEXT_CHANGED` обрабатывается в CallTab, но MainScreen не переключается автоматически на нужную вкладку при обнаружении Google Sheets.
-**Решение**: слушатель в MainScreen с переключением на первую кастомную вкладку при `isGoogleSheets === true` — исправлено в callsheet.
+**Проблема**: `TAB_CONTEXT_CHANGED` обрабатывается в кастомной вкладке, но MainScreen не переключается автоматически на нужную вкладку при обнаружении контекста.
+**Решение**: слушатель в MainScreen с переключением на первую кастомную вкладку при обнаружении контекста.
 
 #### Home/Explore вкладки содержат шаблонный контент
 **Проблема**: "Active Projects / Completed Tasks / Team Members" не подходит ни для одного реального продукта. Пользователь замечает это только после запуска.

@@ -73,9 +73,5 @@ exports[`Database Schema — Column Snapshots > users table columns should match
   "phoneVerified",
   "role",
   "updatedAt",
-  "voximplantAppId",
-  "voximplantLogin",
-  "voximplantNode",
-  "voximplantPassword",
 ]
 `;

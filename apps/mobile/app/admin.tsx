@@ -19,8 +19,10 @@ import { ProxyAdminTab } from '../src/admin/AdminProxy'
 import { StorageAdminTab } from '../src/admin/AdminStorage'
 import { CompanyInfoTab } from '../src/admin/AdminCompany'
 import { TemplateConfigTab } from '../src/admin/AdminTemplateConfig'
+import { TestsAdminTab } from '../src/admin/AdminTests'
 
 const isTemplateConfigEnabled = process.env.EXPO_PUBLIC_ENABLE_TEMPLATE_CONFIG === 'true'
+const isDevEnv = __DEV__ || process.env.NODE_ENV === 'development'
 
 export default function AdminScreen() {
   const { t } = useTranslation()
@@ -44,7 +46,7 @@ export default function AdminScreen() {
   const paymentsEnabled = useTemplateFlag('payments', false)
   const emailEnabled = useTemplateFlag('email', false)
   const aiEnabled = useTemplateFlag('ai', true)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company'>(analyticsEnabled ? 'analytics' : 'users')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'notify' | 'payments' | 'storage' | 'proxy' | 'api' | 'config' | 'company' | 'tests'>(analyticsEnabled ? 'analytics' : 'users')
 
   useEffect(() => {
     if (!analyticsEnabled && activeTab === 'analytics') {
@@ -215,6 +217,14 @@ export default function AdminScreen() {
                 <Text color={activeTab === 'company' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.companyTab')}</Text>
               </XStack>
             </ScalePress>
+            {isDevEnv && (
+              <ScalePress onPress={() => setActiveTab('tests')}>
+                <XStack backgroundColor={activeTab === 'tests' ? '$accent' : '$subtleBackground'} paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" gap="$1.5" alignItems="center">
+                  <Ionicons name="flask-outline" size={16} color={activeTab === 'tests' ? 'white' : theme.accent.val} />
+                  <Text color={activeTab === 'tests' ? 'white' : '$color'} fontWeight="600" fontSize="$3">{t('admin.testsTab')}</Text>
+                </XStack>
+              </ScalePress>
+            )}
           </XStack>
         </ScrollView>
 
@@ -336,6 +346,11 @@ export default function AdminScreen() {
       {/* Company Info Tab */}
       {activeTab === 'company' && (
         <CompanyInfoTab />
+      )}
+
+      {/* Tests Tab (dev only) */}
+      {isDevEnv && activeTab === 'tests' && (
+        <TestsAdminTab />
       )}
     </YStack>
   )

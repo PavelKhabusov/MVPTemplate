@@ -25,7 +25,6 @@ const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; lab
   payments: { icon: 'card-outline', labelKey: 'admin.apiPayments', mainToggle: 'PAYMENTS_ENABLED' },
   ai: { icon: 'sparkles-outline', labelKey: 'admin.apiAI', mainToggle: 'GEMINI_API_KEY' },
   extension: { icon: 'extension-puzzle-outline', labelKey: 'admin.apiExtension', mainToggle: 'CHROME_EXTENSION_ENABLED' },
-  voximplant: { icon: 'call-outline', labelKey: 'admin.apiVoximplant', mainToggle: 'VOXIMPLANT_ACCOUNT_ID', hintKey: 'admin.hintVoximplant', hintUrl: 'https://manage.voximplant.com/' },
 }
 
 const PAYMENT_PROVIDERS = [

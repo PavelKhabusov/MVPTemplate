@@ -30,7 +30,6 @@ describe('Database Schema — Consistency', () => {
       'proxies',
       'phoneVerificationCodes',
       'companyInfo',
-      'calls',
       'sheetTemplates',
     ]
 

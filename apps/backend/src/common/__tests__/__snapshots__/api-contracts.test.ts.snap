@@ -93,9 +93,6 @@ exports[`API Contract Tests — Response Shape Snapshots > Users response contra
   "role",
   "smsEnabled",
   "updatedAt",
-  "voximplantAppId",
-  "voximplantLogin",
-  "voximplantPassword",
 ]
 `;
 
