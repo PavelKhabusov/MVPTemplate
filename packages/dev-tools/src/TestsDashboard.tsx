@@ -196,7 +196,7 @@ function DragHandle({ onHeightChange }: { onHeightChange: (h: number) => void })
 
 // ─── Copy button helper ─────────────────────────────────────────────────────
 
-function CopyButton({ text, monoFamily }: { text: string; monoFamily: string }) {
+function CopyButton({ text, monoFamily, label }: { text: string; monoFamily: string; label?: string }) {
   const [copied, setCopied] = useState(false)
   const handleCopy = useCallback(() => {
     if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
@@ -214,7 +214,7 @@ function CopyButton({ text, monoFamily }: { text: string; monoFamily: string }) 
       <XStack alignItems="center" gap={4} paddingHorizontal={6} paddingVertical={3} borderRadius={4} backgroundColor="#1e293b" hoverStyle={{ backgroundColor: '#2d3748' }}>
         {copied ? <Check size={10} color="#22c55e" /> : <Copy size={10} color="#8b949e" />}
         <Text fontSize={9} fontFamily={monoFamily} color={copied ? '#22c55e' : '#8b949e'}>
-          {copied ? 'Copied' : 'Copy'}
+          {copied ? 'Copied' : (label || 'Copy')}
         </Text>
       </XStack>
     </Pressable>
@@ -675,14 +675,18 @@ export function TestsDashboard({ apiBase }: Props) {
               )}
             </XStack>
             <XStack alignItems="center" gap={4}>
-              {/* Failures history button */}
+              {/* Failures tab toggle */}
               <Pressable onPress={() => {
                 fetchFailures()
                 setFailuresOpen(f => !f)
                 setConsoleCollapsed(false)
               }}>
-                <XStack alignItems="center" gap={3} paddingHorizontal={6} paddingVertical={4}>
-                  <History size={12} color={failures.length > 0 ? '#f87171' : '#8b949e'} />
+                <XStack
+                  alignItems="center" gap={3} paddingHorizontal={8} paddingVertical={4}
+                  borderRadius={4}
+                  backgroundColor={failuresOpen ? '#ef444420' : 'transparent'}
+                >
+                  <History size={12} color={failuresOpen ? '#f87171' : failures.length > 0 ? '#f87171' : '#8b949e'} />
                   {failures.length > 0 && (
                     <Text fontSize={10} fontWeight="600" color="#f87171">{failures.length}</Text>
                   )}
@@ -727,10 +731,24 @@ export function TestsDashboard({ apiBase }: Props) {
             </XStack>
           </XStack>
 
-          {/* Failures list panel */}
-          {!consoleCollapsed && failuresOpen && (
-            <YStack borderBottomWidth={1} borderBottomColor="#1e293b" maxHeight={300}>
-              <ScrollView contentContainerStyle={{ padding: 8 }}>
+          {/* Console content area — shows either failures tab or log */}
+          {!consoleCollapsed && (
+            failuresOpen ? (
+              // ─── Failures tab ────────────────────────────────────────
+              <ScrollView
+                style={{ height: consoleHeight }}
+                contentContainerStyle={{ padding: 8, paddingBottom: 16 }}
+              >
+                {/* Copy All button */}
+                {failures.length > 0 && (
+                  <XStack justifyContent="flex-end" paddingBottom={6} paddingHorizontal={4}>
+                    <CopyButton
+                      text={failures.map(f => formatFailureText(f)).join('\n\n')}
+                      monoFamily={monoFamily}
+                      label="Copy All"
+                    />
+                  </XStack>
+                )}
                 {failures.length === 0 ? (
                   <Text fontSize={11} color="#4b5563" fontStyle="italic" padding={8}>{t('admin.testsNoFailures')}</Text>
                 ) : (
@@ -795,27 +813,25 @@ export function TestsDashboard({ apiBase }: Props) {
                   ))
                 )}
               </ScrollView>
-            </YStack>
-          )}
-
-          {/* Log content */}
-          {!consoleCollapsed && (
-            <ScrollView
-              ref={logScrollRef}
-              style={{ height: consoleHeight }}
-              contentContainerStyle={{ padding: 12, paddingBottom: 16 }}
-            >
-              {log ? (
-                <AnsiText text={log} monoFamily={monoFamily} />
-              ) : (
-                <Text
-                  fontFamily={monoFamily}
-                  fontSize={12} lineHeight={20} color="#4b5563" fontStyle="italic"
-                >
-                  {t('admin.testsWaitingOutput')}
-                </Text>
-              )}
-            </ScrollView>
+            ) : (
+              // ─── Log tab ─────────────────────────────────────────────
+              <ScrollView
+                ref={logScrollRef}
+                style={{ height: consoleHeight }}
+                contentContainerStyle={{ padding: 12, paddingBottom: 16 }}
+              >
+                {log ? (
+                  <AnsiText text={log} monoFamily={monoFamily} />
+                ) : (
+                  <Text
+                    fontFamily={monoFamily}
+                    fontSize={12} lineHeight={20} color="#4b5563" fontStyle="italic"
+                  >
+                    {t('admin.testsWaitingOutput')}
+                  </Text>
+                )}
+              </ScrollView>
+            )
           )}
         </YStack>
       )}
