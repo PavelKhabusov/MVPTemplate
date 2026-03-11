@@ -48,6 +48,9 @@ export default function Root({ children }: { children: React.ReactNode }) {
           *::-webkit-scrollbar-thumb:hover {
             background: rgba(150,150,150,0.5);
           }
+          *:focus {
+            outline: none;
+          }
         `}} />
       </head>
       <body>{children}</body>
