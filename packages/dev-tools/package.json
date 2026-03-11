@@ -18,6 +18,7 @@
     "tamagui": "*"
   },
   "dependencies": {
+    "@mvp/i18n": "*",
     "lucide-react-native": "^0.577.0"
   }
 }

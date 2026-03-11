@@ -20,6 +20,9 @@ export interface TestState {
   startedAt: number | null
   elapsed: string | null
   summary: string
+  passed: number
+  failed: number
+  total: number
 }
 
 export const TESTS: TestDef[] = [

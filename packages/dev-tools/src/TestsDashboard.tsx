@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { ScrollView, Platform, Pressable, useWindowDimensions, PanResponder } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { FadeIn } from '@mvp/ui'
+import { useAppTranslation } from '@mvp/i18n'
 import {
   CheckCircle2, XCircle, Circle, Loader2, Play, Square, Clock,
   FlaskConical, Wrench, Globe, ShieldCheck,
@@ -10,9 +11,11 @@ import {
   BarChart3, FileCheck, Table2, Camera,
   Puzzle, Image, CheckSquare, ShieldAlert,
   Container, Rocket, ChevronDown, ChevronUp, Trash2,
+  History, ChevronLeft, ChevronRight, Copy, Check,
   type LucideIcon,
 } from 'lucide-react-native'
-import { TESTS, GROUP_LABELS, GROUPS, type TestStatus } from './tests'
+import { TESTS, GROUPS, type TestStatus } from './tests'
+// GROUP_LABELS no longer imported — using i18n keys instead
 
 const ICONS: Record<string, LucideIcon> = {
   'flask-conical': FlaskConical, server: Server, database: Database,
@@ -83,17 +86,38 @@ function AnsiText({ text, monoFamily }: { text: string; monoFamily: string }) {
   )
 }
 
-interface St { status: TestStatus; elapsed: string | null; summary: string }
+interface FailedTestInfo { name: string; file?: string; error?: string }
 
-const STATUS_CFG: Record<TestStatus, { color: string; bg: string; Icon: LucideIcon; label: string }> = {
-  idle:    { color: '#6b7280', bg: 'transparent', Icon: Circle,       label: 'Ready' },
-  running: { color: '#f59e0b', bg: '#f59e0b18',  Icon: Loader2,      label: 'Running' },
-  passed:  { color: '#22c55e', bg: '#22c55e18',  Icon: CheckCircle2, label: 'Passed' },
-  failed:  { color: '#ef4444', bg: '#ef444418',  Icon: XCircle,      label: 'Failed' },
+interface St {
+  status: TestStatus
+  elapsed: string | null
+  summary: string
+  passed?: number
+  failed?: number
+  total?: number
+}
+
+interface FailureRecord {
+  id: string
+  testName: string
+  timestamp: number
+  elapsed: string | null
+  summary: string
+  passed: number
+  failed: number
+  total: number
+  failedTests: FailedTestInfo[]
 }
 
 const GROUP_ICONS: Record<string, LucideIcon> = {
   unit: FlaskConical, specialized: Wrench, e2e: Globe, quality: ShieldCheck,
+}
+
+const GROUP_I18N: Record<string, string> = {
+  unit: 'testsGroupUnit',
+  specialized: 'testsGroupSpecialized',
+  e2e: 'testsGroupE2e',
+  quality: 'testsGroupQuality',
 }
 
 const MIN_CONSOLE_H = 120
@@ -170,21 +194,53 @@ function DragHandle({ onHeightChange }: { onHeightChange: (h: number) => void })
   )
 }
 
+// ─── Copy button helper ─────────────────────────────────────────────────────
+
+function CopyButton({ text, monoFamily }: { text: string; monoFamily: string }) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = useCallback(() => {
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }).catch(() => {})
+    }
+  }, [text])
+
+  if (Platform.OS !== 'web') return null
+
+  return (
+    <Pressable onPress={handleCopy}>
+      <XStack alignItems="center" gap={4} paddingHorizontal={6} paddingVertical={3} borderRadius={4} backgroundColor="#1e293b" hoverStyle={{ backgroundColor: '#2d3748' }}>
+        {copied ? <Check size={10} color="#22c55e" /> : <Copy size={10} color="#8b949e" />}
+        <Text fontSize={9} fontFamily={monoFamily} color={copied ? '#22c55e' : '#8b949e'}>
+          {copied ? 'Copied' : 'Copy'}
+        </Text>
+      </XStack>
+    </Pressable>
+  )
+}
+
 interface Props { apiBase?: string }
 
 export function TestsDashboard({ apiBase }: Props) {
   const devApi = `${apiBase ?? (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000')}/dev`
+  const { t } = useAppTranslation()
   const theme = useTheme()
   const { width: screenWidth } = useWindowDimensions()
   const isNarrow = screenWidth < 500
   const [states, setStates] = useState<Record<string, St>>(() => {
-    const r: Record<string, St> = {}; for (const t of TESTS) r[t.id] = { status: 'idle', elapsed: null, summary: '' }; return r
+    const r: Record<string, St> = {}; for (const tt of TESTS) r[tt.id] = { status: 'idle', elapsed: null, summary: '' }; return r
   })
   const [log, setLog] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [connected, setConnected] = useState(false)
   const [consoleHeight, setConsoleHeight] = useState(DEFAULT_CONSOLE_H)
   const [consoleCollapsed, setConsoleCollapsed] = useState(false)
+  // Failure history
+  const [failures, setFailures] = useState<FailureRecord[]>([])
+  const [failureIdx, setFailureIdx] = useState<number | null>(null)
+  const [failuresOpen, setFailuresOpen] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const logScrollRef = useRef<ScrollView>(null)
   const statesRef = useRef(states)
@@ -192,6 +248,13 @@ export function TestsDashboard({ apiBase }: Props) {
   const isWeb = Platform.OS === 'web'
   const accent = theme.accent?.val || '#8b5cf6'
   const monoFamily = isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'
+
+  const STATUS_CFG: Record<TestStatus, { color: string; bg: string; Icon: LucideIcon; label: string }> = {
+    idle:    { color: '#6b7280', bg: 'transparent', Icon: Circle,       label: t('admin.testsReady') },
+    running: { color: '#f59e0b', bg: '#f59e0b18',  Icon: Loader2,      label: t('admin.testsRunningStatus') },
+    passed:  { color: '#22c55e', bg: '#22c55e18',  Icon: CheckCircle2, label: t('admin.testsPassedStatus') },
+    failed:  { color: '#ef4444', bg: '#ef444418',  Icon: XCircle,      label: t('admin.testsFailedStatus') },
+  }
 
   // Auto-scroll log to bottom
   const prevLogLen = useRef(0)
@@ -212,21 +275,33 @@ export function TestsDashboard({ apiBase }: Props) {
           if (d.state) {
             const ns: Record<string, St> = {}
             for (const [id, s] of Object.entries(d.state) as [string, any][])
-              ns[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary }
+              ns[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary, passed: s.passed, failed: s.failed, total: s.total }
             setStates(p => ({ ...p, ...ns }))
           }
           setConnected(true)
+          fetchFailures()
         } catch { /* ignore */ }
       })
       es.addEventListener('status', (e: any) => {
         try {
           const d = JSON.parse(e.data)
-          setStates(p => ({ ...p, [d.id]: { status: d.status, elapsed: d.elapsed || p[d.id]?.elapsed, summary: d.summary || p[d.id]?.summary || '' } }))
+          setStates(p => ({
+            ...p,
+            [d.id]: {
+              status: d.status,
+              elapsed: d.elapsed || p[d.id]?.elapsed,
+              summary: d.summary || p[d.id]?.summary || '',
+              passed: d.passed ?? p[d.id]?.passed,
+              failed: d.failed ?? p[d.id]?.failed,
+              total: d.total ?? p[d.id]?.total,
+            },
+          }))
         } catch { /* ignore */ }
       })
       es.addEventListener('log', (e: any) => {
         try { const d = JSON.parse(e.data); setActiveId(d.id); setLog(p => p + d.text) } catch { /* ignore */ }
       })
+      es.addEventListener('failure', () => { fetchFailures() })
       es.onerror = () => setConnected(false)
       return () => es.close()
     } else {
@@ -239,7 +314,7 @@ export function TestsDashboard({ apiBase }: Props) {
             if (d.state) {
               const ns: Record<string, St> = {}
               for (const [id, s] of Object.entries(d.state) as [string, any][])
-                ns[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary }
+                ns[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary, passed: s.passed, failed: s.failed, total: s.total }
               // Detect test completion → fetch final log
               const prev = statesRef.current
               for (const [id, s] of Object.entries(ns)) {
@@ -261,6 +336,7 @@ export function TestsDashboard({ apiBase }: Props) {
         }
       }
       poll()
+      fetchFailures()
       pollRef.current = setInterval(poll, 2000)
       return () => { if (pollRef.current) clearInterval(pollRef.current) }
     }
@@ -298,10 +374,50 @@ export function TestsDashboard({ apiBase }: Props) {
     setConsoleHeight(h)
   }, [])
 
-  const passed = Object.values(states).filter(s => s.status === 'passed').length
-  const failed = Object.values(states).filter(s => s.status === 'failed').length
-  const running = Object.values(states).filter(s => s.status === 'running').length
-  const activeTest = activeId ? TESTS.find(t => t.id === activeId) : null
+  // Fetch failure history list
+  const fetchFailures = useCallback(() => {
+    fetch(`${devApi}/tests/failures`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setFailures(data) })
+      .catch(() => {})
+  }, [devApi])
+
+  // Load a specific failure log into console
+  const viewFailure = useCallback((idx: number) => {
+    setFailureIdx(idx)
+    fetch(`${devApi}/tests/failures/log?index=${idx}`)
+      .then(r => r.json())
+      .then(d => { if (d.log) { setLog(d.log); setActiveId(d.id); setConsoleCollapsed(false) } })
+      .catch(() => {})
+  }, [devApi])
+
+  // Back to live log
+  const backToLive = useCallback(() => {
+    setFailureIdx(null)
+    if (activeId) fetchLog(activeId)
+  }, [activeId, fetchLog])
+
+  // Format failure details as copyable text
+  const formatFailureText = useCallback((f: FailureRecord): string => {
+    const lines: string[] = []
+    lines.push(`${f.testName} — ${f.summary || 'FAILED'}`)
+    if (f.failedTests && f.failedTests.length > 0) {
+      for (const ft of f.failedTests) {
+        const parts = []
+        if (ft.file) parts.push(ft.file)
+        parts.push(ft.name)
+        lines.push(`  - ${parts.join(' > ')}`)
+        if (ft.error) lines.push(`    ${ft.error}`)
+      }
+    }
+    lines.push(`  ${new Date(f.timestamp).toLocaleString()} | ${f.elapsed ? f.elapsed + 's' : ''}`)
+    return lines.join('\n')
+  }, [])
+
+  const passedCount = Object.values(states).filter(s => s.status === 'passed').length
+  const failedCount = Object.values(states).filter(s => s.status === 'failed').length
+  const runningCount = Object.values(states).filter(s => s.status === 'running').length
+  const activeTest = activeId ? TESTS.find(tt => tt.id === activeId) : null
 
   const cardWidth = isNarrow ? '100%' : 260
   const consoleOpen = activeId !== null
@@ -319,29 +435,40 @@ export function TestsDashboard({ apiBase }: Props) {
           {/* Status bar */}
           <XStack alignItems="center" justifyContent="space-between" flexWrap="wrap" gap="$2" marginBottom="$4">
             <XStack alignItems="center" gap="$2" flexWrap="wrap">
-              {passed > 0 && (
+              {passedCount > 0 && (
                 <XStack alignItems="center" gap={5} paddingHorizontal={10} paddingVertical={4} borderRadius={20} backgroundColor="#22c55e18">
                   <CheckCircle2 size={13} color="#22c55e" />
-                  <Text fontSize={12} fontWeight="600" color="#22c55e">{passed} passed</Text>
+                  <Text fontSize={12} fontWeight="600" color="#22c55e">{t('admin.testsPassed', { count: passedCount })}</Text>
                 </XStack>
               )}
-              {failed > 0 && (
-                <XStack alignItems="center" gap={5} paddingHorizontal={10} paddingVertical={4} borderRadius={20} backgroundColor="#ef444418">
-                  <XCircle size={13} color="#ef4444" />
-                  <Text fontSize={12} fontWeight="600" color="#ef4444">{failed} failed</Text>
-                </XStack>
+              {failedCount > 0 && (
+                <Pressable onPress={() => {
+                  fetchFailures()
+                  setFailuresOpen(true)
+                  setConsoleCollapsed(false)
+                  // Open console if not open — pick first failed test
+                  if (!activeId) {
+                    const firstFailed = Object.entries(states).find(([, s]) => s.status === 'failed')
+                    if (firstFailed) { setActiveId(firstFailed[0]); fetchLog(firstFailed[0]) }
+                  }
+                }}>
+                  <XStack alignItems="center" gap={5} paddingHorizontal={10} paddingVertical={4} borderRadius={20} backgroundColor="#ef444418">
+                    <XCircle size={13} color="#ef4444" />
+                    <Text fontSize={12} fontWeight="600" color="#ef4444">{t('admin.testsFailed', { count: failedCount })}</Text>
+                  </XStack>
+                </Pressable>
               )}
-              {running > 0 && (
+              {runningCount > 0 && (
                 <XStack alignItems="center" gap={5} paddingHorizontal={10} paddingVertical={4} borderRadius={20} backgroundColor="#f59e0b18">
                   <Loader2 size={13} color="#f59e0b" />
-                  <Text fontSize={12} fontWeight="600" color="#f59e0b">{running} running</Text>
+                  <Text fontSize={12} fontWeight="600" color="#f59e0b">{t('admin.testsRunning', { count: runningCount })}</Text>
                 </XStack>
               )}
-              <Text fontSize={12} color="$mutedText">{TESTS.length} total</Text>
+              <Text fontSize={12} color="$mutedText">{t('admin.testsTotal', { count: TESTS.length })}</Text>
             </XStack>
             <XStack alignItems="center" gap={6}>
               <YStack width={7} height={7} borderRadius={4} backgroundColor={connected ? '#22c55e' : '#ef4444'} />
-              <Text fontSize={11} color="$mutedText">{connected ? 'Connected' : 'Disconnected'}</Text>
+              <Text fontSize={11} color="$mutedText">{connected ? t('admin.testsConnected') : t('admin.testsDisconnected')}</Text>
             </XStack>
           </XStack>
         </FadeIn>
@@ -354,13 +481,13 @@ export function TestsDashboard({ apiBase }: Props) {
               marginBottom="$4"
             >
               <CloudOff size={15} color="#f87171" />
-              <Text fontSize={12} color="#f87171">No connection. Run: npm run dev:backend</Text>
+              <Text fontSize={12} color="#f87171">{t('admin.testsNoConnection')}</Text>
             </XStack>
           </FadeIn>
         )}
 
         {GROUPS.map(group => {
-          const tests = TESTS.filter(t => t.group === group)
+          const tests = TESTS.filter(tt => tt.group === group)
           const GIcon = GROUP_ICONS[group] || FlaskConical
           return (
             <FadeIn key={group}>
@@ -368,7 +495,7 @@ export function TestsDashboard({ apiBase }: Props) {
                 <XStack alignItems="center" gap="$2" marginBottom="$2.5">
                   <GIcon size={14} color="#6b7280" />
                   <Text fontSize={11} fontWeight="700" textTransform="uppercase" letterSpacing={1.2} color="$mutedText">
-                    {GROUP_LABELS[group]}
+                    {t(`admin.${GROUP_I18N[group]}`)}
                   </Text>
                   <YStack flex={1} height={1} backgroundColor="$borderColor" opacity={0.3} />
                 </XStack>
@@ -381,6 +508,12 @@ export function TestsDashboard({ apiBase }: Props) {
                     const TestIcon = ICONS[test.lucideIcon] || FlaskConical
                     const isRun = st.status === 'running'
                     const isAct = activeId === test.id
+
+                    // Build status label with counts
+                    let statusLabel = cfg.label
+                    if ((st.status === 'passed' || st.status === 'failed') && st.total && st.total > 0) {
+                      statusLabel = `${st.passed ?? 0}/${st.total}`
+                    }
 
                     return (
                       <Pressable
@@ -424,7 +557,7 @@ export function TestsDashboard({ apiBase }: Props) {
                               borderRadius={12} backgroundColor={cfg.bg}
                             >
                               <StatusIcon size={11} color={cfg.color} />
-                              <Text fontSize={10} fontWeight="600" color={cfg.color}>{cfg.label}</Text>
+                              <Text fontSize={10} fontWeight="600" color={cfg.color}>{statusLabel}</Text>
                             </XStack>
                           </XStack>
 
@@ -452,7 +585,7 @@ export function TestsDashboard({ apiBase }: Props) {
                                 : <Play size={10} color="white" fill="white" />
                               }
                               <Text fontSize={11} fontWeight="600" color={isRun ? '#f59e0b' : 'white'}>
-                                {isRun ? 'Stop' : 'Run'}
+                                {isRun ? t('admin.testsStop') : t('admin.testsRun')}
                               </Text>
                             </XStack>
                             <XStack alignItems="center" gap={8}>
@@ -508,22 +641,70 @@ export function TestsDashboard({ apiBase }: Props) {
             <XStack alignItems="center" gap={8}>
               <Terminal size={13} color="#8b949e" />
               <Text fontSize={11} fontWeight="700" textTransform="uppercase" letterSpacing={1} color="#8b949e">
-                Console
+                {t('admin.testsConsole')}
               </Text>
-              {activeTest && (
-                <Text
-                  fontSize={11} color="#8b949e"
-                  backgroundColor="#1e293b" paddingHorizontal={8} paddingVertical={2} borderRadius={4}
-                >
-                  {activeTest.name}
-                </Text>
-              )}
-              {running > 0 && (
-                <YStack width={6} height={6} borderRadius={3} backgroundColor="#f59e0b" />
+              {failureIdx !== null ? (
+                <XStack alignItems="center" gap={6}>
+                  <XStack backgroundColor="#ef444430" paddingHorizontal={8} paddingVertical={2} borderRadius={4} alignItems="center" gap={4}>
+                    <History size={10} color="#f87171" />
+                    <Text fontSize={10} fontWeight="600" color="#f87171">
+                      {t('admin.testsFailure', { index: failureIdx + 1 })}
+                    </Text>
+                  </XStack>
+                  {failures[failureIdx] && (
+                    <Text fontSize={10} color="#8b949e">{failures[failureIdx].testName}</Text>
+                  )}
+                  <Pressable onPress={backToLive}>
+                    <Text fontSize={10} color="#60a5fa" fontWeight="600">{t('admin.testsLive')}</Text>
+                  </Pressable>
+                </XStack>
+              ) : (
+                <>
+                  {activeTest && (
+                    <Text
+                      fontSize={11} color="#8b949e"
+                      backgroundColor="#1e293b" paddingHorizontal={8} paddingVertical={2} borderRadius={4}
+                    >
+                      {activeTest.name}
+                    </Text>
+                  )}
+                  {runningCount > 0 && (
+                    <YStack width={6} height={6} borderRadius={3} backgroundColor="#f59e0b" />
+                  )}
+                </>
               )}
             </XStack>
             <XStack alignItems="center" gap={4}>
-              <Pressable onPress={() => fetchLog(activeId!)}>
+              {/* Failures history button */}
+              <Pressable onPress={() => {
+                fetchFailures()
+                setFailuresOpen(f => !f)
+                setConsoleCollapsed(false)
+              }}>
+                <XStack alignItems="center" gap={3} paddingHorizontal={6} paddingVertical={4}>
+                  <History size={12} color={failures.length > 0 ? '#f87171' : '#8b949e'} />
+                  {failures.length > 0 && (
+                    <Text fontSize={10} fontWeight="600" color="#f87171">{failures.length}</Text>
+                  )}
+                </XStack>
+              </Pressable>
+              {/* Navigate failures */}
+              {failureIdx !== null && (
+                <XStack alignItems="center" gap={2}>
+                  <Pressable onPress={() => { if (failureIdx < failures.length - 1) viewFailure(failureIdx + 1) }}>
+                    <XStack paddingHorizontal={4} paddingVertical={4} opacity={failureIdx < failures.length - 1 ? 1 : 0.3}>
+                      <ChevronLeft size={12} color="#8b949e" />
+                    </XStack>
+                  </Pressable>
+                  <Text fontSize={10} color="#8b949e">{failureIdx + 1}/{failures.length}</Text>
+                  <Pressable onPress={() => { if (failureIdx > 0) viewFailure(failureIdx - 1) }}>
+                    <XStack paddingHorizontal={4} paddingVertical={4} opacity={failureIdx > 0 ? 1 : 0.3}>
+                      <ChevronRight size={12} color="#8b949e" />
+                    </XStack>
+                  </Pressable>
+                </XStack>
+              )}
+              <Pressable onPress={() => { backToLive(); fetchLog(activeId!) }}>
                 <XStack alignItems="center" paddingHorizontal={6} paddingVertical={4}>
                   <RefreshCw size={12} color="#8b949e" />
                 </XStack>
@@ -538,13 +719,84 @@ export function TestsDashboard({ apiBase }: Props) {
                   {consoleCollapsed ? <ChevronUp size={14} color="#8b949e" /> : <ChevronDown size={14} color="#8b949e" />}
                 </XStack>
               </Pressable>
-              <Pressable onPress={() => { setLog(''); setActiveId(null) }}>
+              <Pressable onPress={() => { setLog(''); setActiveId(null); setFailureIdx(null); setFailuresOpen(false) }}>
                 <XStack alignItems="center" paddingHorizontal={6} paddingVertical={4}>
                   <X size={14} color="#8b949e" />
                 </XStack>
               </Pressable>
             </XStack>
           </XStack>
+
+          {/* Failures list panel */}
+          {!consoleCollapsed && failuresOpen && (
+            <YStack borderBottomWidth={1} borderBottomColor="#1e293b" maxHeight={300}>
+              <ScrollView contentContainerStyle={{ padding: 8 }}>
+                {failures.length === 0 ? (
+                  <Text fontSize={11} color="#4b5563" fontStyle="italic" padding={8}>{t('admin.testsNoFailures')}</Text>
+                ) : (
+                  failures.map((f, idx) => (
+                    <Pressable key={`${f.id}-${f.timestamp}`} onPress={() => { viewFailure(idx); setFailuresOpen(false) }}>
+                      <YStack
+                        padding={8} borderRadius={6} marginBottom={4}
+                        backgroundColor={failureIdx === idx ? '#ef444418' : 'transparent'}
+                        hoverStyle={{ backgroundColor: '#1e293b' }}
+                      >
+                        <XStack alignItems="center" gap={8}>
+                          <XCircle size={12} color="#ef4444" />
+                          <Text fontSize={11} fontWeight="600" color="#d1d5db" flex={1} numberOfLines={1}>
+                            {f.testName}
+                          </Text>
+                          {f.summary ? (
+                            <Text fontSize={10} fontWeight="600" color="#f87171">{f.summary}</Text>
+                          ) : null}
+                          {f.elapsed ? (
+                            <Text fontSize={10} color="#4b5563">{f.elapsed}s</Text>
+                          ) : null}
+                          <Text fontSize={10} color="#4b5563">
+                            {new Date(f.timestamp).toLocaleTimeString()}
+                          </Text>
+                          <CopyButton text={formatFailureText(f)} monoFamily={monoFamily} />
+                        </XStack>
+                        {/* Individual failed tests */}
+                        {f.failedTests && f.failedTests.length > 0 && (
+                          <YStack marginTop={6} marginLeft={20} gap={3}>
+                            {f.failedTests.map((ft, ftIdx) => (
+                              <YStack key={ftIdx} gap={2}>
+                                <XStack alignItems="flex-start" gap={4}>
+                                  <Text fontSize={10} color="#ef4444" marginTop={1}>-</Text>
+                                  <YStack flex={1}>
+                                    <Text
+                                      fontSize={10} fontFamily={monoFamily} color="#d1d5db"
+                                      numberOfLines={2}
+                                      // @ts-ignore
+                                      style={isWeb ? { wordBreak: 'break-all', userSelect: 'text' } : undefined}
+                                    >
+                                      {ft.file ? <Text fontSize={10} color="#60a5fa" fontFamily={monoFamily}>{ft.file} {'> '}</Text> : null}
+                                      {ft.name}
+                                    </Text>
+                                    {ft.error && (
+                                      <Text
+                                        fontSize={9} fontFamily={monoFamily} color="#f87171" marginTop={2}
+                                        numberOfLines={2}
+                                        // @ts-ignore
+                                        style={isWeb ? { wordBreak: 'break-all', userSelect: 'text' } : undefined}
+                                      >
+                                        {ft.error}
+                                      </Text>
+                                    )}
+                                  </YStack>
+                                </XStack>
+                              </YStack>
+                            ))}
+                          </YStack>
+                        )}
+                      </YStack>
+                    </Pressable>
+                  ))
+                )}
+              </ScrollView>
+            </YStack>
+          )}
 
           {/* Log content */}
           {!consoleCollapsed && (
@@ -560,7 +812,7 @@ export function TestsDashboard({ apiBase }: Props) {
                   fontFamily={monoFamily}
                   fontSize={12} lineHeight={20} color="#4b5563" fontStyle="italic"
                 >
-                  Waiting for output...
+                  {t('admin.testsWaitingOutput')}
                 </Text>
               )}
             </ScrollView>
