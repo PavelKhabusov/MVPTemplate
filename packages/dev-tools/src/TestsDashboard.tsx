@@ -70,7 +70,7 @@ export function TestsDashboard({ apiBase }: Props) {
   if (Platform.OS !== 'web') {
     return (
       <YStack flex={1} padding="$4" alignItems="center" justifyContent="center" gap="$4">
-        <FlaskConical size={48} color="#888" />
+        <Text fontSize={48}>🧪</Text>
         <Text fontSize="$4" color="$mutedText" textAlign="center">Тест-дашборд доступен только в браузере</Text>
         <AppButton onPress={() => Linking.openURL(`${devApi}/tests`)}>Открыть в браузере</AppButton>
       </YStack>
