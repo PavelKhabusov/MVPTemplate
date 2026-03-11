@@ -17,7 +17,7 @@ import { spawn, ChildProcess } from 'child_process'
 import { resolve } from 'path'
 import { readdirSync, existsSync } from 'fs'
 import { devTestsDashboardHTML } from './dashboard-html'
-import { TESTS, type TestState } from '@mvp/dev-tools/src/tests'
+import { TESTS, type TestState } from '../../../../../packages/dev-tools/src/tests.js'
 
 const ROOT = resolve(process.cwd(), '../..')
 
