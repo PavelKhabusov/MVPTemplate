@@ -49,7 +49,7 @@ export default function DocsLayout() {
           contentStyle: { backgroundColor: theme.background.val },
           headerLeft: () => (
             <Pressable onPress={() => router.back()} hitSlop={8} style={{ padding: 4 }}>
-              <Ionicons name="chevron-back" size={24} color={theme.accent.val} />
+              <ChevronLeft size={24} color={theme.accent.val} />
             </Pressable>
           ),
         }}
