@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { ScrollView, Platform, Pressable, useWindowDimensions } from 'react-native'
+import { ScrollView, Platform, Pressable, useWindowDimensions, PanResponder } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { AppButton, FadeIn } from '@mvp/ui'
+import { FadeIn } from '@mvp/ui'
 import {
   CheckCircle2, XCircle, Circle, Loader2, Play, Square, Clock,
   FlaskConical, Wrench, Globe, ShieldCheck,
-  Terminal, RefreshCw, X, CloudOff,
+  Terminal, RefreshCw, X, CloudOff, GripHorizontal,
   Server, Database, Library, Languages,
   BarChart3, FileCheck, Table2, Camera,
   Puzzle, Image, CheckSquare, ShieldAlert,
-  Container, Rocket,
+  Container, Rocket, ChevronDown, ChevronUp, Trash2,
   type LucideIcon,
 } from 'lucide-react-native'
 import { TESTS, GROUP_LABELS, GROUPS, type TestStatus } from './tests'
@@ -96,12 +96,67 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   unit: FlaskConical, specialized: Wrench, e2e: Globe, quality: ShieldCheck,
 }
 
+const MIN_CONSOLE_H = 120
+const MAX_CONSOLE_H = 600
+const DEFAULT_CONSOLE_H = 250
+
+// ─── Drag handle (web: mouse events, native: PanResponder) ──────────────────
+
+function DragHandle({ onDrag }: { onDrag: (dy: number) => void }) {
+  const isWeb = Platform.OS === 'web'
+
+  // Native: PanResponder
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        onDrag(-gestureState.dy)
+      },
+    })
+  ).current
+
+  const handleMouseDown = useCallback((e: any) => {
+    if (!isWeb) return
+    e.preventDefault()
+    const startY = e.clientY
+    const onMove = (ev: MouseEvent) => {
+      onDrag(startY - ev.clientY)
+      ;(startY as any) // reassign via closure trick below
+    }
+    let lastY = startY
+    const onMoveTracked = (ev: MouseEvent) => {
+      onDrag(lastY - ev.clientY)
+      lastY = ev.clientY
+    }
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMoveTracked)
+      document.removeEventListener('mouseup', onUp)
+    }
+    document.addEventListener('mousemove', onMoveTracked)
+    document.addEventListener('mouseup', onUp)
+  }, [isWeb, onDrag])
+
+  return (
+    <YStack
+      alignItems="center"
+      justifyContent="center"
+      height={20}
+      // @ts-ignore web cursor
+      style={isWeb ? { cursor: 'row-resize', userSelect: 'none' } : undefined}
+      {...(isWeb ? { onPointerDown: handleMouseDown } : panResponder.panHandlers)}
+    >
+      <GripHorizontal size={16} color="#4b5563" />
+    </YStack>
+  )
+}
+
 interface Props { apiBase?: string }
 
 export function TestsDashboard({ apiBase }: Props) {
   const devApi = `${apiBase ?? (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000')}/dev`
   const theme = useTheme()
-  const { width: screenWidth } = useWindowDimensions()
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   const isNarrow = screenWidth < 500
   const [states, setStates] = useState<Record<string, St>>(() => {
     const r: Record<string, St> = {}; for (const t of TESTS) r[t.id] = { status: 'idle', elapsed: null, summary: '' }; return r
@@ -109,9 +164,22 @@ export function TestsDashboard({ apiBase }: Props) {
   const [log, setLog] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [connected, setConnected] = useState(false)
+  const [consoleHeight, setConsoleHeight] = useState(DEFAULT_CONSOLE_H)
+  const [consoleCollapsed, setConsoleCollapsed] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const logScrollRef = useRef<ScrollView>(null)
   const isWeb = Platform.OS === 'web'
   const accent = theme.accent?.val || '#8b5cf6'
+  const monoFamily = isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'
+
+  // Auto-scroll log to bottom
+  const prevLogLen = useRef(0)
+  useEffect(() => {
+    if (log.length > prevLogLen.current) {
+      logScrollRef.current?.scrollToEnd({ animated: false })
+    }
+    prevLogLen.current = log.length
+  }, [log])
 
   // SSE on web, polling on native
   useEffect(() => {
@@ -168,7 +236,7 @@ export function TestsDashboard({ apiBase }: Props) {
   }, [devApi, isWeb])
 
   const run = useCallback((id: string) => {
-    setLog(''); setActiveId(id)
+    setLog(''); setActiveId(id); setConsoleCollapsed(false)
     fetch(`${devApi}/tests/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }).catch(() => {})
   }, [devApi])
 
@@ -193,6 +261,9 @@ export function TestsDashboard({ apiBase }: Props) {
     return () => clearInterval(id)
   }, [isWeb, activeId, states, fetchLog])
 
+  const handleDrag = useCallback((dy: number) => {
+    setConsoleHeight(h => Math.min(MAX_CONSOLE_H, Math.max(MIN_CONSOLE_H, h + dy)))
+  }, [])
 
   const passed = Object.values(states).filter(s => s.status === 'passed').length
   const failed = Object.values(states).filter(s => s.status === 'failed').length
@@ -200,10 +271,17 @@ export function TestsDashboard({ apiBase }: Props) {
   const activeTest = activeId ? TESTS.find(t => t.id === activeId) : null
 
   const cardWidth = isNarrow ? '100%' : 260
+  const consoleOpen = activeId !== null
+  const consoleBarH = 36
+  const effectiveConsoleH = consoleOpen ? (consoleCollapsed ? consoleBarH : consoleBarH + 20 + consoleHeight) : 0
 
   return (
     <YStack flex={1}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+      {/* Scrollable test cards area */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: effectiveConsoleH + 20 }}
+      >
         <FadeIn>
           {/* Status bar */}
           <XStack alignItems="center" justifyContent="space-between" flexWrap="wrap" gap="$2" marginBottom="$4">
@@ -322,7 +400,7 @@ export function TestsDashboard({ apiBase }: Props) {
 
                           {/* Row 3: cmd */}
                           <Text
-                            fontSize={10} fontFamily={isWeb ? 'JetBrains Mono, SF Mono, monospace' : '$mono'}
+                            fontSize={10} fontFamily={monoFamily}
                             color="#4b5563" numberOfLines={1}
                           >
                             $ {test.cmd}
@@ -370,63 +448,92 @@ export function TestsDashboard({ apiBase }: Props) {
             </FadeIn>
           )
         })}
-
-        {/* Log panel */}
-        {activeId && (
-          <FadeIn>
-            <YStack marginTop="$2">
-              <XStack alignItems="center" justifyContent="space-between" marginBottom="$2" paddingHorizontal={4}>
-                <XStack alignItems="center" gap={8}>
-                  <Terminal size={14} color="#6b7280" />
-                  <Text fontSize={11} fontWeight="700" textTransform="uppercase" letterSpacing={1} color="$mutedText">
-                    Output
-                  </Text>
-                  {activeTest && (
-                    <Text fontSize={11} color="$mutedText" backgroundColor="$backgroundHover" paddingHorizontal={8} paddingVertical={2} borderRadius={4}>
-                      {activeTest.name}
-                    </Text>
-                  )}
-                </XStack>
-                <XStack gap="$3">
-                  <Pressable onPress={() => fetchLog(activeId)}>
-                    <XStack alignItems="center" gap={4}>
-                      <RefreshCw size={11} color="#6b7280" />
-                      <Text fontSize={11} color="$mutedText">Refresh</Text>
-                    </XStack>
-                  </Pressable>
-                  <Pressable onPress={() => { setLog(''); setActiveId(null) }}>
-                    <XStack alignItems="center" gap={4}>
-                      <X size={13} color="#6b7280" />
-                      <Text fontSize={11} color="$mutedText">Close</Text>
-                    </XStack>
-                  </Pressable>
-                </XStack>
-              </XStack>
-
-              <YStack
-                borderRadius={10} borderWidth={1} borderColor="$borderColor"
-                backgroundColor="#0d1117" maxHeight={450} overflow="hidden"
-              >
-                <ScrollView style={{ maxHeight: 450, padding: 16 }}>
-                  {log ? (
-                    <AnsiText
-                      text={log}
-                      monoFamily={isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'}
-                    />
-                  ) : (
-                    <Text
-                      fontFamily={isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'}
-                      fontSize={12} lineHeight={20} color="#4b5563" fontStyle="italic"
-                    >
-                      Waiting for output...
-                    </Text>
-                  )}
-                </ScrollView>
-              </YStack>
-            </YStack>
-          </FadeIn>
-        )}
       </ScrollView>
+
+      {/* ─── Sticky bottom console ──────────────────────────────────────── */}
+      {consoleOpen && (
+        <YStack
+          // @ts-ignore web position: sticky/fixed
+          style={isWeb ? { position: 'sticky', bottom: 0 } : undefined}
+          borderTopWidth={1}
+          borderTopColor="#1e293b"
+          backgroundColor="#0d1117"
+        >
+          {/* Drag handle */}
+          {!consoleCollapsed && <DragHandle onDrag={handleDrag} />}
+
+          {/* Console toolbar */}
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            paddingHorizontal={12}
+            height={consoleBarH}
+            backgroundColor="#161b22"
+            borderBottomWidth={consoleCollapsed ? 0 : 1}
+            borderBottomColor="#1e293b"
+          >
+            <XStack alignItems="center" gap={8}>
+              <Terminal size={13} color="#8b949e" />
+              <Text fontSize={11} fontWeight="700" textTransform="uppercase" letterSpacing={1} color="#8b949e">
+                Console
+              </Text>
+              {activeTest && (
+                <Text
+                  fontSize={11} color="#8b949e"
+                  backgroundColor="#1e293b" paddingHorizontal={8} paddingVertical={2} borderRadius={4}
+                >
+                  {activeTest.name}
+                </Text>
+              )}
+              {running > 0 && (
+                <YStack width={6} height={6} borderRadius={3} backgroundColor="#f59e0b" />
+              )}
+            </XStack>
+            <XStack alignItems="center" gap={4}>
+              <Pressable onPress={() => fetchLog(activeId!)}>
+                <XStack alignItems="center" paddingHorizontal={6} paddingVertical={4}>
+                  <RefreshCw size={12} color="#8b949e" />
+                </XStack>
+              </Pressable>
+              <Pressable onPress={() => setLog('')}>
+                <XStack alignItems="center" paddingHorizontal={6} paddingVertical={4}>
+                  <Trash2 size={12} color="#8b949e" />
+                </XStack>
+              </Pressable>
+              <Pressable onPress={() => setConsoleCollapsed(c => !c)}>
+                <XStack alignItems="center" paddingHorizontal={6} paddingVertical={4}>
+                  {consoleCollapsed ? <ChevronUp size={14} color="#8b949e" /> : <ChevronDown size={14} color="#8b949e" />}
+                </XStack>
+              </Pressable>
+              <Pressable onPress={() => { setLog(''); setActiveId(null) }}>
+                <XStack alignItems="center" paddingHorizontal={6} paddingVertical={4}>
+                  <X size={14} color="#8b949e" />
+                </XStack>
+              </Pressable>
+            </XStack>
+          </XStack>
+
+          {/* Log content */}
+          {!consoleCollapsed && (
+            <ScrollView
+              ref={logScrollRef}
+              style={{ height: consoleHeight }}
+              contentContainerStyle={{ padding: 12, paddingBottom: 16 }}
+            >
+              {log ? (
+                <AnsiText text={log} monoFamily={monoFamily} />
+              ) : (
+                <Text
+                  fontFamily={monoFamily}
+                  fontSize={12} lineHeight={20} color="#4b5563" fontStyle="italic"
+                >
+                  Waiting for output...
+                </Text>
+              )}
+            </ScrollView>
+          )}
+        </YStack>
+      )}
     </YStack>
   )
 }
