@@ -35,7 +35,6 @@
     "test:e2e:ext": "npx playwright test --config=playwright.extension.config.ts",
     "dev:extension": "npm run dev -w apps/extension",
     "build:extension": "npm run build -w apps/extension",
-    "dashboard": "node scripts/test-dashboard.mjs",
     "gitpush": "git push origin HEAD"
   },
   "devDependencies": {

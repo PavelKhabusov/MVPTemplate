@@ -26,6 +26,7 @@ import { StorageService } from './modules/storage/storage.service'
 import { storageRoutes } from './modules/storage/storage.routes'
 import { proxyRoutes } from './modules/proxy/proxy.routes'
 import { emailRoutes } from './modules/email/email.routes'
+import { devToolsRoutes } from './modules/dev-tools/dev-tools.routes'
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerConfig })
@@ -145,6 +146,11 @@ export async function buildApp() {
 
   // Real-time
   await app.register(sseRoutes, { prefix: '/api/sse' })
+
+  // Dev tools (test dashboard) — development only
+  if (env.NODE_ENV !== 'production') {
+    await app.register(devToolsRoutes, { prefix: '/dev' })
+  }
 
   return app
 }
