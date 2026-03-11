@@ -313,7 +313,7 @@ function UserBadge({ collapsed, compact, dropdownDirection = 'up' }: { collapsed
               </Text>
               {THEME_CYCLE.map((m) => (
                 <ScalePress key={m} onPress={() => { setMode(m); setMenuOpen(false) }}>
-                  <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" gap="$2" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
+                  <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" justifyContent="flex-start" gap="$2" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
                     {(() => { const ThIcon = getLucideIcon(THEME_ICONS[m]); return <ThIcon size={14} color={mode === m ? theme.accent.val : theme.mutedText.val} /> })()}
                     <Text fontSize="$2" color={mode === m ? '$color' : '$mutedText'} flex={1} textAlign="left">{t(THEME_LABELS[m])}</Text>
                     {mode === m && <Check size={14} color={theme.accent.val} />}
