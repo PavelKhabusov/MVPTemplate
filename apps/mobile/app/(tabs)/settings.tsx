@@ -236,6 +236,9 @@ function DocumentsSection() {
 function AccountSection({ user, showEditProfile }: { user: any; showEditProfile?: boolean }) {
   const { t } = useTranslation()
 
+  const hasItems = showEditProfile || user?.phone || user?.bio || user?.location || user?.birthday
+  if (!hasItems) return null
+
   return (
     <SettingsGroup header={t('profile.title')}>
       {showEditProfile && (
