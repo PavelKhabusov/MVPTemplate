@@ -5,9 +5,35 @@ import { AppButton, FadeIn, ScalePress } from '@mvp/ui'
 import {
   CheckCircle2, XCircle, Circle, Loader2, Play, Square,
   FlaskConical, Wrench, Globe, ShieldCheck,
-  Terminal, RefreshCw, X, CloudOff, Beaker,
+  Terminal, RefreshCw, X, CloudOff,
+  Server, Database, Library, Languages,
+  BarChart3, FileCheck, Table2, Camera,
+  Puzzle, Image, CheckSquare, ShieldAlert,
+  Container, Rocket,
+  type LucideIcon,
 } from 'lucide-react'
 import { TESTS, GROUP_LABELS, GROUPS, type TestStatus } from './tests'
+
+// --- Lucide icon map (lucideIcon string → component) ----------------------------
+
+const LUCIDE_ICONS: Record<string, LucideIcon> = {
+  'flask-conical': FlaskConical,
+  'server': Server,
+  'database': Database,
+  'library': Library,
+  'languages': Languages,
+  'bar-chart-3': BarChart3,
+  'file-check': FileCheck,
+  'table-2': Table2,
+  'camera': Camera,
+  'globe': Globe,
+  'puzzle': Puzzle,
+  'image': Image,
+  'check-square': CheckSquare,
+  'shield-alert': ShieldAlert,
+  'container': Container,
+  'rocket': Rocket,
+}
 
 // --- ANSI color conversion -------------------------------------------------------
 
@@ -356,7 +382,10 @@ export function TestsDashboard({ apiBase }: Props) {
 
                           {/* Top row: icon + status badge */}
                           <XStack justifyContent="space-between" alignItems="center">
-                            <Text fontSize={22}>{test.icon}</Text>
+                            {(() => {
+                              const TestIcon = LUCIDE_ICONS[test.lucideIcon] || FlaskConical
+                              return <TestIcon size={20} color={theme.mutedText.val as string} />
+                            })()}
                             <XStack
                               backgroundColor={cfg.bg}
                               paddingHorizontal="$2"
@@ -463,9 +492,15 @@ export function TestsDashboard({ apiBase }: Props) {
                       paddingVertical={2}
                       borderRadius="$2"
                     >
-                      <Text fontSize={11} color="$color" fontWeight="500">
-                        {activeTest.icon} {activeTest.name}
-                      </Text>
+                      <XStack alignItems="center" gap={6}>
+                        {(() => {
+                          const LogIcon = LUCIDE_ICONS[activeTest.lucideIcon] || FlaskConical
+                          return <LogIcon size={12} color={theme.color.val as string} />
+                        })()}
+                        <Text fontSize={11} color="$color" fontWeight="500">
+                          {activeTest.name}
+                        </Text>
+                      </XStack>
                     </XStack>
                   )}
                 </XStack>
