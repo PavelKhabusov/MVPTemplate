@@ -166,6 +166,15 @@ export async function devToolsRoutes(app: FastifyInstance) {
     return { ok: true }
   })
 
+  // Full state (polling fallback for native — no SSE)
+  app.get('/tests/state', async () => {
+    const s: Record<string, { status: string; elapsed: string | null; summary: string }> = {}
+    for (const [id, v] of Object.entries(state)) {
+      s[id] = { status: v.status, elapsed: v.elapsed, summary: v.summary }
+    }
+    return { state: s, running: runningId }
+  })
+
   // Modules list
   app.get('/tests/modules', async () => {
     return getBackendModules()

@@ -85,17 +85,18 @@ export function TestsDashboard({ apiBase }: Props) {
       es.onerror = () => setConnected(false)
       return () => es.close()
     } else {
-      // Polling fallback for native
+      // Polling fallback for native (no EventSource)
       const poll = async () => {
         try {
-          const res = await fetch(`${devApi}/tests/stream`, {
-            headers: { Accept: 'application/json' },
-          }).catch(() => null)
-          // If SSE endpoint doesn't support JSON, try init via /tests/modules
-          // Actually let's poll state from individual test logs
-          // Simple approach: check connection by fetching modules
-          const mRes = await fetch(`${devApi}/tests/modules`).catch(() => null)
-          if (mRes && mRes.ok) {
+          const res = await fetch(`${devApi}/tests/state`)
+          if (res.ok) {
+            const d = await res.json()
+            if (d.state) {
+              const ns: Record<string, St> = {}
+              for (const [id, s] of Object.entries(d.state) as [string, any][])
+                ns[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary }
+              setStates(p => ({ ...p, ...ns }))
+            }
             setConnected(true)
           } else {
             setConnected(false)
@@ -105,7 +106,7 @@ export function TestsDashboard({ apiBase }: Props) {
         }
       }
       poll()
-      pollRef.current = setInterval(poll, 3000)
+      pollRef.current = setInterval(poll, 2000)
       return () => { if (pollRef.current) clearInterval(pollRef.current) }
     }
   }, [devApi, isWeb])
@@ -136,26 +137,6 @@ export function TestsDashboard({ apiBase }: Props) {
     return () => clearInterval(id)
   }, [isWeb, activeId, states, fetchLog])
 
-  // On native, poll state
-  useEffect(() => {
-    if (isWeb) return
-    const poll = async () => {
-      for (const t of TESTS) {
-        try {
-          const res = await fetch(`${devApi}/tests/log?id=${t.id}`)
-          if (res.ok) {
-            const d = await res.json()
-            if (d.log) {
-              // Infer status from log presence
-              // We need a better endpoint, but for now just update log
-            }
-          }
-        } catch { /* ignore */ }
-      }
-    }
-    // Run once on mount
-    poll()
-  }, [devApi, isWeb])
 
   const passed = Object.values(states).filter(s => s.status === 'passed').length
   const failed = Object.values(states).filter(s => s.status === 'failed').length
