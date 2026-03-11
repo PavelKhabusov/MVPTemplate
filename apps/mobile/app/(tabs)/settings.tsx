@@ -252,11 +252,6 @@ function AccountSection({ user, showEditProfile }: { user: any; showEditProfile?
           value={user.phone}
         />
       ) : null}
-      <SettingsGroupItem
-        icon="mail-outline"
-        label={t('profile.email')}
-        value={user?.email ?? '-'}
-      />
       {user?.bio ? (
         <SettingsGroupItem
           icon="document-text-outline"
