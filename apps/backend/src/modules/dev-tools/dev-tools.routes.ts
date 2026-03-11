@@ -221,6 +221,14 @@ function runTest(id: string) {
     state[id].failed = summary.failed
     state[id].total = summary.total
     if (runningId === id) { runningProcess = null; runningId = null }
+    // On pass: remove from failure history
+    if (state[id].status === 'passed') {
+      const prevIdx = failureHistory.findIndex(f => f.id === id)
+      if (prevIdx !== -1) {
+        failureHistory.splice(prevIdx, 1)
+        broadcast('failure', { id, removed: true, count: failureHistory.length })
+      }
+    }
     // Save failure to history
     if (state[id].status === 'failed') {
       const testDef = TESTS.find(t => t.id === id)
