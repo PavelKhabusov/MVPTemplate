@@ -684,7 +684,10 @@ export function TestsDashboard({ apiBase }: Props) {
                     <Text fontSize={10} color="#8b949e">{failures[failureIdx].testName}</Text>
                   )}
                   <Pressable onPress={backToLive}>
-                    <Text fontSize={10} color="#60a5fa" fontWeight="600">{t('admin.testsLive')}</Text>
+                    <XStack backgroundColor="#60a5fa20" paddingHorizontal={8} paddingVertical={2} borderRadius={4} alignItems="center" gap={4}>
+                      <YStack width={5} height={5} borderRadius={3} backgroundColor="#60a5fa" />
+                      <Text fontSize={10} color="#60a5fa" fontWeight="600">{t('admin.testsLive')}</Text>
+                    </XStack>
                   </Pressable>
                 </XStack>
               ) : (
@@ -694,7 +697,7 @@ export function TestsDashboard({ apiBase }: Props) {
                       fontSize={11} color="#8b949e"
                       backgroundColor="#1e293b" paddingHorizontal={8} paddingVertical={2} borderRadius={4}
                     >
-                      {activeTest.name}
+                      {t(`admin.testName_${activeTest.id}`, { defaultValue: activeTest.name })}
                     </Text>
                   )}
                   {runningCount > 0 && (
