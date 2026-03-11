@@ -3,7 +3,7 @@ import { YStack, XStack, Text } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { FadeIn, AppButton } from '@mvp/ui'
 import { MarkdownView } from '@mvp/docs'
-import { Ionicons } from '@expo/vector-icons'
+import { Download } from 'lucide-react-native'
 import { useTheme } from 'tamagui'
 
 function markdownToHtml(markdown: string, title: string): string {
@@ -121,7 +121,7 @@ export function DocumentScreen({ content, titleKey }: DocumentScreenProps) {
             cursor="pointer"
             onPress={() => downloadPDF(content, title)}
           >
-            <Ionicons name="download-outline" size={16} color={theme.accent.val} />
+            <Download size={16} color={theme.accent.val} />
             <Text fontSize="$2" color="$accent">
               {t('settings.downloadPDF')}
             </Text>

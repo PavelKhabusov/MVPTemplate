@@ -4,7 +4,7 @@ import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppCard, AppSwitch, AppModal, FadeIn, ScalePress } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { Receipt, Tag, Plus, Pencil, Trash2, CheckCircle2 } from 'lucide-react-native'
 import { type AdminPlan, PROVIDER_CFG, PAYMENT_STATUS_COLOR } from './types'
 import { api } from '../services/api'
 
@@ -206,12 +206,12 @@ export function PaymentsAdminTab() {
               {/* Recent Payments */}
               <AppCard animated={false}>
                 <XStack alignItems="center" gap="$2" marginBottom="$3">
-                  <Ionicons name="receipt-outline" size={18} color={theme.accent.val} />
+                  <Receipt size={18} color={theme.accent.val} />
                   <Text fontWeight="700" color="$color" fontSize="$4">{t('admin.recentPayments')}</Text>
                 </XStack>
                 {stats.recentPayments.length === 0 ? (
                   <YStack alignItems="center" paddingVertical="$3" gap="$1">
-                    <Ionicons name="receipt-outline" size={28} color={theme.mutedText.val} />
+                    <Receipt size={28} color={theme.mutedText.val} />
                     <Text color="$mutedText" fontSize="$2">{t('payments.noHistory')}</Text>
                   </YStack>
                 ) : (
@@ -261,7 +261,7 @@ export function PaymentsAdminTab() {
               {/* Plans header */}
               <XStack justifyContent="space-between" alignItems="center">
                 <XStack alignItems="center" gap="$2">
-                  <Ionicons name="pricetags-outline" size={20} color={theme.accent.val} />
+                  <Tag size={20} color={theme.accent.val} />
                   <Text fontWeight="700" fontSize="$5" color="$color">{t('admin.existingPlans')}</Text>
                   {adminPlans.length > 0 && (
                     <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$0.5" borderRadius="$2">
@@ -271,7 +271,7 @@ export function PaymentsAdminTab() {
                 </XStack>
                 <ScalePress onPress={openCreateModal}>
                   <XStack backgroundColor="$accent" paddingHorizontal="$3" paddingVertical="$2" borderRadius="$3" alignItems="center" gap="$1.5">
-                    <Ionicons name="add" size={16} color="white" />
+                    <Plus size={16} color="white" />
                     <Text color="white" fontWeight="600" fontSize="$2">{t('admin.createPlan')}</Text>
                   </XStack>
                 </ScalePress>
@@ -281,11 +281,11 @@ export function PaymentsAdminTab() {
               {adminPlans.length === 0 ? (
                 <AppCard animated={false}>
                   <YStack alignItems="center" paddingVertical="$5" gap="$3">
-                    <Ionicons name="pricetag-outline" size={36} color={theme.mutedText.val} />
+                    <Tag size={36} color={theme.mutedText.val} />
                     <Text color="$mutedText" fontSize="$2">{t('payments.noPlans')}</Text>
                     <ScalePress onPress={openCreateModal}>
                       <XStack backgroundColor="$accent" paddingHorizontal="$4" paddingVertical="$2.5" borderRadius="$3" alignItems="center" gap="$1.5">
-                        <Ionicons name="add" size={16} color="white" />
+                        <Plus size={16} color="white" />
                         <Text color="white" fontWeight="600" fontSize="$3">{t('admin.createPlan')}</Text>
                       </XStack>
                     </ScalePress>
@@ -321,12 +321,12 @@ export function PaymentsAdminTab() {
                           <XStack gap="$1.5" alignItems="center">
                             <ScalePress onPress={() => openEditModal(plan)}>
                               <YStack width={34} height={34} borderRadius={17} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
-                                <Ionicons name="create-outline" size={16} color={theme.accent.val} />
+                                <Pencil size={16} color={theme.accent.val} />
                               </YStack>
                             </ScalePress>
                             <ScalePress onPress={() => handleDeletePlan(plan)}>
                               <YStack width={34} height={34} borderRadius={17} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
-                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                                <Trash2 size={16} color="#EF4444" />
                               </YStack>
                             </ScalePress>
                           </XStack>
@@ -370,7 +370,7 @@ export function PaymentsAdminTab() {
                             <YStack gap="$1.5">
                               {plan.features.map((f) => (
                                 <XStack key={f} gap="$2" alignItems="center">
-                                  <Ionicons name="checkmark-circle" size={14} color={theme.accent.val} />
+                                  <CheckCircle2 size={14} color={theme.accent.val} />
                                   <Text fontSize="$2" color="$color" flex={1}>{f}</Text>
                                 </XStack>
                               ))}

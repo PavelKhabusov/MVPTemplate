@@ -4,7 +4,7 @@ import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppCard, AppSwitch, AppModal, FadeIn, ScalePress, useToast } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { Globe, FlaskConical, Zap, Activity, Pencil, Trash2, Eye, EyeOff } from 'lucide-react-native'
 import { api } from '../services/api'
 
 interface ProxyItemUI {
@@ -239,7 +239,7 @@ export function ProxyAdminTab() {
           {proxies.length === 0 ? (
             <AppCard animated={false}>
               <YStack alignItems="center" padding="$4" gap="$2">
-                <Ionicons name="globe-outline" size={40} color={theme.mutedText.val} />
+                <Globe size={40} color={theme.mutedText.val} />
                 <Text color="$mutedText">{t('admin.proxyEmpty')}</Text>
               </YStack>
             </AppCard>
@@ -290,31 +290,31 @@ export function ProxyAdminTab() {
                   <XStack gap="$2" flexWrap="wrap">
                     <ScalePress onPress={() => handleTest(proxy.id, 'test')} disabled={testingId === proxy.id}>
                       <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center" opacity={testingId === proxy.id ? 0.5 : 1}>
-                        <Ionicons name="flask-outline" size={14} color={theme.accent.val} />
+                        <FlaskConical size={14} color={theme.accent.val} />
                         <Text fontSize="$1" color="$color">{t('admin.proxyTestFull')}</Text>
                       </XStack>
                     </ScalePress>
                     <ScalePress onPress={() => handleTest(proxy.id, 'test-tcp')} disabled={testingId === proxy.id}>
                       <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center" opacity={testingId === proxy.id ? 0.5 : 1}>
-                        <Ionicons name="flash-outline" size={14} color={theme.accent.val} />
+                        <Zap size={14} color={theme.accent.val} />
                         <Text fontSize="$1" color="$color">{t('admin.proxyTestTcp')}</Text>
                       </XStack>
                     </ScalePress>
                     <ScalePress onPress={() => handleTest(proxy.id, 'diagnose')} disabled={testingId === proxy.id}>
                       <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center" opacity={testingId === proxy.id ? 0.5 : 1}>
-                        <Ionicons name="pulse-outline" size={14} color={theme.accent.val} />
+                        <Activity size={14} color={theme.accent.val} />
                         <Text fontSize="$1" color="$color">{t('admin.proxyDiagnose')}</Text>
                       </XStack>
                     </ScalePress>
                     <ScalePress onPress={() => openEdit(proxy)}>
                       <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center">
-                        <Ionicons name="pencil-outline" size={14} color={theme.accent.val} />
+                        <Pencil size={14} color={theme.accent.val} />
                         <Text fontSize="$1" color="$color">{t('admin.editProxy')}</Text>
                       </XStack>
                     </ScalePress>
                     <ScalePress onPress={() => handleDelete(proxy.id)}>
                       <XStack backgroundColor="$subtleBackground" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$2" gap="$1" alignItems="center">
-                        <Ionicons name="trash-outline" size={14} color="#ef4444" />
+                        <Trash2 size={14} color="#ef4444" />
                         <Text fontSize="$1" color="#ef4444">{t('admin.deleteProxy')}</Text>
                       </XStack>
                     </ScalePress>
@@ -398,7 +398,7 @@ export function ProxyAdminTab() {
               <XStack gap="$2" alignItems="center">
                 <Input flex={1} size="$3" value={formPassword} onChangeText={setFormPassword} placeholder={editingProxy ? '(leave empty to keep)' : ''} secureTextEntry={!showPassword} backgroundColor="$subtleBackground" borderColor="$borderColor" color="$color" fontFamily="$body" />
                 <ScalePress onPress={() => setShowPassword(!showPassword)}>
-                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={theme.mutedText.val} />
+                  {showPassword ? <EyeOff size={20} color={theme.mutedText.val} /> : <Eye size={20} color={theme.mutedText.val} />}
                 </ScalePress>
               </XStack>
             </YStack>

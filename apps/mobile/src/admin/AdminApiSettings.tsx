@@ -3,8 +3,8 @@ import { ScrollView, useWindowDimensions, Linking } from 'react-native'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { AppCard, AppSwitch, FadeIn, ScalePress, useToast } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { AppCard, AppSwitch, FadeIn, ScalePress, useToast, getLucideIcon } from '@mvp/ui'
+import { Check, CreditCard, MessageSquareMore, Sparkles, Globe, Puzzle, PanelLeft, AppWindow } from 'lucide-react-native'
 import {
   useTemplateConfigStore,
   TEMPLATE_FLAGS,
@@ -16,7 +16,7 @@ import { api } from '../services/api'
 interface EnvEntry { value: string | null; type: string }
 type EnvData = Record<string, Record<string, EnvEntry>>
 
-const ENV_GROUP_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string; mainToggle?: string; hintKey?: string; hintUrl?: string }> = {
+const ENV_GROUP_META: Record<string, { icon: string; labelKey: string; mainToggle?: string; hintKey?: string; hintUrl?: string }> = {
   analytics: { icon: 'bar-chart-outline', labelKey: 'admin.apiAnalytics', mainToggle: 'ANALYTICS_ENABLED', hintKey: 'admin.hintPosthog', hintUrl: 'https://app.posthog.com/project/settings' },
   email: { icon: 'mail-outline', labelKey: 'admin.apiEmail', mainToggle: 'EMAIL_ENABLED' },
   auth: { icon: 'logo-google', labelKey: 'admin.apiAuth', mainToggle: 'GOOGLE_CLIENT_ID', hintKey: 'admin.hintGoogle', hintUrl: 'https://console.cloud.google.com/apis/credentials' },
@@ -106,7 +106,7 @@ export function EnvStringField({ envKey, label, value, isSecret, onSave }: {
               paddingVertical="$1.5"
               borderRadius="$2"
             >
-              <Ionicons name="checkmark" size={18} color="white" />
+              <Check size={18} color="white" />
             </XStack>
           </ScalePress>
         )}
@@ -138,7 +138,7 @@ function PaymentsEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
     <AppCard animated={false}>
       <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
         <XStack alignItems="center" gap="$2" flex={1}>
-          <Ionicons name="card-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <CreditCard size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
           <Text fontWeight="600" color="$color" fontSize="$4">
             {t('admin.apiPayments')}
           </Text>
@@ -271,7 +271,7 @@ function SMSEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
     <AppCard animated={false}>
       <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
         <XStack alignItems="center" gap="$2" flex={1}>
-          <Ionicons name="chatbubble-ellipses-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <MessageSquareMore size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
           <Text fontWeight="600" color="$color" fontSize="$4">
             {t('admin.apiSMS')}
           </Text>
@@ -402,7 +402,7 @@ function AIEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
     <AppCard animated={false}>
       <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
         <XStack alignItems="center" gap="$2" flex={1}>
-          <Ionicons name="sparkles-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <Sparkles size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
           <Text fontWeight="600" color="$color" fontSize="$4">
             {t('admin.apiAI')}
           </Text>
@@ -450,7 +450,7 @@ function AIEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
             borderRadius="$3"
           >
             <XStack alignItems="center" gap="$2" flex={1}>
-              <Ionicons name="globe-outline" size={18} color={theme.mutedText.val} />
+              <Globe size={18} color={theme.mutedText.val} />
               <YStack flex={1}>
                 <Text fontSize="$3" color="$color">{t('admin.aiProxyEnabled')}</Text>
                 <Text fontSize="$1" color="$mutedText">{t('admin.aiProxyEnabledDesc')}</Text>
@@ -517,7 +517,7 @@ function AIEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
               {limitDirty && (
                 <ScalePress onPress={handleLimitSave}>
                   <XStack backgroundColor="$accent" paddingHorizontal="$2.5" paddingVertical="$1.5" borderRadius="$2">
-                    <Ionicons name="checkmark" size={18} color="white" />
+                    <Check size={18} color="white" />
                   </XStack>
                 </ScalePress>
               )}
@@ -548,7 +548,7 @@ function ExtensionEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
     <AppCard animated={false}>
       <XStack alignItems="center" justifyContent="space-between" marginBottom={isGroupOn ? '$3' : 0}>
         <XStack alignItems="center" gap="$2" flex={1}>
-          <Ionicons name="extension-puzzle-outline" size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+          <Puzzle size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
           <Text fontWeight="600" color="$color" fontSize="$4">
             {t('admin.apiExtension')}
           </Text>
@@ -578,11 +578,10 @@ function ExtensionEnvCard({ keys, isGroupOn, onToggle, onUpdate }: {
                       gap="$1.5"
                       alignItems="center"
                     >
-                      <Ionicons
-                        name={m === 'sidebar' ? 'tablet-landscape-outline' : 'browsers-outline'}
-                        size={14}
-                        color={active ? theme.accent.val : theme.mutedText.val}
-                      />
+                      {m === 'sidebar'
+                        ? <PanelLeft size={14} color={active ? theme.accent.val : theme.mutedText.val} />
+                        : <AppWindow size={14} color={active ? theme.accent.val : theme.mutedText.val} />
+                      }
                       <Text
                         fontSize="$2"
                         color={active ? '$accent' : '$mutedText'}
@@ -818,7 +817,7 @@ export function ApiSettingsTab() {
       <AppCard key={group} animated={false}>
         <XStack alignItems="center" justifyContent="space-between" marginBottom={subKeys.length > 0 && isGroupOn ? '$3' : 0}>
           <XStack alignItems="center" gap="$2" flex={1}>
-            <Ionicons name={meta.icon} size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} />
+            {(() => { const MetaIcon = getLucideIcon(meta.icon); return <MetaIcon size={20} color={isGroupOn ? theme.accent.val : theme.mutedText.val} /> })()}
             <Text fontWeight="600" color="$color" fontSize="$4">
               {t(meta.labelKey)}
             </Text>

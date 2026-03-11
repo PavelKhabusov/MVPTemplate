@@ -4,7 +4,7 @@ import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppCard, AppSwitch, FadeIn, ScalePress, useToast } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { Cloud, Server, Settings, ChevronUp, ChevronDown, ArrowLeftRight } from 'lucide-react-native'
 import { api } from '../services/api'
 
 interface StorageStats {
@@ -210,20 +210,20 @@ export function StorageAdminTab() {
           {/* Stats */}
           <AppCard animated={false}>
             <XStack alignItems="center" gap="$2" marginBottom="$3">
-              <Ionicons name="cloud-outline" size={20} color={theme.accent.val} />
+              <Cloud size={20} color={theme.accent.val} />
               <Text fontWeight="600" color="$color" fontSize="$4">
                 {t('admin.storage')}
               </Text>
             </XStack>
             <XStack gap="$3">
               <YStack flex={1} backgroundColor="$subtleBackground" borderRadius="$3" padding="$3" alignItems="center" gap="$1">
-                <Ionicons name="server-outline" size={20} color={!isS3 ? theme.accent.val : theme.mutedText.val} />
+                <Server size={20} color={!isS3 ? theme.accent.val : theme.mutedText.val} />
                 <Text fontSize="$5" fontWeight="700" color={!isS3 ? '$accent' : '$color'}>{stats.local.fileCount}</Text>
                 <Text fontSize="$1" color="$mutedText">{t('admin.localFiles')}</Text>
                 <Text fontSize={10} color="$mutedText">{stats.local.totalSizeMB} MB</Text>
               </YStack>
               <YStack flex={1} backgroundColor="$subtleBackground" borderRadius="$3" padding="$3" alignItems="center" gap="$1">
-                <Ionicons name="cloud-outline" size={20} color={isS3 ? theme.accent.val : theme.mutedText.val} />
+                <Cloud size={20} color={isS3 ? theme.accent.val : theme.mutedText.val} />
                 <Text fontSize="$5" fontWeight="700" color={isS3 ? '$accent' : '$color'}>{stats.s3.fileCount}</Text>
                 <Text fontSize="$1" color="$mutedText">{t('admin.s3Files')}</Text>
                 <Text fontSize={10} color="$mutedText">{stats.s3.totalSizeMB} MB</Text>
@@ -278,12 +278,12 @@ export function StorageAdminTab() {
             <ScalePress onPress={() => setS3ConfigOpen(!s3ConfigOpen)}>
               <XStack alignItems="center" justifyContent="space-between">
                 <XStack alignItems="center" gap="$2">
-                  <Ionicons name="settings-outline" size={18} color={theme.accent.val} />
+                  <Settings size={18} color={theme.accent.val} />
                   <Text fontWeight="600" color="$color" fontSize="$4">
                     {t('admin.s3Config')}
                   </Text>
                 </XStack>
-                <Ionicons name={s3ConfigOpen ? 'chevron-up' : 'chevron-down'} size={18} color={theme.mutedText.val} />
+                {s3ConfigOpen ? <ChevronUp size={18} color={theme.mutedText.val} /> : <ChevronDown size={18} color={theme.mutedText.val} />}
               </XStack>
             </ScalePress>
 
@@ -323,7 +323,7 @@ export function StorageAdminTab() {
           {/* Migration & Backup */}
           <AppCard animated={false}>
             <XStack alignItems="center" gap="$2" marginBottom="$3">
-              <Ionicons name="swap-horizontal-outline" size={18} color={theme.accent.val} />
+              <ArrowLeftRight size={18} color={theme.accent.val} />
               <Text fontWeight="600" color="$color" fontSize="$4">
                 {t('admin.migrationBackup')}
               </Text>

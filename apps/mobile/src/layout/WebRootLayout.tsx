@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Platform, Pressable } from 'react-native'
 import { Slot, usePathname, router } from 'expo-router'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
-import { WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, AppAvatar, ScalePress, SearchModal } from '@mvp/ui'
+import { WebSidebar, WebHeader, useIsMobileWeb, CookieBanner, AppAvatar, ScalePress, SearchModal, getLucideIcon } from '@mvp/ui'
+import { Check, Search, FileText, User as UserIcon, Languages } from 'lucide-react-native'
 import { AnimatePresence, MotiView } from 'moti'
 import { TemplateConfigSidebar, useTemplateConfigStore, useTemplateFlag, getFontZoom } from '@mvp/template-config'
 import { APP_BRAND } from '@mvp/template-config/src/brand'
@@ -14,7 +14,7 @@ import type { SupportedLanguage } from '@mvp/i18n'
 import { getPageById, DOC_GROUPS } from '@mvp/docs'
 
 const THEME_CYCLE: ThemeMode[] = ['system', 'light', 'dark']
-const THEME_ICONS: Record<ThemeMode, keyof typeof Ionicons.glyphMap> = {
+const THEME_ICONS: Record<ThemeMode, string> = {
   system: 'contrast-outline',
   light: 'sunny-outline',
   dark: 'moon-outline',
@@ -49,7 +49,7 @@ function ThemeToggle({ collapsed }: { collapsed: boolean }) {
       cursor="pointer"
       onPress={cycleTheme}
     >
-      <Ionicons name={THEME_ICONS[mode]} size={20} color={theme.mutedText.val} />
+      {(() => { const ThemeIcon = getLucideIcon(THEME_ICONS[mode]); return <ThemeIcon size={20} color={theme.mutedText.val} /> })()}
       {!collapsed && (
         <Text color="$mutedText" fontSize="$3" numberOfLines={1}>
           {t(THEME_LABELS[mode])}
@@ -78,7 +78,7 @@ function LanguagePicker({ collapsed, dropdownDirection = 'up' }: { collapsed: bo
         cursor="pointer"
         onPress={() => setOpen(!open)}
       >
-        <Ionicons name="language-outline" size={20} color={theme.mutedText.val} />
+        <Languages size={20} color={theme.mutedText.val} />
         {!collapsed && (
           <Text color="$mutedText" fontSize="$3" numberOfLines={1}>
             {LANGUAGE_LABELS[currentLang]}
@@ -122,7 +122,7 @@ function LanguagePicker({ collapsed, dropdownDirection = 'up' }: { collapsed: bo
                     <Text fontSize="$2" color={currentLang === lang ? '$color' : '$mutedText'}>
                       {LANGUAGE_LABELS[lang]}
                     </Text>
-                    {currentLang === lang && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                    {currentLang === lang && <Check size={14} color={theme.accent.val} />}
                   </XStack>
                 </ScalePress>
               ))}
@@ -155,7 +155,7 @@ function SearchTrigger({ collapsed, onPress }: { collapsed: boolean; onPress: ()
       borderWidth={1}
       borderColor="$borderColor"
     >
-      <Ionicons name="search-outline" size={18} color={theme.mutedText.val} />
+      <Search size={18} color={theme.mutedText.val} />
       {!collapsed && (
         <XStack flex={1} alignItems="center" justifyContent="space-between" gap="$3">
           <Text color="$mutedText" fontSize="$2" numberOfLines={1}>
@@ -285,12 +285,12 @@ function UserBadge({ collapsed, compact, dropdownDirection = 'up' }: { collapsed
               <ScalePress onPress={() => setLangExpanded(!langExpanded)}>
                 <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" justifyContent="space-between" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
                   <XStack alignItems="center" gap="$2">
-                    <Ionicons name="language-outline" size={14} color={theme.mutedText.val} />
+                    <Languages size={14} color={theme.mutedText.val} />
                     <Text fontSize="$2" color="$color">{t('profileMenu.language')}</Text>
                   </XStack>
                   <XStack alignItems="center" gap="$1">
                     <Text fontSize={11} color="$mutedText">{LANGUAGE_LABELS[i18n.language as SupportedLanguage]}</Text>
-                    <Ionicons name={langExpanded ? 'chevron-up' : 'chevron-down'} size={12} color={theme.mutedText.val} />
+                    {(() => { const ChevIcon = getLucideIcon(langExpanded ? 'chevron-up' : 'chevron-down'); return <ChevIcon size={12} color={theme.mutedText.val} /> })()}
                   </XStack>
                 </XStack>
               </ScalePress>
@@ -300,7 +300,7 @@ function UserBadge({ collapsed, compact, dropdownDirection = 'up' }: { collapsed
                     <ScalePress key={lang} onPress={() => { changeLanguage(lang); setMenuOpen(false) }}>
                       <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" justifyContent="space-between" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
                         <Text fontSize="$2" color="$color">{LANGUAGE_LABELS[lang]}</Text>
-                        {i18n.language === lang && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                        {i18n.language === lang && <Check size={14} color={theme.accent.val} />}
                       </XStack>
                     </ScalePress>
                   ))}
@@ -314,9 +314,9 @@ function UserBadge({ collapsed, compact, dropdownDirection = 'up' }: { collapsed
               {THEME_CYCLE.map((m) => (
                 <ScalePress key={m} onPress={() => { setMode(m); setMenuOpen(false) }}>
                   <XStack paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$2" alignItems="center" gap="$2" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
-                    <Ionicons name={THEME_ICONS[m]} size={14} color={mode === m ? theme.accent.val : theme.mutedText.val} />
+                    {(() => { const ThIcon = getLucideIcon(THEME_ICONS[m]); return <ThIcon size={14} color={mode === m ? theme.accent.val : theme.mutedText.val} /> })()}
                     <Text fontSize="$2" color={mode === m ? '$color' : '$mutedText'} flex={1}>{t(THEME_LABELS[m])}</Text>
-                    {mode === m && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                    {mode === m && <Check size={14} color={theme.accent.val} />}
                   </XStack>
                 </ScalePress>
               ))}
@@ -326,7 +326,7 @@ function UserBadge({ collapsed, compact, dropdownDirection = 'up' }: { collapsed
               {/* Profile link */}
               <ScalePress onPress={() => { router.push('/settings' as any); setMenuOpen(false) }}>
                 <XStack paddingHorizontal="$3" paddingVertical="$2" borderRadius="$2" alignItems="center" gap="$2" hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
-                  <Ionicons name="person-outline" size={14} color={theme.mutedText.val} />
+                  <UserIcon size={14} color={theme.mutedText.val} />
                   <Text fontSize="$2" color="$color">{t('profileMenu.profile')}</Text>
                 </XStack>
               </ScalePress>
@@ -499,7 +499,7 @@ export function WebRootLayout() {
                       gap="$3"
                       hoverStyle={{ backgroundColor: '$subtleBackground' } as any}
                     >
-                      <Ionicons name="document-text-outline" size={16} color={theme.mutedText.val} />
+                      <FileText size={16} color={theme.mutedText.val} />
                       <Text fontSize="$3" color="$color">{match.title}</Text>
                     </XStack>
                   </Pressable>

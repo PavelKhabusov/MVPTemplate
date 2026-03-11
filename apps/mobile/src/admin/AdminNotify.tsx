@@ -4,7 +4,7 @@ import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, AppCard, FadeIn, ScalePress } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { Users, Mail } from 'lucide-react-native'
 import { api } from '../services/api'
 
 interface NotifyHistoryItem {
@@ -166,7 +166,7 @@ export function AdminNotifyTab({ pushEnabled, emailEnabled, notifyHistory, histo
                           {item.title}
                         </Text>
                         <XStack alignItems="center" gap="$1" marginLeft="$2">
-                          <Ionicons name="people-outline" size={14} color={theme.mutedText.val} />
+                          <Users size={14} color={theme.mutedText.val} />
                           <Text color="$mutedText" fontSize="$2">{item.recipientCount}</Text>
                         </XStack>
                       </XStack>
@@ -190,7 +190,7 @@ export function AdminNotifyTab({ pushEnabled, emailEnabled, notifyHistory, histo
             <AppCard animated={false}>
               <YStack gap="$3">
                 <XStack alignItems="center" gap="$2">
-                  <Ionicons name="mail-outline" size={20} color={theme.accent.val} />
+                  <Mail size={20} color={theme.accent.val} />
                   <Text fontWeight="600" color="$color" fontSize="$4">{t('admin.emailBroadcast')}</Text>
                 </XStack>
 

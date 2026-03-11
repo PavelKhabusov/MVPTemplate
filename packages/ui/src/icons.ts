@@ -93,6 +93,32 @@ import {
   Puzzle,
   Hourglass,
   Languages,
+  Shield,
+  Newspaper,
+  Phone,
+  Bookmark,
+  UserPlus,
+  CheckCheck,
+  Code,
+  Megaphone,
+  LineChart,
+  Server,
+  FolderOpen,
+  Contrast,
+  Receipt,
+  ThumbsUp,
+  ThumbsDown,
+  Type,
+  MessageSquareMore,
+  Activity,
+  PanelLeft,
+  AppWindow,
+  Send,
+  Save,
+  Inbox,
+  Wifi,
+  Folder,
+  PlusCircle,
   type LucideIcon,
 } from 'lucide-react-native'
 
@@ -115,6 +141,7 @@ export const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   'checkmark': Check,
   'checkmark-circle': CheckCircle2,
   'checkmark-circle-outline': CheckCircle2,
+  'checkmark-done-outline': CheckCheck,
 
   // Arrows
   'arrow-back': ArrowLeft,
@@ -146,17 +173,21 @@ export const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   'person-outline': User,
   'people': Users,
   'people-outline': Users,
+  'person-add-outline': UserPlus,
 
   // Communication
   'mail': Mail,
   'mail-outline': Mail,
   'chatbubble-outline': MessageCircle,
+  'call-outline': Phone,
 
   // Security
   'lock-closed': Lock,
   'lock-closed-outline': Lock,
   'key': Key,
   'key-outline': Key,
+  'shield': Shield,
+  'shield-outline': Shield,
   'shield-checkmark': ShieldCheck,
   'shield-checkmark-outline': ShieldCheck,
   'finger-print-outline': Fingerprint,
@@ -172,6 +203,8 @@ export const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   'heart-outline': Heart,
   'star': Star,
   'star-outline': Star,
+  'bookmark': Bookmark,
+  'bookmark-outline': Bookmark,
 
   // Navigation
   'home': Home,
@@ -230,8 +263,13 @@ export const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   'stop': Square,
 
   // Files / Documents
+  'folder-outline': FolderOpen,
   'document-text-outline': FileText,
   'book-outline': BookOpen,
+  'newspaper-outline': Newspaper,
+
+  // Server
+  'server-outline': Server,
 
   // Cloud / Storage
   'cloud': Cloud,
@@ -280,9 +318,12 @@ export const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   'sparkles-outline': Sparkles,
   'extension-puzzle': Puzzle,
   'extension-puzzle-outline': Puzzle,
+  'code-slash-outline': Code,
+  'megaphone-outline': Megaphone,
 
   // Charts
   'bar-chart-outline': BarChart3,
+  'analytics-outline': LineChart,
   'stats-chart-outline': TrendingUp,
   'trending-up': TrendingUp,
 
@@ -311,6 +352,50 @@ export const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   'funnel-outline': Filter,
   'options-outline': SlidersHorizontal,
   'swap-horizontal': ArrowLeftRight,
+  'swap-horizontal-outline': ArrowLeftRight,
+
+  // Contrast / Theme
+  'contrast-outline': Contrast,
+
+  // Receipts
+  'receipt-outline': Receipt,
+
+  // Thumbs
+  'thumbs-up': ThumbsUp,
+  'thumbs-up-outline': ThumbsUp,
+  'thumbs-down': ThumbsDown,
+  'thumbs-down-outline': ThumbsDown,
+
+  // Text / Typography
+  'text-outline': Type,
+  'text': Type,
+
+  // Chat bubbles (ellipses)
+  'chatbubble-ellipses-outline': MessageSquareMore,
+
+  // Pulse / Activity
+  'pulse-outline': Activity,
+  'pulse': Activity,
+
+  // Tablet / Browser
+  'tablet-landscape-outline': PanelLeft,
+  'browsers-outline': AppWindow,
+
+  // Send
+  'send-outline': Send,
+  'send': Send,
+
+  // Save
+  'save-outline': Save,
+
+  // Inbox / File tray
+  'file-tray-outline': Inbox,
+
+  // Wifi
+  'wifi-outline': Wifi,
+
+  // Plus circle
+  'add-circle-outline': PlusCircle,
 }
 
 export type LucideIconName = keyof typeof LUCIDE_ICON_MAP

@@ -4,7 +4,7 @@ import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppAvatar, AppButton, AppCard, AppSwitch, AppModal, ScalePress } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { ChevronRight } from 'lucide-react-native'
 import { type AdminUser, type AdminConfig, FEATURE_LABELS, ROLE_COLORS } from './types'
 import { api } from '../services/api'
 
@@ -82,7 +82,7 @@ export function AdminUsersTab({ users, loading, config, onLoadMore, onUserUpdate
               </Text>
             )}
           </YStack>
-          <Ionicons name="chevron-forward" size={18} color={theme.mutedText.val} />
+          <ChevronRight size={18} color={theme.mutedText.val} />
         </XStack>
       </AppCard>
     </ScalePress>

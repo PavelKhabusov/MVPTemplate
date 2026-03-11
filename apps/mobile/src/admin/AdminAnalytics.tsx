@@ -4,7 +4,7 @@ import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppCard, FadeIn } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { ThumbsUp, ThumbsDown } from 'lucide-react-native'
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg'
 import { type AnalyticsDashboard, formatDuration, formatShortDate } from './types'
 
@@ -189,11 +189,11 @@ export function AdminAnalyticsTab({ data: analyticsData, loading, docFeedbackEna
                           <Text fontWeight="500" color="$color" fontSize="$3">{item.pageId}</Text>
                           <XStack gap="$3" alignItems="center">
                             <XStack alignItems="center" gap="$1">
-                              <Ionicons name="thumbs-up" size={13} color={theme.accent.val} />
+                              <ThumbsUp size={13} color={theme.accent.val} />
                               <Text fontSize="$2" color="$accent">{item.likes}</Text>
                             </XStack>
                             <XStack alignItems="center" gap="$1">
-                              <Ionicons name="thumbs-down" size={13} color="#EF4444" />
+                              <ThumbsDown size={13} color="#EF4444" />
                               <Text fontSize="$2" color="#EF4444">{item.dislikes}</Text>
                             </XStack>
                           </XStack>

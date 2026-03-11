@@ -3,8 +3,8 @@ import { ScrollView } from 'react-native'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
-import { AppButton, AppCard, AppModal, AppSwitch, FadeIn, ScalePress, useToast } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { AppButton, AppCard, AppModal, AppSwitch, FadeIn, ScalePress, useToast, getLucideIcon } from '@mvp/ui'
+import { Check, ChevronRight, Type, CheckCircle2 } from 'lucide-react-native'
 import {
   useTemplateConfigStore,
   TEMPLATE_FLAGS,
@@ -146,7 +146,7 @@ export function TemplateConfigTab() {
                         {scheme.swatch2 ? (
                           <XStack width={28} height={28} borderRadius={14} overflow="hidden" alignItems="center" justifyContent="center">
                             <YStack flex={1} height={28} style={{ backgroundColor: scheme.swatch } as any} alignItems="center" justifyContent="center">
-                              {isSelected && <Ionicons name="checkmark" size={12} color="white" />}
+                              {isSelected && <Check size={12} color="white" />}
                             </YStack>
                             <YStack flex={1} height={28} style={{ backgroundColor: scheme.swatch2 } as any} />
                           </XStack>
@@ -160,7 +160,7 @@ export function TemplateConfigTab() {
                             justifyContent="center"
                           >
                             {isSelected && (
-                              <Ionicons name="checkmark" size={14} color="white" />
+                              <Check size={14} color="white" />
                             )}
                           </YStack>
                         )}
@@ -223,7 +223,7 @@ export function TemplateConfigTab() {
                       paddingVertical="$1.5"
                       borderRadius="$2"
                     >
-                      <Ionicons name="checkmark" size={18} color="white" />
+                      <Check size={18} color="white" />
                     </XStack>
                   </ScalePress>
                 )}
@@ -316,7 +316,7 @@ export function TemplateConfigTab() {
               <XStack justifyContent="space-between" alignItems="center">
                 <XStack gap="$3" alignItems="center">
                   <YStack width={36} height={36} borderRadius={18} backgroundColor="$subtleBackground" alignItems="center" justifyContent="center">
-                    <Ionicons name="text-outline" size={18} color={theme.accent.val} />
+                    <Type size={18} color={theme.accent.val} />
                   </YStack>
                   <YStack gap="$0.5">
                     <Text fontWeight="600" color="$color" fontSize="$4">{t('templateConfig.fontFamily')}</Text>
@@ -325,7 +325,7 @@ export function TemplateConfigTab() {
                     </Text>
                   </YStack>
                 </XStack>
-                <Ionicons name="chevron-forward" size={18} color={theme.mutedText.val} />
+                <ChevronRight size={18} color={theme.mutedText.val} />
               </XStack>
             </AppCard>
           </ScalePress>
@@ -388,7 +388,7 @@ export function TemplateConfigTab() {
                               {cfg.label}
                             </Text>
                           </YStack>
-                          {active && <Ionicons name="checkmark-circle" size={20} color={theme.accent.val} />}
+                          {active && <CheckCircle2 size={20} color={theme.accent.val} />}
                         </XStack>
                       </ScalePress>
                     )
@@ -410,11 +410,7 @@ export function TemplateConfigTab() {
                 return (
                   <XStack key={flag.key} alignItems="center" justifyContent="space-between">
                     <XStack alignItems="center" gap="$2" flex={1}>
-                      <Ionicons
-                        name={flag.icon}
-                        size={18}
-                        color={value ? theme.accent.val : theme.mutedText.val}
-                      />
+                      {(() => { const FlagIcon = getLucideIcon(flag.icon); return <FlagIcon size={18} color={value ? theme.accent.val : theme.mutedText.val} /> })()}
                       <Text fontSize="$3" color="$color" flex={1} numberOfLines={1}>
                         {t(flag.labelKey)}
                       </Text>
