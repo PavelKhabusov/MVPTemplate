@@ -9,11 +9,14 @@
     "lint": "eslint src"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "tamagui": "*",
     "@expo/vector-icons": "*",
     "@mvp/i18n": "*",
-    "@mvp/ui": "*"
+    "@mvp/ui": "*",
+    "react": "*",
+    "react-native": "*",
+    "tamagui": "*"
+  },
+  "dependencies": {
+    "lucide-react-native": "^0.577.0"
   }
 }

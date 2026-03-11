@@ -9,17 +9,18 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@mvp/analytics": "*",
     "@mvp/ui": "*",
-    "@mvp/analytics": "*"
+    "lucide-react-native": "^0.577.0"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "tamagui": "*",
     "@expo/vector-icons": "*",
     "moti": "*",
+    "react": "*",
+    "react-native": "*",
     "react-native-reanimated": "*",
     "react-native-safe-area-context": "*",
-    "react-native-svg": "*"
+    "react-native-svg": "*",
+    "tamagui": "*"
   }
 }

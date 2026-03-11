@@ -8,16 +8,18 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lucide-react-native": "^0.577.0"
+  },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "tamagui": "*",
+    "@mvp/analytics": "*",
     "@tamagui/config": "*",
     "@tamagui/portal": "*",
-    "moti": "*",
-    "react-native-reanimated": "*",
     "expo-linear-gradient": "*",
-    "@mvp/analytics": "*"
+    "moti": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-reanimated": "*",
+    "tamagui": "*"
   }
 }

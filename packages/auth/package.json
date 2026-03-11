@@ -8,20 +8,22 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lucide-react-native": "^0.577.0"
+  },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "tamagui": "*",
-    "axios": "*",
     "@expo/vector-icons": "*",
-    "expo-auth-session": "*",
-    "expo-web-browser": "*",
-    "react-native-safe-area-context": "*",
+    "@mvp/analytics": "*",
+    "@mvp/i18n": "*",
     "@mvp/lib": "*",
     "@mvp/store": "*",
-    "@mvp/i18n": "*",
     "@mvp/ui": "*",
-    "@mvp/analytics": "*"
+    "axios": "*",
+    "expo-auth-session": "*",
+    "expo-web-browser": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*",
+    "tamagui": "*"
   }
 }
