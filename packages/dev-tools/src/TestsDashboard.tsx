@@ -675,7 +675,14 @@ export function TestsDashboard({ apiBase }: Props) {
               )}
             </XStack>
             <XStack alignItems="center" gap={4}>
-              {/* Failures tab toggle */}
+              {/* Failures tab toggle + copy all */}
+              {failuresOpen && failures.length > 0 && (
+                <CopyButton
+                  text={failures.map(f => formatFailureText(f)).join('\n\n')}
+                  monoFamily={monoFamily}
+                  label="Copy All"
+                />
+              )}
               <Pressable onPress={() => {
                 fetchFailures()
                 setFailuresOpen(f => !f)
@@ -739,16 +746,6 @@ export function TestsDashboard({ apiBase }: Props) {
                 style={{ height: consoleHeight }}
                 contentContainerStyle={{ padding: 8, paddingBottom: 16 }}
               >
-                {/* Copy All button */}
-                {failures.length > 0 && (
-                  <XStack justifyContent="flex-end" paddingBottom={6} paddingHorizontal={4}>
-                    <CopyButton
-                      text={failures.map(f => formatFailureText(f)).join('\n\n')}
-                      monoFamily={monoFamily}
-                      label="Copy All"
-                    />
-                  </XStack>
-                )}
                 {failures.length === 0 ? (
                   <Text fontSize={11} color="#4b5563" fontStyle="italic" padding={8}>{t('admin.testsNoFailures')}</Text>
                 ) : (
