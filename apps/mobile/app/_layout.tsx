@@ -183,12 +183,12 @@ export default function RootLayout() {
     // Radius and card style work via Tamagui updateTheme on all platforms
     applyRadiusScale(templateRadiusScale)
     applyCardStyle(templateCardStyle)
+    if (templateCustomColor) {
+      applyCustomColor(templateCustomColor)
+    } else {
+      applyColorScheme(templateColorScheme ?? DEFAULT_SCHEME_KEY)
+    }
     if (Platform.OS === 'web') {
-      if (templateCustomColor) {
-        applyCustomColor(templateCustomColor)
-      } else {
-        applyColorScheme(templateColorScheme ?? DEFAULT_SCHEME_KEY)
-      }
       applyFontFamily(templateFontFamily).catch(() => {})
     }
   }, [resolvedTheme, templateColorScheme, templateCustomColor, templateRadiusScale, templateCardStyle, templateFontFamily])

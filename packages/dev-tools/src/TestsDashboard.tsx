@@ -23,8 +23,64 @@ const ICONS: Record<string, LucideIcon> = {
   container: Container, rocket: Rocket,
 }
 
-function stripAnsi(text: string): string {
-  return text.replace(/\x1b\[[0-9;]*m/g, '')
+// ─── ANSI → colored Text segments ────────────────────────────────────────────
+
+const ANSI_COLORS: Record<string, string> = {
+  '30': '#555555', '31': '#f87171', '32': '#4ade80', '33': '#fbbf24',
+  '34': '#60a5fa', '35': '#c084fc', '36': '#22d3ee', '37': '#e5e7eb',
+  '90': '#9ca3af', '91': '#fca5a5', '92': '#86efac', '93': '#fde68a',
+  '94': '#93c5fd', '95': '#d8b4fe', '96': '#67e8f9', '97': '#f9fafb',
+}
+
+interface AnsiSegment { text: string; color: string; bold: boolean; dim: boolean }
+
+function parseAnsi(raw: string): AnsiSegment[] {
+  const segments: AnsiSegment[] = []
+  const re = /\x1b\[([0-9;]*)m/g
+  let last = 0, color = '#d1d5db', bold = false, dim = false
+  let m: RegExpExecArray | null
+  while ((m = re.exec(raw)) !== null) {
+    if (m.index > last) {
+      segments.push({ text: raw.slice(last, m.index), color, bold, dim })
+    }
+    for (const code of m[1].split(';')) {
+      if (code === '0' || code === '') { color = '#d1d5db'; bold = false; dim = false }
+      else if (code === '1') bold = true
+      else if (code === '2') dim = true
+      else if (code === '22') { bold = false; dim = false }
+      else if (ANSI_COLORS[code]) color = ANSI_COLORS[code]
+      else if (code === '39') color = '#d1d5db' // default fg
+    }
+    last = m.index + m[0].length
+  }
+  if (last < raw.length) segments.push({ text: raw.slice(last), color, bold, dim })
+  return segments
+}
+
+function AnsiText({ text, monoFamily }: { text: string; monoFamily: string }) {
+  const segments = React.useMemo(() => parseAnsi(text), [text])
+  return (
+    <Text
+      fontFamily={monoFamily}
+      fontSize={12} lineHeight={20} color="#d1d5db"
+      // @ts-ignore web-only
+      style={Platform.OS === 'web' ? { whiteSpace: 'pre-wrap', wordBreak: 'break-all' } : undefined}
+    >
+      {segments.map((seg, i) => (
+        <Text
+          key={i}
+          color={seg.dim ? '#4b5563' : seg.color}
+          fontWeight={seg.bold ? '700' : '400'}
+          fontFamily={monoFamily}
+          fontSize={12}
+          lineHeight={20}
+          opacity={seg.dim ? 0.7 : 1}
+        >
+          {seg.text}
+        </Text>
+      ))}
+    </Text>
+  )
 }
 
 interface St { status: TestStatus; elapsed: string | null; summary: string }
@@ -352,14 +408,19 @@ export function TestsDashboard({ apiBase }: Props) {
                 backgroundColor="#0d1117" maxHeight={450} overflow="hidden"
               >
                 <ScrollView style={{ maxHeight: 450, padding: 16 }}>
-                  <Text
-                    fontFamily={isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'}
-                    fontSize={12} lineHeight={20} color="#d1d5db"
-                    // @ts-ignore web prop
-                    style={isWeb ? { whiteSpace: 'pre-wrap', wordBreak: 'break-all' } : undefined}
-                  >
-                    {log ? stripAnsi(log) : 'Waiting for output...'}
-                  </Text>
+                  {log ? (
+                    <AnsiText
+                      text={log}
+                      monoFamily={isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'}
+                    />
+                  ) : (
+                    <Text
+                      fontFamily={isWeb ? 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace' : '$mono'}
+                      fontSize={12} lineHeight={20} color="#4b5563" fontStyle="italic"
+                    >
+                      Waiting for output...
+                    </Text>
+                  )}
                 </ScrollView>
               </YStack>
             </YStack>
