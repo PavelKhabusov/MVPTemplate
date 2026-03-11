@@ -51,6 +51,7 @@ const envSchema = z.object({
   YOOKASSA_SHOP_ID: z.string().optional(),
   YOOKASSA_SECRET_KEY: z.string().optional(),
   YOOKASSA_WEBHOOK_SECRET: z.string().optional(),
+  YOOKASSA_IP_ALLOWLIST: z.string().optional(),
 
   // Robokassa
   ROBOKASSA_ENABLED: envBoolean.default(true),

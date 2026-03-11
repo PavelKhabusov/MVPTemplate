@@ -1,4 +1,5 @@
-import { pgTable, uuid, varchar, timestamp, text, jsonb, date, boolean } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import { pgTable, uuid, varchar, timestamp, text, jsonb, date, boolean, index } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -20,7 +21,9 @@ export const users = pgTable('users', {
   voximplantNode: varchar('voximplant_node', { length: 20 }), // e.g. 'NODE_1'
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => [
+  index('users_name_tsv_idx').using('gin', sql`to_tsvector('english', ${table.name})`),
+])
 
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
