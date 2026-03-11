@@ -537,6 +537,7 @@ export function TestsDashboard({ apiBase }: Props) {
                     const TestIcon = ICONS[test.lucideIcon] || FlaskConical
                     const isRun = st.status === 'running'
                     const isAct = activeId === test.id
+                    const isBusy = runningCount > 0 && !isRun // another test is running
 
                     // Build status label with counts
                     let statusLabel = cfg.label
@@ -547,7 +548,7 @@ export function TestsDashboard({ apiBase }: Props) {
                     return (
                       <Pressable
                         key={test.id}
-                        onPress={() => isRun ? stop() : run(test.id)}
+                        onPress={() => isRun ? stop() : isBusy ? undefined : run(test.id)}
                         style={{
                           width: isNarrow ? '100%' : cardWidth,
                           flexGrow: isNarrow ? 1 : 0,
@@ -607,7 +608,8 @@ export function TestsDashboard({ apiBase }: Props) {
                               alignItems="center" gap={4}
                               paddingHorizontal={10} paddingVertical={4}
                               borderRadius={6}
-                              backgroundColor={isRun ? '#f59e0b18' : accent}
+                              backgroundColor={isRun ? '#f59e0b18' : isBusy ? '#4b5563' : accent}
+                              opacity={isBusy ? 0.5 : 1}
                             >
                               {isRun
                                 ? <Square size={10} color="#f59e0b" />
