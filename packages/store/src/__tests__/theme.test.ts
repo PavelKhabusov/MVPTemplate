@@ -7,6 +7,7 @@ vi.mock('react-native', () => ({
     getColorScheme: vi.fn(() => 'light'),
     addChangeListener: vi.fn(),
   },
+  Platform: { OS: 'ios' },
 }))
 
 vi.mock('@mvp/lib', () => ({
