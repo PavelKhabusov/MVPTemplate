@@ -16,5 +16,8 @@
     "react": "*",
     "react-native": "*",
     "tamagui": "*"
+  },
+  "dependencies": {
+    "lucide-react": "^0.577.0"
   }
 }
