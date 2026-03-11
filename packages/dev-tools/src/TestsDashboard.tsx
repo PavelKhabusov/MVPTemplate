@@ -102,49 +102,68 @@ const DEFAULT_CONSOLE_H = 250
 
 // ─── Drag handle (web: mouse events, native: PanResponder) ──────────────────
 
-function DragHandle({ onDrag }: { onDrag: (dy: number) => void }) {
+function DragHandle({ onHeightChange }: { onHeightChange: (h: number) => void }) {
   const isWeb = Platform.OS === 'web'
+  const heightRef = useRef(DEFAULT_CONSOLE_H)
 
   // Native: PanResponder
+  const startHRef = useRef(DEFAULT_CONSOLE_H)
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gestureState) => {
-        onDrag(-gestureState.dy)
+      onPanResponderGrant: () => { startHRef.current = heightRef.current },
+      onPanResponderMove: (_, gs) => {
+        const next = Math.min(MAX_CONSOLE_H, Math.max(MIN_CONSOLE_H, startHRef.current - gs.dy))
+        heightRef.current = next
+        onHeightChange(next)
       },
     })
   ).current
 
-  const handleMouseDown = useCallback((e: any) => {
-    if (!isWeb) return
-    e.preventDefault()
-    const startY = e.clientY
-    const onMove = (ev: MouseEvent) => {
-      onDrag(startY - ev.clientY)
-      ;(startY as any) // reassign via closure trick below
+  // Web: raw DOM mousedown → mousemove → mouseup
+  const handleRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!isWeb || !handleRef.current) return
+    const el = handleRef.current
+    const onMouseDown = (e: MouseEvent) => {
+      e.preventDefault()
+      const startY = e.clientY
+      const startH = heightRef.current
+      const onMove = (ev: MouseEvent) => {
+        const next = Math.min(MAX_CONSOLE_H, Math.max(MIN_CONSOLE_H, startH + (startY - ev.clientY)))
+        heightRef.current = next
+        onHeightChange(next)
+      }
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+      }
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
     }
-    let lastY = startY
-    const onMoveTracked = (ev: MouseEvent) => {
-      onDrag(lastY - ev.clientY)
-      lastY = ev.clientY
-    }
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMoveTracked)
-      document.removeEventListener('mouseup', onUp)
-    }
-    document.addEventListener('mousemove', onMoveTracked)
-    document.addEventListener('mouseup', onUp)
-  }, [isWeb, onDrag])
+    el.addEventListener('mousedown', onMouseDown)
+    return () => el.removeEventListener('mousedown', onMouseDown)
+  }, [isWeb, onHeightChange])
+
+  if (isWeb) {
+    return (
+      <div
+        ref={handleRef as any}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          height: 20, cursor: 'row-resize', userSelect: 'none',
+        }}
+      >
+        <GripHorizontal size={16} color="#4b5563" />
+      </div>
+    )
+  }
 
   return (
     <YStack
-      alignItems="center"
-      justifyContent="center"
-      height={20}
-      // @ts-ignore web cursor
-      style={isWeb ? { cursor: 'row-resize', userSelect: 'none' } : undefined}
-      {...(isWeb ? { onPointerDown: handleMouseDown } : panResponder.panHandlers)}
+      alignItems="center" justifyContent="center" height={20}
+      {...panResponder.panHandlers}
     >
       <GripHorizontal size={16} color="#4b5563" />
     </YStack>
@@ -156,7 +175,7 @@ interface Props { apiBase?: string }
 export function TestsDashboard({ apiBase }: Props) {
   const devApi = `${apiBase ?? (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000')}/dev`
   const theme = useTheme()
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+  const { width: screenWidth } = useWindowDimensions()
   const isNarrow = screenWidth < 500
   const [states, setStates] = useState<Record<string, St>>(() => {
     const r: Record<string, St> = {}; for (const t of TESTS) r[t.id] = { status: 'idle', elapsed: null, summary: '' }; return r
@@ -261,8 +280,8 @@ export function TestsDashboard({ apiBase }: Props) {
     return () => clearInterval(id)
   }, [isWeb, activeId, states, fetchLog])
 
-  const handleDrag = useCallback((dy: number) => {
-    setConsoleHeight(h => Math.min(MAX_CONSOLE_H, Math.max(MIN_CONSOLE_H, h + dy)))
+  const handleHeightChange = useCallback((h: number) => {
+    setConsoleHeight(h)
   }, [])
 
   const passed = Object.values(states).filter(s => s.status === 'passed').length
@@ -460,7 +479,7 @@ export function TestsDashboard({ apiBase }: Props) {
           backgroundColor="#0d1117"
         >
           {/* Drag handle */}
-          {!consoleCollapsed && <DragHandle onDrag={handleDrag} />}
+          {!consoleCollapsed && <DragHandle onHeightChange={handleHeightChange} />}
 
           {/* Console toolbar */}
           <XStack
