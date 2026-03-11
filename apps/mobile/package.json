@@ -23,6 +23,7 @@
     "@mvp/lib": "*",
     "@mvp/notifications": "*",
     "@mvp/proxy": "*",
+    "@mvp/dev-tools": "*",
     "@mvp/store": "*",
     "@mvp/ui": "*",
     "@react-native-async-storage/async-storage": "^2.2.0",

@@ -17,52 +17,11 @@ import { spawn, ChildProcess } from 'child_process'
 import { resolve } from 'path'
 import { readdirSync, existsSync } from 'fs'
 import { devTestsDashboardHTML } from './dashboard-html'
-
-// ─── Test definitions ────────────────────────────────────────────────────────
-
-interface TestDef {
-  id: string
-  icon: string
-  name: string
-  desc: string
-  group: string
-  cmd: string
-}
+import { TESTS, type TestState } from '@mvp/dev-tools/src/tests'
 
 const ROOT = resolve(process.cwd(), '../..')
 
-const TESTS: TestDef[] = [
-  // Unit tests
-  { id: 'all', icon: '🧪', name: 'Все юнит-тесты', desc: 'Проверяет всю логику приложения автоматически', group: 'unit', cmd: 'npx vitest run' },
-  { id: 'backend', icon: '⚙️', name: 'Backend', desc: 'Тесты серверной части (API, авторизация, платежи)', group: 'unit', cmd: 'npx vitest run --project backend' },
-  { id: 'store', icon: '🗄️', name: 'Store', desc: 'Тесты хранилища данных (Zustand)', group: 'unit', cmd: 'npx vitest run --project store' },
-  { id: 'lib', icon: '📚', name: 'Библиотеки', desc: 'Тесты общих утилит и хелперов', group: 'unit', cmd: 'npx vitest run --project lib' },
-  { id: 'i18n', icon: '🌍', name: 'Переводы (i18n)', desc: 'Проверяет что все переводы на месте (en, ru, es, ja)', group: 'unit', cmd: 'npx vitest run --project i18n' },
-  // Specialized
-  { id: 'coverage', icon: '📊', name: 'Покрытие кода', desc: 'Показывает % кода покрытого тестами. Минимум: 70%', group: 'specialized', cmd: 'npx vitest run --coverage' },
-  { id: 'contracts', icon: '📝', name: 'API-контракты', desc: 'Проверяет что формат ответов API не сломался', group: 'specialized', cmd: 'npx vitest run --project backend -- api-contracts' },
-  { id: 'schema', icon: '🗃️', name: 'Схема базы данных', desc: 'Проверяет структуру таблиц в PostgreSQL', group: 'specialized', cmd: 'npx vitest run --project backend -- schema-consistency' },
-  { id: 'snapshots', icon: '📸', name: 'Обновить снапшоты', desc: 'Пересоздаёт эталонные снимки для сравнения', group: 'specialized', cmd: 'npx vitest run -u --project backend' },
-  // E2E
-  { id: 'e2e', icon: '🌐', name: 'E2E Web', desc: 'Открывает браузер и кликает по приложению как пользователь', group: 'e2e', cmd: 'npx playwright test' },
-  { id: 'e2e-ext', icon: '🧩', name: 'E2E Расширение', desc: 'Тестирует Chrome расширение в реальном браузере', group: 'e2e', cmd: 'npx playwright test --config=playwright.extension.config.ts' },
-  { id: 'e2e-visual', icon: '🎨', name: 'Визуальная регрессия', desc: 'Сравнивает скриншоты UI — ищет сломанную вёрстку', group: 'e2e', cmd: 'npx playwright test tests/e2e/visual.spec.ts' },
-  // Quality
-  { id: 'lint', icon: '✅', name: 'Lint + Типы', desc: 'Проверяет стиль кода и типы TypeScript', group: 'quality', cmd: 'npx turbo typecheck && npx eslint .' },
-  { id: 'audit', icon: '🔒', name: 'Аудит безопасности', desc: 'Сканирует зависимости на критические уязвимости', group: 'quality', cmd: 'npm audit --audit-level=critical' },
-  { id: 'docker', icon: '🐳', name: 'Docker сборка', desc: 'Проверяет что Docker-образ backend собирается', group: 'quality', cmd: 'docker build -f apps/backend/docker/Dockerfile -t mvp-backend:test apps/backend' },
-  { id: 'ci', icon: '🚀', name: 'Полный CI', desc: 'Запускает ВСЁ как на сервере (lint → тесты → Docker)', group: 'quality', cmd: 'npx turbo typecheck && npx eslint . && npx vitest run && npx vitest run --coverage && docker build -f apps/backend/docker/Dockerfile -t mvp-backend:ci apps/backend' },
-]
-
 // ─── State ───────────────────────────────────────────────────────────────────
-
-interface TestState {
-  status: 'idle' | 'running' | 'passed' | 'failed'
-  log: string
-  startedAt: number | null
-  elapsed: string | null
-  summary: string
-}
 
 const state: Record<string, TestState> = {}
 for (const t of TESTS) {
