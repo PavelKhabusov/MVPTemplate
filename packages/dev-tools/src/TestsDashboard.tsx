@@ -3,7 +3,7 @@ import { ScrollView, Platform, Linking } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { AppButton, FadeIn, ScalePress } from '@mvp/ui'
 import {
-  CheckCircle2, XCircle, Circle, Loader2, Play, Square,
+  CheckCircle2, XCircle, Circle, Loader2, Play, Square, Clock,
   FlaskConical, Wrench, Globe, ShieldCheck,
   Terminal, RefreshCw, X, CloudOff,
   Server, Database, Library, Languages,
@@ -14,28 +14,18 @@ import {
 } from 'lucide-react'
 import { TESTS, GROUP_LABELS, GROUPS, type TestStatus } from './tests'
 
-// --- Lucide icon map (lucideIcon string → component) ----------------------------
+// --- Lucide icon map ---------------------------------------------------------------
 
 const LUCIDE_ICONS: Record<string, LucideIcon> = {
-  'flask-conical': FlaskConical,
-  'server': Server,
-  'database': Database,
-  'library': Library,
-  'languages': Languages,
-  'bar-chart-3': BarChart3,
-  'file-check': FileCheck,
-  'table-2': Table2,
-  'camera': Camera,
-  'globe': Globe,
-  'puzzle': Puzzle,
-  'image': Image,
-  'check-square': CheckSquare,
-  'shield-alert': ShieldAlert,
-  'container': Container,
-  'rocket': Rocket,
+  'flask-conical': FlaskConical, server: Server, database: Database,
+  library: Library, languages: Languages, 'bar-chart-3': BarChart3,
+  'file-check': FileCheck, 'table-2': Table2, camera: Camera,
+  globe: Globe, puzzle: Puzzle, image: Image,
+  'check-square': CheckSquare, 'shield-alert': ShieldAlert,
+  container: Container, rocket: Rocket,
 }
 
-// --- ANSI color conversion -------------------------------------------------------
+// --- ANSI color conversion ---------------------------------------------------------
 
 const ANSI_COLORS: Record<string, string> = {
   '30': '#555', '31': '#f87171', '32': '#4ade80', '33': '#fbbf24',
@@ -52,15 +42,10 @@ function ansiToReactNodes(text: string): React.ReactNode[] {
   let currentColor: string | null = null
   let bold = false
   let match: RegExpExecArray | null
-
   while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) {
       const chunk = text.slice(lastIndex, match.index)
-      parts.push(
-        <span key={lastIndex} style={{ color: currentColor || '#d1d5db', fontWeight: bold ? 700 : 400 }}>
-          {chunk}
-        </span>
-      )
+      parts.push(<span key={lastIndex} style={{ color: currentColor || '#d1d5db', fontWeight: bold ? 700 : 400 }}>{chunk}</span>)
     }
     const codes = match[1].split(';')
     for (const code of codes) {
@@ -71,16 +56,12 @@ function ansiToReactNodes(text: string): React.ReactNode[] {
     lastIndex = match.index + match[0].length
   }
   if (lastIndex < text.length) {
-    parts.push(
-      <span key={lastIndex} style={{ color: currentColor || '#d1d5db', fontWeight: bold ? 700 : 400 }}>
-        {text.slice(lastIndex)}
-      </span>
-    )
+    parts.push(<span key={lastIndex} style={{ color: currentColor || '#d1d5db', fontWeight: bold ? 700 : 400 }}>{text.slice(lastIndex)}</span>)
   }
   return parts
 }
 
-// --- Helpers ---------------------------------------------------------------------
+// --- Helpers -----------------------------------------------------------------------
 
 interface CardTestState {
   status: TestStatus
@@ -88,218 +69,132 @@ interface CardTestState {
   summary: string
 }
 
-const STATUS_CONFIG: Record<TestStatus, { color: string; bg: string; Icon: React.FC<any>; label: string }> = {
-  idle: { color: '#6b7280', bg: 'transparent', Icon: Circle, label: 'Ready' },
-  running: { color: '#f59e0b', bg: '#f59e0b15', Icon: Loader2, label: 'Running...' },
-  passed: { color: '#22c55e', bg: '#22c55e12', Icon: CheckCircle2, label: 'Passed' },
-  failed: { color: '#ef4444', bg: '#ef444412', Icon: XCircle, label: 'Failed' },
+const STATUS_CFG: Record<TestStatus, { color: string; bg: string; Icon: React.FC<any>; label: string }> = {
+  idle:    { color: '#6b7280', bg: 'transparent',  Icon: Circle,       label: 'Ready' },
+  running: { color: '#f59e0b', bg: '#f59e0b12',    Icon: Loader2,      label: 'Running' },
+  passed:  { color: '#22c55e', bg: '#22c55e10',    Icon: CheckCircle2, label: 'Passed' },
+  failed:  { color: '#ef4444', bg: '#ef444410',    Icon: XCircle,      label: 'Failed' },
 }
 
 const GROUP_ICONS: Record<string, React.FC<any>> = {
-  unit: FlaskConical,
-  specialized: Wrench,
-  e2e: Globe,
-  quality: ShieldCheck,
+  unit: FlaskConical, specialized: Wrench, e2e: Globe, quality: ShieldCheck,
 }
 
-// --- Component -------------------------------------------------------------------
+// --- Component ---------------------------------------------------------------------
 
-interface Props {
-  apiBase?: string
-}
+interface Props { apiBase?: string }
 
 export function TestsDashboard({ apiBase }: Props) {
   const devApi = `${apiBase ?? (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000')}/dev`
   const theme = useTheme()
   const [states, setStates] = useState<Record<string, CardTestState>>(() => {
-    const initial: Record<string, CardTestState> = {}
-    for (const test of TESTS) initial[test.id] = { status: 'idle', elapsed: null, summary: '' }
-    return initial
+    const init: Record<string, CardTestState> = {}
+    for (const t of TESTS) init[t.id] = { status: 'idle', elapsed: null, summary: '' }
+    return init
   })
   const [runningId, setRunningId] = useState<string | null>(null)
   const [log, setLog] = useState('')
   const [activeLogId, setActiveLogId] = useState<string | null>(null)
   const [connected, setConnected] = useState(false)
-  const logRef = useRef<ScrollView>(null)
 
   // Native fallback
   if (Platform.OS !== 'web') {
     return (
       <YStack flex={1} padding="$4" alignItems="center" justifyContent="center" gap="$4">
         <FlaskConical size={48} color="#888" />
-        <Text fontSize="$4" color="$mutedText" textAlign="center">
-          Тест-дашборд доступен только в браузере
-        </Text>
-        <AppButton onPress={() => Linking.openURL(`${devApi}/tests`)}>
-          Открыть в браузере
-        </AppButton>
+        <Text fontSize="$4" color="$mutedText" textAlign="center">Тест-дашборд доступен только в браузере</Text>
+        <AppButton onPress={() => Linking.openURL(`${devApi}/tests`)}>Открыть в браузере</AppButton>
       </YStack>
     )
   }
 
-  // SSE connection
+  // SSE
   useEffect(() => {
     const es = new EventSource(`${devApi}/tests/stream`)
-
     es.addEventListener('init', (e: any) => {
       try {
-        const data = JSON.parse(e.data)
-        if (data.running) setRunningId(data.running)
-        if (data.state) {
-          const newStates: Record<string, CardTestState> = {}
-          for (const [id, s] of Object.entries(data.state) as [string, any][]) {
-            newStates[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary }
-          }
-          setStates(prev => ({ ...prev, ...newStates }))
+        const d = JSON.parse(e.data)
+        if (d.running) setRunningId(d.running)
+        if (d.state) {
+          const ns: Record<string, CardTestState> = {}
+          for (const [id, s] of Object.entries(d.state) as [string, any][])
+            ns[id] = { status: s.status, elapsed: s.elapsed, summary: s.summary }
+          setStates(p => ({ ...p, ...ns }))
         }
         setConnected(true)
-      } catch { /* ignore */ }
+      } catch { /* */ }
     })
-
     es.addEventListener('status', (e: any) => {
       try {
-        const data = JSON.parse(e.data)
-        setStates(prev => ({
-          ...prev,
-          [data.id]: {
-            status: data.status,
-            elapsed: data.elapsed || prev[data.id]?.elapsed || null,
-            summary: data.summary || prev[data.id]?.summary || '',
-          }
-        }))
-        if (data.status === 'running') {
-          setRunningId(data.id)
-        } else if (data.status === 'passed' || data.status === 'failed' || data.status === 'idle') {
-          setRunningId(prev => prev === data.id ? null : prev)
-        }
-      } catch { /* ignore */ }
+        const d = JSON.parse(e.data)
+        setStates(p => ({ ...p, [d.id]: { status: d.status, elapsed: d.elapsed || p[d.id]?.elapsed || null, summary: d.summary || p[d.id]?.summary || '' } }))
+        if (d.status === 'running') setRunningId(d.id)
+        else setRunningId(p => p === d.id ? null : p)
+      } catch { /* */ }
     })
-
     es.addEventListener('log', (e: any) => {
-      try {
-        const data = JSON.parse(e.data)
-        setActiveLogId(data.id)
-        setLog(prev => prev + data.text)
-      } catch { /* ignore */ }
+      try { const d = JSON.parse(e.data); setActiveLogId(d.id); setLog(p => p + d.text) } catch { /* */ }
     })
-
     es.onerror = () => setConnected(false)
-
     return () => { es.close() }
   }, [devApi])
 
   const runTest = useCallback((id: string) => {
-    setLog('')
-    setActiveLogId(id)
-    fetch(`${devApi}/tests/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    }).catch(() => {})
+    setLog(''); setActiveLogId(id)
+    fetch(`${devApi}/tests/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }).catch(() => {})
   }, [devApi])
-
-  const stopTest = useCallback(() => {
-    fetch(`${devApi}/tests/stop`, { method: 'POST' }).catch(() => {})
-  }, [devApi])
-
+  const stopTest = useCallback(() => { fetch(`${devApi}/tests/stop`, { method: 'POST' }).catch(() => {}) }, [devApi])
   const fetchLog = useCallback((id: string) => {
-    fetch(`${devApi}/tests/log?id=${id}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.log) {
-          setLog(data.log)
-          setActiveLogId(id)
-        }
-      })
-      .catch(() => {})
+    fetch(`${devApi}/tests/log?id=${id}`).then(r => r.json()).then(d => { if (d.log) { setLog(d.log); setActiveLogId(id) } }).catch(() => {})
   }, [devApi])
 
-  // Stats
   const passedCount = Object.values(states).filter(s => s.status === 'passed').length
   const failedCount = Object.values(states).filter(s => s.status === 'failed').length
-  const totalCount = TESTS.length
-
+  const runningCount = Object.values(states).filter(s => s.status === 'running').length
   const activeTest = activeLogId ? TESTS.find(t => t.id === activeLogId) : null
 
   return (
     <YStack flex={1}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
 
-        {/* Header bar with stats + connection indicator */}
+        {/* Status bar */}
         <FadeIn>
-          <XStack
-            alignItems="center"
-            justifyContent="space-between"
-            marginBottom="$4"
-            // @ts-ignore
-            style={{ flexWrap: 'wrap', gap: 12 }}
-          >
-            {/* Stats pills */}
-            <XStack gap="$2" alignItems="center" // @ts-ignore
-              style={{ flexWrap: 'wrap' }}
-            >
-              <XStack
-                backgroundColor="#22c55e12"
-                paddingHorizontal="$2.5"
-                paddingVertical="$1.5"
-                borderRadius="$4"
-                alignItems="center"
-                gap="$1.5"
-              >
-                <CheckCircle2 size={13} color="#22c55e" />
-                <Text fontSize={12} color="#22c55e" fontWeight="600">{passedCount} passed</Text>
-              </XStack>
-              {failedCount > 0 && (
-                <XStack
-                  backgroundColor="#ef444412"
-                  paddingHorizontal="$2.5"
-                  paddingVertical="$1.5"
-                  borderRadius="$4"
-                  alignItems="center"
-                  gap="$1.5"
-                >
-                  <XCircle size={13} color="#ef4444" />
-                  <Text fontSize={12} color="#ef4444" fontWeight="600">{failedCount} failed</Text>
-                </XStack>
-              )}
-              <Text fontSize={12} color="$mutedText">{totalCount} tests</Text>
-            </XStack>
-
-            {/* Connection indicator */}
-            <XStack alignItems="center" gap="$1.5">
+          {/* @ts-ignore */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
+            {/* @ts-ignore */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { count: passedCount, color: '#22c55e', Icon: CheckCircle2, label: 'passed' },
+                { count: failedCount, color: '#ef4444', Icon: XCircle, label: 'failed' },
+                { count: runningCount, color: '#f59e0b', Icon: Loader2, label: 'running' },
+              ].filter(s => s.count > 0).map(s => (
+                // @ts-ignore
+                <div key={s.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: `${s.color}10`, fontSize: 12, fontWeight: 600, color: s.color }}>
+                  <s.Icon size={13} color={s.color} />
+                  {s.count} {s.label}
+                </div>
+              ))}
               {/* @ts-ignore */}
-              <div style={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                backgroundColor: connected ? '#22c55e' : '#ef4444',
-                boxShadow: connected ? '0 0 6px #22c55e80' : '0 0 6px #ef444480',
-              }} />
-              <Text fontSize={11} color="$mutedText">
-                {connected ? 'Connected' : 'Disconnected'}
-              </Text>
-            </XStack>
-          </XStack>
+              <span style={{ fontSize: 12, color: '#6b7280' }}>{TESTS.length} tests total</span>
+            </div>
+            {/* @ts-ignore */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {/* @ts-ignore */}
+              <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: connected ? '#22c55e' : '#ef4444', boxShadow: connected ? '0 0 6px #22c55e80' : '0 0 6px #ef444480' }} />
+              {/* @ts-ignore */}
+              <span style={{ fontSize: 11, color: '#6b7280' }}>{connected ? 'Connected' : 'Disconnected'}</span>
+            </div>
+          </div>
         </FadeIn>
 
-        {/* Disconnected banner */}
+        {/* Disconnected */}
         {!connected && (
           <FadeIn>
-            <XStack
-              backgroundColor="#ef444410"
-              borderWidth={1}
-              borderColor="#ef444425"
-              padding="$2.5"
-              borderRadius="$3"
-              marginBottom="$4"
-              alignItems="center"
-              gap="$2"
-            >
+            {/* @ts-ignore */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, background: '#ef444408', border: '1px solid #ef444420', marginBottom: 20, fontSize: 12, color: '#f87171' }}>
               <CloudOff size={15} color="#ef4444" />
-              <Text fontSize={12} color="#f87171" flex={1}>
-                No connection to server. Run: npm run dev:backend
-              </Text>
-            </XStack>
+              No connection to server. Run: npm run dev:backend
+            </div>
           </FadeIn>
         )}
 
@@ -309,162 +204,128 @@ export function TestsDashboard({ apiBase }: Props) {
           const GroupIcon = GROUP_ICONS[group] || FlaskConical
           return (
             <FadeIn key={group}>
-              <YStack marginBottom="$5">
+              {/* @ts-ignore */}
+              <div style={{ marginBottom: 28 }}>
                 {/* Group header */}
-                <XStack alignItems="center" gap="$2" marginBottom="$3">
-                  <GroupIcon size={15} color={theme.mutedText.val as string} />
-                  <Text
-                    fontSize={11}
-                    color="$mutedText"
-                    fontWeight="700"
-                    textTransform="uppercase"
-                    letterSpacing={1.2}
-                  >
-                    {GROUP_LABELS[group]}
-                  </Text>
-                  <YStack
-                    flex={1}
-                    height={1}
-                    backgroundColor="$borderColor"
-                    opacity={0.4}
-                  />
-                </XStack>
-
-                {/* Cards grid */}
                 {/* @ts-ignore */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                  gap: 10,
-                }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <GroupIcon size={14} color="#6b7280" />
+                  {/* @ts-ignore */}
+                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: '#6b7280' }}>{GROUP_LABELS[group]}</span>
+                  {/* @ts-ignore */}
+                  <div style={{ flex: 1, height: 1, background: '#ffffff08' }} />
+                </div>
+
+                {/* Test rows */}
+                {/* @ts-ignore */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {groupTests.map(test => {
                     const st = states[test.id] || { status: 'idle' as TestStatus, elapsed: null, summary: '' }
-                    const cfg = STATUS_CONFIG[st.status]
+                    const cfg = STATUS_CFG[st.status]
                     const StatusIcon = cfg.Icon
+                    const TestIcon = LUCIDE_ICONS[test.lucideIcon] || FlaskConical
                     const isRunning = st.status === 'running'
                     const isActive = activeLogId === test.id
 
                     return (
-                      <ScalePress key={test.id} onPress={() => isRunning ? stopTest() : runTest(test.id)}>
-                        <YStack
-                          backgroundColor={isActive ? '$subtleBackground' : '$background'}
-                          borderWidth={1}
-                          borderColor={isActive ? '$accent' : '$borderColor'}
-                          borderRadius="$4"
-                          padding="$3"
-                          gap="$2"
-                          // @ts-ignore
-                          style={{
-                            minHeight: 130,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                            position: 'relative',
-                            overflow: 'hidden',
-                          }}
-                          hoverStyle={{
-                            borderColor: '$accent',
-                            backgroundColor: '$subtleBackground',
-                          }}
-                        >
-                          {/* Status accent line at top */}
-                          {st.status !== 'idle' && (
+                      // @ts-ignore
+                      <div
+                        key={test.id}
+                        onClick={() => isRunning ? stopTest() : runTest(test.id)}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '28px 1fr auto auto auto',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '10px 14px',
+                          borderRadius: 10,
+                          border: `1px solid ${isActive ? (theme.accent?.val || '#8b5cf6') : 'transparent'}`,
+                          background: isActive ? '#ffffff06' : 'transparent',
+                          cursor: 'pointer',
+                          transition: 'all 0.12s ease',
+                        }}
+                        onMouseEnter={(e: any) => { if (!isActive) e.currentTarget.style.background = '#ffffff04' }}
+                        onMouseLeave={(e: any) => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
+                      >
+                        {/* Icon */}
+                        <TestIcon size={18} color="#6b7280" />
+
+                        {/* Name + desc + cmd */}
+                        {/* @ts-ignore */}
+                        <div style={{ minWidth: 0 }}>
+                          {/* @ts-ignore */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {/* @ts-ignore */}
+                            <span style={{ fontSize: 13, fontWeight: 600, color: '#e5e7eb', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {test.name}
+                            </span>
+                            {/* @ts-ignore */}
+                            <span style={{ fontSize: 11, color: '#4b5563', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {test.desc}
+                            </span>
+                          </div>
+                          {/* @ts-ignore */}
+                          <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, SF Mono, monospace', color: '#374151', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {test.cmd}
+                          </div>
+                        </div>
+
+                        {/* Result summary */}
+                        {/* @ts-ignore */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 80, justifyContent: 'flex-end' }}>
+                          {st.summary && (
                             // @ts-ignore
-                            <div style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              height: 2,
-                              backgroundColor: cfg.color,
-                              opacity: 0.8,
-                            }} />
-                          )}
-
-                          {/* Top row: icon + status badge */}
-                          <XStack justifyContent="space-between" alignItems="center">
-                            {(() => {
-                              const TestIcon = LUCIDE_ICONS[test.lucideIcon] || FlaskConical
-                              return <TestIcon size={20} color={theme.mutedText.val as string} />
-                            })()}
-                            <XStack
-                              backgroundColor={cfg.bg}
-                              paddingHorizontal="$2"
-                              paddingVertical={3}
-                              borderRadius="$4"
-                              alignItems="center"
-                              gap={4}
-                            >
-                              <StatusIcon
-                                size={12}
-                                color={cfg.color}
-                                // @ts-ignore
-                                style={isRunning ? { animation: 'spin 1s linear infinite' } : undefined}
-                              />
-                              {st.status !== 'idle' && (
-                                <Text fontSize={10} color={cfg.color} fontWeight="600">
-                                  {cfg.label}
-                                </Text>
-                              )}
-                            </XStack>
-                          </XStack>
-
-                          {/* Name */}
-                          <Text fontSize={14} fontWeight="700" color="$color" numberOfLines={1}>
-                            {test.name}
-                          </Text>
-
-                          {/* Description */}
-                          <Text fontSize={12} color="$mutedText" numberOfLines={2} lineHeight={16}>
-                            {test.desc}
-                          </Text>
-
-                          {/* Bottom row: action + elapsed */}
-                          <XStack marginTop="auto" justifyContent="space-between" alignItems="center">
-                            <XStack
-                              backgroundColor={isRunning ? '#f59e0b18' : '$accent'}
-                              paddingHorizontal="$2"
-                              paddingVertical={4}
-                              borderRadius={6}
-                              alignItems="center"
-                              gap={4}
-                              hoverStyle={{ opacity: 0.85 }}
-                            >
-                              {isRunning
-                                ? <Square size={10} color="#f59e0b" />
-                                : <Play size={10} color="white" fill="white" />
-                              }
-                              <Text
-                                fontSize={11}
-                                color={isRunning ? '#f59e0b' : 'white'}
-                                fontWeight="600"
-                              >
-                                {isRunning ? 'Stop' : 'Run'}
-                              </Text>
-                            </XStack>
-                            {st.elapsed && (
-                              <Text fontSize={10} color="$mutedText" fontWeight="500">
-                                {st.elapsed}s
-                              </Text>
-                            )}
-                          </XStack>
-
-                          {/* Summary line */}
-                          {st.summary ? (
-                            <Text
-                              fontSize={10}
-                              color={st.status === 'passed' ? '#22c55e' : st.status === 'failed' ? '#ef4444' : '$mutedText'}
-                              numberOfLines={1}
-                              fontWeight="500"
-                            >
+                            <span style={{ fontSize: 11, fontWeight: 500, color: st.status === 'passed' ? '#22c55e' : st.status === 'failed' ? '#ef4444' : '#6b7280' }}>
                               {st.summary}
-                            </Text>
-                          ) : null}
-                        </YStack>
-                      </ScalePress>
+                            </span>
+                          )}
+                          {st.elapsed && (
+                            // @ts-ignore
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, color: '#4b5563' }}>
+                              <Clock size={10} color="#4b5563" />
+                              {st.elapsed}s
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Status badge */}
+                        {/* @ts-ignore */}
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                          padding: '3px 10px', borderRadius: 20,
+                          background: cfg.bg, fontSize: 11, fontWeight: 600, color: cfg.color,
+                          minWidth: 75, justifyContent: 'center',
+                        }}>
+                          <StatusIcon
+                            size={12}
+                            color={cfg.color}
+                            style={isRunning ? { animation: 'spin 1s linear infinite' } : undefined}
+                          />
+                          {cfg.label}
+                        </div>
+
+                        {/* Action button */}
+                        {/* @ts-ignore */}
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '5px 12px', borderRadius: 6,
+                          background: isRunning ? '#f59e0b18' : (theme.accent?.val || '#8b5cf6'),
+                          fontSize: 11, fontWeight: 600,
+                          color: isRunning ? '#f59e0b' : 'white',
+                          cursor: 'pointer', transition: 'opacity 0.12s',
+                          whiteSpace: 'nowrap',
+                        }}
+                        onMouseEnter={(e: any) => { e.currentTarget.style.opacity = '0.8' }}
+                        onMouseLeave={(e: any) => { e.currentTarget.style.opacity = '1' }}
+                        >
+                          {isRunning ? <Square size={10} /> : <Play size={10} fill="white" />}
+                          {isRunning ? 'Stop' : 'Run'}
+                        </div>
+                      </div>
                     )
                   })}
                 </div>
-              </YStack>
+              </div>
             </FadeIn>
           )
         })}
@@ -472,97 +333,66 @@ export function TestsDashboard({ apiBase }: Props) {
         {/* Log panel */}
         {activeLogId && (
           <FadeIn>
-            <YStack marginTop="$2">
+            {/* @ts-ignore */}
+            <div style={{ marginTop: 8 }}>
               {/* Log header */}
-              <XStack
-                justifyContent="space-between"
-                alignItems="center"
-                marginBottom="$2"
-                paddingHorizontal="$1"
-              >
-                <XStack alignItems="center" gap="$2">
-                  <Terminal size={14} color={theme.mutedText.val as string} />
-                  <Text fontSize={11} color="$mutedText" fontWeight="700" textTransform="uppercase" letterSpacing={1}>
-                    Output
-                  </Text>
+              {/* @ts-ignore */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '0 4px' }}>
+                {/* @ts-ignore */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Terminal size={14} color="#6b7280" />
+                  {/* @ts-ignore */}
+                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: '#6b7280' }}>Output</span>
                   {activeTest && (
-                    <XStack
-                      backgroundColor="$subtleBackground"
-                      paddingHorizontal="$2"
-                      paddingVertical={2}
-                      borderRadius="$2"
-                    >
-                      <XStack alignItems="center" gap={6}>
-                        {(() => {
-                          const LogIcon = LUCIDE_ICONS[activeTest.lucideIcon] || FlaskConical
-                          return <LogIcon size={12} color={theme.color.val as string} />
-                        })()}
-                        <Text fontSize={11} color="$color" fontWeight="500">
-                          {activeTest.name}
-                        </Text>
-                      </XStack>
-                    </XStack>
+                    // @ts-ignore
+                    <span style={{ fontSize: 11, color: '#9ca3af', padding: '2px 8px', background: '#ffffff06', borderRadius: 4 }}>
+                      {activeTest.name}
+                    </span>
                   )}
-                </XStack>
-                <XStack gap="$3" alignItems="center">
-                  <ScalePress onPress={() => fetchLog(activeLogId)}>
-                    <XStack alignItems="center" gap="$1" opacity={0.7} hoverStyle={{ opacity: 1 }}>
-                      <RefreshCw size={12} color={theme.mutedText.val as string} />
-                      <Text fontSize={11} color="$mutedText" fontWeight="500">Refresh</Text>
-                    </XStack>
-                  </ScalePress>
-                  <ScalePress onPress={() => { setLog(''); setActiveLogId(null) }}>
-                    <XStack alignItems="center" gap="$1" opacity={0.7} hoverStyle={{ opacity: 1 }}>
-                      <X size={14} color={theme.mutedText.val as string} />
-                      <Text fontSize={11} color="$mutedText" fontWeight="500">Close</Text>
-                    </XStack>
-                  </ScalePress>
-                </XStack>
-              </XStack>
+                </div>
+                {/* @ts-ignore */}
+                <div style={{ display: 'flex', gap: 12 }}>
+                  {/* @ts-ignore */}
+                  <span onClick={() => fetchLog(activeLogId)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#6b7280', cursor: 'pointer' }}
+                    onMouseEnter={(e: any) => { e.currentTarget.style.color = '#9ca3af' }}
+                    onMouseLeave={(e: any) => { e.currentTarget.style.color = '#6b7280' }}
+                  >
+                    <RefreshCw size={11} />Refresh
+                  </span>
+                  {/* @ts-ignore */}
+                  <span onClick={() => { setLog(''); setActiveLogId(null) }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#6b7280', cursor: 'pointer' }}
+                    onMouseEnter={(e: any) => { e.currentTarget.style.color = '#9ca3af' }}
+                    onMouseLeave={(e: any) => { e.currentTarget.style.color = '#6b7280' }}
+                  >
+                    <X size={13} />Close
+                  </span>
+                </div>
+              </div>
 
               {/* Log body */}
-              <YStack
-                borderRadius="$4"
-                borderWidth={1}
-                borderColor="$borderColor"
-                // @ts-ignore
-                style={{
-                  maxHeight: 450,
-                  overflow: 'hidden',
-                  background: 'linear-gradient(180deg, #0d1117 0%, #161b22 100%)',
-                }}
-              >
+              {/* @ts-ignore */}
+              <div style={{
+                borderRadius: 10, border: '1px solid #ffffff08',
+                background: 'linear-gradient(180deg, #0d1117, #161b22)',
+                maxHeight: 450, overflow: 'hidden',
+              }}>
                 {/* @ts-ignore */}
-                <div style={{
-                  maxHeight: 450,
-                  overflow: 'auto',
-                  padding: 16,
-                }}>
+                <div style={{ maxHeight: 450, overflow: 'auto', padding: 16 }}>
                   {/* @ts-ignore */}
                   <pre style={{
-                    margin: 0,
-                    fontFamily: 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace',
-                    fontSize: 12,
-                    lineHeight: 1.7,
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-all',
-                    color: '#d1d5db',
+                    margin: 0, fontFamily: 'JetBrains Mono, SF Mono, Menlo, Consolas, monospace',
+                    fontSize: 12, lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-all', color: '#d1d5db',
                   }}>
-                    {log ? ansiToReactNodes(log) : (
-                      <span style={{ color: '#4b5563', fontStyle: 'italic' }}>
-                        Waiting for output...
-                      </span>
-                    )}
+                    {log ? ansiToReactNodes(log) : <span style={{ color: '#4b5563', fontStyle: 'italic' }}>Waiting for output...</span>}
                   </pre>
                 </div>
-              </YStack>
-            </YStack>
+              </div>
+            </div>
           </FadeIn>
         )}
       </ScrollView>
-
-      {/* @ts-ignore — inject spin keyframes for Loader2 */}
-      <style dangerouslySetInnerHTML={{ __html: `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }` }} />
+      {/* @ts-ignore */}
+      <style dangerouslySetInnerHTML={{ __html: '@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}' }} />
     </YStack>
   )
 }

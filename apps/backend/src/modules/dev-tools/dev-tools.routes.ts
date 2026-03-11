@@ -133,10 +133,12 @@ export async function devToolsRoutes(app: FastifyInstance) {
 
   // SSE stream
   app.get('/tests/stream', async (request: FastifyRequest, reply: FastifyReply) => {
+    const origin = request.headers.origin
     reply.raw.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
+      ...(origin ? { 'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Credentials': 'true' } : {}),
     })
     reply.raw.write(`event: init\ndata: ${JSON.stringify({ state, running: runningId })}\n\n`)
     sseClients.add(reply)
