@@ -4,7 +4,7 @@ import { YStack, XStack, Text, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, FadeIn, ScalePress } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { CheckCircle2, X, Tag, ShieldCheck, RefreshCw, XCircle } from 'lucide-react-native'
 import { PricingCard, SubscriptionBadge } from '@mvp/payments'
 import type { Plan, Subscription } from '@mvp/payments'
 import { trackPricingView, trackBillingToggle, trackCheckoutStart, trackCheckoutSuccess, trackSubscriptionCancel } from '@mvp/analytics'
@@ -169,13 +169,13 @@ export default function PricingScreen() {
               {...(isWide ? { width: '100%' as any } : {})}
               style={{ background: 'linear-gradient(135deg, #059669, #047857)' } as any}
             >
-              <Ionicons name="checkmark-circle" size={24} color="white" />
+              <CheckCircle2 size={24} color="white" />
               <YStack flex={1} gap="$0.5">
                 <Text fontWeight="700" color="white" fontSize="$4">{t('payments.successTitle')}</Text>
                 <Text color="white" fontSize="$2" opacity={0.9}>{t('payments.successMessage')}</Text>
               </YStack>
               <TouchableOpacity onPress={() => setShowSuccess(false)}>
-                <Ionicons name="close" size={20} color="white" />
+                <X size={20} color="white" />
               </TouchableOpacity>
             </XStack>
           )}
@@ -305,7 +305,7 @@ export default function PricingScreen() {
             </XStack>
           ) : filteredPlans.length === 0 ? (
             <YStack alignItems="center" gap="$3" paddingVertical="$10">
-              <Ionicons name="pricetags-outline" size={48} color={theme.mutedText.val} />
+              <Tag size={48} color={theme.mutedText.val} />
               <Text color="$mutedText" textAlign="center" fontSize="$4">{t('payments.noPlans')}</Text>
             </YStack>
           ) : isWide ? (
@@ -365,12 +365,12 @@ export default function PricingScreen() {
               paddingBottom="$2"
             >
               {[
-                { icon: 'shield-checkmark-outline' as const, label: t('payments.securePayments') },
-                { icon: 'refresh-outline' as const, label: t('payments.guarantee') },
-                { icon: 'close-circle-outline' as const, label: t('payments.cancelAnytime') },
-              ].map(({ icon, label }) => (
+                { Icon: ShieldCheck, label: t('payments.securePayments') },
+                { Icon: RefreshCw, label: t('payments.guarantee') },
+                { Icon: XCircle, label: t('payments.cancelAnytime') },
+              ].map(({ Icon, label }) => (
                 <XStack key={label} alignItems="center" gap="$1.5">
-                  <Ionicons name={icon} size={15} color={theme.mutedText.val} />
+                  <Icon size={15} color={theme.mutedText.val} />
                   <Text fontSize="$2" color="$mutedText">{label}</Text>
                 </XStack>
               ))}

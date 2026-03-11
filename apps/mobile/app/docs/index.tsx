@@ -3,7 +3,7 @@ import { Platform, ScrollView } from 'react-native'
 import { router } from 'expo-router'
 import { YStack, Text, useTheme } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
-import { Ionicons } from '@expo/vector-icons'
+import { BookOpen } from 'lucide-react-native'
 import { DocTreeView } from '@mvp/docs'
 
 function useIsWideScreen() {
@@ -37,7 +37,7 @@ export default function DocsIndexScreen() {
   if (Platform.OS === 'web' && isWide) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" padding="$6" gap="$3">
-        <Ionicons name="book-outline" size={48} color={theme.mutedText.val} />
+        <BookOpen size={48} color={theme.mutedText.val} />
         <Text color="$mutedText" fontSize="$3" textAlign="center">
           {t('docs.selectPage')}
         </Text>

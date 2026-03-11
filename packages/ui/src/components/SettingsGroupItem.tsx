@@ -1,11 +1,12 @@
 import { memo } from 'react'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
 import { AppSwitch } from './AppSwitch'
-import { Ionicons } from '@expo/vector-icons'
+import { ChevronRight } from 'lucide-react-native'
+import { getLucideIcon } from '../icons'
 import { ScalePress } from '../animations/ScalePress'
 
 interface SettingsGroupItemProps {
-  icon: keyof typeof Ionicons.glyphMap
+  icon: string
   iconColor?: string
   label: string
   value?: string
@@ -29,6 +30,7 @@ export const SettingsGroupItem = memo(function SettingsGroupItem({
 }: SettingsGroupItemProps) {
   const theme = useTheme()
   const color = danger ? theme.error.val : (iconColor ?? theme.accent.val)
+  const IconComponent = getLucideIcon(icon)
 
   const content = (
     <XStack
@@ -46,7 +48,7 @@ export const SettingsGroupItem = memo(function SettingsGroupItem({
         alignItems="center"
         justifyContent="center"
       >
-        <Ionicons name={icon} size={18} color={color} />
+        <IconComponent size={18} color={color} />
       </YStack>
 
       <Text flex={1} flexShrink={0} color={danger ? '$error' : '$color'} fontSize={16} numberOfLines={1} textAlign="left">
@@ -66,7 +68,7 @@ export const SettingsGroupItem = memo(function SettingsGroupItem({
             </Text>
           )}
           {onPress && (
-            <Ionicons name="chevron-forward" size={18} color={theme.mutedText.val} />
+            <ChevronRight size={18} color={theme.mutedText.val} />
           )}
         </>
       )}

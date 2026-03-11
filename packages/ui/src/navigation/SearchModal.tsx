@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Platform, Pressable, TextInput } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { Search } from 'lucide-react-native'
 import { AnimatePresence, MotiView } from 'moti'
 
 interface SearchModalProps {
@@ -108,7 +108,7 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
                 borderBottomWidth={1}
                 borderBottomColor="$borderColor"
               >
-                <Ionicons name="search-outline" size={22} color={theme.mutedText.val} />
+                <Search size={22} color={theme.mutedText.val} />
                 <TextInput
                   ref={inputRef}
                   value={query}
@@ -142,7 +142,7 @@ export function SearchModal({ open, onClose, onSearch, results, placeholder }: S
               <YStack padding="$5" minHeight={200} alignItems="center" justifyContent="center">
                 {results || (
                   <YStack alignItems="center" gap="$3">
-                    <Ionicons name="search" size={40} color={theme.mutedText.val} style={{ opacity: 0.3 }} />
+                    <Search size={40} color={theme.mutedText.val} style={{ opacity: 0.3 }} />
                     <Text color="$mutedText" fontSize="$3">
                       {query ? 'No results found' : 'Type to search...'}
                     </Text>

@@ -1,5 +1,3 @@
-import { Ionicons } from '@expo/vector-icons'
-
 export interface DocPage {
   id: string
   titleKey: string
@@ -9,7 +7,7 @@ export interface DocPage {
 export interface DocGroup {
   id: string
   titleKey: string
-  icon: keyof typeof Ionicons.glyphMap
+  icon: string
   pages: DocPage[]
 }
 
@@ -17,7 +15,7 @@ export const DOC_GROUPS: DocGroup[] = [
   {
     id: 'getting-started',
     titleKey: 'docs.groupGettingStarted',
-    icon: 'rocket-outline',
+    icon: 'rocket',
     pages: [
       { id: 'install', titleKey: 'docs.pageInstall', contentKey: 'docs.contentInstall' },
       { id: 'setup', titleKey: 'docs.pageSetup', contentKey: 'docs.contentSetup' },
@@ -26,7 +24,7 @@ export const DOC_GROUPS: DocGroup[] = [
   {
     id: 'using',
     titleKey: 'docs.groupUsing',
-    icon: 'book-outline',
+    icon: 'book-open',
     pages: [
       { id: 'features', titleKey: 'docs.pageFeatures', contentKey: 'docs.contentFeatures' },
     ],
@@ -34,7 +32,7 @@ export const DOC_GROUPS: DocGroup[] = [
   {
     id: 'billing',
     titleKey: 'docs.groupBilling',
-    icon: 'card-outline',
+    icon: 'credit-card',
     pages: [
       { id: 'plans', titleKey: 'docs.pagePlans', contentKey: 'docs.contentPlans' },
       { id: 'upgrade', titleKey: 'docs.pageUpgrade', contentKey: 'docs.contentUpgrade' },
@@ -43,7 +41,7 @@ export const DOC_GROUPS: DocGroup[] = [
   {
     id: 'faq',
     titleKey: 'docs.groupFaq',
-    icon: 'help-circle-outline',
+    icon: 'help-circle',
     pages: [
       { id: 'faq-general', titleKey: 'docs.pageFaqGeneral', contentKey: 'docs.contentFaqGeneral' },
     ],

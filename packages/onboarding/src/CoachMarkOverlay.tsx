@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { ArrowRight } from 'lucide-react-native'
 import { MotiView } from 'moti'
 import Svg, { Defs, Mask, Rect } from 'react-native-svg'
 import { ScalePress } from '@mvp/ui'
@@ -187,7 +187,7 @@ function OverlayContent({
                   {isLast ? (labels.done ?? 'Done') : (labels.next ?? 'Next')}
                 </Text>
                 {!isLast && (
-                  <Ionicons name="arrow-forward" size={14} color={theme.accent.val} />
+                  <ArrowRight size={14} color={theme.accent.val} />
                 )}
               </XStack>
             </ScalePress>

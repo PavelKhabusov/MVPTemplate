@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { XStack, Text } from 'tamagui'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
-import { Ionicons } from '@expo/vector-icons'
+import { Mail } from 'lucide-react-native'
 import { TouchableOpacity, ActivityIndicator } from 'react-native'
 import { useAuth } from './AuthProvider'
 
@@ -36,7 +36,7 @@ export function EmailVerificationBanner() {
       alignItems="center"
       gap="$2"
     >
-      <Ionicons name="mail-outline" size={18} color="#92400E" />
+      <Mail size={18} color="#92400E" />
       <Text fontSize="$2" color="#92400E" flex={1}>
         {sent ? t('auth.verificationSent') : t('auth.emailNotVerified')}
       </Text>

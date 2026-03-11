@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Platform, View } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { Layers, Cloud } from 'lucide-react-native'
+import { getLucideIcon } from '../icons'
 import { useTranslation } from '@mvp/i18n'
 import { SlideIn } from '../animations/SlideIn'
 
@@ -168,7 +169,7 @@ export function LandingShowcase() {
                       background: `linear-gradient(135deg, ${theme.accentGradientStart.val}20, ${theme.accentGradientEnd.val}20)`,
                     } as any}
                   >
-                    <Ionicons name={item.icon as any} size={18} color={theme.accent.val} />
+                    {(() => { const Icon = getLucideIcon(item.icon); return <Icon size={18} color={theme.accent.val} /> })()}
                   </YStack>
                   <Text fontSize="$4" color="$color">
                     {t(`landing.${item.key}` as any)}
@@ -193,7 +194,7 @@ export function LandingShowcase() {
               {/* Core & Structure */}
               <YStack gap="$2.5">
                 <XStack gap="$2" alignItems="center">
-                  <Ionicons name="layers-outline" size={16} color={theme.accent.val} />
+                  <Layers size={16} color={theme.accent.val} />
                   <Text fontWeight="bold" fontSize="$4" color="$color">Core & Structure</Text>
                 </XStack>
                 <XStack flexWrap="wrap" gap="$2.5">
@@ -220,7 +221,7 @@ export function LandingShowcase() {
               {/* Backend & Integrations */}
               <YStack gap="$2.5">
                 <XStack gap="$2" alignItems="center">
-                  <Ionicons name="cloud-outline" size={16} color={theme.mutedText.val} />
+                  <Cloud size={16} color={theme.mutedText.val} />
                   <Text fontWeight="bold" fontSize="$4" color="$color">Backend & Integrations</Text>
                 </XStack>
                 <XStack flexWrap="wrap" gap="$2.5">

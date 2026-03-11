@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Image, Platform, StyleSheet } from 'react-native'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { ChevronLeft, ChevronRight } from 'lucide-react-native'
+import { getLucideIcon } from '../icons'
 import { MotiView } from 'moti'
 import Animated, {
   useSharedValue,
@@ -18,8 +19,8 @@ type AnimationType = 'bounce' | 'rotate' | 'wiggle' | 'pop' | 'bell'
 interface NavItem {
   href: string
   label: string
-  icon: keyof typeof Ionicons.glyphMap
-  iconFilled: keyof typeof Ionicons.glyphMap
+  icon: string
+  iconFilled: string
   animation?: AnimationType
 }
 
@@ -90,11 +91,7 @@ export function WebSidebar({ items, currentPath, onNavigate, topContent, footer,
               cursor="pointer"
               onPress={() => onNavigate(item.href)}
             >
-              <Ionicons
-                name={isActive ? item.iconFilled : item.icon}
-                size={22}
-                color={isActive ? theme.accent.val : theme.mutedText.val}
-              />
+              {(() => { const Icon = getLucideIcon(isActive ? item.iconFilled : item.icon); return <Icon size={22} color={isActive ? theme.accent.val : theme.mutedText.val} /> })()}
               <Text
                 fontSize={10}
                 color={isActive ? '$accent' : '$mutedText'}
@@ -208,11 +205,11 @@ export function WebSidebar({ items, currentPath, onNavigate, topContent, footer,
             cursor="pointer"
             onPress={() => setCollapsed(!collapsed)}
           >
-            <Ionicons
-              name={collapsed ? 'chevron-forward' : 'chevron-back'}
-              size={18}
-              color={theme.mutedText.val}
-            />
+            {collapsed ? (
+              <ChevronRight size={18} color={theme.mutedText.val} />
+            ) : (
+              <ChevronLeft size={18} color={theme.mutedText.val} />
+            )}
             {!collapsed && (
               <Text color="$mutedText" fontSize="$2">
                 Collapse
@@ -349,11 +346,7 @@ function SidebarItem({
       aria-label={item.label}
     >
       <Animated.View style={[styles.iconContainer, iconAnimStyle]}>
-        <Ionicons
-          name={isActive ? item.iconFilled : item.icon}
-          size={20}
-          color={isActive ? theme.accent.val : theme.mutedText.val}
-        />
+        {(() => { const Icon = getLucideIcon(isActive ? item.iconFilled : item.icon); return <Icon size={20} color={isActive ? theme.accent.val : theme.mutedText.val} /> })()}
       </Animated.View>
       {!collapsed && (
         <Text

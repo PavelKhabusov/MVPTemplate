@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { Image, Platform, TouchableOpacity, View } from 'react-native'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { Sun, Moon, Smartphone, Languages, Check, X, Menu } from 'lucide-react-native'
 import { useTranslation } from '@mvp/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS, type SupportedLanguage } from '@mvp/i18n'
 import { useThemeStore, useLanguageStore, useAuthStore, useCompanyStore } from '@mvp/store'
@@ -160,7 +160,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
     setMode(next)
   }
 
-  const themeIcon = mode === 'dark' ? 'sunny-outline' : mode === 'light' ? 'moon-outline' : 'phone-portrait-outline'
+  const ThemeIcon = mode === 'dark' ? Sun : mode === 'light' ? Moon : Smartphone
 
   const selectLanguage = (lang: SupportedLanguage) => {
     i18n.changeLanguage(lang)
@@ -250,7 +250,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
           <ScalePress onPress={cycleTheme}>
             <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
               style={{ backgroundColor: NAV_BTN_BG } as any}>
-              <Ionicons name={themeIcon as any} size={15} color={NAV_ICON} />
+              <ThemeIcon size={15} color={NAV_ICON} />
             </YStack>
           </ScalePress>
 
@@ -258,7 +258,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
             <ScalePress onPress={() => setShowLangPicker((v) => !v)}>
               <XStack height={32} paddingHorizontal="$2" borderRadius={8} alignItems="center" gap="$1.5"
                 style={{ backgroundColor: NAV_BTN_BG } as any}>
-                <Ionicons name="language-outline" size={13} color={NAV_ICON} />
+                <Languages size={13} color={NAV_ICON} />
                 <Text fontSize="$2" color={NAV_MUTED}>
                   {LANGUAGE_LABELS[i18n.language as SupportedLanguage] ?? 'EN'}
                 </Text>
@@ -283,7 +283,7 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
                         <XStack paddingHorizontal="$3" paddingVertical="$2" borderRadius="$2" alignItems="center" justifyContent="space-between"
                           hoverStyle={{ backgroundColor: '$subtleBackground' } as any}>
                           <Text fontSize="$3" color="$color">{LANGUAGE_LABELS[lang]}</Text>
-                          {i18n.language === lang && <Ionicons name="checkmark" size={14} color={theme.accent.val} />}
+                          {i18n.language === lang && <Check size={14} color={theme.accent.val} />}
                         </XStack>
                       </ScalePress>
                     ))}
@@ -323,13 +323,13 @@ export function LandingNav({ onNavigate, logo, paymentsEnabled = false }: Landin
           <ScalePress onPress={cycleTheme}>
             <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
               style={{ backgroundColor: NAV_BTN_BG } as any}>
-              <Ionicons name={themeIcon as any} size={15} color={NAV_ICON} />
+              <ThemeIcon size={15} color={NAV_ICON} />
             </YStack>
           </ScalePress>
           <TouchableOpacity onPress={() => setMobileMenuOpen((v) => !v)}>
             <YStack width={32} height={32} borderRadius={8} alignItems="center" justifyContent="center"
               style={{ backgroundColor: NAV_BTN_BG } as any}>
-              <Ionicons name={mobileMenuOpen ? 'close' : 'menu'} size={17} color={NAV_TEXT} />
+              {mobileMenuOpen ? <X size={17} color={NAV_TEXT} /> : <Menu size={17} color={NAV_TEXT} />}
             </YStack>
           </TouchableOpacity>
         </XStack>

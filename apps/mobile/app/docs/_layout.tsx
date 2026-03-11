@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Platform, Pressable, ScrollView } from 'react-native'
 import { Stack, Slot, usePathname, router } from 'expo-router'
 import { XStack, YStack, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { ChevronLeft } from 'lucide-react-native'
 import { useTranslation } from '@mvp/i18n'
 import { DocTreeView } from '@mvp/docs'
 

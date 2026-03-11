@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { XStack, Text, useTheme } from 'tamagui'
 import { Pressable, ActivityIndicator } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Text as RNText } from 'react-native'
 import { useTranslation } from '@mvp/i18n'
 import * as Google from 'expo-auth-session/providers/google'
 import * as WebBrowser from 'expo-web-browser'
@@ -67,7 +67,7 @@ export function GoogleSignInButton() {
             <ActivityIndicator size="small" color={theme.color.val} />
           ) : (
             <>
-              <Ionicons name="logo-google" size={20} color={theme.color.val} />
+              <RNText style={{ fontSize: 20, fontWeight: '700', color: theme.color.val }}>G</RNText>
               <Text fontSize="$3" fontWeight="600" color="$color">
                 {t('auth.continueWithGoogle')}
               </Text>

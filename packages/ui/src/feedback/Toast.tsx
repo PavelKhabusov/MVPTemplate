@@ -3,7 +3,7 @@ import { Platform } from 'react-native'
 import { XStack, Text, useTheme } from 'tamagui'
 import { AnimatePresence, MotiView } from 'moti'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
+import { CheckCircle2, AlertCircle, Info, X, type LucideIcon } from 'lucide-react-native'
 
 type ToastType = 'success' | 'error' | 'info'
 
@@ -22,10 +22,10 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-const ICONS: Record<ToastType, keyof typeof Ionicons.glyphMap> = {
-  success: 'checkmark-circle',
-  error: 'alert-circle',
-  info: 'information-circle',
+const ICONS: Record<ToastType, LucideIcon> = {
+  success: CheckCircle2,
+  error: AlertCircle,
+  info: Info,
 }
 
 const COLORS: Record<ToastType, string> = {
@@ -122,7 +122,7 @@ function ToastOverlay({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: (
                 elevation: 8,
               }}
             >
-              <Ionicons name={ICONS[toast.type]} size={20} color={COLORS[toast.type]} />
+              {(() => { const Icon = ICONS[toast.type]; return <Icon size={20} color={COLORS[toast.type]} /> })()}
               <Text color="$color" fontSize="$3" fontWeight="500" flex={1}>
                 {toast.message}
               </Text>
@@ -131,7 +131,7 @@ function ToastOverlay({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: (
                 hitSlop={8}
                 cursor="pointer"
               >
-                <Ionicons name="close" size={16} color={theme.mutedText.val} />
+                <X size={16} color={theme.mutedText.val} />
               </XStack>
             </XStack>
           </MotiView>

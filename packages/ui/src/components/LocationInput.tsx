@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { MapPin, Navigation, Hourglass } from 'lucide-react-native'
 import { ScalePress } from '../animations/ScalePress'
 
 export interface LocationSuggestion {
@@ -41,7 +41,7 @@ export function LocationInput({
         paddingHorizontal="$2.5"
         gap="$2"
       >
-        <Ionicons name="location-outline" size={18} color={theme.mutedText.val} />
+        <MapPin size={18} color={theme.mutedText.val} />
         <Input
           flex={1}
           value={value}
@@ -58,7 +58,7 @@ export function LocationInput({
           paddingHorizontal={0}
         />
         {isLoading && (
-          <Ionicons name="hourglass-outline" size={16} color={theme.mutedText.val} />
+          <Hourglass size={16} color={theme.mutedText.val} />
         )}
       </XStack>
 
@@ -86,7 +86,7 @@ export function LocationInput({
                 borderBottomWidth={i < suggestions.length - 1 ? 0.5 : 0}
                 borderBottomColor="$borderColor"
               >
-                <Ionicons name="navigate-outline" size={16} color={theme.accent.val} />
+                <Navigation size={16} color={theme.accent.val} />
                 <Text flex={1} fontSize={14} color="$color" numberOfLines={1}>
                   {s.displayName}
                 </Text>

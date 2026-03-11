@@ -22,7 +22,7 @@ import {
   SettingsGroupItem,
   AppModal,
 } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { X, Layers, Check } from 'lucide-react-native'
 import { useTemplateFlag } from '@mvp/template-config'
 import { AnimatePresence, MotiView } from 'moti'
 import Animated, {
@@ -376,7 +376,7 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
       >
         <XStack justifyContent="flex-end" padding="$3">
           <ScalePress onPress={onClose}>
-            <Ionicons name="close" size={24} color={theme.color.val} />
+            <X size={24} color={theme.color.val} />
           </ScalePress>
         </XStack>
         <NotificationCenter http={api} emailEnabled={emailEnabled} />
@@ -389,7 +389,7 @@ function NotificationModal({ visible, onClose }: { visible: boolean; onClose: ()
       <YStack flex={1} backgroundColor="$background">
         <XStack justifyContent="flex-end" padding="$3" paddingTop={60}>
           <ScalePress onPress={onClose}>
-            <Ionicons name="close" size={24} color={theme.color.val} />
+            <X size={24} color={theme.color.val} />
           </ScalePress>
         </XStack>
         <NotificationCenter http={api} emailEnabled={emailEnabled} />
@@ -436,7 +436,7 @@ function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => voi
             alignItems="center"
             justifyContent="center"
           >
-            <Ionicons name="layers-outline" size={36} color={theme.accent.val} />
+            <Layers size={36} color={theme.accent.val} />
           </YStack>
           <Text fontSize="$6" fontWeight="700" color="$color">{displayName}</Text>
           {company.tagline ? (
@@ -749,7 +749,7 @@ function LanguagePicker({
                 {LANGUAGE_LABELS[lang]}
               </Text>
               {isActive && (
-                <Ionicons name="checkmark" size={18} color={theme.accent.val} />
+                <Check size={18} color={theme.accent.val} />
               )}
             </XStack>
           </ScalePress>

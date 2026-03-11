@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Platform, View } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { ShieldCheck, RefreshCw, XCircle, Star, Check, ArrowRight } from 'lucide-react-native'
 import { useTranslation } from '@mvp/i18n'
 import { SlideIn } from '../animations/SlideIn'
 import { FadeIn } from '../animations/FadeIn'
@@ -101,9 +101,9 @@ export function LandingPricing({ onNavigate, plans = [] }: LandingPricingProps) 
   }
 
   const trustItems = [
-    { icon: 'shield-checkmark-outline' as const, label: t('payments.securePayments') },
-    { icon: 'refresh-outline' as const, label: t('payments.guarantee') },
-    { icon: 'close-circle-outline' as const, label: t('payments.cancelAnytime') },
+    { Icon: ShieldCheck, label: t('payments.securePayments') },
+    { Icon: RefreshCw, label: t('payments.guarantee') },
+    { Icon: XCircle, label: t('payments.cancelAnytime') },
   ]
 
   return (
@@ -263,9 +263,9 @@ export function LandingPricing({ onNavigate, plans = [] }: LandingPricingProps) 
         {/* Trust signals */}
         <FadeIn>
           <XStack gap="$6" justifyContent="center" flexWrap="wrap">
-            {trustItems.map(({ icon, label }) => (
+            {trustItems.map(({ Icon, label }) => (
               <XStack key={label} alignItems="center" gap="$2">
-                <Ionicons name={icon} size={16} color={theme.mutedText.val} />
+                <Icon size={16} color={theme.mutedText.val} />
                 <Text fontSize="$3" color="$mutedText">{label}</Text>
               </XStack>
             ))}
@@ -321,7 +321,7 @@ function LandingPricingCard({
             background: `linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
           } as any}
         >
-          <Ionicons name="star" size={11} color="white" />
+          <Star size={11} color="white" fill="white" />
           <Text color="white" fontSize={11} fontWeight="700" textTransform="uppercase" letterSpacing={1}>
             {t('payments.popular')}
           </Text>
@@ -404,7 +404,7 @@ function LandingPricingCard({
                     backgroundColor: `${theme.accent.val}15`,
                   } as any}
                 >
-                  <Ionicons name="checkmark" size={11} color={isPopular ? '#fff' : theme.accent.val} />
+                  <Check size={11} color={isPopular ? '#fff' : theme.accent.val} />
                 </YStack>
                 <Text fontSize="$3" color="$color" flex={1} lineHeight={22}>{feature}</Text>
               </XStack>
@@ -435,8 +435,7 @@ function LandingPricingCard({
             >
               {t('payments.getStarted')}
             </Text>
-            <Ionicons
-              name="arrow-forward"
+            <ArrowRight
               size={16}
               color={isPopular ? 'white' : theme.accent.val}
             />
@@ -513,7 +512,7 @@ function PlaceholderCards({
                 background: `linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
               } as any}
             >
-              <Ionicons name="star" size={11} color="white" />
+              <Star size={11} color="white" fill="white" />
               <Text color="white" fontSize={11} fontWeight="700" textTransform="uppercase" letterSpacing={1}>
                 {t('payments.popular')}
               </Text>
@@ -547,7 +546,7 @@ function PlaceholderCards({
                       background: `linear-gradient(135deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
                     } as any : { backgroundColor: `${theme.accent.val}15` } as any}
                   >
-                    <Ionicons name="checkmark" size={11} color={plan.isPopular ? '#fff' : theme.accent.val} />
+                    <Check size={11} color={plan.isPopular ? '#fff' : theme.accent.val} />
                   </YStack>
                   <Text fontSize="$3" color="$color" flex={1} lineHeight={22}>{f}</Text>
                 </XStack>
@@ -568,7 +567,7 @@ function PlaceholderCards({
                 <Text fontWeight="700" fontSize="$4" color={plan.isPopular ? 'white' : '$accent'}>
                   {t('payments.getStarted')}
                 </Text>
-                <Ionicons name="arrow-forward" size={16} color={plan.isPopular ? 'white' : theme.accent.val} />
+                <ArrowRight size={16} color={plan.isPopular ? 'white' : theme.accent.val} />
               </XStack>
             </ScalePress>
           </YStack>

@@ -1,13 +1,13 @@
 import { Image, Platform } from 'react-native'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { getLucideIcon } from '../icons'
 import { useIsMobileWeb } from './WebSidebar'
 
 interface NavItem {
   href: string
   label: string
-  icon: keyof typeof Ionicons.glyphMap
-  iconFilled: keyof typeof Ionicons.glyphMap
+  icon: string
+  iconFilled: string
 }
 
 interface WebHeaderProps {
@@ -140,11 +140,7 @@ function HeaderNavItem({
       aria-current={isActive ? 'page' : undefined}
       aria-label={item.label}
     >
-      <Ionicons
-        name={isActive ? item.iconFilled : item.icon}
-        size={18}
-        color={isActive ? theme.accent.val : theme.mutedText.val}
-      />
+      {(() => { const Icon = getLucideIcon(isActive ? item.iconFilled : item.icon); return <Icon size={18} color={isActive ? theme.accent.val : theme.mutedText.val} /> })()}
       <Text
         color={isActive ? '$color' : '$mutedText'}
         fontWeight={isActive ? '600' : '400'}

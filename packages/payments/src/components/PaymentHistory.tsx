@@ -1,5 +1,6 @@
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { CheckCircle2, Clock, XCircle, Undo2, HelpCircle } from 'lucide-react-native'
+import type { LucideIcon } from 'lucide-react-native'
 import { useTranslation } from '@mvp/i18n'
 import { AppCard } from '@mvp/ui'
 import type { PaymentRecord } from '../types'
@@ -15,11 +16,11 @@ function formatPrice(amount: number, currency: string): string {
   return fmt.format(value)
 }
 
-const STATUS_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  succeeded: 'checkmark-circle',
-  pending: 'time-outline',
-  failed: 'close-circle',
-  refunded: 'arrow-undo',
+const STATUS_ICONS: Record<string, LucideIcon> = {
+  succeeded: CheckCircle2,
+  pending: Clock,
+  failed: XCircle,
+  refunded: Undo2,
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -48,39 +49,41 @@ export function PaymentHistory({ payments, loading }: PaymentHistoryProps) {
 
   return (
     <YStack gap="$2">
-      {payments.map((payment) => (
-        <AppCard key={payment.id} animated={false}>
-          <XStack alignItems="center" justifyContent="space-between">
-            <XStack alignItems="center" gap="$2" flex={1}>
-              <Ionicons
-                name={STATUS_ICONS[payment.status] ?? 'help-circle'}
-                size={20}
-                color={STATUS_COLORS[payment.status] ?? theme.mutedText.val}
-              />
-              <YStack flex={1}>
-                <Text fontWeight="600" color="$color" fontSize="$3" numberOfLines={1}>
-                  {payment.description ?? t(`payments.${payment.type}` as any)}
+      {payments.map((payment) => {
+        const StatusIcon = STATUS_ICONS[payment.status] ?? HelpCircle
+        return (
+          <AppCard key={payment.id} animated={false}>
+            <XStack alignItems="center" justifyContent="space-between">
+              <XStack alignItems="center" gap="$2" flex={1}>
+                <StatusIcon
+                  size={20}
+                  color={STATUS_COLORS[payment.status] ?? theme.mutedText.val}
+                />
+                <YStack flex={1}>
+                  <Text fontWeight="600" color="$color" fontSize="$3" numberOfLines={1}>
+                    {payment.description ?? t(`payments.${payment.type}` as any)}
+                  </Text>
+                  <Text color="$mutedText" fontSize="$1">
+                    {new Date(payment.createdAt).toLocaleDateString()}
+                  </Text>
+                </YStack>
+              </XStack>
+              <YStack alignItems="flex-end">
+                <Text fontWeight="700" fontSize="$3" color="$color">
+                  {formatPrice(payment.amount, payment.currency)}
                 </Text>
-                <Text color="$mutedText" fontSize="$1">
-                  {new Date(payment.createdAt).toLocaleDateString()}
+                <Text
+                  fontSize="$1"
+                  color={STATUS_COLORS[payment.status] ?? '$mutedText'}
+                  fontWeight="600"
+                >
+                  {t(`payments.${payment.status}` as any)}
                 </Text>
               </YStack>
             </XStack>
-            <YStack alignItems="flex-end">
-              <Text fontWeight="700" fontSize="$3" color="$color">
-                {formatPrice(payment.amount, payment.currency)}
-              </Text>
-              <Text
-                fontSize="$1"
-                color={STATUS_COLORS[payment.status] ?? '$mutedText'}
-                fontWeight="600"
-              >
-                {t(`payments.${payment.status}` as any)}
-              </Text>
-            </YStack>
-          </XStack>
-        </AppCard>
-      ))}
+          </AppCard>
+        )
+      })}
     </YStack>
   )
 }

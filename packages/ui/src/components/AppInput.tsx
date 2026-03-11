@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Input, YStack, Text, XStack, GetProps, useTheme } from 'tamagui'
 import { Platform, TouchableOpacity } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Eye, EyeOff } from 'lucide-react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -92,11 +92,11 @@ export function AppInput({ label, error, helper, secureTextEntry, ...props }: Ap
               justifyContent: 'center',
             }}
           >
-            <Ionicons
-              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-              size={20}
-              color={theme.mutedText.val}
-            />
+            {showPassword ? (
+              <EyeOff size={20} color={theme.mutedText.val} />
+            ) : (
+              <Eye size={20} color={theme.mutedText.val} />
+            )}
           </TouchableOpacity>
         )}
       </YStack>

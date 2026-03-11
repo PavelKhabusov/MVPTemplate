@@ -1,7 +1,14 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Platform, ScrollView, Pressable, useWindowDimensions } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import {
+  Settings, X, Check, Copy, RefreshCw, HelpCircle,
+  BookOpen, Mail, CheckCircle2, Terminal, BarChart3, TrendingUp,
+  Info, MessageCircle, Bell, CreditCard, Compass, Sparkles,
+  Type, Layout, User, UserCircle, Languages, Contrast, Grid3x3,
+  Search, Sun, Moon,
+} from 'lucide-react-native'
+import type { LucideIcon } from 'lucide-react-native'
 import { MotiView } from 'moti'
 import { useTranslation, useAppTranslation, LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import type { SupportedLanguage } from '@mvp/i18n'
@@ -23,9 +30,30 @@ import type { TemplateFlag } from './flags'
 import { COLOR_SCHEMES, DEFAULT_SCHEME_KEY, applyColorScheme } from './colorSchemes'
 import { applyRadiusScale, applyCardStyle, applyFontFamily, FONT_FAMILY_CONFIG } from './designTokens'
 
+/** Map flag icon string keys to Lucide components */
+const FLAG_ICON_MAP: Record<string, LucideIcon> = {
+  'book-open': BookOpen,
+  'mail': Mail,
+  'check-circle': CheckCircle2,
+  'google': Settings, // no Google logo in Lucide, use Settings as fallback
+  'terminal': Terminal,
+  'bar-chart': BarChart3,
+  'trending-up': TrendingUp,
+  'info': Info,
+  'message-circle': MessageCircle,
+  'bell': Bell,
+  'credit-card': CreditCard,
+  'compass': Compass,
+  'sparkles': Sparkles,
+  'settings': Settings,
+  'search': Search,
+  'help-circle': HelpCircle,
+}
+
 function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value: boolean; onToggle: () => void; action?: { label: string; onPress: () => void } }) {
   const theme = useTheme()
   const { t } = useTranslation()
+  const FlagIcon = FLAG_ICON_MAP[flag.icon] || HelpCircle
 
   return (
     <Pressable onPress={onToggle}>
@@ -37,8 +65,7 @@ function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value:
         hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
       >
         <XStack alignItems="center" gap="$2" flex={1}>
-          <Ionicons
-            name={flag.icon}
+          <FlagIcon
             size={16}
             color={value ? theme.accent.val : theme.mutedText.val}
           />
@@ -88,8 +115,9 @@ function FlagRow({ flag, value, onToggle, action }: { flag: TemplateFlag; value:
   )
 }
 
-function ToggleRow({ icon, label, value, onToggle }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: boolean; onToggle: () => void }) {
+function ToggleRow({ icon, label, value, onToggle }: { icon: LucideIcon; label: string; value: boolean; onToggle: () => void }) {
   const theme = useTheme()
+  const Icon = icon
 
   return (
     <Pressable onPress={onToggle}>
@@ -101,7 +129,7 @@ function ToggleRow({ icon, label, value, onToggle }: { icon: keyof typeof Ionico
         hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
       >
         <XStack alignItems="center" gap="$2" flex={1}>
-          <Ionicons name={icon} size={16} color={value ? theme.accent.val : theme.mutedText.val} />
+          <Icon size={16} color={value ? theme.accent.val : theme.mutedText.val} />
           <Text fontSize="$2" color="$color" flex={1} numberOfLines={1}>{label}</Text>
         </XStack>
         <YStack
@@ -130,18 +158,19 @@ function SegmentedControl<T extends string>({
   options,
   onChange,
 }: {
-  icon: keyof typeof Ionicons.glyphMap
+  icon: LucideIcon
   label: string
   value: T
   options: { value: T; label: string }[]
   onChange: (value: T) => void
 }) {
   const theme = useTheme()
+  const Icon = icon
 
   return (
     <YStack paddingHorizontal="$3" paddingVertical="$1.5" gap="$1.5">
       <XStack alignItems="center" gap="$2">
-        <Ionicons name={icon} size={16} color={theme.accent.val} />
+        <Icon size={16} color={theme.accent.val} />
         <Text fontSize="$2" color="$color">{label}</Text>
       </XStack>
       <XStack
@@ -187,18 +216,19 @@ function IconButtonGroup<T extends string>({
   options,
   onChange,
 }: {
-  icon: keyof typeof Ionicons.glyphMap
+  icon: LucideIcon
   label: string
   value: T
-  options: { value: T; icon?: keyof typeof Ionicons.glyphMap; text?: string }[]
+  options: { value: T; icon?: LucideIcon; text?: string }[]
   onChange: (value: T) => void
 }) {
   const theme = useTheme()
+  const Icon = icon
 
   return (
     <YStack paddingHorizontal="$3" paddingVertical="$1.5" gap="$1.5">
       <XStack alignItems="center" gap="$2">
-        <Ionicons name={icon} size={16} color={theme.accent.val} />
+        <Icon size={16} color={theme.accent.val} />
         <Text fontSize="$2" color="$color">{label}</Text>
       </XStack>
       <XStack gap="$1.5">
@@ -215,8 +245,7 @@ function IconButtonGroup<T extends string>({
               borderColor={value === opt.value ? '$accent' : '$borderColor'}
             >
               {opt.icon ? (
-                <Ionicons
-                  name={opt.icon}
+                <opt.icon
                   size={16}
                   color={value === opt.value ? 'white' : theme.mutedText.val}
                 />
@@ -348,7 +377,7 @@ export function TemplateConfigSidebar() {
         borderBottomColor="$borderColor"
       >
         <XStack alignItems="center" gap="$2">
-          <Ionicons name="construct-outline" size={18} color={theme.accent.val} />
+          <Settings size={18} color={theme.accent.val} />
           <Text fontWeight="700" fontSize="$3" color="$color">
             {t('templateConfig.title')}
           </Text>
@@ -362,7 +391,7 @@ export function TemplateConfigSidebar() {
             justifyContent="center"
             hoverStyle={{ backgroundColor: '$backgroundHover' }}
           >
-            <Ionicons name="close" size={18} color={theme.mutedText.val} />
+            <X size={18} color={theme.mutedText.val} />
           </YStack>
         </Pressable>
       </XStack>
@@ -538,7 +567,7 @@ export function TemplateConfigSidebar() {
         {/* Font Scale */}
         <YStack marginBottom="$3">
           <SegmentedControl<FontScale>
-            icon="text-outline"
+            icon={Type}
             label={t('templateConfig.fontScale')}
             value={fontScale}
             options={[
@@ -553,7 +582,7 @@ export function TemplateConfigSidebar() {
         {/* Font Family */}
         <YStack paddingHorizontal="$3" gap="$1.5" marginBottom="$3">
           <XStack alignItems="center" gap="$2">
-            <Ionicons name="logo-google" size={16} color={theme.accent.val} />
+            <Type size={16} color={theme.accent.val} />
             <Text fontSize="$2" color="$color">{t('templateConfig.fontFamily')}</Text>
           </XStack>
           <YStack gap="$1">
@@ -585,7 +614,7 @@ export function TemplateConfigSidebar() {
                       {cfg.label}
                     </Text>
                     {isSelected && (
-                      <Ionicons name="checkmark" size={14} color={theme.accent.val} />
+                      <Check size={14} color={theme.accent.val} />
                     )}
                   </XStack>
                 </Pressable>
@@ -608,7 +637,7 @@ export function TemplateConfigSidebar() {
         </Text>
         <YStack marginBottom="$3">
           <SegmentedControl<WebLayout>
-            icon="browsers-outline"
+            icon={Layout}
             label={t('templateConfig.webLayout')}
             value={webLayout}
             options={[
@@ -619,7 +648,7 @@ export function TemplateConfigSidebar() {
             onChange={setWebLayout}
           />
           <SegmentedControl<UserBadgePlacement>
-            icon="person-outline"
+            icon={User}
             label={t('templateConfig.userBadge')}
             value={userBadgePlacement}
             options={
@@ -643,7 +672,7 @@ export function TemplateConfigSidebar() {
             onChange={setUserBadgePlacement}
           />
           <IconButtonGroup<SupportedLanguage>
-            icon="language-outline"
+            icon={Languages}
             label={t('templateConfig.language')}
             value={i18n.language as SupportedLanguage}
             options={SUPPORTED_LANGUAGES.map((lang) => ({
@@ -653,19 +682,19 @@ export function TemplateConfigSidebar() {
             onChange={(lang) => changeLanguage(lang)}
           />
           <IconButtonGroup<ThemeMode>
-            icon="contrast-outline"
+            icon={Contrast}
             label={t('profileMenu.theme')}
             value={mode}
             options={[
-              { value: 'light', icon: 'sunny-outline' },
-              { value: 'dark', icon: 'moon-outline' },
-              { value: 'system', icon: 'contrast-outline' },
+              { value: 'light', icon: Sun },
+              { value: 'dark', icon: Moon },
+              { value: 'system', icon: Contrast },
             ]}
             onChange={(m) => setMode(m)}
           />
           {showHeaderControls && (
             <SegmentedControl<HeaderNavAlign>
-              icon="apps-outline"
+              icon={Grid3x3}
               label={t('templateConfig.headerNavAlign')}
               value={headerNavAlign}
               options={[
@@ -678,7 +707,7 @@ export function TemplateConfigSidebar() {
           )}
           {userBadgePlacement !== 'nowhere' && (
             <ToggleRow
-              icon="person-circle-outline"
+              icon={UserCircle}
               label={t('templateConfig.compactProfile')}
               value={compactProfile}
               onToggle={() => setCompactProfile(!compactProfile)}
@@ -686,7 +715,7 @@ export function TemplateConfigSidebar() {
           )}
           {!compactProfile && (
             <SegmentedControl<ItemPlacement>
-              icon="language-outline"
+              icon={Languages}
               label={t('templateConfig.languagePlacement')}
               value={languagePlacement}
               options={
@@ -712,7 +741,7 @@ export function TemplateConfigSidebar() {
           )}
           {!compactProfile && (
             <SegmentedControl<ItemPlacement>
-              icon="contrast-outline"
+              icon={Contrast}
               label={t('templateConfig.themePlacement')}
               value={themePlacement}
               options={
@@ -737,7 +766,7 @@ export function TemplateConfigSidebar() {
             />
           )}
           <SegmentedControl<SearchPlacement>
-            icon="search-outline"
+            icon={Search}
             label={t('templateConfig.searchPlacement')}
             value={searchPlacement}
             options={
@@ -805,7 +834,7 @@ export function TemplateConfigSidebar() {
                   borderRadius="$2"
                   hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
                 >
-                  <Ionicons name="copy-outline" size={12} color={theme.mutedText.val} />
+                  <Copy size={12} color={theme.mutedText.val} />
                   <Text fontSize={11} color="$mutedText">
                     {t('templateConfig.copy')}
                   </Text>
@@ -844,7 +873,7 @@ export function TemplateConfigSidebar() {
                 borderColor="$borderColor"
                 hoverStyle={{ backgroundColor: '$backgroundHover' } as any}
               >
-                <Ionicons name="refresh-outline" size={14} color={theme.mutedText.val} />
+                <RefreshCw size={14} color={theme.mutedText.val} />
                 <Text fontSize="$2" color="$mutedText" fontWeight="600">
                   {t('templateConfig.reset')}
                 </Text>

@@ -7,22 +7,47 @@ import { useAuthStore, useNotesStore } from '@mvp/store'
 import { router } from 'expo-router'
 import { FadeIn, SlideIn, AnimatedListItem, AppCard, AppButton, ScalePress, RefreshSpinner } from '@mvp/ui'
 import { CoachMark } from '@mvp/onboarding'
-import { Ionicons } from '@expo/vector-icons'
+import {
+  Plus,
+  List,
+  BarChart3,
+  FileText,
+  XCircle,
+  FolderOpen,
+  CheckCircle2,
+  Users,
+  UserPlus,
+  CheckCheck,
+  Rocket,
+  HelpCircle,
+} from 'lucide-react-native'
+import type { LucideIcon } from 'lucide-react-native'
 
-function StatCard({ value, label, icon, color }: { value: string; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }) {
+const ICON_MAP: Record<string, LucideIcon> = {
+  'folder-outline': FolderOpen,
+  'checkmark-circle-outline': CheckCircle2,
+  'people-outline': Users,
+  'person-add-outline': UserPlus,
+  'checkmark-done-outline': CheckCheck,
+  'rocket-outline': Rocket,
+}
+
+function StatCard({ value, label, icon, color }: { value: string; label: string; icon: string; color: string }) {
   const theme = useTheme()
+  const IconComponent = ICON_MAP[icon] || HelpCircle
   return (
     <AppCard flex={1} padding="$3" gap="$2" alignItems="center">
-      <Ionicons name={icon} size={24} color={color} />
+      <IconComponent size={24} color={color} />
       <Text fontSize="$6" fontWeight="bold" color="$color">{value}</Text>
       <Text fontSize="$1" color="$mutedText" textAlign="center">{label}</Text>
     </AppCard>
   )
 }
 
-function ActivityItem({ text, time, icon, color }: { text: string; time: string; icon: keyof typeof Ionicons.glyphMap; color?: string }) {
+function ActivityItem({ text, time, icon, color }: { text: string; time: string; icon: string; color?: string }) {
   const theme = useTheme()
   const iconColor = color ?? theme.mutedText.val
+  const IconComponent = ICON_MAP[icon] || HelpCircle
   return (
     <XStack gap="$3" alignItems="center" paddingVertical="$2">
       <YStack
@@ -33,7 +58,7 @@ function ActivityItem({ text, time, icon, color }: { text: string; time: string;
         alignItems="center"
         justifyContent="center"
       >
-        <Ionicons name={icon} size={16} color={iconColor} />
+        <IconComponent size={16} color={iconColor} />
       </YStack>
       <YStack flex={1}>
         <Text fontSize="$2" color="$color">{text}</Text>
@@ -114,19 +139,19 @@ export default function HomeScreen() {
               <XStack gap="$3" flexWrap="wrap">
                 <AppButton variant="accent" size="sm" onPress={() => {}}>
                   <XStack gap="$2" alignItems="center">
-                    <Ionicons name="add" size={16} color={theme.background.val} />
+                    <Plus size={16} color={theme.background.val} />
                     <Text color="$background" fontWeight="600" fontSize="$2">{t('home.newProject')}</Text>
                   </XStack>
                 </AppButton>
                 <AppButton variant="outline" size="sm" onPress={() => {}}>
                   <XStack gap="$2" alignItems="center">
-                    <Ionicons name="list-outline" size={16} color={theme.color.val} />
+                    <List size={16} color={theme.color.val} />
                     <Text color="$color" fontSize="$2">{t('home.viewTasks')}</Text>
                   </XStack>
                 </AppButton>
                 <AppButton variant="outline" size="sm" onPress={() => {}}>
                   <XStack gap="$2" alignItems="center">
-                    <Ionicons name="bar-chart-outline" size={16} color={theme.color.val} />
+                    <BarChart3 size={16} color={theme.color.val} />
                     <Text color="$color" fontSize="$2">{t('home.analytics')}</Text>
                   </XStack>
                 </AppButton>
@@ -204,7 +229,7 @@ function NotesSection() {
       <AppCard>
         <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
           <XStack gap="$2" alignItems="center">
-            <Ionicons name="document-text-outline" size={18} color={theme.accent.val} />
+            <FileText size={18} color={theme.accent.val} />
             <Text fontWeight="600" fontSize="$4" color="$color">{t('interactive.notes')}</Text>
           </XStack>
           <Text fontSize="$1" color="$mutedText">{notes.length}</Text>
@@ -236,7 +261,7 @@ function NotesSection() {
               alignItems="center"
               justifyContent="center"
             >
-              <Ionicons name="add" size={20} color="white" />
+              <Plus size={20} color="white" />
             </YStack>
           </ScalePress>
         </XStack>
@@ -259,7 +284,7 @@ function NotesSection() {
                 >
                   <Text flex={1} fontSize="$2" color="$color" numberOfLines={2}>{note.text}</Text>
                   <ScalePress onPress={() => deleteNote(note.id)}>
-                    <Ionicons name="close-circle-outline" size={18} color={theme.mutedText.val} />
+                    <XCircle size={18} color={theme.mutedText.val} />
                   </ScalePress>
                 </XStack>
               </AnimatedListItem>

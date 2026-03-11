@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Platform, View } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { ArrowLeftRight, Compass, ShieldCheck, CreditCard, Puzzle } from 'lucide-react-native'
+import { getLucideIcon } from '../icons'
 import { useTranslation } from '@mvp/i18n'
 
 const GREETINGS = [
@@ -226,7 +227,7 @@ export function LandingFeatures() {
                       <YStack height={8} borderRadius={4} width="70%" style={{ background: '#e0e0e0' } as any} />
                       <YStack flex={1} borderRadius={6} style={{ background: `linear-gradient(135deg, ${gs}30, ${ge}30)` } as any} />
                     </YStack>
-                    <Ionicons name="swap-horizontal" size={20} color={acc} />
+                    <ArrowLeftRight size={20} color={acc} />
                     {/* Dark card */}
                     <YStack
                       width={60} height={80} borderRadius={12}
@@ -323,7 +324,7 @@ export function LandingFeatures() {
                       alignItems="center" justifyContent="center"
                       style={{ background: `linear-gradient(135deg, ${gs}25, ${ge}25)` } as any}
                     >
-                      <Ionicons name="compass" size={36} color={acc} />
+                      <Compass size={36} color={acc} />
                     </YStack>
                     {/* Progress dots */}
                     <XStack gap="$2" alignItems="center">
@@ -410,9 +411,9 @@ export function LandingFeatures() {
             nativeID="feature-bar"
           >
             {[
-              { icon: 'shield-checkmark' as const, titleKey: 'landing.featureAuth', tags: 'Email · Google · SMS OTP' },
-              { icon: 'card' as const, titleKey: 'landing.featurePayments', tags: 'Stripe · PayPal · Polar · YooKassa' },
-              { icon: 'extension-puzzle' as const, titleKey: 'landing.featureExtension', tags: 'Sidebar · Popup · Auth · Themes' },
+              { Icon: ShieldCheck, titleKey: 'landing.featureAuth', tags: 'Email · Google · SMS OTP' },
+              { Icon: CreditCard, titleKey: 'landing.featurePayments', tags: 'Stripe · PayPal · Polar · YooKassa' },
+              { Icon: Puzzle, titleKey: 'landing.featureExtension', tags: 'Sidebar · Popup · Auth · Themes' },
             ].map((item, idx) => (
               <XStack key={item.titleKey} gap="$3" alignItems="center">
                 {idx > 0 && (
@@ -423,7 +424,7 @@ export function LandingFeatures() {
                   alignItems="center" justifyContent="center"
                   style={{ background: `linear-gradient(135deg, ${gs}18, ${ge}18)` } as any}
                 >
-                  <Ionicons name={item.icon} size={20} color={acc} />
+                  <item.Icon size={20} color={acc} />
                 </YStack>
                 <YStack gap={2}>
                   <Text fontWeight="bold" fontSize="$4" color="$color">

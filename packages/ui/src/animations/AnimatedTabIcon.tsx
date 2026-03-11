@@ -9,15 +9,13 @@ import Animated, {
   Easing,
   interpolate,
 } from 'react-native-reanimated'
-import { Ionicons } from '@expo/vector-icons'
-
-type IconName = keyof typeof Ionicons.glyphMap
+import { getLucideIcon } from '../icons'
 
 type AnimationType = 'bounce' | 'rotate' | 'wiggle' | 'pop' | 'bell'
 
 interface AnimatedTabIconProps {
-  name: IconName
-  nameFilled: IconName
+  name: string
+  nameFilled: string
   focused: boolean
   color: string
   size?: number
@@ -130,12 +128,17 @@ export const AnimatedTabIcon = memo(function AnimatedTabIcon({
     }
   })
 
+  const iconName = focused ? nameFilled : name
+  const IconComponent = getLucideIcon(iconName)
+  // For filled variants, use fill prop
+  const isFilled = focused && nameFilled && !nameFilled.includes('outline')
+
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
-      <Ionicons
-        name={focused ? nameFilled : name}
+      <IconComponent
         size={size}
         color={color}
+        {...(isFilled ? { fill: color } : {})}
       />
     </Animated.View>
   )

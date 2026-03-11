@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { XStack, YStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { ThumbsUp, ThumbsDown } from 'lucide-react-native'
 import { useTranslation } from '@mvp/i18n'
 import { useAuthStore } from '@mvp/store'
 import { ScalePress } from '@mvp/ui'
@@ -82,10 +82,10 @@ export function DocFeedback({ pageId, http }: DocFeedbackProps) {
             borderColor={userVote === true ? '$accent' : '$borderColor'}
             backgroundColor={userVote === true ? `${theme.accent.val}15` : 'transparent'}
           >
-            <Ionicons
-              name={userVote === true ? 'thumbs-up' : 'thumbs-up-outline'}
+            <ThumbsUp
               size={18}
               color={userVote === true ? theme.accent.val : theme.mutedText.val}
+              fill={userVote === true ? theme.accent.val : 'none'}
             />
             {likes > 0 && (
               <Text
@@ -110,10 +110,10 @@ export function DocFeedback({ pageId, http }: DocFeedbackProps) {
             borderColor={userVote === false ? '#EF4444' : '$borderColor'}
             backgroundColor={userVote === false ? '#EF444415' : 'transparent'}
           >
-            <Ionicons
-              name={userVote === false ? 'thumbs-down' : 'thumbs-down-outline'}
+            <ThumbsDown
               size={18}
               color={userVote === false ? '#EF4444' : theme.mutedText.val}
+              fill={userVote === false ? '#EF4444' : 'none'}
             />
             {dislikes > 0 && (
               <Text

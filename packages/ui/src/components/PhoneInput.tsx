@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { FlatList, Modal, Platform } from 'react-native'
 import { YStack, XStack, Text, Input, View, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { ChevronDown, XCircle, Check } from 'lucide-react-native'
 import { countries, applyMask, extractDigits } from '@mvp/lib'
 import type { Country } from '@mvp/lib'
 import { useTranslation } from '@mvp/i18n'
@@ -103,7 +103,7 @@ export function PhoneInput({
           >
             <Text fontSize={20}>{country.flag}</Text>
             <Text fontSize={14} color="$mutedText">{country.dialCode}</Text>
-            <Ionicons name="chevron-down" size={14} color={theme.mutedText.val} />
+            <ChevronDown size={14} color={theme.mutedText.val} />
           </XStack>
         </ScalePress>
 
@@ -132,7 +132,7 @@ export function PhoneInput({
             <XStack paddingHorizontal="$4" paddingBottom="$3" alignItems="center" justifyContent="space-between">
               <Text fontSize={18} fontWeight="bold" color="$color">{t('phone.countryPickerTitle')}</Text>
               <ScalePress onPress={() => { setPickerVisible(false); setSearch('') }}>
-                <Ionicons name="close-circle" size={28} color={theme.mutedText.val} />
+                <XCircle size={28} color={theme.mutedText.val} />
               </ScalePress>
             </XStack>
 
@@ -173,7 +173,7 @@ export function PhoneInput({
                     <Text flex={1} fontSize={16} color="$color">{item.name}</Text>
                     <Text fontSize={14} color="$mutedText">{item.dialCode}</Text>
                     {item.code === country.code && (
-                      <Ionicons name="checkmark" size={20} color={theme.accent.val} />
+                      <Check size={20} color={theme.accent.val} />
                     )}
                   </XStack>
                 </ScalePress>

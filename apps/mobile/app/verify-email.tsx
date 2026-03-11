@@ -4,7 +4,7 @@ import { YStack, Text, H1, useTheme } from 'tamagui'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton, FadeIn } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import { ArrowLeft, CheckCircle2, XCircle, Mail } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuthStore } from '@mvp/store'
 import { authApi } from '../src/services/auth'
@@ -36,7 +36,7 @@ export default function VerifyEmailScreen() {
         onPress={() => router.back()}
         style={{ position: 'absolute', top: insets.top + 8, left: 8, padding: 8, zIndex: 1 }}
       >
-        <Ionicons name="arrow-back" size={24} color={theme.color.val} />
+        <ArrowLeft size={24} color={theme.color.val} />
       </TouchableOpacity>
 
       <YStack flex={1} justifyContent="center" alignItems="center" padding="$5" gap="$4">
@@ -47,7 +47,7 @@ export default function VerifyEmailScreen() {
         {status === 'success' && (
           <FadeIn>
             <YStack alignItems="center" gap="$4">
-              <Ionicons name="checkmark-circle" size={64} color={theme.primary.val} />
+              <CheckCircle2 size={64} color={theme.primary.val} />
               <H1 textAlign="center">{t('auth.emailVerified')}</H1>
               <AppButton onPress={() => router.replace('/')}>
                 {t('common.done')}
@@ -59,7 +59,7 @@ export default function VerifyEmailScreen() {
         {status === 'error' && (
           <FadeIn>
             <YStack alignItems="center" gap="$4">
-              <Ionicons name="close-circle" size={64} color="red" />
+              <XCircle size={64} color="red" />
               <Text color="$mutedText" textAlign="center" fontSize="$4">
                 {t('auth.invalidToken')}
               </Text>
@@ -73,7 +73,7 @@ export default function VerifyEmailScreen() {
         {status === 'idle' && (
           <FadeIn>
             <YStack alignItems="center" gap="$4">
-              <Ionicons name="mail-outline" size={64} color={theme.primary.val} />
+              <Mail size={64} color={theme.primary.val} />
               <H1 textAlign="center">{t('auth.verifyEmailTitle')}</H1>
               <Text color="$mutedText" textAlign="center" maxWidth={300}>
                 {t('auth.verifyEmailSubtitle')}

@@ -1,11 +1,23 @@
 import { useState, useMemo, useCallback } from 'react'
 import { YStack, XStack, Text, Input, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import {
+  Search, XCircle, ChevronUp, ChevronDown, Minimize2, Maximize2,
+  FileText, File,
+  Rocket, BookOpen, CreditCard, HelpCircle,
+} from 'lucide-react-native'
+import type { LucideIcon } from 'lucide-react-native'
 import { MotiView, AnimatePresence } from 'moti'
 import { useTranslation, SUPPORTED_LANGUAGES } from '@mvp/i18n'
 import { ScalePress } from '@mvp/ui'
 import { DOC_GROUPS } from './docData'
 import type { DocGroup } from './docData'
+
+const DOC_ICON_MAP: Record<string, LucideIcon> = {
+  'rocket': Rocket,
+  'book-open': BookOpen,
+  'credit-card': CreditCard,
+  'help-circle': HelpCircle,
+}
 
 interface PageListProps {
   pages: DocGroup['pages']
@@ -20,6 +32,7 @@ function PageList({ pages, selectedPageId, onPageSelect, theme, t }: PageListPro
     <YStack paddingLeft="$4" gap="$0.5">
       {pages.map((page) => {
         const isSelected = selectedPageId === page.id
+        const PageIcon = isSelected ? FileText : File
         return (
           <XStack
             key={page.id}
@@ -34,8 +47,7 @@ function PageList({ pages, selectedPageId, onPageSelect, theme, t }: PageListPro
             cursor="pointer"
             onPress={() => onPageSelect?.(page.id)}
           >
-            <Ionicons
-              name={isSelected ? 'document' : 'document-outline'}
+            <PageIcon
               size={14}
               color={isSelected ? theme.accent.val : theme.mutedText.val}
             />
@@ -126,7 +138,7 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
           alignItems="center"
           gap="$2"
         >
-          <Ionicons name="search-outline" size={16} color={theme.mutedText.val} />
+          <Search size={16} color={theme.mutedText.val} />
           <Input
             flex={1}
             placeholder={t('docs.search')}
@@ -141,7 +153,7 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
           />
           {searchQuery.length > 0 && (
             <ScalePress onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={16} color={theme.mutedText.val} />
+              <XCircle size={16} color={theme.mutedText.val} />
             </ScalePress>
           )}
         </XStack>
@@ -156,11 +168,11 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
             alignItems="center"
             justifyContent="center"
           >
-            <Ionicons
-              name={allExpanded ? 'contract-outline' : 'expand-outline'}
-              size={18}
-              color={theme.mutedText.val}
-            />
+            {allExpanded ? (
+              <Minimize2 size={18} color={theme.mutedText.val} />
+            ) : (
+              <Maximize2 size={18} color={theme.mutedText.val} />
+            )}
           </XStack>
         </ScalePress>
       </XStack>
@@ -174,6 +186,7 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
         <YStack gap="$1">
           {filteredGroups.map((group) => {
             const isExpanded = isSearchActive || expandedGroups.has(group.id)
+            const GroupIcon = DOC_ICON_MAP[group.icon] || HelpCircle
             return (
               <YStack key={group.id}>
                 {/* Group Header */}
@@ -188,15 +201,15 @@ export function DocTreeView({ onPageSelect, selectedPageId }: DocTreeViewProps) 
                   cursor="pointer"
                   onPress={() => toggleGroup(group.id)}
                 >
-                  <Ionicons name={group.icon} size={18} color={theme.accent.val} />
+                  <GroupIcon size={18} color={theme.accent.val} />
                   <Text flex={1} fontWeight="600" fontSize="$3" color="$color">
                     {t(group.titleKey)}
                   </Text>
-                  <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={16}
-                    color={theme.mutedText.val}
-                  />
+                  {isExpanded ? (
+                    <ChevronUp size={16} color={theme.mutedText.val} />
+                  ) : (
+                    <ChevronDown size={16} color={theme.mutedText.val} />
+                  )}
                 </XStack>
 
                 {/* Pages */}

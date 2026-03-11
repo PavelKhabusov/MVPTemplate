@@ -1,11 +1,38 @@
 import React from 'react'
 import { Modal, Platform } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import {
+  ArrowRight, HelpCircle,
+  Rocket, BookOpen, CreditCard, Compass, Sparkles,
+  Mail, CheckCircle2, Terminal, BarChart3, TrendingUp,
+  Bell, Info, MessageCircle, Search, Settings, Star,
+} from 'lucide-react-native'
+import type { LucideIcon } from 'lucide-react-native'
 import { AnimatePresence, MotiView } from 'moti'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ScalePress, AppModal } from '@mvp/ui'
 import { trackOnboardingStep, trackOnboardingComplete, trackOnboardingSkip } from '@mvp/analytics'
+
+const WIZARD_ICON_MAP: Record<string, LucideIcon> = {
+  'rocket': Rocket,
+  'book-open': BookOpen,
+  'credit-card': CreditCard,
+  'compass': Compass,
+  'sparkles': Sparkles,
+  'mail': Mail,
+  'check-circle': CheckCircle2,
+  'terminal': Terminal,
+  'bar-chart': BarChart3,
+  'trending-up': TrendingUp,
+  'bell': Bell,
+  'info': Info,
+  'message-circle': MessageCircle,
+  'search': Search,
+  'settings': Settings,
+  'star': Star,
+  'help-circle': HelpCircle,
+  'arrow-right': ArrowRight,
+}
 
 export interface WizardStep {
   id: string
@@ -87,7 +114,7 @@ export function OnboardingWizard({
           <Text color="white" fontWeight="700" fontSize="$4">
             {isLast ? complete : next}
           </Text>
-          {!isLast && <Ionicons name="arrow-forward" size={18} color="white" />}
+          {!isLast && <ArrowRight size={18} color="white" />}
         </XStack>
       </ScalePress>
     </YStack>
@@ -95,6 +122,7 @@ export function OnboardingWizard({
 
   // ── Web: centered dialog via AppModal ─────────────────────────────────────
   if (isWeb) {
+    const StepIcon = WIZARD_ICON_MAP[steps[currentIndex].icon] || HelpCircle
     return (
       <AppModal visible onClose={handleSkip} title="" maxWidth={480}>
         <YStack gap="$5" alignItems="center" paddingVertical="$2">
@@ -116,7 +144,7 @@ export function OnboardingWizard({
                   backgroundColor="$accent"
                   opacity={0.12}
                 />
-                <Ionicons name={steps[currentIndex].icon as any} size={44} color={theme.accent.val} />
+                <StepIcon size={44} color={theme.accent.val} />
               </YStack>
             </MotiView>
           </AnimatePresence>
@@ -192,6 +220,7 @@ export function OnboardingWizard({
 
 function StepContent({ step, insetTop }: { step: WizardStep; insetTop: number }) {
   const theme = useTheme()
+  const StepIcon = WIZARD_ICON_MAP[step.icon] || HelpCircle
   return (
     <YStack
       flex={1}
@@ -217,7 +246,7 @@ function StepContent({ step, insetTop }: { step: WizardStep; insetTop: number })
             backgroundColor="$accent"
             opacity={0.12}
           />
-          <Ionicons name={step.icon as any} size={56} color={theme.accent.val} />
+          <StepIcon size={56} color={theme.accent.val} />
         </YStack>
       </MotiView>
 

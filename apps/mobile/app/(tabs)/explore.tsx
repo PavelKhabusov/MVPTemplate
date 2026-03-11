@@ -5,22 +5,51 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from '@mvp/i18n'
 import { useBookmarksStore } from '@mvp/store'
 import { FadeIn, SlideIn, AnimatedListItem, AppCard, ScalePress, AppAvatar } from '@mvp/ui'
-import { Ionicons } from '@expo/vector-icons'
+import {
+  Search,
+  XCircle,
+  TrendingUp,
+  Palette,
+  Code,
+  Megaphone,
+  BarChart3,
+  Layers,
+  LineChart,
+  Lock,
+  Server,
+  Bookmark,
+  HelpCircle,
+} from 'lucide-react-native'
+import type { LucideIcon } from 'lucide-react-native'
 import { useSearch } from '@mvp/lib'
 import { api } from '../../src/services/api'
 
+const CATEGORY_ICON_MAP: Record<string, LucideIcon> = {
+  'color-palette-outline': Palette,
+  'code-slash-outline': Code,
+  'megaphone-outline': Megaphone,
+  'bar-chart-outline': BarChart3,
+}
+
+const FEATURED_ICON_MAP: Record<string, LucideIcon> = {
+  'layers-outline': Layers,
+  'analytics-outline': LineChart,
+  'lock-closed-outline': Lock,
+  'server-outline': Server,
+}
+
 const CATEGORIES = [
-  { key: 'catDesign', icon: 'color-palette-outline' as const, colorKey: 'accent' as const },
-  { key: 'catDev', icon: 'code-slash-outline' as const, colorKey: 'secondary' as const },
-  { key: 'catMarketing', icon: 'megaphone-outline' as const, colorKey: 'accent' as const },
-  { key: 'catAnalytics', icon: 'bar-chart-outline' as const, colorKey: 'secondary' as const },
+  { key: 'catDesign', icon: 'color-palette-outline', colorKey: 'accent' as const },
+  { key: 'catDev', icon: 'code-slash-outline', colorKey: 'secondary' as const },
+  { key: 'catMarketing', icon: 'megaphone-outline', colorKey: 'accent' as const },
+  { key: 'catAnalytics', icon: 'bar-chart-outline', colorKey: 'secondary' as const },
 ]
 
 const FEATURED = [
-  { titleKey: 'item1Title', descKey: 'item1Desc', icon: 'layers-outline' as const, colorKey: 'accent' as const },
-  { titleKey: 'item2Title', descKey: 'item2Desc', icon: 'analytics-outline' as const, colorKey: 'secondary' as const },
-  { titleKey: 'item3Title', descKey: 'item3Desc', icon: 'lock-closed-outline' as const, colorKey: 'accent' as const },
-  { titleKey: 'item4Title', descKey: 'item4Desc', icon: 'server-outline' as const, colorKey: 'secondary' as const },
+  { titleKey: 'item1Title', descKey: 'item1Desc', icon: 'layers-outline', colorKey: 'accent' as const },
+  { titleKey: 'item2Title', descKey: 'item2Desc', icon: 'analytics-outline', colorKey: 'secondary' as const },
+  { titleKey: 'item3Title', descKey: 'item3Desc', icon: 'lock-closed-outline', colorKey: 'accent' as const },
+  { titleKey: 'item4Title', descKey: 'item4Desc', icon: 'server-outline', colorKey: 'secondary' as const },
 ]
 
 export default function ExploreScreen() {
@@ -85,7 +114,7 @@ export default function ExploreScreen() {
             alignItems="center"
             gap="$2"
           >
-            <Ionicons name="search-outline" size={18} color={theme.mutedText.val} />
+            <Search size={18} color={theme.mutedText.val} />
             <Input
               flex={1}
               placeholder={t('explore.searchPlaceholder')}
@@ -102,7 +131,7 @@ export default function ExploreScreen() {
             {isLoading && <ActivityIndicator size="small" />}
             {query.length > 0 && (
               <ScalePress onPress={() => setQuery('')}>
-                <Ionicons name="close-circle" size={18} color={theme.mutedText.val} />
+                <XCircle size={18} color={theme.mutedText.val} />
               </ScalePress>
             )}
           </XStack>
@@ -145,6 +174,7 @@ export default function ExploreScreen() {
               {CATEGORIES.map((cat) => {
                 const color = cat.colorKey === 'accent' ? theme.accent.val : theme.secondary.val
                 const colorEnd = cat.colorKey === 'accent' ? theme.accentGradientEnd.val : theme.accent.val
+                const CatIcon = CATEGORY_ICON_MAP[cat.icon] || HelpCircle
                 return (
                   <ScalePress key={cat.key} onPress={() => {}}>
                     <YStack width={80} alignItems="center" gap="$2">
@@ -159,7 +189,7 @@ export default function ExploreScreen() {
                           : { backgroundColor: color }
                         }
                       >
-                        <Ionicons name={cat.icon} size={24} color="white" />
+                        <CatIcon size={24} color="white" />
                       </YStack>
                       <Text fontSize="$1" color="$mutedText" textAlign="center" numberOfLines={1}>
                         {t(`explore.${cat.key}`)}
@@ -183,6 +213,7 @@ export default function ExploreScreen() {
               {FEATURED.map((item, idx) => {
                 const isBookmarked = bookmarkedIds.includes(item.titleKey)
                 const itemColor = item.colorKey === 'accent' ? theme.accent.val : theme.secondary.val
+                const FeaturedIcon = FEATURED_ICON_MAP[item.icon] || HelpCircle
                 return (
                   <AnimatedListItem key={item.titleKey} index={idx}>
                     <AppCard animated={false}>
@@ -195,7 +226,7 @@ export default function ExploreScreen() {
                           alignItems="center"
                           justifyContent="center"
                         >
-                          <Ionicons name={item.icon} size={22} color={itemColor} />
+                          <FeaturedIcon size={22} color={itemColor} />
                         </YStack>
                         <YStack flex={1} gap="$1">
                           <Text fontWeight="600" fontSize="$3" color="$color">
@@ -206,10 +237,10 @@ export default function ExploreScreen() {
                           </Text>
                         </YStack>
                         <ScalePress onPress={() => toggleBookmark(item.titleKey)}>
-                          <Ionicons
-                            name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                          <Bookmark
                             size={20}
                             color={isBookmarked ? theme.accent.val : theme.mutedText.val}
+                            {...(isBookmarked ? { fill: theme.accent.val } : {})}
                           />
                         </ScalePress>
                       </XStack>
@@ -226,7 +257,7 @@ export default function ExploreScreen() {
           <AppCard>
             <YStack gap="$3">
               <XStack gap="$2" alignItems="center">
-                <Ionicons name="trending-up" size={20} color={theme.accent.val} />
+                <TrendingUp size={20} color={theme.accent.val} />
                 <Text fontWeight="600" fontSize="$4" color="$color">{t('explore.trending')}</Text>
               </XStack>
               <XStack gap="$2" flexWrap="wrap">

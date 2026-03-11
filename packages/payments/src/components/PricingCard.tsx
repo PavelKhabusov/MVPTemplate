@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Platform, View } from 'react-native'
 import { YStack, XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { Star, Check, CheckCircle2 } from 'lucide-react-native'
 import { useTranslation } from '@mvp/i18n'
 import { AppButton } from '@mvp/ui'
 import type { Plan, PlanInterval } from '../types'
@@ -83,7 +83,7 @@ export function PricingCard({ plan, isCurrentPlan, isHighlighted, onSelect, load
             background: `linear-gradient(90deg, ${theme.accentGradientStart.val}, ${theme.accentGradientEnd.val})`,
           } as any}
         >
-          <Ionicons name="star" size={11} color="white" />
+          <Star size={11} color="white" fill="white" />
           <Text color="white" fontSize={11} fontWeight="700" textTransform="uppercase" letterSpacing={1}>
             {t('payments.popular')}
           </Text>
@@ -170,8 +170,7 @@ export function PricingCard({ plan, isCurrentPlan, isHighlighted, onSelect, load
                     backgroundColor: `${theme.accent.val}15`,
                   } as any}
                 >
-                  <Ionicons
-                    name="checkmark"
+                  <Check
                     size={11}
                     color={isHighlighted ? '#fff' : theme.accent.val}
                   />
@@ -196,7 +195,7 @@ export function PricingCard({ plan, isCurrentPlan, isHighlighted, onSelect, load
             borderWidth={1}
             borderColor={`${theme.accent.val}25`}
           >
-            <Ionicons name="checkmark-circle" size={18} color={theme.accent.val} />
+            <CheckCircle2 size={18} color={theme.accent.val} />
             <Text fontWeight="600" color="$accent" fontSize="$3">
               {t('payments.currentPlan')}
             </Text>

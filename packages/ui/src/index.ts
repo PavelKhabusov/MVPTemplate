@@ -13,6 +13,10 @@ export * from './navigation'
 // Landing (web)
 export * from './landing'
 
+// Icons (Lucide map for dynamic icon rendering)
+export { LUCIDE_ICON_MAP, getLucideIcon } from './icons'
+export type { LucideIconName, LucideIcon } from './icons'
+
 // SEO (web)
 export { SEO } from './SEO'
 

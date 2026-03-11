@@ -1,6 +1,6 @@
 import { Platform, Pressable } from 'react-native'
 import { XStack, Text, useTheme } from 'tamagui'
-import { Ionicons } from '@expo/vector-icons'
+import { Settings } from 'lucide-react-native'
 import { useTranslation } from '@mvp/i18n'
 import { useTemplateConfigStore } from './store'
 
@@ -23,7 +23,7 @@ export function TemplateConfigButton() {
         gap="$2"
         hoverStyle={{ opacity: 0.9 } as any}
       >
-        <Ionicons name="construct-outline" size={18} color="white" />
+        <Settings size={18} color="white" />
         <Text color="white" fontWeight="600" fontSize="$3">
           {t('templateConfig.title')}
         </Text>
