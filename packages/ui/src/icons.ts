@@ -123,7 +123,7 @@ import {
 } from 'lucide-react-native'
 
 /**
- * Map of Ionicons-style icon names to Lucide icon components.
+ * Map of lucide-style icon names to Lucide icon components.
  * Used for backward compatibility where icon names are passed as strings.
  */
 export const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {

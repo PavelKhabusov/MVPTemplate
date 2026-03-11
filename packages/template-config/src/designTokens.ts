@@ -116,7 +116,7 @@ export { FONT_FAMILY_CONFIG }
 // Per CSS spec, the LAST @font-face rule for a given font-family+weight wins.
 // We fetch the Google Fonts CSS and re-inject it with font-family:'Inter',
 // so our rule comes last and overrides expo-font's Inter declaration.
-// Icon fonts (Ionicons, MaterialIcons, etc.) use different font-family names — unaffected.
+// Icon fonts (Lucide, MaterialIcons, etc.) use different font-family names — unaffected.
 export async function applyFontFamily(family: FontFamily): Promise<void> {
   if (typeof document === 'undefined') return
 
@@ -148,7 +148,7 @@ export async function applyFontFamily(family: FontFamily): Promise<void> {
     const css = await res.text()
     // Rewrite every font-family declaration to 'Inter'.
     // Elements using fontFamily:'Inter' (Tamagui/RNW) now render with the chosen font.
-    // Icon fonts use 'Ionicons', 'MaterialIcons', etc. — their @font-face is untouched.
+    // Icon fonts use 'Lucide', 'MaterialIcons', etc. — their @font-face is untouched.
     styleEl.textContent = css.replace(/font-family:\s*['"][^'"]+['"]/g, "font-family: 'Inter'")
   } catch {
     // Fallback on network error
