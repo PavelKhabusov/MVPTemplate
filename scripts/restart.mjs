@@ -66,6 +66,25 @@ try {
   fatal('Ошибка Docker: ' + e.message)
 }
 
+// 2.5 Ensure database exists
+info('Проверяем существование базы данных...')
+const dbUrlRaw = run('grep DATABASE_URL apps/backend/.env')
+const dbMatch = dbUrlRaw.match(/\/([^/?]+)(\?|$)/)
+const dbName = dbMatch ? dbMatch[1] : 'mvp_template'
+const containerName = run("docker ps --filter 'publish=5432' --format '{{.Names}}'") || 'docker-postgres-1'
+const dbExists = run(`docker exec ${containerName} psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${dbName}'"`)
+if (dbExists.trim() === '1') {
+  ok(`База «${dbName}» существует`)
+} else {
+  info(`Создаём базу «${dbName}»...`)
+  try {
+    execSync(`docker exec ${containerName} psql -U postgres -c "CREATE DATABASE ${dbName};"`, { stdio: 'pipe' })
+    ok(`База «${dbName}» создана`)
+  } catch (e) {
+    fatal(`Не удалось создать базу: ${e.message}`)
+  }
+}
+
 // 3. DB push
 info('Применяем схему БД...')
 try {
