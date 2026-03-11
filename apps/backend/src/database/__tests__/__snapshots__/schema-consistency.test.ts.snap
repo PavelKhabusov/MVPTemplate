@@ -1,0 +1,81 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Database Schema — Column Snapshots > payments table columns should match snapshot 1`] = `
+[
+  "amount",
+  "createdAt",
+  "currency",
+  "description",
+  "enableRLS",
+  "id",
+  "provider",
+  "providerPaymentId",
+  "status",
+  "subscriptionId",
+  "type",
+  "userId",
+]
+`;
+
+exports[`Database Schema — Column Snapshots > plans table columns should match snapshot 1`] = `
+[
+  "createdAt",
+  "currency",
+  "description",
+  "enableRLS",
+  "features",
+  "id",
+  "interval",
+  "isActive",
+  "name",
+  "priceAmount",
+  "provider",
+  "providerPriceId",
+  "sortOrder",
+  "updatedAt",
+]
+`;
+
+exports[`Database Schema — Column Snapshots > subscriptions table columns should match snapshot 1`] = `
+[
+  "cancelAtPeriodEnd",
+  "canceledAt",
+  "createdAt",
+  "currentPeriodEnd",
+  "currentPeriodStart",
+  "enableRLS",
+  "id",
+  "planId",
+  "provider",
+  "providerCustomerId",
+  "providerSubscriptionId",
+  "status",
+  "updatedAt",
+  "userId",
+]
+`;
+
+exports[`Database Schema — Column Snapshots > users table columns should match snapshot 1`] = `
+[
+  "avatarUrl",
+  "bio",
+  "birthday",
+  "createdAt",
+  "email",
+  "emailVerified",
+  "enableRLS",
+  "features",
+  "id",
+  "location",
+  "name",
+  "passwordHash",
+  "phone",
+  "phoneVerified",
+  "role",
+  "updatedAt",
+  "voximplantAppId",
+  "voximplantLogin",
+  "voximplantNode",
+  "voximplantPassword",
+]
+`;

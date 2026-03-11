@@ -27,3 +27,34 @@ jobs:
       #   run: |
       #     docker tag mvp-backend:latest ghcr.io/${{ github.repository }}/backend:latest
       #     docker push ghcr.io/${{ github.repository }}/backend:latest
+
+  smoke-test:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: vars.PROD_URL != ''
+    steps:
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Smoke test — health check
+        run: |
+          for i in $(seq 1 10); do
+            if curl -sf "${{ vars.PROD_URL }}/health" -o /dev/null; then
+              echo "Health check passed on attempt $i"
+              exit 0
+            fi
+            echo "Attempt $i failed, waiting 10s..."
+            sleep 10
+          done
+          echo "Health check failed after 10 attempts"
+          exit 1
+
+      - name: Smoke test — API responds
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ vars.PROD_URL }}/api/config")
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 500 ]; then
+            echo "API responded with status $STATUS"
+          else
+            echo "API returned unexpected status $STATUS"
+            exit 1
+          fi

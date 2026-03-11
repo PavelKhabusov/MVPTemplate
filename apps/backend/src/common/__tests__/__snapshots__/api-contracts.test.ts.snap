@@ -1,0 +1,107 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`API Contract Tests — Response Shape Snapshots > Auth response contracts > GET /api/auth/me — 200 response shape 1`] = `
+[
+  "avatarUrl",
+  "bio",
+  "birthday",
+  "createdAt",
+  "email",
+  "emailEnabled",
+  "emailVerified",
+  "features",
+  "id",
+  "location",
+  "name",
+  "phone",
+  "phoneVerified",
+  "role",
+  "smsEnabled",
+  "updatedAt",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Auth response contracts > POST /api/auth/login — 200 response shape 1`] = `
+[
+  "accessToken",
+  "refreshToken",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Auth response contracts > POST /api/auth/register — 201 response shape 1`] = `
+[
+  "accessToken",
+  "refreshToken",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Auth response contracts > POST /api/auth/register — 400 error shape 1`] = `
+[
+  "error",
+  "message",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Config response contracts > GET /api/config/company — 200 response shape 1`] = `
+[
+  "address",
+  "appName",
+  "companyName",
+  "id",
+  "phone",
+  "supportEmail",
+  "tagline",
+  "updatedAt",
+  "website",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Config response contracts > GET /api/config/flags — 200 response shape 1`] = `
+[
+  "analytics",
+  "email",
+  "emailVerification",
+  "googleAuth",
+  "payments",
+  "pushNotifications",
+  "requestLogging",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Health response contract > GET /health — 200 response shape 1`] = `
+[
+  "status",
+  "timestamp",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Users response contracts > GET /api/users/profile — 200 response shape 1`] = `
+[
+  "avatarUrl",
+  "bio",
+  "birthday",
+  "createdAt",
+  "email",
+  "emailEnabled",
+  "emailVerified",
+  "features",
+  "id",
+  "location",
+  "name",
+  "phone",
+  "phoneVerified",
+  "role",
+  "smsEnabled",
+  "updatedAt",
+  "voximplantAppId",
+  "voximplantLogin",
+  "voximplantPassword",
+]
+`;
+
+exports[`API Contract Tests — Response Shape Snapshots > Users response contracts > GET /api/users/profile — 401 error shape 1`] = `
+[
+  "error",
+  "message",
+]
+`;

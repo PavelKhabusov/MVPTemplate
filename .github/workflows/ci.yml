@@ -21,9 +21,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Security audit
-        run: npm audit --audit-level=high || true
-
       - name: Typecheck
         run: npx turbo typecheck
 
@@ -46,3 +43,98 @@ jobs:
 
       - name: Run Vitest
         run: npm run test
+
+      - name: Run Vitest with coverage
+        run: npm run test:coverage
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit (critical)
+        run: npm audit --audit-level=critical
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -f apps/backend/docker/Dockerfile -t mvp-backend:test apps/backend
+
+  dockerfile-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: apps/backend/docker/Dockerfile
+
+  production-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build backend for production
+        run: npx turbo build --filter=backend
+
+      - name: Verify server starts
+        run: |
+          cd apps/backend
+          timeout 10 node dist/server.js &
+          sleep 3
+          curl -sf http://localhost:3000/health || exit 1
+        env:
+          NODE_ENV: production
+          DATABASE_URL: postgresql://skip:skip@localhost:5432/skip
+          REDIS_URL: redis://localhost:6379
+          JWT_ACCESS_SECRET: ci-test-secret-key-minimum-32-chars!!
+          JWT_REFRESH_SECRET: ci-test-refresh-key-minimum-32-chars!
+
+  bundle-size:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export web bundle
+        run: npx expo export --platform web --output-dir dist
+        working-directory: apps/mobile
+
+      - name: Report bundle size
+        run: |
+          echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          du -sh apps/mobile/dist/ >> $GITHUB_STEP_SUMMARY
+          du -sh apps/mobile/dist/_expo/static/js/*.js 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY

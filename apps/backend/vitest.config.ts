@@ -14,6 +14,12 @@ export default defineConfig({
       include: ['src/modules/**', 'src/common/**'],
       exclude: ['**/__tests__/**', '**/node_modules/**'],
       reporter: ['text', 'lcov'],
+      thresholds: {
+        statements: 70,
+        branches: 60,
+        functions: 70,
+        lines: 70,
+      },
     },
   },
 })
