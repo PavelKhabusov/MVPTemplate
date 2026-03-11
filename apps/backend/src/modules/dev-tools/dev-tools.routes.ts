@@ -224,6 +224,9 @@ function runTest(id: string) {
     // Save failure to history
     if (state[id].status === 'failed') {
       const testDef = TESTS.find(t => t.id === id)
+      // Remove previous failure for the same test (keep only latest per test)
+      const prevIdx = failureHistory.findIndex(f => f.id === id)
+      if (prevIdx !== -1) failureHistory.splice(prevIdx, 1)
       failureHistory.unshift({
         id,
         testName: testDef?.name ?? id,

@@ -120,6 +120,35 @@ const GROUP_I18N: Record<string, string> = {
   quality: 'testsGroupQuality',
 }
 
+// ─── Spinning loader for web ─────────────────────────────────────────────────
+
+function SpinningIcon({ size, color }: { size: number; color: string }) {
+  if (Platform.OS === 'web') {
+    return (
+      <span
+        style={{
+          display: 'inline-flex',
+          animation: 'spin 1s linear infinite',
+        }}
+      >
+        <Loader2 size={size} color={color} />
+      </span>
+    )
+  }
+  return <Loader2 size={size} color={color} />
+}
+
+// Inject @keyframes once on web
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const id = '__dev-tools-spin'
+  if (!document.getElementById(id)) {
+    const style = document.createElement('style')
+    style.id = id
+    style.textContent = '@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }'
+    document.head.appendChild(style)
+  }
+}
+
 const MIN_CONSOLE_H = 120
 const MAX_CONSOLE_H = 600
 const DEFAULT_CONSOLE_H = 250
@@ -549,20 +578,20 @@ export function TestsDashboard({ apiBase }: Props) {
                               fontSize={13} fontWeight="600" color="$color"
                               flex={1} numberOfLines={1}
                             >
-                              {test.name}
+                              {t(`admin.testName_${test.id}`, { defaultValue: test.name })}
                             </Text>
                             <XStack
                               alignItems="center" gap={4}
                               paddingHorizontal={8} paddingVertical={2}
                               borderRadius={12} backgroundColor={cfg.bg}
                             >
-                              <StatusIcon size={11} color={cfg.color} />
+                              {isRun ? <SpinningIcon size={11} color={cfg.color} /> : <StatusIcon size={11} color={cfg.color} />}
                               <Text fontSize={10} fontWeight="600" color={cfg.color}>{statusLabel}</Text>
                             </XStack>
                           </XStack>
 
                           {/* Row 2: description */}
-                          <Text fontSize={11} color="$mutedText" lineHeight={16}>{test.desc}</Text>
+                          <Text fontSize={11} color="$mutedText" lineHeight={16}>{t(`admin.testDesc_${test.id}`, { defaultValue: test.desc })}</Text>
 
                           {/* Row 3: cmd */}
                           <Text
