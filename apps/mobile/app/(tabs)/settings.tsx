@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react'
-import { Platform, RefreshControl, ScrollView, Modal } from 'react-native'
+import { useState, useEffect } from 'react'
+import { Platform, ScrollView, Modal } from 'react-native'
 import { YStack, XStack, Text, H2, useTheme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
@@ -525,19 +525,12 @@ function AuthenticatedSettingsView() {
   const userRole = useAuthStore((s) => s.user?.role)
   const s = useSettingsCommon()
   const [showNotifications, setShowNotifications] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
-
   const scrollY = useSharedValue(0)
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y
     },
   })
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true)
-    setTimeout(() => setRefreshing(false), 1200)
-  }, [])
 
   const handleSignOut = async () => {
     await authApi.logout()
@@ -567,15 +560,6 @@ function AuthenticatedSettingsView() {
           paddingBottom: 40,
           gap: 20,
         }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={s.theme.accent.val}
-            colors={[s.theme.accent.val]}
-            progressBackgroundColor={s.theme.cardBackground.val}
-          />
-        }
       >
         <StaggerGroup index={groupIndex++}>
           <AccountSection user={user} />

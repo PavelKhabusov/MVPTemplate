@@ -84,6 +84,7 @@ export default function ExploreScreen() {
             tintColor={theme.accent.val}
             colors={[theme.accent.val]}
             progressBackgroundColor={theme.cardBackground.val}
+            progressViewOffset={insets.top}
           />
         ) : undefined
       }

@@ -100,6 +100,7 @@ export default function HomeScreen() {
             tintColor={theme.accent.val}
             colors={[theme.accent.val]}
             progressBackgroundColor={theme.cardBackground.val}
+            progressViewOffset={insets.top}
             title=""
           />
         ) : undefined
