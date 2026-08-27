@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/icon.svg" width="96" alt="MVP Template">
+<img src="assets/icon.png" width="96" alt="MVP Template">
 
 # MVP Template
 
