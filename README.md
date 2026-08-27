@@ -21,6 +21,14 @@
 
 Production-ready monorepo template for cross-platform apps (iOS, Android, Web) with a Fastify backend.
 
+## Quick start
+
+```bash
+npx degit PavelKhabusov/MVPTemplate my-app && cd my-app
+pwsh scripts/setup.ps1     # deps, Docker (Postgres + Redis), .env, DB schema
+npm run dev
+```
+
 ## Tech Stack
 
 | Layer | Technology |
