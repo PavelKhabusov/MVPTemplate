@@ -1,4 +1,15 @@
+<div align="center">
+
+<img src="assets/icon.svg" width="96" alt="MVP Template">
+
 # MVP Template
+
+**Production-ready monorepo template for cross-platform apps** (iOS, Android, Web)
+with a Fastify backend.
+
+![Status](https://img.shields.io/badge/status-template-8957e5)
+![Platform](https://img.shields.io/badge/platform-iOS%20%C2%B7%20Android%20%C2%B7%20Web-1f1f1f)
+![License](https://img.shields.io/badge/license-MIT-7ba7d4)
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
@@ -8,7 +19,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_16-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis_7-DC382D?style=flat-square&logo=redis&logoColor=white)
 ![Drizzle](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=flat-square&logo=drizzle&logoColor=black)
-![Tamagui](https://img.shields.io/badge/Tamagui_v2-1A1A2E?style=flat-square&logo=data:image/svg+xml;base64,&logoColor=white)
+![Tamagui](https://img.shields.io/badge/Tamagui_v2-1A1A2E?style=flat-square&logoColor=white)
 ![Zustand](https://img.shields.io/badge/Zustand_v5-443E38?style=flat-square&logoColor=white)
 ![Turborepo](https://img.shields.io/badge/Turborepo-EF4444?style=flat-square&logo=turborepo&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
@@ -19,7 +30,9 @@
 ![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-4285F4?style=flat-square&logo=googlechrome&logoColor=white)
 ![i18n](https://img.shields.io/badge/i18n-EN_RU_ES_JA-blue?style=flat-square)
 
-Production-ready monorepo template for cross-platform apps (iOS, Android, Web) with a Fastify backend.
+</div>
+
+---
 
 ## Quick start
 
